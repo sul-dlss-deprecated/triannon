@@ -4,6 +4,11 @@ rescue LoadError
   puts 'You must `gem install bundler` and `bundle install` to run rake tasks'
 end
 
+ZIP_URL = "https://github.com/projecthydra/hydra-jetty/archive/v8.0.0.rc2.zip"
+
+require 'active_support/benchmarkable'
+require 'jettywrapper'
+
 require 'rdoc/task'
 
 RDoc::Task.new(:rdoc) do |rdoc|
@@ -15,9 +20,12 @@ RDoc::Task.new(:rdoc) do |rdoc|
 end
 
 require 'engine_cart/rake_task'
-task :ci => ['engine_cart:generate'] do
+task :ci => ['engine_cart:generate', 'jetty:clean'] do
   # run the tests
-  Rake::Task['spec'].invoke
+  jetty_params = Jettywrapper.load_config.merge({:jetty_home => File.expand_path(File.dirname(__FILE__) + '/jetty')})
+  Jettywrapper.wrap(jetty_params) do
+    Rake::Task['spec'].invoke
+  end
 end
 
 
@@ -30,4 +38,3 @@ RSpec::Core::RakeTask.new(:spec)
 task :default => :ci
 
 Bundler::GemHelper.install_tasks
-
