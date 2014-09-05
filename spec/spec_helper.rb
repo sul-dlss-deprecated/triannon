@@ -20,6 +20,8 @@ EngineCart.load_application!
 
 require 'cerberus/annotations'
 require 'rspec/rails'
+require 'capybara/rails'
+require 'capybara/rspec'
 
 RSpec.configure do |config|
 # The settings below are suggested to provide a good initial experience
