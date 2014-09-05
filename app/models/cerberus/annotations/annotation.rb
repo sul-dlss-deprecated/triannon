@@ -7,8 +7,11 @@ module Cerberus::Annotations
       end
     end
 
+    attr_reader :graph
+
     def initialize graph
       @graph = graph
     end
+    
   end
 end
