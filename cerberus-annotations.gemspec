@@ -9,9 +9,7 @@ Gem::Specification.new do |s|
   s.version     = Cerberus::Annotations::VERSION
   s.authors     = ["Chris Beer"]
   s.email       = ["cabeer@stanford.edu"]
-  s.homepage    = "TODO"
-  s.summary     = "TODO: Summary of Cerberus."
-  s.description = "TODO: Description of Cerberus."
+  s.summary     = "Open Annotation demonstrator for LD4L"
   s.license     = "Apache 2"
 
   s.files = Dir["{app,config,db,lib}/**/*", "Rakefile", "README.md"]
