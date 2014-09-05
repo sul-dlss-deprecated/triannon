@@ -28,6 +28,26 @@ task :ci => ['engine_cart:generate', 'jetty:clean'] do
   end
 end
 
+namespace :cerberus do
+  task :server do
+    jetty_params = Jettywrapper.load_config.merge({:jetty_home => File.expand_path(File.dirname(__FILE__) + '/jetty')})
+    Jettywrapper.wrap(jetty_params) do
+      within_test_app do
+        system "rails s"
+      end
+    end
+  end
+
+  task :console do
+    jetty_params = Jettywrapper.load_config.merge({:jetty_home => File.expand_path(File.dirname(__FILE__) + '/jetty')})
+    Jettywrapper.wrap(jetty_params) do
+      within_test_app do
+        system "rails c"
+      end
+    end
+  end
+end
+
 
 load 'rails/tasks/statistics.rake'
 
