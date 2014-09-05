@@ -6,6 +6,6 @@ describe Cerberus::Annotations::Annotation do
   end
 
   def annotation_fixture fixture
-    File.read fixture_path("annotations/#{fixture}")
+    File.read Cerberus::Annotations.fixture_path("annotations/#{fixture}")
   end
 end

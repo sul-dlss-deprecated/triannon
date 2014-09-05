@@ -19,6 +19,7 @@ require 'engine_cart'
 EngineCart.load_application!
 
 require 'cerberus/annotations'
+require 'rspec/rails'
 
 RSpec.configure do |config|
 # The settings below are suggested to provide a good initial experience
@@ -83,6 +84,8 @@ RSpec.configure do |config|
 =end
 end
 
-def fixture_path path
-  File.expand_path(File.dirname(__FILE__) + "/fixtures/#{path}")
+module Cerberus::Annotations
+  def self.fixture_path path
+    File.expand_path(File.dirname(__FILE__) + "/fixtures/#{path}")
+  end
 end
