@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.add_dependency "rails", "~> 4.2.0.beta1"
   s.add_dependency "linkeddata"
   s.add_dependency "spira"
+  s.add_dependency "rdf-open_annotation"
 
   s.add_development_dependency "sqlite3"
   s.add_development_dependency "rspec", "~> 3.0"
