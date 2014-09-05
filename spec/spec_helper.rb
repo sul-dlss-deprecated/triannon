@@ -82,3 +82,7 @@ RSpec.configure do |config|
   end
 =end
 end
+
+def fixture_path path
+  File.expand_path(File.dirname(__FILE__) + "/fixtures/#{path}")
+end
