@@ -22,6 +22,7 @@ end
 require 'engine_cart/rake_task'
 task :ci => ['engine_cart:generate', 'jetty:clean'] do
   # run the tests
+  RAILS_ENV = 'test'
   jetty_params = Jettywrapper.load_config.merge({:jetty_home => File.expand_path(File.dirname(__FILE__) + '/jetty')})
   Jettywrapper.wrap(jetty_params) do
     Rake::Task['spec'].invoke

@@ -1,17 +1,19 @@
 module Cerberus::Annotations
-  class Annotation
-    class <<self
-      def from_json json
-        graph = RDF::Graph.new << JSON::LD::API.toRdf(JSON.parse(json))
-        self.new graph
-      end
+  class Annotation < ActiveRecord::Base
+
+    def url
+      json['@id'] if json
     end
 
-    attr_reader :graph
-
-    def initialize graph
-      @graph = graph
+    def graph
+      @graph ||= RDF::Graph.new << JSON::LD::API.toRdf(json)
     end
-    
+
+    private
+
+    def json
+      @json ||= JSON.parse(data) rescue nil
+    end
+
   end
 end

@@ -10,12 +10,12 @@ class TestAppGenerator < Rails::Generators::Base
   def install_engine
     generate 'cerberus:annotations:install'
   end
-  
-  # def run_cerberus_migrations
-  #   rake "cerberus:annotations:install:migrations"
-  #   rake "db:migrate"
-  # end
-  
+
+  def run_cerberus_migrations
+     rake "cerberus_annotations:install:migrations"
+     rake "db:migrate"
+  end
+
   def add_root_route
     route "root to: redirect('/annotations')"
   end
