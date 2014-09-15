@@ -20,6 +20,7 @@ RDoc::Task.new(:rdoc) do |rdoc|
 end
 
 require 'engine_cart/rake_task'
+desc 'run the cerberus specs'
 task :ci => ['engine_cart:generate', 'jetty:clean'] do
   # run the tests
   RAILS_ENV = 'test'
@@ -30,6 +31,7 @@ task :ci => ['engine_cart:generate', 'jetty:clean'] do
 end
 
 namespace :cerberus do
+  desc 'run the test rails app w cerberus'
   task :server do
     jetty_params = Jettywrapper.load_config.merge({:jetty_home => File.expand_path(File.dirname(__FILE__) + '/jetty')})
     Jettywrapper.wrap(jetty_params) do
@@ -39,6 +41,7 @@ namespace :cerberus do
     end
   end
 
+  desc 'run the test rails console w cerberus'
   task :console do
     jetty_params = Jettywrapper.load_config.merge({:jetty_home => File.expand_path(File.dirname(__FILE__) + '/jetty')})
     Jettywrapper.wrap(jetty_params) do
