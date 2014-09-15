@@ -5,6 +5,13 @@ module Cerberus::Annotations
       json['@id'] if json
     end
 
+    def type
+      json['@type'] if json
+      s = rdf.detect { |s| 
+        s.predicate.to_s == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+      }.object.to_str
+    end
+
     def motivated_by
       # FIXME:  can have multiple motivations per spec 
       # http://www.openannotation.org/spec/core/core.html#Motivations

@@ -11,6 +11,9 @@ describe Cerberus::Annotations::Annotation do
       expect(@anno).not_to eql(nil)
     end
 
+    it "type is oa:Annotation" do
+      expect(@anno.type).to eql("http://www.w3.org/ns/oa#Annotation")
+    end
     it "url is the @id of the json" do
       expect(@anno.url).to eql("http://example.org/annos/annotation/12.json")
     end
