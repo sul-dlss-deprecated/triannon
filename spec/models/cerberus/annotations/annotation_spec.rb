@@ -10,6 +10,14 @@ describe Cerberus::Annotations::Annotation do
     expect(@anno).not_to eql(nil)
   end
   
+  it "id is the @id of the json" do
+    expect(@anno.id).to eql("http://example.org/annos/annotation/12.json")
+  end
+
+  it "url is an alias for id" do
+    expect(@anno.url).to eql("http://example.org/annos/annotation/12.json")
+  end
+  
   it "graph is populated RDF::Graph" do
     expect(@anno.graph).to be_a_kind_of RDF::Graph
     expect(@anno.graph.count).to be > 0

@@ -10,16 +10,17 @@ module Cerberus::Annotations
       s.object.to_str
     end
 
-    def url
+    def id
       json['@id'] if json
     end
+    alias_method :url, :id
 
     def rdf
-      @rdf ||= JSON::LD::API.toRdf(json)
+      @rdf ||= JSON::LD::API.toRdf(json) if json
     end
 
     def graph
-      @graph ||= RDF::Graph.new << rdf
+      @graph ||= RDF::Graph.new << rdf if json
     end
 
     private
