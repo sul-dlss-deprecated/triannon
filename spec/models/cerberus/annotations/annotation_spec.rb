@@ -21,6 +21,9 @@ describe Cerberus::Annotations::Annotation do
     expect(@anno.rdf[0].class).to eql(RDF::Statement)
   end
   
+  it "motivated_by" do
+    expect(@anno.motivated_by).to eql("http://www.w3.org/ns/oa#bookmarking")
+  end
 
   def annotation_fixture fixture
     File.read Cerberus::Annotations.fixture_path("annotations/#{fixture}")
