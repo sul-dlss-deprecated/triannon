@@ -1,6 +1,10 @@
 module Cerberus::Annotations
   class Annotation < ActiveRecord::Base
 
+    def url
+      json['@id'] if json
+    end
+
     def motivated_by
       # FIXME:  can have multiple motivations per spec 
       # http://www.openannotation.org/spec/core/core.html#Motivations
@@ -9,11 +13,6 @@ module Cerberus::Annotations
       }.first
       s.object.to_str
     end
-
-    def id
-      json['@id'] if json
-    end
-    alias_method :url, :id
 
     def rdf
       @rdf ||= JSON::LD::API.toRdf(json) if json
