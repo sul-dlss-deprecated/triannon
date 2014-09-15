@@ -14,6 +14,13 @@ describe Cerberus::Annotations::Annotation do
     expect(@anno.graph).to be_a_kind_of RDF::Graph
     expect(@anno.graph.count).to be > 0
   end
+  
+  it "rdf is populated Array of RDF statments" do
+    expect(@anno.rdf).to be_a_kind_of Array
+    expect(@anno.rdf.size).to be > 0
+    expect(@anno.rdf[0].class).to eql(RDF::Statement)
+  end
+  
 
   def annotation_fixture fixture
     File.read Cerberus::Annotations.fixture_path("annotations/#{fixture}")

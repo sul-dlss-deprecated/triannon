@@ -5,8 +5,12 @@ module Cerberus::Annotations
       json['@id'] if json
     end
 
+    def rdf
+      @rdf ||= JSON::LD::API.toRdf(json)
+    end
+
     def graph
-      @graph ||= RDF::Graph.new << JSON::LD::API.toRdf(json)
+      @graph ||= RDF::Graph.new << rdf
     end
 
     private
