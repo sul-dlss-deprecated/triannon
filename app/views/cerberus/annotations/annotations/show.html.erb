@@ -4,12 +4,15 @@
 <%= @annotation.url %>
 </p>
 <p>
+<strong>Target:</strong>
+<%= link_to @annotation.has_target, @annotation.has_target %>
+</p>
 <strong>Motivated By:</strong>
-<%= @annotation.motivated_by %>
+<%= link_to @annotation.motivated_by, @annotation.motivated_by %>
 </p>
 
 <strong>Type:</strong>
-<%= @annotation.type %>
+<%= link_to @annotation.type, @annotation.type %>
 </p>
 
 <pre>

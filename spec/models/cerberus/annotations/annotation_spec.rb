@@ -17,6 +17,9 @@ describe Cerberus::Annotations::Annotation do
     it "url is the @id of the json" do
       expect(@anno.url).to eql("http://example.org/annos/annotation/12.json")
     end
+    it "has_target as URL" do
+      expect(@anno.has_target).to eql("http://purl.stanford.edu/kq131cs7229")
+    end
     it "motivated_by" do
       expect(@anno.motivated_by).to eql("http://www.w3.org/ns/oa#bookmarking")
     end
