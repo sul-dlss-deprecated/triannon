@@ -4,7 +4,7 @@ describe Cerberus::Annotations::Annotation do
   
   context "json from fixture" do
     before(:each) do
-      @anno = Cerberus::Annotations::Annotation.new data: annotation_fixture("annotation-bookmarking.json")
+      @anno = Cerberus::Annotations::Annotation.new data: annotation_fixture("bookmarking.json")
     end
 
     it "deserializes json-ld annotations" do
@@ -20,13 +20,13 @@ describe Cerberus::Annotations::Annotation do
     it "has_target when URL" do
       expect(@anno.has_target).to eql("http://purl.stanford.edu/kq131cs7229")
     end
-    it "has_body missing" do
+    it "has_body is nil when there is no body" do
       expect(@anno.has_body).to be_nil
     end
-    it "has_body when blank node with text" do
-      anno = Cerberus::Annotations::Annotation.new data: annotation_fixture("annotation-comment-as-text-chars.json")
+    it "has_body is chars when blank node with text" do
+      anno = Cerberus::Annotations::Annotation.new data: annotation_fixture("textbody.json")
       expect(anno.has_body).to eql("I love this!")
-      anno = Cerberus::Annotations::Annotation.new data: annotation_fixture("annotation-multiple-targets.json")
+      anno = Cerberus::Annotations::Annotation.new data: annotation_fixture("mult-targets.json")
       expect(anno.has_body).to eql("I love these two things!")
     end
     it "motivated_by" do
