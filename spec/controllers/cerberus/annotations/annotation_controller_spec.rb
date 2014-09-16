@@ -9,7 +9,7 @@ describe Cerberus::Annotations::AnnotationsController, type: :controller do
   end
 
   it "should have a show" do
-    @annotation = Cerberus::Annotations::Annotation.create(data: 'x')
+    @annotation = Cerberus::Annotations::Annotation.create(data: 'asdasdfasdfasdfasdfsdafsdfaadfasdfafasfda')
 
     get :show, id: @annotation.id
     expect(assigns[:annotation]).to eq @annotation
