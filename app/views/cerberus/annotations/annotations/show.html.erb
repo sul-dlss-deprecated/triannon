@@ -13,16 +13,18 @@
 <%= @annotation.has_body %>
 </pre>
 </p>
+<p>
 <strong>Motivated By:</strong>
 <%= link_to @annotation.motivated_by, @annotation.motivated_by %>
 </p>
-
+<p>
 <strong>Type:</strong>
 <%= link_to @annotation.type, @annotation.type %>
 </p>
 
+<strong>Turtle:</strong>
 <pre>
 <%= @annotation.graph.dump(:ttl) %>
 </pre>
 
-<%= link_to "Back", annotations_path %>
+<%= link_to "Back to List", annotations_path %>
