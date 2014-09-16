@@ -16,7 +16,6 @@ Gem::Specification.new do |s|
 
   s.add_dependency "rails", "~> 4.2.0.beta1"
   s.add_dependency "linkeddata"
-  s.add_dependency "spira"
   s.add_dependency "rdf-open_annotation"
   s.add_dependency "bootstrap-sass"
   s.add_dependency "sass-rails", ">= 5.0.0.beta1"
