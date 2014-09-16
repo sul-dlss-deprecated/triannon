@@ -1,5 +1,8 @@
 module Cerberus::Annotations
   class Annotation < ActiveRecord::Base
+    
+    validates :data, presence: true,
+                      length: {minimum: 30}
 
     def url
       json['@id'] if json
