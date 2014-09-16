@@ -1,7 +1,8 @@
 Cerberus::Annotations::Engine.routes.draw do
-  namespace :annotations do
-    resources :annotations
-  end
+# not sure why this was here ... seems silly?  
+#  namespace :annotations do
+#    resources :annotations
+#  end
 
   root to: 'annotations#index'
 
