@@ -10,7 +10,7 @@ module Cerberus::Annotations
 
     def type
       rdf.detect { |s| 
-        s.predicate.to_s == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+        s.predicate.to_s == RDF.type
       }.object.to_str
     end
     
@@ -18,7 +18,7 @@ module Cerberus::Annotations
       # FIXME:  can have multiple targets per spec  (example 8)
       # FIXME:  target might be more than a string (examples 14-17)
       stmt = rdf.find_all { |s| 
-        s.predicate.to_s == "http://www.w3.org/ns/oa#hasTarget"
+        s.predicate.to_s == RDF::OpenAnnotation.hasTarget
       }.first
       stmt.object.to_str if stmt
     end
@@ -26,7 +26,7 @@ module Cerberus::Annotations
     def has_body
       # FIXME:  can have multiple bodies per spec
       stmt = rdf.find_all { |s| 
-        s.predicate.to_s == "http://www.w3.org/ns/oa#hasBody"
+        s.predicate.to_s == RDF::OpenAnnotation.hasBody
       }.first
       
       # FIXME:  body can be other things
@@ -36,10 +36,10 @@ module Cerberus::Annotations
         body_stmts = rdf.find_all { |s| s.subject == body }
         if body_stmts && 
             body_stmts.detect { |s| 
-              s.predicate.to_s == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" &&
-              s.object.to_s == "http://www.w3.org/2011/content#ContentAsText"
+              s.predicate.to_s == RDF.type &&
+              s.object.to_s == RDF::Content.ContentAsText
             }
-          chars_stmt = body_stmts.detect { |s| s.predicate.to_s == "http://www.w3.org/2011/content#chars"}
+          chars_stmt = body_stmts.detect { |s| s.predicate.to_s == RDF::Content.chars}
           return chars_stmt.object.to_s if chars_stmt
         end
       end
@@ -50,7 +50,7 @@ module Cerberus::Annotations
       # FIXME:  can have multiple motivations per spec  (examples 9, 10, 11)
       # http://www.openannotation.org/spec/core/core.html#Motivations
       s = rdf.find_all { |s| 
-        s.predicate.to_s == "http://www.w3.org/ns/oa#motivatedBy"
+        s.predicate.to_s == RDF::OpenAnnotation.motivatedBy
       }.first
       s.object.to_str
     end
