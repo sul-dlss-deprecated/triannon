@@ -5,7 +5,7 @@ module Cerberus::Annotations
                       length: {minimum: 30}
 
     def url
-      json['@id'] if json
+      json_ld['@id'] if json_ld
     end
 
     def type
@@ -56,17 +56,17 @@ module Cerberus::Annotations
     end
 
     def rdf
-      @rdf ||= JSON::LD::API.toRdf(json) if json
+      @rdf ||= JSON::LD::API.toRdf(json_ld) if json_ld
     end
 
     def graph
-      @graph ||= RDF::Graph.new << rdf if json
+      @graph ||= RDF::Graph.new << rdf if json_ld
     end
 
     private
 
-    def json
-      @json ||= JSON.parse(data) rescue nil
+    def json_ld
+      @json_ld ||= JSON.parse(data) rescue nil
     end
 
   end
