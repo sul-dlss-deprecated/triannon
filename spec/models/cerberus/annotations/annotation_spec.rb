@@ -11,6 +11,37 @@ describe Cerberus::Annotations::Annotation do
       expect(@anno).not_to eql(nil)
     end
     
+    context "data_as_graph" do
+      context "json data" do
+        it "populates graph from json" do
+          expect(@anno.graph).to be_a_kind_of RDF::Graph
+          expect(@anno.graph.count).to be > 1
+        end
+        it "converts data to turtle" do
+          c = @anno.graph.count
+          g = RDF::Graph.new      
+          g.from_ttl(@anno.data)
+          expect(g.count).to eql c
+        end
+      end
+      context "turtle data" do
+        it "populates graph from ttl" do
+          anno = Cerberus::Annotations::Annotation.new data: annotation_fixture("body-chars.ttl")
+          expect(anno.graph).to be_a_kind_of RDF::Graph
+          expect(anno.graph.count).to be > 1
+        end
+      end
+      context "url as data" do
+        it "populates graph from url" do
+          skip "do we want to load annos from urls?"
+          anno = Cerberus::Annotations::Annotation.new data: 'http://example.org/url_to_turtle_anno'
+          expect(anno.graph).to be_a_kind_of RDF::Graph
+          expect(anno.graph.count).to be > 1
+        end
+      end
+    end
+    
+
     it "type is oa:Annotation" do
       expect(@anno.type).to eql("http://www.w3.org/ns/oa#Annotation")
     end

@@ -60,10 +60,34 @@ module Cerberus::Annotations
     end
 
     def graph
-      @graph ||= RDF::Graph.new << rdf if json_ld
+      g = data_to_graph
+      @graph ||= g if g
     end
 
     private
+
+    # loads RDF::Graph from data attribute.  If data is in json-ld, converts it to turtle.
+    def data_to_graph
+      begin
+        if data
+          case data
+            when /\{\s*\"@\w+\"/
+              json ||= JSON.parse(data)
+              g ||= RDF::Graph.new << JSON::LD::API.toRdf(json_ld) if json
+              self.data = g.dump(:ttl) if g
+            #when /http/
+            #  g ||= RDF::Graph.load(data, :format => :ttl)
+            else # assume turtle
+              g = RDF::Graph.new
+              g.from_ttl(data)
+              g = nil if g.size == 0
+          end
+        end # if data
+      rescue Exception => e
+        g = nil
+      end
+      g
+    end
 
     def json_ld
       @json_ld ||= JSON.parse(data) rescue nil
