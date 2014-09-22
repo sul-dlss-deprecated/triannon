@@ -5,16 +5,20 @@ module Cerberus::Annotations
                       length: {minimum: 30}
 
     # full validation should be optional?
-    #   minimal:  a subject with the right type and a hasTarget??
+    #   minimal:  a subject with the right type and a hasTarget?  (see url)
     # and perhaps modeled on this:
     #   https://github.com/uq-eresearch/lorestore/blob/3e9aa1c69aafd3692c69aa39c64bfdc32b757892/src/main/resources/OAConstraintsSPARQL.json
 
     def url
-      # does this need to be the first non-blank node?
-      # a subject with the right type and a hasTarget??
       if graph && graph.size > 0
-        stmts = graph.query([nil, RDF.type, RDF::URI("http://www.w3.org/ns/oa#Annotation")])
-        stmts.first.subject.to_s if stmts && stmts.size > 0
+        query = RDF::Query.new
+        query << [:s, RDF.type, RDF::URI("http://www.w3.org/ns/oa#Annotation")]
+        query << [:s, RDF::OpenAnnotation.hasTarget, nil]
+        solution = graph.query(query)
+        if solution && solution.size == 1
+          solution.first.s.to_s
+        # TODO:  raise exception if no URL?
+        end
       end
     end
     
