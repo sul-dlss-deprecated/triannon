@@ -24,12 +24,16 @@ module Cerberus::Annotations
     
     # FIXME:  this should be part of validation:  RDF.type should be RDF::OpenAnnotation.Annotation
     def type
-      # does this need to be the first non-blank node?
-      # a subject with the right type and a hasTarget??
-#      graph.query([url, RDF.type, nil]).first.object.to_s if graph
-      rdf.detect { |s| 
-        s.predicate.to_s == RDF.type
-      }.object.to_str
+      if graph && graph.size > 0
+        query = RDF::Query.new
+        query << [:s, RDF::OpenAnnotation.hasTarget, nil]
+        query << [:s, RDF.type, :type]
+        solution = graph.query(query)
+        if solution && solution.size == 1
+          solution.first.type.to_s
+        # TODO:  raise exception if no type?
+        end
+      end
     end
     
     def has_target

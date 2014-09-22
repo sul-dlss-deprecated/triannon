@@ -51,6 +51,7 @@ describe Cerberus::Annotations::Annotation do
         @anno_ttl = Cerberus::Annotations::Annotation.new data: annotation_fixture("body-chars.ttl")
       end
       it "type is oa:Annotation" do
+        expect(@anno_ttl.type).to eql("http://www.w3.org/ns/oa#Annotation")
         expect(@anno_json.type).to eql("http://www.w3.org/ns/oa#Annotation")
       end
       it "url is the @id of the json" do
@@ -58,6 +59,7 @@ describe Cerberus::Annotations::Annotation do
         expect(@anno_ttl.url).to eql("http://example.org/annos/annotation/body-chars.ttl")
       end
       it "has_target when URL" do
+        expect(@anno_ttl.has_target).to eql("http://purl.stanford.edu/kq131cs7229")
         expect(@anno_json.has_target).to eql("http://purl.stanford.edu/kq131cs7229")
       end
       context "has_body" do
