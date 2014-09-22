@@ -5,10 +5,19 @@ module Cerberus::Annotations
                       length: {minimum: 30}
 
     def url
-      json_ld['@id'] if json_ld
+      # does this need to be the first non-blank node?
+      # a subject with the right type and a hasTarget??
+      if graph && graph.size > 0
+        stmts = graph.query([nil, RDF.type, nil])
+        stmts.first.subject.to_s if stmts && stmts.size > 0
+      end
     end
-
+    
+    # FIXME:  this should be part of validation:  RDF.type should be RDF::OpenAnnotation.Annotation
     def type
+      # does this need to be the first non-blank node?
+      # a subject with the right type and a hasTarget??
+#      graph.query([url, RDF.type, nil]).first.object.to_s if graph
       rdf.detect { |s| 
         s.predicate.to_s == RDF.type
       }.object.to_str
@@ -53,6 +62,10 @@ module Cerberus::Annotations
         s.predicate.to_s == RDF::OpenAnnotation.motivatedBy
       }.first
       s.object.to_str
+#      if graph && graph.size > 0
+#        stmts = graph.query([nil, RDF::OpenAnnotation.motivatedBy, nil])
+#        stmts.first.object.to_str if stmts && stmts.size > 0
+#      end
     end
 
     def rdf
@@ -68,23 +81,19 @@ module Cerberus::Annotations
 
     # loads RDF::Graph from data attribute.  If data is in json-ld, converts it to turtle.
     def data_to_graph
-      begin
-        if data
-          case data
-            when /\{\s*\"@\w+\"/
-              json ||= JSON.parse(data)
-              g ||= RDF::Graph.new << JSON::LD::API.toRdf(json_ld) if json
-              self.data = g.dump(:ttl) if g
-            #when /http/
-            #  g ||= RDF::Graph.load(data, :format => :ttl)
-            else # assume turtle
-              g = RDF::Graph.new
-              g.from_ttl(data)
-              g = nil if g.size == 0
-          end
-        end # if data
-      rescue Exception => e
-        g = nil
+      if data
+        case data
+          when /\{\s*\"@\w+\"/
+            json ||= JSON.parse(data)
+            g ||= RDF::Graph.new << JSON::LD::API.toRdf(json_ld) if json
+            self.data = g.dump(:ttl) if g
+          #when /http/
+          #  g ||= RDF::Graph.load(data, :format => :ttl)
+          else # assume turtle
+            g = RDF::Graph.new
+            g.from_ttl(data)
+            g = nil if g.size == 0
+        end
       end
       g
     end
