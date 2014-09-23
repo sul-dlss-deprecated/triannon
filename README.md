@@ -2,7 +2,7 @@
 
 # Triannon
 
-Demonstration Open Annotation to support the Linked Data for Libraries use cases.
+Store Open Annotation in Fedora4 to support the Linked Data for Libraries use cases.
 
 ## Tests
 
