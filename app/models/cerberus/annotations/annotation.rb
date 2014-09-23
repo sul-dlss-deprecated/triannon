@@ -10,11 +10,8 @@ module Cerberus::Annotations
     #   https://github.com/uq-eresearch/lorestore/blob/3e9aa1c69aafd3692c69aa39c64bfdc32b757892/src/main/resources/OAConstraintsSPARQL.json
 
     def url
-      if graph && graph.size > 0
-        query = RDF::Query.new
-        query << [:s, RDF.type, RDF::URI("http://www.w3.org/ns/oa#Annotation")]
-        query << [:s, RDF::OpenAnnotation.hasTarget, nil]
-        solution = graph.query(query)
+      if graph_exists?
+        solution = graph.query(self.class.basic_query)
         if solution && solution.size == 1
           solution.first.s.to_s
         # TODO:  raise exception if no URL?
@@ -24,7 +21,7 @@ module Cerberus::Annotations
     
     # FIXME:  this should be part of validation:  RDF.type should be RDF::OpenAnnotation.Annotation
     def type
-      if graph && graph.size > 0
+      if graph_exists?
         query = RDF::Query.new
         query << [:s, RDF::OpenAnnotation.hasTarget, nil]
         query << [:s, RDF.type, :type]
@@ -79,6 +76,16 @@ module Cerberus::Annotations
 #        stmts = graph.query([nil, RDF::OpenAnnotation.motivatedBy, nil])
 #        stmts.first.object.to_str if stmts && stmts.size > 0
 #      end
+      if graph_exists?
+        query = RDF::Query.new
+        query << [:s, RDF::OpenAnnotation.hasTarget, nil]
+        query << [:s, RDF.type, :type]
+        solution = graph.query(query)
+        if solution && solution.size == 1
+          solution.first.type.to_s
+        # TODO:  raise exception if no type?
+        end
+      end
     end
 
     def rdf
@@ -90,7 +97,18 @@ module Cerberus::Annotations
       @graph ||= g if g
     end
 
-    private
+    # query for a subject with 
+    #  predicate  RDF::OpenAnnotation.hasTarget  
+    #  type of RDF::OpenAnnotation.Annotation
+    def self.basic_query
+      @basic_query ||= begin
+        basic_query = RDF::Query.new
+        basic_query << [:s, RDF.type, RDF::URI("http://www.w3.org/ns/oa#Annotation")]
+        basic_query << [:s, RDF::OpenAnnotation.hasTarget, nil]
+      end
+    end
+    
+private
 
     # loads RDF::Graph from data attribute.  If data is in json-ld, converts it to turtle.
     def data_to_graph
@@ -113,6 +131,10 @@ module Cerberus::Annotations
 
     def json_ld
       @json_ld ||= JSON.parse(data) rescue nil
+    end
+    
+    def graph_exists?
+      graph && graph.size > 0
     end
 
   end
