@@ -74,10 +74,18 @@ describe Cerberus::Annotations::Annotation do
           expect(anno.has_body).to eql("I love these two things!")
         end
       end
-      it "motivated_by" do
-        expect(@anno_ttl.motivated_by).to eql("http://www.w3.org/ns/oa#commenting")
-        expect(@anno_json.motivated_by).to eql("http://www.w3.org/ns/oa#bookmarking")
-      end      
+      context "motivated_by" do
+        it "single" do
+          expect(@anno_ttl.motivated_by[0]).to eql("http://www.w3.org/ns/oa#commenting")
+          expect(@anno_json.motivated_by).to include("http://www.w3.org/ns/oa#bookmarking")
+        end
+        it "multiple" do
+          anno = Cerberus::Annotations::Annotation.new data: annotation_fixture("mult-motivations.json")
+          expect(anno.motivated_by.size).to eql 2
+          expect(anno.motivated_by).to include("http://www.w3.org/ns/oa#moderating")
+          expect(anno.motivated_by).to include("http://www.w3.org/ns/oa#tagging")
+        end
+      end
     end
   end # json from fixture
 

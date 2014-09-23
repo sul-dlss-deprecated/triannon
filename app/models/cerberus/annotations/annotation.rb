@@ -66,14 +66,16 @@ module Cerberus::Annotations
     end
 
     def motivated_by
-      # FIXME:  can have multiple motivations per spec  (examples 9, 10, 11)
-      # http://www.openannotation.org/spec/core/core.html#Motivations
       if graph_exists?
         q = self.class.basic_query.clone
         q << [:s, RDF::OpenAnnotation.motivatedBy, :motivated_by]
         solution = graph.query(q)
-        if solution && solution.size == 1
-          solution.first.motivated_by.to_s
+        if solution && solution.size > 0
+          motivations = []
+          solution.each {|res|
+            motivations << res.motivated_by.to_s
+          }
+          motivations
         # TODO:  raise exception if none?
         end
       end

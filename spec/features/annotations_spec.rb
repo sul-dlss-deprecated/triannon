@@ -26,10 +26,17 @@ describe "viewing an annotation", type: :feature do
     expect(page).to have_content "I love this!"
   end
 
-  it "has the motivation" do
-    expect(page).to have_content "http://www.w3.org/ns/oa#commenting"
+  context "has motivation" do
+    it "single" do
+      expect(page).to have_content "http://www.w3.org/ns/oa#commenting"
+    end
+    it "multiple" do
+      anno = create_annotation('mult-motivations.json')
+      visit "/annotations/annotations/#{anno.id}"
+      expect(page).to have_content "http://www.w3.org/ns/oa#moderating"
+      expect(page).to have_content "http://www.w3.org/ns/oa#tagging"
+    end
   end
-
 
   def create_annotation f
     Cerberus::Annotations::Annotation.create data: annotation_fixture(f)
