@@ -50,6 +50,13 @@ namespace :cerberus do
       end
     end
   end
+
+  desc 'run the test rails console w cerberus but no jetty'
+  task :console_no_jetty do
+    within_test_app do
+      system "rails c"
+    end
+  end
 end
 
 
