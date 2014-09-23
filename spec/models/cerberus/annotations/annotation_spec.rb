@@ -54,11 +54,11 @@ describe Cerberus::Annotations::Annotation do
         expect(@anno_ttl.type).to eql("http://www.w3.org/ns/oa#Annotation")
         expect(@anno_json.type).to eql("http://www.w3.org/ns/oa#Annotation")
       end
-      it "url is the @id of the json" do
+      it "url" do
         expect(@anno_json.url).to eql("http://example.org/annos/annotation/bookmark.json")
         expect(@anno_ttl.url).to eql("http://example.org/annos/annotation/body-chars.ttl")
       end
-      it "has_target when URL" do
+      it "has_target when it is a URL" do
         expect(@anno_ttl.has_target).to eql("http://purl.stanford.edu/kq131cs7229")
         expect(@anno_json.has_target).to eql("http://purl.stanford.edu/kq131cs7229")
       end
