@@ -18,8 +18,16 @@ describe "viewing an annotation", type: :feature do
     expect(page).to have_content "http://www.w3.org/ns/oa#Annotation"
   end
 
-  it "has the target url" do
-    expect(page).to have_content "http://purl.stanford.edu/kq131cs7229"
+  context "target" do
+    it "single url" do
+      expect(page).to have_content "http://purl.stanford.edu/kq131cs7229"
+    end
+    it "mult urls" do
+      anno = create_annotation('mult-targets.json')
+      visit "/annotations/annotations/#{anno.id}"
+      expect(page).to have_content "http://purl.stanford.edu/kq131cs7229"
+      expect(page).to have_content "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg"
+    end
   end
 
   it "has the body when it's blank node with text" do

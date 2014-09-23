@@ -5,7 +5,7 @@
 </p>
 <p>
 <strong>Target:</strong>
-<% @annotation.has_target { |t| %>
+<% @annotation.has_target.each { |t| %>
 <%= link_to t, t %>
 <% } %>
 </p>
@@ -17,7 +17,7 @@
 </p>
 <p>
 <strong>Motivated By:</strong>
-<% @annotation.motivated_by { |m| %>
+<% @annotation.motivated_by.each { |m| %>
 <%= link_to m, m %>
 <% } %>
 </p>

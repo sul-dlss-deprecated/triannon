@@ -58,9 +58,17 @@ describe Triannon::Annotation do
         expect(@anno_json.url).to eql("http://example.org/annos/annotation/bookmark.json")
         expect(@anno_ttl.url).to eql("http://example.org/annos/annotation/body-chars.ttl")
       end
-      it "has_target when it is a URL" do
-#        expect(@anno_ttl.has_target).to eql("http://purl.stanford.edu/kq131cs7229")
-        expect(@anno_json.has_target).to eql("http://purl.stanford.edu/kq131cs7229")
+      context "has_target" do
+        it "single url" do
+          expect(@anno_ttl.has_target[0]).to eql("http://purl.stanford.edu/kq131cs7229")
+          expect(@anno_json.has_target).to include("http://purl.stanford.edu/kq131cs7229")
+        end
+        it "multiple urls" do
+          anno = Triannon::Annotation.new data: annotation_fixture("mult-targets.json")
+          expect(anno.has_target.size).to eql 2
+          expect(anno.has_target).to include("http://purl.stanford.edu/kq131cs7229")
+          expect(anno.has_target).to include("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg")
+        end
       end
       context "has_body" do
         it "nil when there is no body" do

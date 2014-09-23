@@ -34,12 +34,21 @@ module Triannon
     end
     
     def has_target
-      # FIXME:  can have multiple targets per spec  (example 8)
       # FIXME:  target might be more than a string (examples 14-17)
-      stmt = rdf.find_all { |s| 
-        s.predicate.to_s == RDF::OpenAnnotation.hasTarget
-      }.first
-      stmt.object.to_str if stmt
+      if graph_exists?
+        q = RDF::Query.new
+        q << [:s, RDF.type, RDF::URI("http://www.w3.org/ns/oa#Annotation")]
+        q << [:s, RDF::OpenAnnotation.hasTarget, :target]
+        solution = graph.query q
+        if solution && solution.size > 0
+          targets = []
+          solution.each {|res|
+            targets << res.target.to_s
+          }
+          targets
+        # TODO:  raise exception if none?
+        end
+      end
     end
     
     def has_body
@@ -67,7 +76,7 @@ module Triannon
 
     def motivated_by
       if graph_exists?
-        q = self.class.basic_query.clone
+        q = self.class.basic_query.dup
         q << [:s, RDF::OpenAnnotation.motivatedBy, :motivated_by]
         solution = graph.query(q)
         if solution && solution.size > 0
