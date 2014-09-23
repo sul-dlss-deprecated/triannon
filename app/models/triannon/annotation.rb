@@ -1,4 +1,4 @@
-module Cerberus::Annotations
+module Triannon
   class Annotation < ActiveRecord::Base
     
     validates :data, presence: true,

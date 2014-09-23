@@ -39,10 +39,10 @@ describe "viewing an annotation", type: :feature do
   end
 
   def create_annotation f
-    Cerberus::Annotations::Annotation.create data: annotation_fixture(f)
+    Triannon::Annotation.create data: annotation_fixture(f)
   end
 
   def annotation_fixture fixture
-    File.read Cerberus::Annotations.fixture_path("annotations/#{fixture}")
+    File.read Triannon.fixture_path("annotations/#{fixture}")
   end
 end

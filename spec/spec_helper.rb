@@ -19,7 +19,7 @@ ENV["RAILS_ENV"] ||= 'test'
 require 'engine_cart'
 EngineCart.load_application!
 
-require 'cerberus/annotations'
+require 'triannon'
 require 'rspec/rails'
 require 'capybara/rails'
 require 'capybara/rspec'
@@ -87,7 +87,7 @@ RSpec.configure do |config|
 =end
 end
 
-module Cerberus::Annotations
+module Triannon
   def self.fixture_path path
     File.expand_path(File.dirname(__FILE__) + "/fixtures/#{path}")
   end

@@ -1,4 +1,4 @@
-module Cerberus::Annotations
+module Triannon
   module AnnotationsHelper
   end
 end

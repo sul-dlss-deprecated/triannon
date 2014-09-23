@@ -1,4 +1,4 @@
-module Cerberus::Annotations
+module Triannon
   class ApplicationController < ActionController::Base
   end
 end

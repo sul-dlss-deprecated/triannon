@@ -1,6 +1,6 @@
-require_dependency "cerberus/annotations/application_controller"
+require_dependency "triannon/application_controller"
 
-module Cerberus::Annotations
+module Triannon
   class AnnotationsController < ApplicationController
     before_action :set_annotation, only: [:show, :edit, :update, :destroy]
 

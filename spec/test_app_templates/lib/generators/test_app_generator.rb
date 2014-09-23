@@ -8,11 +8,11 @@ class TestAppGenerator < Rails::Generators::Base
   # after setting up the application
 
   def install_engine
-    generate 'cerberus:annotations:install'
+    generate 'triannon:install'
   end
 
-  def run_cerberus_migrations
-     rake "cerberus_annotations:install:migrations"
+  def run_triannon_migrations
+     rake "triannon:install:migrations"
      rake "db:migrate"
   end
 

@@ -13,14 +13,14 @@ require 'rdoc/task'
 
 RDoc::Task.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title    = 'Cerberus'
+  rdoc.title    = 'Triannon'
   rdoc.options << '--line-numbers'
   rdoc.rdoc_files.include('README.rdoc')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
 
 require 'engine_cart/rake_task'
-desc 'run the cerberus specs'
+desc 'run the triannon specs'
 task :ci => ['engine_cart:generate', 'jetty:clean'] do
   # run the tests
   RAILS_ENV = 'test'
@@ -30,8 +30,8 @@ task :ci => ['engine_cart:generate', 'jetty:clean'] do
   end
 end
 
-namespace :cerberus do
-  desc 'run the test rails app w cerberus'
+namespace :triannon do
+  desc 'run the test rails app w triannon'
   task :server do
     jetty_params = Jettywrapper.load_config.merge({:jetty_home => File.expand_path(File.dirname(__FILE__) + '/jetty')})
     Jettywrapper.wrap(jetty_params) do
@@ -41,7 +41,7 @@ namespace :cerberus do
     end
   end
 
-  desc 'run the test rails console w cerberus'
+  desc 'run the test rails console w triannon'
   task :console do
     jetty_params = Jettywrapper.load_config.merge({:jetty_home => File.expand_path(File.dirname(__FILE__) + '/jetty')})
     Jettywrapper.wrap(jetty_params) do
@@ -51,7 +51,7 @@ namespace :cerberus do
     end
   end
 
-  desc 'run the test rails console w cerberus but no jetty'
+  desc 'run the test rails console w triannon but no jetty'
   task :console_no_jetty do
     within_test_app do
       system "rails c"
