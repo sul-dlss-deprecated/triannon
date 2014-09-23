@@ -75,6 +75,7 @@ describe Cerberus::Annotations::Annotation do
         end
       end
       it "motivated_by" do
+        expect(@anno_ttl.motivated_by).to eql("http://www.w3.org/ns/oa#commenting")
         expect(@anno_json.motivated_by).to eql("http://www.w3.org/ns/oa#bookmarking")
       end      
     end
