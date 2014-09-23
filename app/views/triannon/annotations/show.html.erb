@@ -5,7 +5,9 @@
 </p>
 <p>
 <strong>Target:</strong>
-<%= link_to @annotation.has_target, @annotation.has_target %>
+<% @annotation.has_target { |t| %>
+<%= link_to t, t %>
+<% } %>
 </p>
 <p>
 <strong>Body (blank node with text):</strong>
@@ -15,8 +17,8 @@
 </p>
 <p>
 <strong>Motivated By:</strong>
-<% @annotation.motivated_by { |m|%>
-<%= link_to @annotation.m, @annotation.m %>
+<% @annotation.motivated_by { |m| %>
+<%= link_to m, m %>
 <% } %>
 </p>
 <p>
