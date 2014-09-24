@@ -1,7 +1,8 @@
 require 'spec_helper'
 
-describe Triannon::Annotation do
-  
+vcr_options = { :cassette_name => "models_triannon_annotation" }
+describe Triannon::Annotation, :vcr => vcr_options do
+
   context "json from fixture" do
 
     context "data_as_graph" do
@@ -15,7 +16,7 @@ describe Triannon::Annotation do
         end
         it "converts data to turtle" do
           c = @anno.graph.count
-          g = RDF::Graph.new      
+          g = RDF::Graph.new
           g.from_ttl(@anno.data)
           expect(g.count).to eql c
         end
@@ -36,15 +37,15 @@ describe Triannon::Annotation do
         end
       end
     end
-    
-# TODO: remove this    
+
+# TODO: remove this
     it "rdf is populated Array of RDF statments" do
       skip "to be removed"
       expect(@anno.rdf).to be_a_kind_of Array
       expect(@anno.rdf.size).to be > 0
       expect(@anno.rdf[0].class).to eql(RDF::Statement)
     end
-    
+
     context "parsing graph" do
       before(:each) do
         @anno_json = Triannon::Annotation.new data: annotation_fixture("bookmark.json")

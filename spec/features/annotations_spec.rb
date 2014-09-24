@@ -1,6 +1,7 @@
 require 'spec_helper'
 
-describe "viewing an annotation", type: :feature do
+vcr_options = { :cassette_name => "features_annotations" }
+describe "viewing an annotation", type: :feature, :vcr => vcr_options do
   before(:each) do
     annotation = create_annotation('body-chars.json')
     visit "/annotations/annotations/#{annotation.id}"
@@ -9,7 +10,7 @@ describe "viewing an annotation", type: :feature do
   it "has a title" do
     expect(page).to have_content "Annotation"
   end
-  
+
   it "has the id/url" do
     expect(page).to have_content "http://example.org/annos/annotation/body-chars.json"
   end
