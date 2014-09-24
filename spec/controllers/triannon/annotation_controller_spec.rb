@@ -1,6 +1,7 @@
 require 'spec_helper'
 
-describe Triannon::AnnotationsController, type: :controller do
+vcr_options = { :cassette_name => "features_annotations_index" }
+describe Triannon::AnnotationsController, type: :controller, :vcr => vcr_options do
 
   routes { Triannon::Engine.routes }
 
