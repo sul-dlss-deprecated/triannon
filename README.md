@@ -37,6 +37,11 @@ $ rails g triannon:install
 There is a bundled rake task for running the test app:
 
 ```console
+# One time setup: run the following 3 commands
+$ rake jetty:download
+$ rake jetty:unzip
 $ rake engine_cart:generate # (first run only)
+
+# Run the test app
 $ rake triannon:server
 ```
