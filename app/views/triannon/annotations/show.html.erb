@@ -11,9 +11,13 @@
 </p>
 <p>
 <strong>Body (blank node with text):</strong>
+<% if @annotation.has_body.size > 0 -%>
 <pre>
-<%= @annotation.has_body %>
+<%= @annotation.has_body.map{|b| b}.join(", ") %>
 </pre>
+<% else %>
+(no body for this annotation)
+<% end -%>
 </p>
 <p>
 <strong>Motivated By:</strong>
