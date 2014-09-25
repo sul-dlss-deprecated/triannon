@@ -10,9 +10,7 @@
 <p>
 <strong>Body (blank node with text):</strong>
 <% if @annotation.has_body.size > 0 -%>
-<pre>
-<%= @annotation.has_body.map{|b| b}.join(", ") %>
-</pre>
+<%= @annotation.has_body.map{|b| "<pre>" + b + "</pre>"}.join.html_safe %>
 <% else %>
 (no body for this annotation)
 <% end -%>
