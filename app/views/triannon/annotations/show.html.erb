@@ -5,9 +5,7 @@
 </p>
 <p>
 <strong>Target:</strong>
-<% @annotation.has_target.each { |t| %>
-<%= link_to t, t %>
-<% } %>
+<%= @annotation.has_target.map{|t| link_to(t, t)}.join(", ").html_safe %>
 </p>
 <p>
 <strong>Body (blank node with text):</strong>
@@ -21,9 +19,7 @@
 </p>
 <p>
 <strong>Motivated By:</strong>
-<% @annotation.motivated_by.each { |m| %>
-<%= link_to m, m %>
-<% } %>
+<%= @annotation.motivated_by.map{|m| link_to(m, m)}.join(", ").html_safe %>
 </p>
 <p>
 <strong>Type:</strong>
