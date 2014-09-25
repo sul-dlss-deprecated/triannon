@@ -91,10 +91,6 @@ module Triannon
       end
     end
 
-    def rdf
-      @rdf ||= JSON::LD::API.toRdf(json_ld) if json_ld
-    end
-
     def graph
       g = data_to_graph
       @graph ||= g if g

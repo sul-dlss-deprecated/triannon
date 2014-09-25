@@ -38,14 +38,6 @@ describe Triannon::Annotation, :vcr => vcr_options do
       end
     end
 
-# TODO: remove this
-    it "rdf is populated Array of RDF statments" do
-      skip "to be removed"
-      expect(@anno.rdf).to be_a_kind_of Array
-      expect(@anno.rdf.size).to be > 0
-      expect(@anno.rdf[0].class).to eql(RDF::Statement)
-    end
-
     context "parsing graph" do
       before(:each) do
         @anno_json = Triannon::Annotation.new data: annotation_fixture("bookmark.json")
