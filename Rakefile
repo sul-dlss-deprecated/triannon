@@ -31,8 +31,8 @@ task :ci => ['engine_cart:generate', 'jetty:clean'] do
 end
 
 namespace :triannon do
-  desc 'run the test rails app w triannon'
-  task :server do
+  desc 'run test rails app w triannon and jetty'
+  task :server_jetty do
     jetty_params = Jettywrapper.load_config.merge({:jetty_home => File.expand_path(File.dirname(__FILE__) + '/jetty')})
     Jettywrapper.wrap(jetty_params) do
       within_test_app do
@@ -41,8 +41,17 @@ namespace :triannon do
     end
   end
 
-  desc 'run the test rails console w triannon'
-  task :console do
+  desc 'run test rails app w triannon but no jetty'
+  task :server_no_jetty do
+    within_test_app do
+      system "rails s"
+    end
+  end
+  desc 'run test rails app w triannon but no jetty'
+  task :server => :server_no_jetty
+
+  desc 'run test rails console w triannon'
+  task :console_jetty do
     jetty_params = Jettywrapper.load_config.merge({:jetty_home => File.expand_path(File.dirname(__FILE__) + '/jetty')})
     Jettywrapper.wrap(jetty_params) do
       within_test_app do
@@ -51,12 +60,15 @@ namespace :triannon do
     end
   end
 
-  desc 'run the test rails console w triannon but no jetty'
+  desc 'run test rails console w triannon but no jetty'
   task :console_no_jetty do
     within_test_app do
       system "rails c"
     end
   end
+  desc 'run test rails console w triannon but no jetty'
+  task :console => :console_no_jetty
+  
 end
 
 

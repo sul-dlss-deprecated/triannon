@@ -38,14 +38,6 @@ describe Triannon::Annotation, :vcr => vcr_options do
       end
     end
 
-# TODO: remove this
-    it "rdf is populated Array of RDF statments" do
-      skip "to be removed"
-      expect(@anno.rdf).to be_a_kind_of Array
-      expect(@anno.rdf.size).to be > 0
-      expect(@anno.rdf[0].class).to eql(RDF::Statement)
-    end
-
     context "parsing graph" do
       before(:each) do
         @anno_json = Triannon::Annotation.new data: annotation_fixture("bookmark.json")
@@ -72,15 +64,18 @@ describe Triannon::Annotation, :vcr => vcr_options do
         end
       end
       context "has_body" do
-        it "nil when there is no body" do
-          expect(@anno_json.has_body).to be_nil
+        it "empty array when there is no body" do
+          expect(@anno_json.has_body).not_to be_nil
+          expect(@anno_json.has_body.size).to eql 0
         end
-        it "text from chars when blank node with text" do
-#          expect(@anno_ttl.has_body).to eql("I love this!")
+        it "text from chars" do
+          expect(@anno_ttl.has_body).to include("I love this!")
           anno = Triannon::Annotation.new data: annotation_fixture("body-chars.json")
-          expect(anno.has_body).to eql("I love this!")
-          anno = Triannon::Annotation.new data: annotation_fixture("mult-targets.json")
-          expect(anno.has_body).to eql("I love these two things!")
+          expect(anno.has_body).to include("I love this!")
+          anno = Triannon::Annotation.new data: annotation_fixture("body-chars-plain.json")
+          expect(anno.has_body).to include("I love this!")
+          anno = Triannon::Annotation.new data: annotation_fixture("body-chars-html.json")
+          expect(anno.has_body).to include("<div xml:lang='en' xmlns='http://www.w3.org/1999/xhtml'>I love this!</div>")
         end
       end
       context "motivated_by" do

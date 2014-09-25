@@ -11,7 +11,7 @@ module Triannon
 
     def url
       if graph_exists?
-        solution = graph.query(self.class.basic_query)
+        solution = graph.query self.class.basic_query
         if solution && solution.size == 1
           solution.first.s.to_s
         # TODO:  raise exception if no URL?
@@ -25,7 +25,7 @@ module Triannon
         query = RDF::Query.new
         query << [:s, RDF::OpenAnnotation.hasTarget, nil]
         query << [:s, RDF.type, :type]
-        solution = graph.query(query)
+        solution = graph.query query
         if solution && solution.size == 1
           solution.first.type.to_s
         # TODO:  raise exception if no type?
@@ -52,33 +52,34 @@ module Triannon
     end
     
     def has_body
-      # FIXME:  can have multiple bodies per spec
-      stmt = rdf.find_all { |s| 
-        s.predicate.to_s == RDF::OpenAnnotation.hasBody
-      }.first
-      
-      # FIXME:  body can be other things
-      # if body is blank node and has character content, then return it
-      body = stmt.object if stmt
-      if body && body.is_a?(RDF::Node)
-        body_stmts = rdf.find_all { |s| s.subject == body }
-        if body_stmts && 
-            body_stmts.detect { |s| 
-              s.predicate.to_s == RDF.type &&
-              s.object.to_s == RDF::Content.ContentAsText
-            }
-          chars_stmt = body_stmts.detect { |s| s.predicate.to_s == RDF::Content.chars}
-          return chars_stmt.object.to_s if chars_stmt
+      # FIXME:  body can be other things besides blank node with chars
+      bodies = []
+      if graph_exists?
+        q = self.class.basic_query.dup
+        q << [:s, RDF::OpenAnnotation.hasBody, :body]
+        # for chars content
+        # the following two lines are equivalent in identifying inline chars content
+        # q << [:body, RDF.type, RDF::Content.ContentAsText]
+        q << [:body, RDF::Content.chars, :chars]
+        # for non-chars content
+        # // non-embedded Text resource
+        #?body a dctypes:Text ;
+        #  dc:format "application/msword .
+        solution = graph.query q
+        if solution && solution.size > 0
+          solution.each {|res|
+            bodies << res.chars.to_s
+          }
         end
       end
-      nil
+      bodies
     end
 
     def motivated_by
       if graph_exists?
         q = self.class.basic_query.dup
         q << [:s, RDF::OpenAnnotation.motivatedBy, :motivated_by]
-        solution = graph.query(q)
+        solution = graph.query q
         if solution && solution.size > 0
           motivations = []
           solution.each {|res|
@@ -88,10 +89,6 @@ module Triannon
         # TODO:  raise exception if none?
         end
       end
-    end
-
-    def rdf
-      @rdf ||= JSON::LD::API.toRdf(json_ld) if json_ld
     end
 
     def graph
