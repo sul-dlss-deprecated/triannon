@@ -22,10 +22,11 @@ module Triannon
     # FIXME:  this should be part of validation:  RDF.type should be RDF::OpenAnnotation.Annotation
     def type
       if graph_exists?
-        query = RDF::Query.new
-        query << [:s, RDF::OpenAnnotation.hasTarget, nil]
-        query << [:s, RDF.type, :type]
-        solution = graph.query query
+        q = RDF::Query.new
+        q << [:s, RDF::OpenAnnotation.hasTarget, nil] # must have a target
+        q << [:s, RDF.type, :type]
+        solution = graph.query q
+        solution.distinct!
         if solution && solution.size == 1
           solution.first.type.to_s
         # TODO:  raise exception if no type?

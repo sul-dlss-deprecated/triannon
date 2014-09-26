@@ -46,10 +46,14 @@ describe Triannon::Annotation, :vcr => vcr_options do
       it "type is oa:Annotation" do
         expect(@anno_ttl.type).to eql("http://www.w3.org/ns/oa#Annotation")
         expect(@anno_json.type).to eql("http://www.w3.org/ns/oa#Annotation")
+        anno = Triannon::Annotation.new data: annotation_fixture("mult-targets.json")
+        expect(anno.type).to eql("http://www.w3.org/ns/oa#Annotation")
       end
       it "url" do
         expect(@anno_json.url).to eql("http://example.org/annos/annotation/bookmark.json")
         expect(@anno_ttl.url).to eql("http://example.org/annos/annotation/body-chars.ttl")
+        anno = Triannon::Annotation.new data: annotation_fixture("mult-targets.json")
+        expect(anno.url).to eql("http://example.org/annos/annotation/mult-targets.json")
       end
       context "has_target" do
         it "single url" do
