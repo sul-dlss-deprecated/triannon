@@ -69,18 +69,29 @@ describe Triannon::Annotation, :vcr => vcr_options do
           expect(@anno_json.has_body.size).to eql 0
         end
         it "text from chars" do
+          expect(@anno_ttl.has_body.size).to eql 1
           expect(@anno_ttl.has_body).to include("I love this!")
           anno = Triannon::Annotation.new data: annotation_fixture("body-chars.json")
+          expect(anno.has_body.size).to eql 1
           expect(anno.has_body).to include("I love this!")
           anno = Triannon::Annotation.new data: annotation_fixture("body-chars-plain.json")
+          expect(anno.has_body.size).to eql 1
           expect(anno.has_body).to include("I love this!")
           anno = Triannon::Annotation.new data: annotation_fixture("body-chars-html.json")
+          expect(anno.has_body.size).to eql 1
           expect(anno.has_body).to include("<div xml:lang='en' xmlns='http://www.w3.org/1999/xhtml'>I love this!</div>")
+        end
+        it "mult targets" do
+          anno = Triannon::Annotation.new data: annotation_fixture("mult-targets.json")
+          expect(anno.has_body.size).to eql 1
+          expect(anno.has_body).to include("I love these two things!")
         end
       end
       context "motivated_by" do
         it "single" do
+          expect(@anno_ttl.motivated_by.size).to eql 1
           expect(@anno_ttl.motivated_by[0]).to eql("http://www.w3.org/ns/oa#commenting")
+          expect(@anno_json.motivated_by.size).to eql 1
           expect(@anno_json.motivated_by).to include("http://www.w3.org/ns/oa#bookmarking")
         end
         it "multiple" do
@@ -88,6 +99,11 @@ describe Triannon::Annotation, :vcr => vcr_options do
           expect(anno.motivated_by.size).to eql 2
           expect(anno.motivated_by).to include("http://www.w3.org/ns/oa#moderating")
           expect(anno.motivated_by).to include("http://www.w3.org/ns/oa#tagging")
+        end
+        it "mult targets" do
+          anno = Triannon::Annotation.new data: annotation_fixture("mult-targets.json")
+          expect(anno.motivated_by.size).to eql 1
+          expect(anno.motivated_by).to include("http://www.w3.org/ns/oa#commenting")
         end
       end
     end
