@@ -11,7 +11,7 @@ module Triannon
 
     def url
       if graph_exists?
-        solution = graph.query self.class.basic_query
+        solution = graph.query self.class.anno_query
         if solution && solution.size == 1
           solution.first.s.to_s
         # TODO:  raise exception if no URL?
@@ -22,10 +22,11 @@ module Triannon
     # FIXME:  this should be part of validation:  RDF.type should be RDF::OpenAnnotation.Annotation
     def type
       if graph_exists?
-        query = RDF::Query.new
-        query << [:s, RDF::OpenAnnotation.hasTarget, nil]
-        query << [:s, RDF.type, :type]
-        solution = graph.query query
+        q = RDF::Query.new
+        q << [:s, RDF::OpenAnnotation.hasTarget, nil] # must have a target
+        q << [:s, RDF.type, :type]
+        solution = graph.query q
+        solution.distinct!
         if solution && solution.size == 1
           solution.first.type.to_s
         # TODO:  raise exception if no type?
@@ -36,8 +37,7 @@ module Triannon
     def has_target
       # FIXME:  target might be more than a string (examples 14-17)
       if graph_exists?
-        q = RDF::Query.new
-        q << [:s, RDF.type, RDF::URI("http://www.w3.org/ns/oa#Annotation")]
+        q = self.class.anno_query.dup
         q << [:s, RDF::OpenAnnotation.hasTarget, :target]
         solution = graph.query q
         if solution && solution.size > 0
@@ -55,7 +55,7 @@ module Triannon
       # FIXME:  body can be other things besides blank node with chars
       bodies = []
       if graph_exists?
-        q = self.class.basic_query.dup
+        q = self.class.anno_query.dup
         q << [:s, RDF::OpenAnnotation.hasBody, :body]
         # for chars content
         # the following two lines are equivalent in identifying inline chars content
@@ -77,7 +77,7 @@ module Triannon
 
     def motivated_by
       if graph_exists?
-        q = self.class.basic_query.dup
+        q = self.class.anno_query.dup
         q << [:s, RDF::OpenAnnotation.motivatedBy, :motivated_by]
         solution = graph.query q
         if solution && solution.size > 0
@@ -96,14 +96,11 @@ module Triannon
       @graph ||= g if g
     end
 
-    # query for a subject with 
-    #  predicate  RDF::OpenAnnotation.hasTarget  
-    #  type of RDF::OpenAnnotation.Annotation
-    def self.basic_query
-      @basic_query ||= begin
-        basic_query = RDF::Query.new
-        basic_query << [:s, RDF.type, RDF::URI("http://www.w3.org/ns/oa#Annotation")]
-        basic_query << [:s, RDF::OpenAnnotation.hasTarget, nil]
+    # query for a subject with type of RDF::OpenAnnotation.Annotation
+    def self.anno_query
+      @anno_query ||= begin
+        q = RDF::Query.new
+        q << [:s, RDF.type, RDF::URI("http://www.w3.org/ns/oa#Annotation")]
       end
     end
     
