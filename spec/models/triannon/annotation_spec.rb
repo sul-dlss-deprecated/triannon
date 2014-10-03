@@ -58,14 +58,6 @@ describe Triannon::Annotation, :vcr => vcr_options do
           expect(anno.graph).to be_nil
         end
       end
-      context "url as data" do
-        it "populates graph from url" do
-          skip "do we want to load annos from urls?"
-          anno = Triannon::Annotation.new data: 'http://example.org/url_to_turtle_anno'
-          expect(anno.graph).to be_a_kind_of RDF::Graph
-          expect(anno.graph.count).to be > 1
-        end
-      end
     end
 
     context "parsing graph" do

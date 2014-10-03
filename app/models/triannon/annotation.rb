@@ -114,8 +114,6 @@ private
             json ||= JSON.parse(data)
             g ||= RDF::Graph.new << JSON::LD::API.toRdf(json_ld) if json
             self.data = g.dump(:ttl) if g
-          #when /http/
-          #  g ||= RDF::Graph.load(data, :format => :ttl)
           when /\A<.+>\Z/m # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
             g = RDF::Graph.new
             g.from_rdfxml(data)
