@@ -107,8 +107,9 @@ module Triannon
 private
 
     # loads RDF::Graph from data attribute.  If data is in json-ld, converts it to turtle.
-    def data_to_graph
+    def data_to_graph   
       if data
+        data.strip!
         case data
           when /\{\s*\"@\w+\"/
             json ||= JSON.parse(data)
@@ -116,7 +117,7 @@ private
             self.data = g.dump(:ttl) if g
           #when /http/
           #  g ||= RDF::Graph.load(data, :format => :ttl)
-          else # assume turtle
+          when /\.\Z/ # turtle  (Note:  \Z  is needed instead of $ for \n in data)
             g = RDF::Graph.new
             g.from_ttl(data)
             g = nil if g.size == 0

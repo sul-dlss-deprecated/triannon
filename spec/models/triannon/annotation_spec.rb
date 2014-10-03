@@ -23,9 +23,16 @@ describe Triannon::Annotation, :vcr => vcr_options do
       end
       context "turtle data" do
         it "populates graph from ttl" do
-          anno = Triannon::Annotation.new data: annotation_fixture("body-chars.ttl")
+          turtle = annotation_fixture("body-chars.ttl")
+          expect(turtle).to match(/\.$/)
+          anno = Triannon::Annotation.new data: turtle
           expect(anno.graph).to be_a_kind_of RDF::Graph
           expect(anno.graph.count).to be > 1
+        end
+        it "reject if it doesn't end in period" do
+          bad_end = annotation_fixture("body-chars.ttl") + "xxx"
+          anno = Triannon::Annotation.new data: bad_end
+          expect(anno.graph).to be_nil
         end
       end
       context "url as data" do
