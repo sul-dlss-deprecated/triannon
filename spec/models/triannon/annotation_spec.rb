@@ -6,11 +6,11 @@ describe Triannon::Annotation, :vcr => vcr_options do
   context "json from fixture" do
 
     context "data_as_graph" do
-      context "json data" do
+      context "json-ld data" do
         before(:each) do
           @anno = Triannon::Annotation.new data: annotation_fixture("bookmark.json")
         end
-        it "populates graph from json" do
+        it "populates graph from json-ld" do
           expect(@anno.graph).to be_a_kind_of RDF::Graph
           expect(@anno.graph.count).to be > 1
         end
@@ -24,14 +24,28 @@ describe Triannon::Annotation, :vcr => vcr_options do
       context "turtle data" do
         it "populates graph from ttl" do
           turtle = annotation_fixture("body-chars.ttl")
-          expect(turtle).to match(/\.$/)
+          expect(turtle).to match(/\.\Z/)  # (Note:  \Z is needed instead of $ due to \n in data)
           anno = Triannon::Annotation.new data: turtle
           expect(anno.graph).to be_a_kind_of RDF::Graph
           expect(anno.graph.count).to be > 1
         end
-        it "reject if it doesn't end in period" do
+        it "is rejected if it doesn't end in period" do
           bad_end = annotation_fixture("body-chars.ttl") + "xxx"
           anno = Triannon::Annotation.new data: bad_end
+          expect(anno.graph).to be_nil
+        end
+      end
+      context "rdf(xml) data" do
+        it "populates graph from rdfxml" do
+          rdfxml = annotation_fixture("body-chars.rdf")
+          expect(rdfxml).to match(/\A<.+>\Z/m) # (Note:  \A and \Z are needed instead of ^$ due to \n in data)
+          anno = Triannon::Annotation.new data: rdfxml
+          expect(anno.graph).to be_a_kind_of RDF::Graph
+          expect(anno.graph.count).to be > 1
+        end
+        it "is rejected if first and last non whitespace characters aren't < and >" do
+          bad_rdfxml = annotation_fixture("body-chars.rdf") + "xxx"
+          anno = Triannon::Annotation.new data: bad_rdfxml
           expect(anno.graph).to be_nil
         end
       end

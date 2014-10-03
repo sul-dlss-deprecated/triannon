@@ -116,7 +116,12 @@ private
             self.data = g.dump(:ttl) if g
           #when /http/
           #  g ||= RDF::Graph.load(data, :format => :ttl)
-          when /\.\Z/ # turtle  (Note:  \Z  is needed instead of $ for \n in data)
+          when /\A<.+>\Z/m # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
+            g = RDF::Graph.new
+            g.from_rdfxml(data)
+            g = nil if g.size == 0
+          when /\.\Z/ #  (Note:  \Z is needed instead of $ due to \n in data)
+            # turtle ends in period
             g = RDF::Graph.new
             g.from_ttl(data)
             g = nil if g.size == 0
