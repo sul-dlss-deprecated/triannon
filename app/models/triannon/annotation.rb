@@ -92,8 +92,7 @@ module Triannon
     end
 
     def graph
-      g = data_to_graph
-      @graph ||= g if g
+      @graph ||= data_to_graph 
     end
 
     # query for a subject with type of RDF::OpenAnnotation.Annotation
