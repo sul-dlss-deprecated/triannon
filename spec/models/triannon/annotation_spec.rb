@@ -6,46 +6,55 @@ describe Triannon::Annotation, :vcr => vcr_options do
   context "json from fixture" do
 
     context "data_as_graph" do
+      before(:each) do
+        @json_ld_data = annotation_fixture("bookmark.json")
+      end
       context "json-ld data" do
-        before(:each) do
-          @anno = Triannon::Annotation.new data: annotation_fixture("bookmark.json")
-        end
         it "populates graph from json-ld" do
-          expect(@anno.graph).to be_a_kind_of RDF::Graph
-          expect(@anno.graph.count).to be > 1
+          expect(@json_ld_data).to match(/\A\{.+\}\Z/m) # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
+          anno = Triannon::Annotation.new data: @json_ld_data
+          expect(anno.graph).to be_a_kind_of RDF::Graph
+          expect(anno.graph.count).to be > 1
+        end
+        it "is rejected if first and last non whitespace characters aren't { and }" do
+          anno = Triannon::Annotation.new data: "xxx " + @json_ld_data
+          expect(anno.graph).to be_nil
         end
         it "converts data to turtle" do
-          c = @anno.graph.count
+          anno = Triannon::Annotation.new data: @json_ld_data
+          c = anno.graph.count
           g = RDF::Graph.new
-          g.from_ttl(@anno.data)
+          g.from_ttl(anno.data)
           expect(g.count).to eql c
         end
       end
       context "turtle data" do
+        before(:each) do
+          @ttl_data = annotation_fixture("body-chars.ttl")
+        end
         it "populates graph from ttl" do
-          turtle = annotation_fixture("body-chars.ttl")
-          expect(turtle).to match(/\.\Z/)  # (Note:  \Z is needed instead of $ due to \n in data)
-          anno = Triannon::Annotation.new data: turtle
+          expect(@ttl_data).to match(/\.\Z/)  # (Note:  \Z is needed instead of $ due to \n in data)
+          anno = Triannon::Annotation.new data: @ttl_data
           expect(anno.graph).to be_a_kind_of RDF::Graph
           expect(anno.graph.count).to be > 1
         end
         it "is rejected if it doesn't end in period" do
-          bad_end = annotation_fixture("body-chars.ttl") + "xxx"
-          anno = Triannon::Annotation.new data: bad_end
+          anno = Triannon::Annotation.new data: @ttl_data + "xxx"
           expect(anno.graph).to be_nil
         end
       end
       context "rdf(xml) data" do
+        before(:each) do
+          @rdfxml_data = annotation_fixture("body-chars.rdf")
+        end
         it "populates graph from rdfxml" do
-          rdfxml = annotation_fixture("body-chars.rdf")
-          expect(rdfxml).to match(/\A<.+>\Z/m) # (Note:  \A and \Z are needed instead of ^$ due to \n in data)
-          anno = Triannon::Annotation.new data: rdfxml
+          expect(@rdfxml_data).to match(/\A<.+>\Z/m) # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
+          anno = Triannon::Annotation.new data: @rdfxml_data
           expect(anno.graph).to be_a_kind_of RDF::Graph
           expect(anno.graph.count).to be > 1
         end
         it "is rejected if first and last non whitespace characters aren't < and >" do
-          bad_rdfxml = annotation_fixture("body-chars.rdf") + "xxx"
-          anno = Triannon::Annotation.new data: bad_rdfxml
+          anno = Triannon::Annotation.new data: "xxx " + @rdfxml_data
           expect(anno.graph).to be_nil
         end
       end

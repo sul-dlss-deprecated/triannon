@@ -110,7 +110,7 @@ private
       if data
         data.strip!
         case data
-          when /\{\s*\"@\w+\"/
+          when /\A\{.+\}\Z/m
             json ||= JSON.parse(data)
             g ||= RDF::Graph.new << JSON::LD::API.toRdf(json_ld) if json
             self.data = g.dump(:ttl) if g
