@@ -92,8 +92,7 @@ module Triannon
     end
 
     def graph
-      g = data_to_graph
-      @graph ||= g if g
+      @graph ||= data_to_graph 
     end
 
     # query for a subject with type of RDF::OpenAnnotation.Annotation
@@ -107,16 +106,20 @@ module Triannon
 private
 
     # loads RDF::Graph from data attribute.  If data is in json-ld, converts it to turtle.
-    def data_to_graph
+    def data_to_graph   
       if data
+        data.strip!
         case data
-          when /\{\s*\"@\w+\"/
+          when /\A\{.+\}\Z/m
             json ||= JSON.parse(data)
             g ||= RDF::Graph.new << JSON::LD::API.toRdf(json_ld) if json
             self.data = g.dump(:ttl) if g
-          #when /http/
-          #  g ||= RDF::Graph.load(data, :format => :ttl)
-          else # assume turtle
+          when /\A<.+>\Z/m # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
+            g = RDF::Graph.new
+            g.from_rdfxml(data)
+            g = nil if g.size == 0
+          when /\.\Z/ #  (Note:  \Z is needed instead of $ due to \n in data)
+            # turtle ends in period
             g = RDF::Graph.new
             g.from_ttl(data)
             g = nil if g.size == 0
