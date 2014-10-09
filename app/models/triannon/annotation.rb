@@ -128,9 +128,18 @@ private
     end
 
     def json_ld
+      if data.match(/"@context"\s*\:\s*"http\:\/\/www\.w3\.org\/ns\/oa-context-20130208\.json"/)
+        data.sub!("\"http://www.w3.org/ns/oa-context-20130208.json\"", json_oa_context)
+      elsif data.match(/"@context"\s*\:\s*"http\:\/\/www\.w3\.org\/ns\/oa\.jsonld"/)
+        data.sub!("\"http://www.w3.org/ns/oa.jsonld\"", json_oa_context)
+      end
       @json_ld ||= JSON.parse(data) rescue nil
     end
-    
+
+    def json_oa_context
+      @json_oa_context ||= File.read("lib/triannon/oa_context_20130208.json")
+    end
+
     def graph_exists?
       graph && graph.size > 0
     end
