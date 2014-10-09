@@ -111,8 +111,7 @@ private
         data.strip!
         case data
           when /\A\{.+\}\Z/m
-            json ||= JSON.parse(data)
-            g ||= RDF::Graph.new << JSON::LD::API.toRdf(json_ld) if json
+            g ||= RDF::Graph.new << JSON::LD::API.toRdf(json_ld) if json_ld
             self.data = g.dump(:ttl) if g
           when /\A<.+>\Z/m # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
             g = RDF::Graph.new
