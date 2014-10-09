@@ -91,6 +91,9 @@ module Triannon
   def self.fixture_path path
     File.expand_path(File.dirname(__FILE__) + "/fixtures/#{path}")
   end
+  def self.annotation_fixture fixture
+    File.read Triannon.fixture_path("annotations/#{fixture}")
+  end
 end
 
 require 'vcr'

@@ -7,7 +7,7 @@ describe Triannon::Annotation, :vcr => vcr_options do
 
     context "data_as_graph" do
       before(:each) do
-        @json_ld_data = annotation_fixture("bookmark.json")
+        @json_ld_data = Triannon.annotation_fixture("bookmark.json")
       end
       context "json-ld data" do
         it "populates graph from json-ld" do
@@ -30,7 +30,7 @@ describe Triannon::Annotation, :vcr => vcr_options do
       end
       context "turtle data" do
         before(:each) do
-          @ttl_data = annotation_fixture("body-chars.ttl")
+          @ttl_data = Triannon.annotation_fixture("body-chars.ttl")
         end
         it "populates graph from ttl" do
           expect(@ttl_data).to match(/\.\Z/)  # (Note:  \Z is needed instead of $ due to \n in data)
@@ -45,7 +45,7 @@ describe Triannon::Annotation, :vcr => vcr_options do
       end
       context "rdf(xml) data" do
         before(:each) do
-          @rdfxml_data = annotation_fixture("body-chars.rdf")
+          @rdfxml_data = Triannon.annotation_fixture("body-chars.rdf")
         end
         it "populates graph from rdfxml" do
           expect(@rdfxml_data).to match(/\A<.+>\Z/m) # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
@@ -62,19 +62,19 @@ describe Triannon::Annotation, :vcr => vcr_options do
 
     context "parsing graph" do
       before(:each) do
-        @anno_json = Triannon::Annotation.new data: annotation_fixture("bookmark.json")
-        @anno_ttl = Triannon::Annotation.new data: annotation_fixture("body-chars.ttl")
+        @anno_json = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
+        @anno_ttl = Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl")
       end
       it "type is oa:Annotation" do
         expect(@anno_ttl.type).to eql("http://www.w3.org/ns/oa#Annotation")
         expect(@anno_json.type).to eql("http://www.w3.org/ns/oa#Annotation")
-        anno = Triannon::Annotation.new data: annotation_fixture("mult-targets.json")
+        anno = Triannon::Annotation.new data: Triannon.annotation_fixture("mult-targets.json")
         expect(anno.type).to eql("http://www.w3.org/ns/oa#Annotation")
       end
       it "url" do
         expect(@anno_json.url).to eql("http://example.org/annos/annotation/bookmark.json")
         expect(@anno_ttl.url).to eql("http://example.org/annos/annotation/body-chars.ttl")
-        anno = Triannon::Annotation.new data: annotation_fixture("mult-targets.json")
+        anno = Triannon::Annotation.new data: Triannon.annotation_fixture("mult-targets.json")
         expect(anno.url).to eql("http://example.org/annos/annotation/mult-targets.json")
       end
       context "has_target" do
@@ -83,7 +83,7 @@ describe Triannon::Annotation, :vcr => vcr_options do
           expect(@anno_json.has_target).to include("http://purl.stanford.edu/kq131cs7229")
         end
         it "multiple urls" do
-          anno = Triannon::Annotation.new data: annotation_fixture("mult-targets.json")
+          anno = Triannon::Annotation.new data: Triannon.annotation_fixture("mult-targets.json")
           expect(anno.has_target.size).to eql 2
           expect(anno.has_target).to include("http://purl.stanford.edu/kq131cs7229")
           expect(anno.has_target).to include("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg")
@@ -97,18 +97,18 @@ describe Triannon::Annotation, :vcr => vcr_options do
         it "text from chars" do
           expect(@anno_ttl.has_body.size).to eql 1
           expect(@anno_ttl.has_body).to include("I love this!")
-          anno = Triannon::Annotation.new data: annotation_fixture("body-chars.json")
+          anno = Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.json")
           expect(anno.has_body.size).to eql 1
           expect(anno.has_body).to include("I love this!")
-          anno = Triannon::Annotation.new data: annotation_fixture("body-chars-plain.json")
+          anno = Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars-plain.json")
           expect(anno.has_body.size).to eql 1
           expect(anno.has_body).to include("I love this!")
-          anno = Triannon::Annotation.new data: annotation_fixture("body-chars-html.json")
+          anno = Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars-html.json")
           expect(anno.has_body.size).to eql 1
           expect(anno.has_body).to include("<div xml:lang='en' xmlns='http://www.w3.org/1999/xhtml'>I love this!</div>")
         end
         it "mult targets" do
-          anno = Triannon::Annotation.new data: annotation_fixture("mult-targets.json")
+          anno = Triannon::Annotation.new data: Triannon.annotation_fixture("mult-targets.json")
           expect(anno.has_body.size).to eql 1
           expect(anno.has_body).to include("I love these two things!")
         end
@@ -121,13 +121,13 @@ describe Triannon::Annotation, :vcr => vcr_options do
           expect(@anno_json.motivated_by).to include("http://www.w3.org/ns/oa#bookmarking")
         end
         it "multiple" do
-          anno = Triannon::Annotation.new data: annotation_fixture("mult-motivations.json")
+          anno = Triannon::Annotation.new data: Triannon.annotation_fixture("mult-motivations.json")
           expect(anno.motivated_by.size).to eql 2
           expect(anno.motivated_by).to include("http://www.w3.org/ns/oa#moderating")
           expect(anno.motivated_by).to include("http://www.w3.org/ns/oa#tagging")
         end
         it "mult targets" do
-          anno = Triannon::Annotation.new data: annotation_fixture("mult-targets.json")
+          anno = Triannon::Annotation.new data: Triannon.annotation_fixture("mult-targets.json")
           expect(anno.motivated_by.size).to eql 1
           expect(anno.motivated_by).to include("http://www.w3.org/ns/oa#commenting")
         end
@@ -135,7 +135,4 @@ describe Triannon::Annotation, :vcr => vcr_options do
     end
   end # json from fixture
 
-  def annotation_fixture fixture
-    File.read Triannon.fixture_path("annotations/#{fixture}")
-  end
 end
