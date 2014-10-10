@@ -4,6 +4,8 @@ vcr_options = { :cassette_name => "controllers_annotations_index" }
 describe Triannon::AnnotationsController, type: :controller, :vcr => vcr_options do
 
   routes { Triannon::Engine.routes }
+  # regex: \A and \Z and m are needed instead of ^$ due to \n in data)
+  json_regex = /\A\{.+\}\Z/m
 
   it "should have an index" do
     get :index
@@ -19,7 +21,7 @@ describe Triannon::AnnotationsController, type: :controller, :vcr => vcr_options
   context "show request's response format" do
     before(:each) do
       @annotation = Triannon::Annotation.create(data: Triannon.annotation_fixture("bookmark.json"))
-    end
+    end    
     shared_examples_for 'accept header determines media type' do | mime_types, regex | 
       mime_types.each { |mtype|  
         it "#{mtype}" do
@@ -37,31 +39,30 @@ describe Triannon::AnnotationsController, type: :controller, :vcr => vcr_options
     end
     context "rdfxml" do
       # regex: \A and \Z and m are needed instead of ^$ due to \n in data)
-      it_behaves_like 'accept header determines media type', ["application/rdf+xml", "text/rdf+xml", "text/rdf", "application/xml", "text/xml"], /\A<.+>\Z/m
+      it_behaves_like 'accept header determines media type', ["application/rdf+xml", "text/rdf+xml", "text/rdf", "application/xml", "text/xml", "application/x-xml"], /\A<.+>\Z/m
     end
     context "json" do
-      # regex: \A and \Z and m are needed instead of ^$ due to \n in data)
-      it_behaves_like 'accept header determines media type', ["application/ld+json", "application/json", "text/x-json"], /\A\{.+\}\Z/m
+      it_behaves_like 'accept header determines media type', ["application/ld+json", "application/json", "text/x-json", "application/jsonrequest"], json_regex
     end
     it "empty string gets json-ld" do
       @request.accept = ""
       get :show, id: @annotation.id, format: nil
       expect(@response.content_type).to eql("application/ld+json") 
-      expect(@response.body).to match(/\A\{.+\}\Z/m) # (Note: \A and \Z and m are needed instead of ^$ due to \n in data)
+      expect(@response.body).to match json_regex
       expect(@response.status).to eql(200)
     end
-    it "no format specified gets json-ld" do
+    it "nil gets json-ld" do
       @request.accept = nil
       get :show, id: @annotation.id, format: nil
       expect(@response.content_type).to eql("application/ld+json") 
-      expect(@response.body).to match(/\A\{.+\}\Z/m) # (Note: \A and \Z and m are needed instead of ^$ due to \n in data)
+      expect(@response.body).to match json_regex
       expect(@response.status).to eql(200)
     end
-    it "*/* format specified gets json-ld" do
+    it "*/* gets json-ld" do
       @request.accept = "*/*"
       get :show, id: @annotation.id, format: nil
       expect(@response.content_type).to eql("application/ld+json") 
-      expect(@response.body).to match(/\A\{.+\}\Z/m) # (Note: \A and \Z and m are needed instead of ^$ due to \n in data)
+      expect(@response.body).to match json_regex
       expect(@response.status).to eql(200)
     end
     it "html uses view" do
@@ -72,24 +73,15 @@ describe Triannon::AnnotationsController, type: :controller, :vcr => vcr_options
       expect(response).to render_template(:show)
     end
     context 'multiple formats' do
-      it 'jsonld and json favors jsonld' do
-        skip "to be implemented"
-        @request.accept = ["application/json", "text/x-json", "application/ld+json"]
+      # rails will use them in order listed in the http accept header value.
+      # also, "note that if browser is sending */* along with other values then Rails totally bails out and just returns Mime::HTML"
+      #   http://blog.bigbinary.com/2010/11/23/mime-type-resolution-in-rails.html
+      it 'uses first known format' do
+        @request.accept = "application/ld+json, text/x-json, application/json"
         get :show, id: @annotation.id
         expect(@response.content_type).to eql("application/ld+json") 
-        expect(@response.body).to match(/\A\{.+\}\Z/m) # (Note: \A and \Z and m are needed instead of ^$ due to \n in data)
+        expect(@response.body).to match json_regex
         expect(@response.status).to eql(200)
-      end
-      # ultimately the same (jsonld, json)
-      # ultimately diff (json, ttl)
-      it 'jsonld first' do
-        skip "to be implemented"
-      end
-      it 'jsonld not first' do
-        skip "to be implemented"
-      end
-      it 'jsonld missing' do
-        skip "to be implemented"
       end
     end
   end
