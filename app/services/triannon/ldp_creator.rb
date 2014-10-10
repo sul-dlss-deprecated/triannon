@@ -81,7 +81,6 @@ module Triannon
         <> a cnt:ContentAsText, dctypes:Text;
            cnt:chars '#{body_chars}' .
       TTL
-      # TODO extract body from annotation
 
       response = conn.post do |req|
         req.url "#{@id}/b"
@@ -92,6 +91,7 @@ module Triannon
     end
 
     def create_target
+      target = @anno.has_target.first        # TODO handle more than just one target or different types
       body =<<-TTL
         @prefix dc: <http://purl.org/dc/elements/1.1/> .
         @prefix dctypes: <http://purl.org/dc/dcmitype/> .
@@ -99,9 +99,8 @@ module Triannon
 
         <> a dctypes:Text;
            dc:formant 'text/html';
-           triannon:externalReference 'http://purl.stanford.edu/kq131cs7229' .
+           triannon:externalReference <#{target}> .
       TTL
-      # TODO extract target from annotation
 
       response = conn.post do |req|
         req.url "#{@id}/t"

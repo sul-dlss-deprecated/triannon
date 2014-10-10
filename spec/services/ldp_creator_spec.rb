@@ -67,7 +67,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
   end
 
   describe "#create_target" do
-    it "POSTS a ttl represntation of a body to the body container" do
+    it "POSTS a ttl represntation of a target to the target container" do
       new_pid = svc.create
       svc.create_target_container
       target_pid = svc.create_target
@@ -77,7 +77,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.headers['Accept'] = 'text/turtle'
       end
       expect(resp.body).to match /purl.stanford.edu/
-      expect(resp.body).to match /#{new_pid}/
+      expect(resp.body).to match /triannon.*\/externalReference/
     end
   end
 
