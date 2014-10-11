@@ -7,7 +7,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl")
   }
   let(:svc) { Triannon::LdpCreator.new anno }
-  let(:conn) { Faraday.new(:url => 'http://localhost:8080/rest/anno') }
+  let(:conn) { Faraday.new(:url => Triannon.ldp_config[:url]) }
 
   describe "#create" do
 

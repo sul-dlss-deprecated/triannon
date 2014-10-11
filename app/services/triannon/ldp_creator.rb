@@ -17,7 +17,7 @@ module Triannon
 
     def initialize(anno)
       @anno = anno
-      @base_uri = 'http://localhost:8080/rest/anno'  # TODO use Triannon.ldp_config
+      @base_uri = Triannon.ldp_config[:url]
     end
 
     def create
