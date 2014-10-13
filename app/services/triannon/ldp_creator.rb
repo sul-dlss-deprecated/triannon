@@ -3,14 +3,14 @@ require 'faraday'
 module Triannon
   class LdpCreator
 
-    def self.create(anno)
+    def self.create(anno)                       # TODO just pass simple strings/arrays/hashes? :body => [,,], :target => [,,], :motivation => [,,]
       res = Triannon::LdpCreator.new anno
       res.create
       res.create_body_container
       res.create_target_container
       res.create_body
       res.create_target
-      res
+      res.id                                     # TODO just return the pid?
     end
 
     attr_accessor :id
@@ -77,7 +77,7 @@ module Triannon
         @prefix triannon: <http://triannon.stanford.edu/ns/> .
 
         <> a dctypes:Text;
-           dc:formant 'text/html';
+           dc:format 'text/html';
            triannon:externalReference <#{target}> .
       TTL
 

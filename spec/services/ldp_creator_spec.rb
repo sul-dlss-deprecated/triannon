@@ -34,6 +34,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       expect(resp.body).to match /oa#hasBody/
       expect(resp.body).to match /#{new_pid}/
+      # fails now hasMemberRelation <http://www.w3.org/ns/ldp#hasMemberRelation> <http://fedora.info/definitions/v4/repository#hasChild>
     end
   end
 
@@ -83,10 +84,10 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
 
   describe ".create" do
     it "creates an entire Annotation vi LDP and returns the pid" do
-      service = Triannon::LdpCreator.create anno
+      id = Triannon::LdpCreator.create anno
 
       resp = conn.get do |req|
-        req.url " #{service.id}"
+        req.url " #{id}"
         req.headers['Accept'] = 'text/turtle'
       end
       expect(resp.body).to match /hasBody/
