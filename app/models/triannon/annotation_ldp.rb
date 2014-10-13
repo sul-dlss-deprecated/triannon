@@ -22,6 +22,13 @@ module Triannon
       res.first.uri
     end
 
+    def target_uri
+      q = anno_query
+      q << [:s, RDF::OpenAnnotation.hasTarget, :uri]
+      res = graph.query q
+      res.first.uri
+    end
+
     def add_body body_data
 
     end

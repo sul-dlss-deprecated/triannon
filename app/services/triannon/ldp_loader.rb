@@ -30,6 +30,12 @@ module Triannon
       @annotation.load_data_into_graph get_ttl sub_path
     end
 
+    def load_target
+      uri = @annotation.target_uri.to_s
+      sub_path = uri.split(@base_uri + '/').last
+      @annotation.load_data_into_graph get_ttl sub_path
+    end
+
     protected
 
     def get_ttl sub_path

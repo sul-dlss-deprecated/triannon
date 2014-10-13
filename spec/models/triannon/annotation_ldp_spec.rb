@@ -2,7 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 
 describe Triannon::AnnotationLdp do
 
-  let(:anno_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_complete.ttl') }
+  let(:anno_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_base.ttl') }
   let(:anno) { Triannon::AnnotationLdp.new }
 
   before(:each) do
@@ -29,6 +29,14 @@ describe Triannon::AnnotationLdp do
     it "returns the URI to the resource stored in the annotation's body container" do
       anno.load_data_into_graph anno_ttl
       expect(anno.body_uri.path).to match /\/b\/e14b93b7-3a88-4eb5-9688-7dea7f482d23/
+    end
+  end
+
+  describe "#target_uri" do
+
+    it "returns the URI to the resource stored in the annotation's target container" do
+      anno.load_data_into_graph anno_ttl
+      expect(anno.target_uri.path).to match /\/t\/ee774031-74d9-4f5a-9b03-cdd21267e4e1/
     end
   end
 

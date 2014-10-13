@@ -2,8 +2,9 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe Triannon::LdpLoader do
 
-  let(:anno_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_complete.ttl') }
+  let(:anno_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_base.ttl') }
   let(:body_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_body.ttl') }
+  let(:target_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_target.ttl') }
 
   describe "#load_annotation" do
 
@@ -45,8 +46,17 @@ describe Triannon::LdpLoader do
       expect(result.first.object.to_s).to match /I love this/
     end
 
-    it "has triples in the graph where the subject is the body uri" do
+  end
 
+  describe "#load_target" do
+    it "retrieves the target by using hasTarget value from the annotation" do
+      loader = Triannon::LdpLoader.new 'somekey'
+      allow(loader).to receive(:get_ttl).and_return(anno_ttl, target_ttl)
+      loader.load_annotation
+      loader.load_target
+
+      result = loader.annotation.graph.query [loader.annotation.target_uri, RDF::URI.new("http://triannon.stanford.edu/ns/externalReference"), nil]
+      expect(result.first.object.to_s).to match /kq131cs7229/
     end
 
   end
