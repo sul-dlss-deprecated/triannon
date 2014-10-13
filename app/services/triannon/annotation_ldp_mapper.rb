@@ -3,10 +3,10 @@ module Triannon
   class AnnotationLdpMapper
 
 
-    def self.ldp_to_annotation
-      mapper = Triannon::AnnotationLdpMapper.new
-      mapper.ldp_graph = # stripped graph from LDP repo
-      mapper.ldp_to_annotation
+    def self.ldp_to_annotation ldp_anno
+      mapper = Triannon::AnnotationLdpMapper.new ldp_anno
+      oa_anno = mapper.ldp_to_annotation
+      oa_anno
     end
 
     def l_to_a

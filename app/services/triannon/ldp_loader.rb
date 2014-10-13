@@ -22,13 +22,12 @@ module Triannon
 
     def load_annotation
       @annotation.load_data_into_graph get_ttl @key
-
     end
 
     def load_body
       uri = @annotation.body_uri.to_s
       sub_path = uri.split(@base_uri + '/').last
-      @data.add_body = get_ttl sub_path
+      @annotation.load_data_into_graph get_ttl sub_path
     end
 
     protected
