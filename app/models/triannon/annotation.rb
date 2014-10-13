@@ -105,7 +105,7 @@ module Triannon
     def self.anno_query
       @anno_query ||= begin
         q = RDF::Query.new
-        q << [:s, RDF.type, RDF::URI("http://www.w3.org/ns/oa#Annotation")]d
+        q << [:s, RDF.type, RDF::URI("http://www.w3.org/ns/oa#Annotation")]
       end
     end
 

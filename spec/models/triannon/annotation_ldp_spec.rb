@@ -10,7 +10,6 @@ describe Triannon::AnnotationLdp do
   end
 
   describe "#graph" do
-
     it "creates an RDF::Graph if it does not yet exist" do
       g = anno.graph
       expect(g.count).to eq 0
@@ -25,7 +24,6 @@ describe Triannon::AnnotationLdp do
   end
 
   describe "#body_uri" do
-
     it "returns the URI to the resource stored in the annotation's body container" do
       anno.load_data_into_graph anno_ttl
       expect(anno.body_uri.path).to match /\/b\/e14b93b7-3a88-4eb5-9688-7dea7f482d23/
@@ -33,7 +31,6 @@ describe Triannon::AnnotationLdp do
   end
 
   describe "#target_uri" do
-
     it "returns the URI to the resource stored in the annotation's target container" do
       anno.load_data_into_graph anno_ttl
       expect(anno.target_uri.path).to match /\/t\/ee774031-74d9-4f5a-9b03-cdd21267e4e1/
@@ -43,7 +40,6 @@ describe Triannon::AnnotationLdp do
   describe "load_data_into_graph" do
     it "takes incoming turtle and loads it into base_graph" do
       anno.load_data_into_graph anno_ttl
-
       result = anno.graph.query [nil, RDF.type, RDF::OpenAnnotation.Annotation]
       expect(result.first.subject.path).to match /deb27887-1241-4ccc-a09c-439293d73fbb/
     end

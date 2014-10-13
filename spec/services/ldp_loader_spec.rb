@@ -8,7 +8,6 @@ describe Triannon::LdpLoader do
 
   describe "#load_annotation" do
 
-
     # TODO super brittle since it stubs the whole http interaction
     it "retrives the ttl data for an annotation when given an id" do
       conn = double()
@@ -39,11 +38,9 @@ describe Triannon::LdpLoader do
       result = loader.annotation.graph.query [loader.annotation.target_uri, nil, nil]
       expect(result.size).to eq 0
     end
-
   end
 
   describe "#load_body" do
-
     it "retrieves the body by using the hasBody value from the annotation" do
       loader = Triannon::LdpLoader.new 'somekey'
       allow(loader).to receive(:get_ttl).and_return(anno_ttl, body_ttl)
@@ -53,7 +50,6 @@ describe Triannon::LdpLoader do
       result = loader.annotation.graph.query [loader.annotation.body_uri, RDF::Content.chars, nil]
       expect(result.first.object.to_s).to match /I love this/
     end
-
   end
 
   describe "#load_target" do
@@ -66,7 +62,6 @@ describe Triannon::LdpLoader do
       result = loader.annotation.graph.query [loader.annotation.target_uri, RDF::URI.new("http://triannon.stanford.edu/ns/externalReference"), nil]
       expect(result.first.object.to_s).to match /kq131cs7229/
     end
-
   end
 
 end

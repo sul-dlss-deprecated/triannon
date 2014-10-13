@@ -10,7 +10,6 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
   let(:conn) { Faraday.new(:url => Triannon.ldp_config[:url]) }
 
   describe "#create" do
-
     it "POSTS a ttl represntation of the Annotation to the correct LDP container" do
       new_pid = svc.create
 
@@ -20,7 +19,6 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       expect(resp.body).to match /oa#commenting/
     end
-
   end
 
   describe "#create_body_container" do
