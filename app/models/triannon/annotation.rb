@@ -2,6 +2,7 @@ module Triannon
   class Annotation
     include ActiveModel::Model
     include ActiveModel::Validations
+    include Rails.application.routes.url_helpers
 
     attr_accessor :key, :data
 
@@ -104,7 +105,7 @@ module Triannon
     def self.anno_query
       @anno_query ||= begin
         q = RDF::Query.new
-        q << [:s, RDF.type, RDF::URI("http://www.w3.org/ns/oa#Annotation")]
+        q << [:s, RDF.type, RDF::URI("http://www.w3.org/ns/oa#Annotation")]d
       end
     end
 
@@ -118,6 +119,14 @@ module Triannon
       # check if valid?
       graph
       @key = Triannon::LdpCreator.create self
+    end
+
+    def self.find(key)
+
+    end
+
+    def base_uri
+      annotation_path(self)
     end
 
 private

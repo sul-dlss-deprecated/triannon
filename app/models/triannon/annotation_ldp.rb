@@ -2,27 +2,28 @@
 module Triannon
   class AnnotationLdp
 
-    attr_accessor :annotation_data, :body_data, :target_data
-
-
     def body_uri
       result = bg.query []
     end
 
-    def base_graph
-      @bg ||= base_graph_from_data
+    def graph
+      @g ||= RDF::Graph.new
     end
 
     def base_uri
-      res = base_graph.query anno_query
+      res = graph.query anno_query
       res.first.s
     end
 
     def body_uri
       q = anno_query
       q << [:s, RDF::OpenAnnotation.hasBody, :uri]
-      res = base_graph.query q
+      res = graph.query q
       res.first.uri
+    end
+
+    def add_body body_data
+
     end
 
     def anno_query
@@ -30,10 +31,14 @@ module Triannon
       q << [:s, RDF.type, RDF::OpenAnnotation.Annotation]
     end
 
-    def base_graph_from_data
+    def graph_from_data
       g = RDF::Graph.new
       g.from_ttl @annotation_data
       g
+    end
+
+    def load_data_into_graph ttl
+      graph.from_ttl ttl
     end
   end
 end

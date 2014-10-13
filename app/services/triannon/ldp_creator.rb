@@ -56,6 +56,11 @@ module Triannon
       create_container :target, ttl
     end
 
+    # TODO might have to send as blank node since triples getting mixed with fedora internal triples
+    #   or create sub-resource /rest/anno/34/b/1/x
+    # <> [
+    #
+    # ]
     def create_body
       body_chars = @anno.has_body.first        # TODO handle more than just one body or different types
       ttl =<<-TTL

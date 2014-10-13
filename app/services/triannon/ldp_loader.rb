@@ -21,7 +21,8 @@ module Triannon
     end
 
     def load_annotation
-      @annotation.annotation_ttl = get_ttl @key
+      @annotation.load_data_into_graph get_ttl @key
+
     end
 
     def load_body
