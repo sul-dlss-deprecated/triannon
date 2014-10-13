@@ -25,11 +25,13 @@ describe Triannon::LdpLoader do
     end
 
     it "no triple in the graph should have the body uri as a subject" do
-      skip
+      result = loader.annotation.graph.query [loader.annotation.body_uri, nil, nil]
+      expect(result.size).to eq 0
     end
 
     it "no triple in the graph should have the target uri as a subject" do
-      skip
+      result = loader.annotation.graph.query [loader.annotation.target_uri, nil, nil]
+      expect(result.size).to eq 0
     end
 
   end
