@@ -1,6 +1,7 @@
 require 'linkeddata'
 require 'rdf/open_annotation'
 require 'rdf/ldp'
+require 'rdf/fcrepo4'
 require 'bootstrap-sass'
 require 'faraday'
 
