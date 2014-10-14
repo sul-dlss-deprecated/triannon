@@ -1,6 +1,8 @@
 require 'linkeddata'
 require 'rdf/open_annotation'
+require 'rdf/ldp'
 require 'bootstrap-sass'
+require 'faraday'
 
 module Triannon
   require "triannon/engine"
