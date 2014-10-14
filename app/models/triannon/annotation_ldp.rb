@@ -1,37 +1,16 @@
 module Triannon
   class AnnotationLdp
 
+    # RDF::Graph object with all triples, including back end (e.g. LDP, Fedora)
     def graph
       @g ||= RDF::Graph.new
     end
-
-    # returns graph without any ldp triples
-    def graph_no_ldp
-      @no_ldp_graph ||= begin
-        no_ldp_graph = RDF::Graph.new
-        ldp_props = RDF::LDP.properties.map {|p| p.to_s}
-        graph.each { |stmt|  
-          no_ldp_graph << stmt unless ldp_props.include?(stmt.predicate.to_s) || 
-                                      (stmt.predicate == RDF.type && ldp_props.include?(stmt.object.to_s))
-        }
-        no_ldp_graph
-      end
-    end
     
-    # returns graph without any fedora triples
-    def remove_fedora_triples graph
-      fedora_ns = "http://fedora.info/definitions"
-      modeshape_ns = "http://www.jcp.org/jcr"
-      no_fedora_graph = RDF::Graph.new
-      ldp_props = RDF::LDP.properties.map {|p| p.to_s}
-      graph.each { |stmt|  
-        no_fedora_graph << stmt unless stmt.predicate.to_s.match(fedora_ns) ||
-                                    stmt.predicate.to_s.match(modeshape_ns) || 
-                                    stmt.subject.to_s.match(fedora_ns) ||
-                                    stmt.object.to_s.match(fedora_ns) ||
-                                    (stmt.predicate == RDF.type && stmt.object.to_s.match(modeshape_ns))
-      }
-      no_fedora_graph
+    # RDF::Graph without any back end (e.g. LDP, Fedora) triples
+    def stripped_graph
+      @stripped_graph ||= begin
+        new_graph = RDF::LDP.remove_ldp_triples (RDF::FCRepo4.remove_fedora_triples(graph))
+      end
     end
 
     def base_uri
