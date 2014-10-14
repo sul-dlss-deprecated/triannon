@@ -37,7 +37,7 @@ describe Triannon::AnnotationLdp do
     end
   end
 
-  describe "load_data_into_graph" do
+  describe "#load_data_into_graph" do
     it "takes incoming turtle and loads it into base_graph" do
       anno.load_data_into_graph anno_ttl
       result = anno.graph.query [nil, RDF.type, RDF::OpenAnnotation.Annotation]
@@ -50,6 +50,24 @@ describe Triannon::AnnotationLdp do
 
     it "does something with data other than turtle" do
       skip
+    end
+  end
+  
+  describe '#remove_ldp_properties' do
+    it 'orig graph has ldp properties when loaded' do
+      anno.load_data_into_graph anno_ttl
+      result = anno.graph.query [nil, RDF.type, RDF::URI.new("http://www.w3.org/ns/ldp#Container")]
+      expect(result.first.subject.to_s).to eql anno.base_uri.to_s
+      result = anno.graph.query [nil, RDF::URI.new("http://www.w3.org/ns/ldp#contains"), nil]
+      expect(result.size).to eql 2
+    end
+    it 'graph returned has no ldp properties' do
+      anno.load_data_into_graph anno_ttl
+      stripped_graph = anno.graph_no_ldp
+      result = stripped_graph.query [nil, RDF.type, RDF::URI.new("http://www.w3.org/ns/ldp#Container")]
+      expect(result.size).to eql 0
+      result = stripped_graph.query [nil, RDF::URI.new("http://www.w3.org/ns/ldp#contains"), nil]
+      expect(result.size).to eql 0
     end
   end
 

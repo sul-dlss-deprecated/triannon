@@ -6,6 +6,17 @@ module Triannon
       @g ||= RDF::Graph.new
     end
 
+    # returns graph without any ldp properties
+    def graph_no_ldp
+      no_ldp_graph = RDF::Graph.new
+      ldp_props = RDF::LDP.properties.map {|p| p.to_s}
+      graph.each { |stmt|  
+        no_ldp_graph << stmt unless ldp_props.include?(stmt.predicate.to_s) || 
+                                    (stmt.predicate == RDF.type && ldp_props.include?(stmt.object.to_s))
+      }
+      no_ldp_graph
+    end
+
     def base_uri
       res = graph.query anno_query
       res.first.s

@@ -6,7 +6,6 @@ module Triannon
 
     def self.load key
       l = Triannon::LdpLoader.new key
-
       l.load_annotation
       l.load_body
       l.load_target
