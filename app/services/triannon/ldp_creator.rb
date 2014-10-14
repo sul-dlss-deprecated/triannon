@@ -1,42 +1,36 @@
-require 'faraday'
 
 module Triannon
   class LdpCreator
 
-    def self.create(anno)
+    def self.create(anno)                       # TODO just pass simple strings/arrays/hashes? :body => [,,], :target => [,,], :motivation => [,,]
       res = Triannon::LdpCreator.new anno
       res.create
       res.create_body_container
       res.create_target_container
       res.create_body
       res.create_target
-      res
+      res.id                                     # TODO just return the pid?
     end
 
     attr_accessor :id
 
     def initialize(anno)
       @anno = anno
-      @base_uri = 'http://localhost:8080/rest/anno'  # TODO use Triannon.ldp_config
+      @base_uri = Triannon.ldp_config[:url]
     end
 
     def create
       motivation = @anno.motivated_by.first
-      body  =<<-EOTL
+      ttl  =<<-EOTL
         <> a <http://www.w3.org/ns/oa#Annotation>;
            <http://www.w3.org/ns/oa#motivatedBy> <#{motivation}> .
       EOTL
 
-      response = conn.post do |req|
-        req.headers['Content-Type'] = 'text/turtle'
-        req.body = body
-      end
-
-      @id = response.headers['Location'].split('/').last
+      @id = create_resource ttl
     end
 
     def create_body_container
-      body =<<-TTL
+      ttl =<<-TTL
         @prefix ldp: <http://www.w3.org/ns/ldp#> .
         @prefix oa: <http://www.w3.org/ns/oa#> .
 
@@ -44,18 +38,12 @@ module Triannon
            ldp:hasMemberRelation oa:hasBody;
            ldp:membershipResource <#{@base_uri}/#{id}> .
       TTL
-      # TODO figure out base uri
 
-      res = conn.post do |req|
-        req.url "#{id}"
-        req.headers['Content-Type'] = 'text/turtle'
-        req.headers['Slug'] = 'b'
-        req.body = body
-      end
+      create_container :body, ttl
     end
 
     def create_target_container
-      body =<<-TTL
+      ttl =<<-TTL
         @prefix ldp: <http://www.w3.org/ns/ldp#> .
         @prefix oa: <http://www.w3.org/ns/oa#> .
 
@@ -63,53 +51,41 @@ module Triannon
            ldp:hasMemberRelation oa:hasTarget;
            ldp:membershipResource <#{@base_uri}/#{id}> .
       TTL
-      # TODO figure out base uri
-      conn.post do |req|
-        req.url "#{id}"
-        req.headers['Content-Type'] = 'text/turtle'
-        req.headers['Slug'] = 't'
-        req.body = body
-      end
+
+      create_container :target, ttl
     end
 
+    # TODO might have to send as blank node since triples getting mixed with fedora internal triples
+    #   or create sub-resource /rest/anno/34/b/1/x
+    # <> [
+    #
+    # ]
     def create_body
       body_chars = @anno.has_body.first        # TODO handle more than just one body or different types
-      body =<<-TTL
+      ttl =<<-TTL
         @prefix cnt: <http://www.w3.org/2011/content#> .
         @prefix dctypes: <http://purl.org/dc/dcmitype/> .
 
         <> a cnt:ContentAsText, dctypes:Text;
            cnt:chars '#{body_chars}' .
       TTL
-      # TODO extract body from annotation
 
-      response = conn.post do |req|
-        req.url "#{@id}/b"
-        req.headers['Content-Type'] = 'text/turtle'
-        req.body = body
-      end
-      @body_id = response.headers['Location'].split('/').last
+      @body_id = create_resource ttl, "#{@id}/b"
     end
 
     def create_target
-      body =<<-TTL
+      target = @anno.has_target.first        # TODO handle more than just one target or different types
+      ttl =<<-TTL
         @prefix dc: <http://purl.org/dc/elements/1.1/> .
         @prefix dctypes: <http://purl.org/dc/dcmitype/> .
         @prefix triannon: <http://triannon.stanford.edu/ns/> .
 
         <> a dctypes:Text;
-           dc:formant 'text/html';
-           triannon:externalReference 'http://purl.stanford.edu/kq131cs7229' .
+           dc:format 'text/html';
+           triannon:externalReference <#{target}> .
       TTL
-      # TODO extract target from annotation
 
-      response = conn.post do |req|
-        req.url "#{@id}/t"
-        req.headers['Content-Type'] = 'text/turtle'
-        req.body = body
-      end
-
-      @target_id = response.headers['Location'].split('/').last
+      @target_id = create_resource ttl, "#{@id}/t"
     end
 
     def conn
@@ -117,9 +93,22 @@ module Triannon
     end
 
   protected
-    def create_container type
-      # TODO Refactor common container code here
+    def create_resource body, url = nil
+      response = conn.post do |req|
+        req.url url if url
+        req.headers['Content-Type'] = 'text/turtle'
+        req.body = body
+      end
+      response.headers['Location'].split('/').last
     end
 
+    def create_container type, body
+      conn.post do |req|
+        req.url "#{id}"
+        req.headers['Content-Type'] = 'text/turtle'
+        req.headers['Slug'] = type.to_s.chars.first
+        req.body = body
+      end
+    end
   end
 end

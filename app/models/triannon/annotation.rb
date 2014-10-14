@@ -1,13 +1,23 @@
 module Triannon
-  class Annotation < ActiveRecord::Base
-    
-    validates :data, presence: true,
-                      length: {minimum: 30}
+  class Annotation
+    include ActiveModel::Model
+    include ActiveModel::Validations
+    include Rails.application.routes.url_helpers
+
+    attr_accessor :key, :data
+
+    validates_each :data do |record, attr, value|
+      record.errors.add attr, 'less than 30 chars' if value.to_s.length < 30
+    end
 
     # full validation should be optional?
     #   minimal:  a subject with the right type and a hasTarget?  (see url)
     # and perhaps modeled on this:
     #   https://github.com/uq-eresearch/lorestore/blob/3e9aa1c69aafd3692c69aa39c64bfdc32b757892/src/main/resources/OAConstraintsSPARQL.json
+
+    def id
+      @key
+    end
 
     def url
       if graph_exists?
@@ -18,7 +28,7 @@ module Triannon
         end
       end
     end
-    
+
     # FIXME:  this should be part of validation:  RDF.type should be RDF::OpenAnnotation.Annotation
     def type
       if graph_exists?
@@ -33,7 +43,7 @@ module Triannon
         end
       end
     end
-    
+
     def has_target
       # FIXME:  target might be more than a string (examples 14-17)
       if graph_exists?
@@ -50,7 +60,7 @@ module Triannon
         end
       end
     end
-    
+
     def has_body
       # FIXME:  body can be other things besides blank node with chars
       bodies = []
@@ -92,7 +102,7 @@ module Triannon
     end
 
     def graph
-      @graph ||= data_to_graph 
+      @graph ||= data_to_graph
     end
 
     # query for a subject with type of RDF::OpenAnnotation.Annotation
@@ -102,11 +112,31 @@ module Triannon
         q << [:s, RDF.type, RDF::URI("http://www.w3.org/ns/oa#Annotation")]
       end
     end
-    
+
+    def self.create(attrs = {})
+      a = Triannon::Annotation.new attrs
+      a.save
+      a
+    end
+
+    def save
+      # check if valid?
+      graph
+      @key = Triannon::LdpCreator.create self
+    end
+
+    def self.find(key)
+
+    end
+
+    def base_uri
+      annotation_path(self)
+    end
+
 private
 
     # loads RDF::Graph from data attribute.  If data is in json-ld, converts it to turtle.
-    def data_to_graph   
+    def data_to_graph
       if data
         data.strip!
         case data

@@ -7,10 +7,9 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl")
   }
   let(:svc) { Triannon::LdpCreator.new anno }
-  let(:conn) { Faraday.new(:url => 'http://localhost:8080/rest/anno') }
+  let(:conn) { Faraday.new(:url => Triannon.ldp_config[:url]) }
 
   describe "#create" do
-
     it "POSTS a ttl represntation of the Annotation to the correct LDP container" do
       new_pid = svc.create
 
@@ -20,7 +19,6 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       expect(resp.body).to match /oa#commenting/
     end
-
   end
 
   describe "#create_body_container" do
@@ -34,6 +32,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       expect(resp.body).to match /oa#hasBody/
       expect(resp.body).to match /#{new_pid}/
+      # fails now hasMemberRelation <http://www.w3.org/ns/ldp#hasMemberRelation> <http://fedora.info/definitions/v4/repository#hasChild>
     end
   end
 
@@ -67,7 +66,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
   end
 
   describe "#create_target" do
-    it "POSTS a ttl represntation of a body to the body container" do
+    it "POSTS a ttl represntation of a target to the target container" do
       new_pid = svc.create
       svc.create_target_container
       target_pid = svc.create_target
@@ -77,16 +76,16 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.headers['Accept'] = 'text/turtle'
       end
       expect(resp.body).to match /purl.stanford.edu/
-      expect(resp.body).to match /#{new_pid}/
+      expect(resp.body).to match /triannon.*\/externalReference/
     end
   end
 
   describe ".create" do
     it "creates an entire Annotation vi LDP and returns the pid" do
-      service = Triannon::LdpCreator.create anno
+      id = Triannon::LdpCreator.create anno
 
       resp = conn.get do |req|
-        req.url " #{service.id}"
+        req.url " #{id}"
         req.headers['Accept'] = 'text/turtle'
       end
       expect(resp.body).to match /hasBody/
