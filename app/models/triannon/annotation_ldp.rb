@@ -1,4 +1,3 @@
-
 module Triannon
   class AnnotationLdp
 
@@ -17,6 +16,22 @@ module Triannon
         }
         no_ldp_graph
       end
+    end
+    
+    # returns graph without any fedora triples
+    def remove_fedora_triples graph
+      fedora_ns = "http://fedora.info/definitions"
+      modeshape_ns = "http://www.jcp.org/jcr"
+      no_fedora_graph = RDF::Graph.new
+      ldp_props = RDF::LDP.properties.map {|p| p.to_s}
+      graph.each { |stmt|  
+        no_fedora_graph << stmt unless stmt.predicate.to_s.match(fedora_ns) ||
+                                    stmt.predicate.to_s.match(modeshape_ns) || 
+                                    stmt.subject.to_s.match(fedora_ns) ||
+                                    stmt.object.to_s.match(fedora_ns) ||
+                                    (stmt.predicate == RDF.type && stmt.object.to_s.match(modeshape_ns))
+      }
+      no_fedora_graph
     end
 
     def base_uri

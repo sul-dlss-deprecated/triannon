@@ -53,17 +53,50 @@ describe Triannon::AnnotationLdp do
     end
   end
   
-  describe '#remove_ldp_properties' do
-    it 'graph returned has no ldp properties' do
+  describe '#graph_no_ldp' do
+    it 'graph returned has no ldp triples' do
       anno.load_data_into_graph anno_ttl
       result = anno.graph.query [nil, RDF.type, RDF::URI.new("http://www.w3.org/ns/ldp#Container")]
       expect(result.first.subject.to_s).to eql anno.base_uri.to_s
       result = anno.graph.query [nil, RDF::URI.new("http://www.w3.org/ns/ldp#contains"), nil]
       expect(result.size).to eql 2
+      
       stripped_graph = anno.graph_no_ldp
       result = stripped_graph.query [nil, RDF.type, RDF::URI.new("http://www.w3.org/ns/ldp#Container")]
       expect(result.size).to eql 0
       result = stripped_graph.query [nil, RDF::URI.new("http://www.w3.org/ns/ldp#contains"), nil]
+      expect(result.size).to eql 0
+    end
+  end
+  
+  describe '#remove_fedora_triples' do
+    it 'graph returned has no fedora triples' do
+      anno.load_data_into_graph anno_ttl
+      result = anno.graph.query [nil, RDF.type, RDF::URI.new("http://fedora.info/definitions/v4/rest-api#resource")]
+      expect(result.size).to eql 1
+      result = anno.graph.query [nil, RDF.type, RDF::URI.new("http://www.jcp.org/jcr/nt/1.0base")]
+      expect(result.size).to eql 1
+      result = anno.graph.query [nil, RDF::URI.new("http://fedora.info/definitions/v4/repository#lastModifiedBy"), nil]
+      expect(result.size).to eql 1
+      result = anno.graph.query [nil, RDF::URI.new("http://fedora.info/definitions/v4/rest-api#writable"), nil]
+      expect(result.size).to eql 1
+      result = anno.graph.query [RDF::URI.new("http://fedora.info/definitions/v4/repository#jcr/xml"), nil, nil]
+      expect(result.size).to eql 1
+      result = anno.graph.query [nil, nil, RDF::URI.new("http://fedora.info/definitions/v4/repository#jcr/xml")]
+      expect(result.size).to eql 1
+
+      stripped_graph = anno.remove_fedora_triples anno.graph
+      result = stripped_graph.query [nil, RDF.type, RDF::URI.new("http://fedora.info/definitions/v4/rest-api#resource")]
+      expect(result.size).to eql 0
+      result = stripped_graph.query [nil, RDF.type, RDF::URI.new("http://www.jcp.org/jcr/nt/1.0base")]
+      expect(result.size).to eql 0
+      result = stripped_graph.query [nil, RDF::URI.new("http://fedora.info/definitions/v4/repository#lastModifiedBy"), nil]
+      expect(result.size).to eql 0
+      result = stripped_graph.query [nil, RDF::URI.new("http://fedora.info/definitions/v4/rest-api#writable"), nil]
+      expect(result.size).to eql 0
+      result = stripped_graph.query [RDF::URI.new("http://fedora.info/definitions/v4/repository#jcr/xml"), nil, nil]
+      expect(result.size).to eql 0
+      result = stripped_graph.query [nil, nil, RDF::URI.new("http://fedora.info/definitions/v4/repository#jcr/xml")]
       expect(result.size).to eql 0
     end
   end
