@@ -4,30 +4,34 @@ vcr_options = { :cassette_name => "controllers_annotations_index" }
 describe Triannon::AnnotationsController, type: :controller, :vcr => vcr_options do
 
   routes { Triannon::Engine.routes }
+  let(:annotation) { Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json"), key: '123'}
+
   # regex: \A and \Z and m are needed instead of ^$ due to \n in data)
   json_regex = /\A\{.+\}\Z/m
 
+
+  before(:each) do
+    allow(Triannon::Annotation).to receive(:find).and_return(annotation)
+  end
+
   it "should have an index" do
+    skip 'Need to create Annotation.all method'
     get :index
   end
 
   it "should have a show" do
-    @annotation = Triannon::Annotation.create(data: Triannon.annotation_fixture("bookmark.json"))
-
-    get :show, id: @annotation.id
-    expect(assigns[:annotation]).to eq @annotation
+    get :show, id: annotation.id
+    expect(assigns[:annotation]).to eq annotation
   end
 
   context "show request's response format" do
-    before(:each) do
-      @annotation = Triannon::Annotation.create(data: Triannon.annotation_fixture("bookmark.json"))
-    end    
-    shared_examples_for 'accept header determines media type' do | mime_types, regex | 
-      mime_types.each { |mtype|  
+
+    shared_examples_for 'accept header determines media type' do | mime_types, regex |
+      mime_types.each { |mtype|
         it "#{mtype}" do
           @request.accept = mtype
-          get :show, id: @annotation.id
-          expect(@response.content_type).to eql(mtype) 
+          get :show, id: annotation.id
+          expect(@response.content_type).to eql(mtype)
           expect(@response.body).to match(regex)
           expect(@response.status).to eql(200)
         end
@@ -46,29 +50,29 @@ describe Triannon::AnnotationsController, type: :controller, :vcr => vcr_options
     end
     it "empty string gets json-ld" do
       @request.accept = ""
-      get :show, id: @annotation.id, format: nil
-      expect(@response.content_type).to eql("application/ld+json") 
+      get :show, id: annotation.id, format: nil
+      expect(@response.content_type).to eql("application/ld+json")
       expect(@response.body).to match json_regex
       expect(@response.status).to eql(200)
     end
     it "nil gets json-ld" do
       @request.accept = nil
-      get :show, id: @annotation.id, format: nil
-      expect(@response.content_type).to eql("application/ld+json") 
+      get :show, id: annotation.id, format: nil
+      expect(@response.content_type).to eql("application/ld+json")
       expect(@response.body).to match json_regex
       expect(@response.status).to eql(200)
     end
     it "*/* gets json-ld" do
       @request.accept = "*/*"
-      get :show, id: @annotation.id, format: nil
-      expect(@response.content_type).to eql("application/ld+json") 
+      get :show, id: annotation.id, format: nil
+      expect(@response.content_type).to eql("application/ld+json")
       expect(@response.body).to match json_regex
       expect(@response.status).to eql(200)
     end
     it "html uses view" do
       @request.accept = "text/html"
-      get :show, id: @annotation.id
-      expect(response.content_type).to eql("text/html") 
+      get :show, id: annotation.id
+      expect(response.content_type).to eql("text/html")
       expect(response.status).to eql(200)
       expect(response).to render_template(:show)
     end
@@ -78,12 +82,12 @@ describe Triannon::AnnotationsController, type: :controller, :vcr => vcr_options
       #   http://blog.bigbinary.com/2010/11/23/mime-type-resolution-in-rails.html
       it 'uses first known format' do
         @request.accept = "application/ld+json, text/x-json, application/json"
-        get :show, id: @annotation.id
-        expect(@response.content_type).to eql("application/ld+json") 
+        get :show, id: annotation.id
+        expect(@response.content_type).to eql("application/ld+json")
         expect(@response.body).to match json_regex
         expect(@response.status).to eql(200)
       end
     end
   end
-  
+
 end

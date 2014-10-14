@@ -15,6 +15,10 @@ module Triannon
     # and perhaps modeled on this:
     #   https://github.com/uq-eresearch/lorestore/blob/3e9aa1c69aafd3692c69aa39c64bfdc32b757892/src/main/resources/OAConstraintsSPARQL.json
 
+    def id
+      @key
+    end
+
     def url
       if graph_exists?
         solution = graph.query self.class.anno_query

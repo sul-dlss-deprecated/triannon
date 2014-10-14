@@ -14,10 +14,10 @@ describe Triannon::Annotation, :vcr => vcr_options do
     before(:each) do
       @json_b4_url = "{
                         \"@context\"  :     \""
-      @json_after_url = "\"   , 
-                        \"@id\": \"http://example.org/annos/annotation/foo.json\", 
-                        \"@type\": \"oa:Annotation\", 
-                        \"motivatedBy\": \"oa:bookmarking\", 
+      @json_after_url = "\"   ,
+                        \"@id\": \"http://example.org/annos/annotation/foo.json\",
+                        \"@type\": \"oa:Annotation\",
+                        \"motivatedBy\": \"oa:bookmarking\",
                         \"hasTarget\": \"http://purl.stanford.edu/kq131cs7229\"
                       }"
       @inline_context = File.read "lib/triannon/oa_context_20130208.json"
@@ -164,5 +164,12 @@ describe Triannon::Annotation, :vcr => vcr_options do
       end
     end
   end # parsing graph
+
+  context ".all" do
+    it "returns an array of all Annotation identifiers in the repository" do
+      skip
+    end
+
+  end
 
 end

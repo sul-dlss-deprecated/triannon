@@ -14,18 +14,18 @@ module Triannon
     def show
       respond_to do |format|
         format.jsonld { render :json => @annotation.graph.to_jsonld }
-        format.ttl { 
+        format.ttl {
           accept_return_type = mime_type_from_accept(["application/x-turtle", "text/turtle"])
-          render :body => @annotation.graph.to_ttl, content_type: accept_return_type if accept_return_type } 
-        format.rdfxml { 
+          render :body => @annotation.graph.to_ttl, content_type: accept_return_type if accept_return_type }
+        format.rdfxml {
           accept_return_type = mime_type_from_accept(["application/rdf+xml", "text/rdf+xml", "text/rdf"])
-          render :body => @annotation.graph.to_rdfxml, content_type: accept_return_type if accept_return_type } 
-        format.json { 
+          render :body => @annotation.graph.to_rdfxml, content_type: accept_return_type if accept_return_type }
+        format.json {
           accept_return_type = mime_type_from_accept(["application/json", "text/x-json", "application/jsonrequest"])
-          render :json => @annotation.graph.to_jsonld, content_type: accept_return_type if accept_return_type } 
-        format.xml { 
+          render :json => @annotation.graph.to_jsonld, content_type: accept_return_type if accept_return_type }
+        format.xml {
           accept_return_type = mime_type_from_accept(["application/xml", "text/xml", "application/x-xml"])
-          render :xml => @annotation.graph.to_rdfxml, content_type: accept_return_type if accept_return_type } 
+          render :xml => @annotation.graph.to_rdfxml, content_type: accept_return_type if accept_return_type }
         format.html { render :show }
       end
     end
@@ -75,7 +75,7 @@ module Triannon
       def annotation_params
         params.require(:annotation).permit(:data)
       end
-      
+
       def default_format_jsonld
         if ((!request.accept || request.accept.empty?) && (!params[:format] || params[:format].empty?))
           request.format = "jsonld"
@@ -87,7 +87,7 @@ module Triannon
         @mime_type_from_accept ||= begin
           if request.accept && request.accept.is_a?(String)
             accepted_formats = request.accept.split(',')
-            accepted_formats.each { |accepted_format| 
+            accepted_formats.each { |accepted_format|
               if return_mime_types.include? accepted_format
                 return accepted_format
               end
