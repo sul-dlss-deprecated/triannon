@@ -105,6 +105,10 @@ module Triannon
       @graph ||= data_to_graph
     end
 
+    def graph= g
+      @graph = g
+    end
+
     # query for a subject with type of RDF::OpenAnnotation.Annotation
     def self.anno_query
       @anno_query ||= begin
@@ -126,7 +130,10 @@ module Triannon
     end
 
     def self.find(key)
-
+      oa_graph = LdpLoader.load key
+      anno = Triannon::Annotation.new
+      anno.graph = oa_graph
+      anno
     end
 
     def base_uri

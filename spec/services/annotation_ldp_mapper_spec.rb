@@ -15,7 +15,7 @@ describe Triannon::AnnotationLdpMapper do
       oa_graph = Triannon::AnnotationLdpMapper.ldp_to_oa ldp_anno
 
       resp = oa_graph.query [nil,RDF.type, RDF::OpenAnnotation.Annotation ]
-      expect(resp.first.subject.to_s).to match /blah/
+      expect(resp.first.subject.to_s).to match /changeme.com\/deb27887-1241-4ccc-a09c-439293d73fbb/
     end
 
   end
@@ -35,9 +35,14 @@ describe Triannon::AnnotationLdpMapper do
       expect(mapper.id).to eq 'deb27887-1241-4ccc-a09c-439293d73fbb'
     end
 
-    # TODO raise an exception if it is not?
+    it "builds the base identifier from the Config.open_annotation.base_uri and @id" do
+      mapper.extract_base
+      resp = mapper.oa_graph.query [nil,RDF.type, RDF::OpenAnnotation.Annotation ]
+      expect(resp.first.subject.to_s).to match /changeme.com\/deb27887-1241-4ccc-a09c-439293d73fbb/
+    end
+
     it "checks the RDF.type to be RDF::OpenAnnotation.Annotation" do
-      skip
+      skip "raise an exception if it is not?"
     end
 
     it "extracts the motivations" do
@@ -50,22 +55,51 @@ describe Triannon::AnnotationLdpMapper do
   end
 
   describe "#extract_body" do
-    it "grabs the chars if the RDF.type is ContextAsText" do
+    context "when the RDF.type is ContentAsText" do
+      let(:ldp_anno) {
+        a = Triannon::AnnotationLdp.new
+        a.load_data_into_graph anno_ttl
+        a.load_data_into_graph body_ttl
+        a
+      }
 
+      it "sets the hasBody statement with a blank node of type ContentAsText, dcmitype/Text with content#chars" do
+        mapper = Triannon::AnnotationLdpMapper.new ldp_anno
+        mapper.extract_base
+        mapper.extract_body
+
+        res = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasBody, nil]
+        expect(res.count).to eq 1
+        body_node = res.first.object
+        res = mapper.oa_graph.query [body_node, RDF.type, RDF::Content.ContentAsText]
+        expect(res.count).to eq 1
+        res = mapper.oa_graph.query [body_node, RDF.type, RDF::URI.new('http://purl.org/dc/dcmitype/Text')]
+        expect(res.count).to eq 1
+        res = mapper.oa_graph.query [body_node, RDF::Content.chars, nil]
+        expect(res.first.object.to_s).to match /I love this!/
+      end
     end
 
-    it "sets the hasBody statement" do
-
-    end
   end
 
   describe "#extract_target" do
-    it "grabs the url if there's an externalRefence" do
+    let(:ldp_anno) {
+      a = Triannon::AnnotationLdp.new
+      a.load_data_into_graph anno_ttl
+      a.load_data_into_graph target_ttl
+      a
+    }
 
-    end
+    it "sets the hasTarget url from externalReference" do
+      mapper = Triannon::AnnotationLdpMapper.new ldp_anno
+      mapper.extract_base
+      mapper.extract_target
 
-    it "sets the hasTarget url" do
-
+      res = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      expect(res.count).to eq 1
+      uri = res.first.object
+      expect(uri.class).to eq RDF::URI
+      expect(uri.to_s).to match /purl.stanford.edu\/kq131cs7229/
     end
   end
 

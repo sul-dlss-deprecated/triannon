@@ -1,7 +1,6 @@
 module Triannon
   class AnnotationLdpMapper
 
-    # TODO might need to pass in url somehow, or create as blank node?
     def self.ldp_to_oa ldp_anno
       mapper = Triannon::AnnotationLdpMapper.new ldp_anno
       mapper.extract_base
@@ -15,46 +14,42 @@ module Triannon
     def initialize ldp_anno
       @ldp = ldp_anno
       @oa_graph = RDF::Graph.new
-      @root_uri = RDF::URI.new "http://changeme.com" # TODO read from Triannon::Config.base_uri
     end
 
-=begin
-<http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb> a <http://www.w3.org/ns/oa#Annotation>,
-     <http://purl.org/dc/elements/1.1/describable>;
-   <http://www.w3.org/ns/oa#hasBody> <http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23>;
-   <http://www.w3.org/ns/oa#hasTarget> <http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1>;
-   <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#commenting> .
-=end
     def extract_base
-      @ldp.graph.each_statement do |stmnt|
+      @ldp.stripped_graph.each_statement do |stmnt|
         if stmnt.predicate == RDF.type && stmnt.object == RDF::OpenAnnotation.Annotation
           @id = stmnt.subject.to_s.split('/').last
-          @root_uri.join @id
-          @oa_graph << [@root_uri, RDF.type, RDF::OpenAnnotation]
+          @root_uri = RDF::URI.new "http://changeme.com/#{@id}"                             # TODO read from Triannon::Config.base_uri
+          @oa_graph << [@root_uri, RDF.type, RDF::OpenAnnotation.Annotation]
+
         elsif stmnt.predicate == RDF::OpenAnnotation.motivatedBy
           @oa_graph << [@root_uri, stmnt.predicate, stmnt.object]
         end
       end
     end
 
-=begin
-<http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23> a <http://purl.org/dc/dcmitype/Text>,
-     <http://www.w3.org/2011/content#ContentAsText>,
-     <http://purl.org/dc/elements/1.1/describable>;
-   <http://www.w3.org/2011/content#chars> "I love this!" .
-=end
     def extract_body
-
+      res = @ldp.stripped_graph.query [@ldp.body_uri, RDF.type, RDF::Content.ContentAsText]
+      if res.count > 0 # TODO raise if this fails?
+        body_node = RDF::Node.new
+        @oa_graph << [@root_uri, RDF::OpenAnnotation.hasBody, body_node]
+        @oa_graph << [body_node, RDF.type, RDF::Content.ContentAsText]
+        @oa_graph << [body_node, RDF.type, RDF::URI.new('http://purl.org/dc/dcmitype/Text')]
+        res_chars = @ldp.stripped_graph.query [@ldp.body_uri, RDF::Content.chars, nil]
+        if res_chars.count > 0
+          @oa_graph << [body_node, RDF::Content.chars, res_chars.first.object]
+        end
+      end
     end
 
-=begin
-<http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1> a <http://purl.org/dc/dcmitype/Text>,
-     <http://purl.org/dc/elements/1.1/describable>;
-   <http://purl.org/dc/elements/1.1/format> "text/html";
-   <http://triannon.stanford.edu/ns/externalReference> <http://purl.stanford.edu/kq131cs7229> .
-=end
     def extract_target
-
+      ext_ref = RDF::URI.new 'http://triannon.stanford.edu/ns/externalReference'  # TODO make vocab for
+      res = @ldp.stripped_graph.query [@ldp.target_uri, ext_ref, nil]
+      if res.count > 0
+        ext_uri = res.first.object
+        @oa_graph << [@root_uri, RDF::OpenAnnotation.hasTarget, ext_uri]
+      end
     end
 
   end

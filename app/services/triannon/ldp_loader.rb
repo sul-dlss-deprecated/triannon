@@ -1,6 +1,7 @@
 
 module Triannon
 
+  # Loads an existing Annotation from the LDP server
   class LdpLoader
 
     def self.load key
@@ -8,6 +9,9 @@ module Triannon
       l.load_annotation
       l.load_body
       l.load_target
+
+      oa_graph = AnnotationLdpMapper.ldp_to_oa l.annotation
+      oa_graph
     end
 
     attr_accessor :annotation
