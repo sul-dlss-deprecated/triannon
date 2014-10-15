@@ -7,7 +7,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl")
   }
   let(:svc) { Triannon::LdpCreator.new anno }
-  let(:conn) { Faraday.new(:url => Triannon.ldp_config[:url]) }
+  let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
 
   describe "#create" do
     it "POSTS a ttl represntation of the Annotation to the correct LDP container" do

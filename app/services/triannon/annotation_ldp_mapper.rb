@@ -20,7 +20,7 @@ module Triannon
       @ldp.stripped_graph.each_statement do |stmnt|
         if stmnt.predicate == RDF.type && stmnt.object == RDF::OpenAnnotation.Annotation
           @id = stmnt.subject.to_s.split('/').last
-          @root_uri = RDF::URI.new "http://changeme.com/#{@id}"                             # TODO read from Triannon::Config.base_uri
+          @root_uri = RDF::URI.new(Triannon.config[:triannon_base_url] + "/#{@id}")
           @oa_graph << [@root_uri, RDF.type, RDF::OpenAnnotation.Annotation]
 
         elsif stmnt.predicate == RDF::OpenAnnotation.motivatedBy

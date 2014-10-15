@@ -18,7 +18,7 @@ module Triannon
 
     def initialize key
       @key = key
-      @base_uri = Triannon.ldp_config[:url]
+      @base_uri = Triannon.config[:ldp_url]
       @annotation = Triannon::AnnotationLdp.new
     end
 

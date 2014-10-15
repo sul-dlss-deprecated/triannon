@@ -18,7 +18,7 @@ module Triannon
 
     def initialize(anno)
       @anno = anno
-      @base_uri = Triannon.ldp_config[:url]
+      @base_uri = Triannon.config[:ldp_url]
     end
 
     def create
