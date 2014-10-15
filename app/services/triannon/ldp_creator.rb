@@ -1,5 +1,7 @@
 
 module Triannon
+
+  # creates a new Annotation in the LDP server
   class LdpCreator
 
     def self.create(anno)                       # TODO just pass simple strings/arrays/hashes? :body => [,,], :target => [,,], :motivation => [,,]
