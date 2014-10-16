@@ -9,40 +9,40 @@ module Triannon
   require "triannon/engine"
 
   class << self
-    attr_accessor :ldp_config
+    attr_accessor :config
   end
 
-  def self.ldp_file
-    "#{::Rails.root.to_s}/config/ldp.yml"
+  def self.triannon_file
+    "#{::Rails.root.to_s}/config/triannon.yml"
   end
 
-  def self.ldp_config
-    @ldp_config ||= begin
-        raise "The #{::Rails.env} environment settings were not found in the ldp.yml config" unless ldp_yml[::Rails.env]
-        ldp_yml[::Rails.env].symbolize_keys
+  def self.config
+    @triannon_config ||= begin
+        raise "The #{::Rails.env} environment settings were not found in the triannon.yml config" unless config_yml[::Rails.env]
+        config_yml[::Rails.env].symbolize_keys
       end
   end
 
-  def self.ldp_yml
+  def self.config_yml
     require 'erb'
     require 'yaml'
 
-    return @ldp_yml if @ldp_yml
-    unless File.exists?(ldp_file)
-      raise "You are missing the ldp configuration file: #{ldp_file}."
+    return @triannon_yml if @triannon_yml
+    unless File.exists?(triannon_file)
+      raise "You are missing the triannon configuration file: #{triannon_file}."
     end
 
     begin
-      @ldp_yml = YAML::load_file(ldp_file)
+      @triannon_yml = YAML::load_file(triannon_file)
     rescue => e
-      raise("ldp.yml was found, but could not be parsed.\n")
+      raise("triannon.yml was found, but could not be parsed.\n")
     end
 
-    if @ldp_yml.nil? || !@ldp_yml.is_a?(Hash)
-      raise("ldp.yml was found, but was blank or malformed.\n")
+    if @triannon_yml.nil? || !@triannon_yml.is_a?(Hash)
+      raise("triannon.yml was found, but was blank or malformed.\n")
     end
 
-    return @ldp_yml
+    return @triannon_yml
   end
 
 

@@ -6,16 +6,19 @@ module Triannon
       route "mount Triannon::Engine, at: 'annotations'"
     end
 
-    def create_ldp_yml_file
-      default_ldp_yml =<<-YML
+    def create_triannon_yml_file
+      default_yml =<<-YML
 development:
-  url: http://localhost:8080/rest/anno
+  ldp_url: http://localhost:8080/rest/anno
+  triannon_base_url: http://your.triannon-server.com
 test: &test
-  url: http://localhost:8080/rest/anno
+  ldp_url: http://localhost:8080/rest/anno
+  triannon_base_url: http://your.triannon-server.com
 production:
-  url:
+  ldp_url:
+  triannon_base_url:
       YML
-      create_file 'config/ldp.yml', default_ldp_yml
+      create_file 'config/triannon.yml', default_yml
     end
   end
 end

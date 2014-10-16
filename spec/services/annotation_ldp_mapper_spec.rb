@@ -15,7 +15,7 @@ describe Triannon::AnnotationLdpMapper do
       oa_graph = Triannon::AnnotationLdpMapper.ldp_to_oa ldp_anno
 
       resp = oa_graph.query [nil,RDF.type, RDF::OpenAnnotation.Annotation ]
-      expect(resp.first.subject.to_s).to match /changeme.com\/deb27887-1241-4ccc-a09c-439293d73fbb/
+      expect(resp.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/deb27887-1241-4ccc-a09c-439293d73fbb"
     end
 
   end
@@ -38,7 +38,7 @@ describe Triannon::AnnotationLdpMapper do
     it "builds the base identifier from the Config.open_annotation.base_uri and @id" do
       mapper.extract_base
       resp = mapper.oa_graph.query [nil,RDF.type, RDF::OpenAnnotation.Annotation ]
-      expect(resp.first.subject.to_s).to match /changeme.com\/deb27887-1241-4ccc-a09c-439293d73fbb/
+      expect(resp.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/deb27887-1241-4ccc-a09c-439293d73fbb"
     end
 
     it "checks the RDF.type to be RDF::OpenAnnotation.Annotation" do
