@@ -167,7 +167,7 @@ describe Triannon::Annotation, :vcr => vcr_options do
 
   context ".all" do
     it "returns an array of all Annotation identifiers in the repository" do
-      skip
+      skip ".all to be implemented"
     end
 
   end

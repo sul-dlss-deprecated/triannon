@@ -3,9 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 vcr_options = {:re_record_interval => 45.days}  # TODO will make shorter once we have jetty running fedora4
 describe Triannon::LdpCreator, :vcr => vcr_options do
 
-  let(:anno) {
-    Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl")
-  }
+  let(:anno) { Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl") }
   let(:svc) { Triannon::LdpCreator.new anno }
   let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
 
@@ -90,6 +88,35 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       expect(resp.body).to match /hasBody/
       expect(resp.body).to match /hasTarget/
+    end
+  end
+  
+  describe '#subject_statements' do
+    it 'appropriate blank node statements when the subject is an RDF::Node in the graph' do
+      # we know anno's graph has a body with a blank node
+      has_body_stmts = anno.graph.query([nil, RDF::OpenAnnotation.hasBody, nil])
+      expect(has_body_stmts.size).to eql 1
+      body_resource = has_body_stmts.first.object
+      expect(body_resource).to be_a RDF::Node
+      body_stmts = svc.send(:subject_statements, body_resource, anno.graph)
+      expect(body_stmts.size).to eql 3
+      expect(body_stmts).to include([body_resource, RDF::Content::chars, "I love this!"])
+      expect(body_stmts).to include([body_resource, RDF.type, RDF::Content.ContentAsText])
+      expect(body_stmts).to include([body_resource, RDF.type, RDF::DCMIType.Text])
+    end
+    it 'empty Array when the subject is an RDF::Node not in the graph' do
+      expect(svc.send(:subject_statements, RDF::Node.new, anno.graph)).to eql []
+    end
+    it 'empty Array when the subject is an RDF::URI' do
+      # we know anno's graph has a target with a URI
+      has_target_stmts = anno.graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+      expect(has_target_stmts.size).to eql 1
+      target_resource = has_target_stmts.first.object
+      expect(target_resource).to be_a RDF::URI
+      expect(svc.send(:subject_statements, target_resource, anno.graph)).to eql []
+    end
+    it 'empty Array when subject is not RDF::Node or RDF::URI' do
+      expect(svc.send(:subject_statements, nil, anno.graph)).to eql []
     end
   end
 
