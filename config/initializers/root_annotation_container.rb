@@ -5,4 +5,4 @@ def root_container_create
   Triannon::RootAnnotationCreator.create if File.exists? Triannon.triannon_file
 end
 
-root_container_create
+# root_container_create
