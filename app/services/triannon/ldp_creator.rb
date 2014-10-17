@@ -126,16 +126,19 @@ module Triannon
     end
     
     # @param [RDF::Graph] graph a Triannon::Annotation as a graph
-    # @return [RDF::Graph] all the triples with a target as a subject, as a single graph object
-    def get_targets_graph graph
-      result = []
+    # @return [Array[RDF::Statement]] all the triples with a target as a subject, as a single graph object
+    def targets_graph graph
+      stmts = []
       targets_solns = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
-      # FIXME:  can get has_target statements from triannon object itself
-      targets_solns.each { |has_target_stmt| 
+      targets_solns.each { |has_target_stmt | 
         target_obj = has_target_stmt.object
-        result = statements_for_subject (target_obj)
+        stmts = subject_statements(target_obj, graph)
       }
-      result
+      g = RDF::Graph.new
+      stmts.each { |s| 
+        g << s 
+      }
+      g
     end
     
     # @param subject the RDF object to be used as the subject in the graph query.  Should be an RDF::Node or RDF::URI

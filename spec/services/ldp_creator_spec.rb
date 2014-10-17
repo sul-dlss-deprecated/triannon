@@ -91,21 +91,52 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     end
   end
   
+  describe '#targets_graph' do
+    it 'empty when target is a URI' do
+      targets_graph = svc.send(:targets_graph, anno.graph)
+      expect(targets_graph).to be_a RDF::Graph
+      expect(targets_graph.size).to eql 0
+    end
+    it 'contains all appropriate statements when has_target contains a blank node, recursively' do
+      graph = RDF::Graph.new
+      graph.from_jsonld(Triannon.annotation_fixture("html-frag-pos-selector.json"))
+      has_target_stmts = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+      expect(has_target_stmts.size).to eql 1
+      target_resource = has_target_stmts.first.object
+      expect(target_resource).to be_a RDF::Node
+      
+      targets_graph = svc.send(:targets_graph, graph)
+      expect(targets_graph).to be_a RDF::Graph
+      expect(targets_graph.size).to eql 6
+      expect(targets_graph.query([target_resource, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
+      expect(targets_graph.query([target_resource, RDF::OpenAnnotation.hasSource, RDF::URI.new("http://purl.stanford.edu/kq131cs7229.html")]).size).to eql 1
+      has_selector_stmts = graph.query([target_resource, RDF::OpenAnnotation.hasSelector, nil])
+      selector_resource = has_selector_stmts.first.object
+      expect(targets_graph.query([target_resource, RDF::OpenAnnotation.hasSelector, selector_resource]).size).to eql 1
+      expect(targets_graph.query([selector_resource, RDF.type, RDF::OpenAnnotation.TextPositionSelector]).size).to eql 1
+      expect(targets_graph.query([selector_resource, RDF::OpenAnnotation.start, RDF::Literal.new(0)]).size).to eql 1
+      expect(targets_graph.query([selector_resource, RDF::OpenAnnotation.end, RDF::Literal.new(66)]).size).to eql 1
+    end
+    it 'multiple targets' do
+      skip "to be implemented"
+    end
+  end
+  
   describe '#subject_statements' do
-    it 'appropriate blank node statements when the subject is an RDF::Node in the graph' do
+    it 'returns appropriate blank node statements when the subject is an RDF::Node in the graph' do
       # we know anno's graph has a body with a blank node
       has_body_stmts = anno.graph.query([nil, RDF::OpenAnnotation.hasBody, nil])
       expect(has_body_stmts.size).to eql 1
       body_resource = has_body_stmts.first.object
       expect(body_resource).to be_a RDF::Node
-      
+
       body_stmts = svc.send(:subject_statements, body_resource, anno.graph)
       expect(body_stmts.size).to eql 3
       expect(body_stmts).to include([body_resource, RDF::Content::chars, "I love this!"])
       expect(body_stmts).to include([body_resource, RDF.type, RDF::Content.ContentAsText])
       expect(body_stmts).to include([body_resource, RDF.type, RDF::DCMIType.Text])
     end
-    it 'should recurse when the object of a subject statement is a blank node' do
+    it 'recurses when the object of a subject statement is itself a blank node' do
       graph = RDF::Graph.new
       graph.from_jsonld(Triannon.annotation_fixture("html-frag-pos-selector.json"))
       has_target_stmts = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
