@@ -161,9 +161,49 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(target_stmts).to include([selector_resource, RDF.type, RDF::OpenAnnotation.TextPositionSelector])
       expect(target_stmts).to include([selector_resource, RDF::OpenAnnotation.start, RDF::Literal.new(0)])
       expect(target_stmts).to include([selector_resource, RDF::OpenAnnotation.end, RDF::Literal.new(66)])
+      
+      graph = RDF::Graph.new
+      graph.from_jsonld('{  
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "hasTarget": {
+          "@type": "oa:SpecificResource", 
+          "hasSelector": {
+            "@type": "oa:FragmentSelector", 
+            "value": "xywh=0,0,200,200", 
+            "conformsTo": "http://www.w3.org/TR/media-frags/"
+          }
+        }
+      }')
+      target_resource = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil]).first.object
+      target_stmts = svc.send(:subject_statements, target_resource, graph)
+      expect(target_stmts.size).to eql 5
+      expect(target_stmts).to include([target_resource, RDF.type, RDF::OpenAnnotation.SpecificResource])
+      selector_resource =  graph.query([target_resource, RDF::OpenAnnotation.hasSelector, nil]).first.object
+      expect(target_stmts).to include([target_resource, RDF::OpenAnnotation.hasSelector, selector_resource])
+      expect(target_stmts).to include([selector_resource, RDF.type, RDF::OpenAnnotation.FragmentSelector])
+      expect(target_stmts).to include([selector_resource, RDF.value, RDF::Literal.new("xywh=0,0,200,200")])
+      expect(target_stmts).to include([selector_resource, RDF::DC.conformsTo, "http://www.w3.org/TR/media-frags/"])
     end
-    it 'empty Array when the subject is an RDF::Node not in the graph' do
-      expect(svc.send(:subject_statements, RDF::Node.new, anno.graph)).to eql []
+    it 'finds all properties of URI nodes' do
+      graph = RDF::Graph.new
+      graph.from_jsonld('{  
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "hasTarget": {
+          "@type": "oa:SpecificResource", 
+          "hasSource": {
+            "@id": "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg", 
+            "@type": "dctypes:Image"
+          }
+        }
+      }')
+      target_resource = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil]).first.object
+      target_stmts = svc.send(:subject_statements, target_resource, graph)
+      expect(target_stmts.size).to eql 3
+      expect(target_stmts).to include([target_resource, RDF.type, RDF::OpenAnnotation.SpecificResource])
+      expect(target_stmts).to include([target_resource, RDF::OpenAnnotation.hasSource, "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg"])
+      source_resource = graph.query([target_resource, RDF::OpenAnnotation.hasSource, nil]).first.object
+      expect(target_stmts).to include([target_resource, RDF::OpenAnnotation.hasSource, source_resource])
+      expect(target_stmts).to include([source_resource, RDF.type, RDF::DCMIType.Image])
     end
     it 'empty Array when the subject is not in the graph' do
       graph = RDF::Graph.new
@@ -185,7 +225,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     it 'empty Array when subject is not RDF::Node or RDF::URI' do
       graph = RDF::Graph.new
       graph.from_ttl('<http://example.org/annos/annotation/body-chars.ttl> <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq131cs7229>.')
-      expect(svc.send(:subject_statements, nil, graph)).to eql []
+      expect(svc.send(:subject_statements, RDF.type, graph)).to eql []
     end
   end
 

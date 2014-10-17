@@ -141,20 +141,17 @@ module Triannon
       g
     end
     
+    # given an RDF::Resource (an RDF::Node or RDF::URI), look for all the statements with that object 
+    #  as the subject, and recurse through the graph to find all descendant statements pertaining to the subject
     # @param subject the RDF object to be used as the subject in the graph query.  Should be an RDF::Node or RDF::URI
     # @param [RDF::Graph] graph
     # @return [Array[RDF::Statement]] all the triples with the given subject
     def subject_statements(subject, graph)      
       result = []
-      if subject.is_a? RDF::Node
-        stmts = graph.query([subject, nil, nil])
-        stmts.each { |s|
-          result << s
-          if s.object.is_a? RDF::Node
-            subject_statements(s.object, graph).each { |s| result << s }
-          end
-        }
-      end
+      graph.query([subject, nil, nil]).each { |stmt|
+        result << stmt
+        subject_statements(stmt.object, graph).each { |s| result << s }
+      }
       result.uniq
     end 
     
