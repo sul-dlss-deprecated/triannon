@@ -104,7 +104,6 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       graph.from_jsonld('{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
         "@type": "oa:Annotation", 
-        "motivatedBy": "oa:commenting", 
         "hasTarget": {
           "@id": "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg#xywh=0,0,200,200", 
           "@type": "dctypes:Image"
@@ -121,7 +120,6 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       graph.from_jsonld('{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
         "@type": "oa:Annotation", 
-        "motivatedBy": "oa:commenting", 
         "hasTarget": {
           "@type": "oa:SpecificResource", 
           "hasSource": "http://purl.stanford.edu/kq131cs7229.html", 
@@ -149,7 +147,6 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       graph.from_jsonld('{  
         "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
         "@type": "oa:Annotation", 
-        "motivatedBy": "oa:commenting", 
         "hasTarget": {
           "@type": "oa:SpecificResource", 
           "hasSource": {
@@ -183,7 +180,6 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       graph.from_jsonld('{  
         "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
         "@type": "oa:Annotation", 
-        "motivatedBy": "oa:commenting", 
         "hasTarget": {
           "@type": "oa:SpecificResource", 
           "hasSource": "http://purl.stanford.edu/kq131cs7229.html", 
@@ -209,7 +205,24 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(targets_graph.query([selector_resource, RDF::OpenAnnotation.prefix, RDF::Literal.new("manuscript which comprised the ")]).size).to eql 1
     end
     it 'multiple targets' do
-      skip "to be implemented"
+      graph = RDF::Graph.new
+      graph.from_jsonld('{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@type": "oa:Annotation", 
+        "hasTarget": [
+          "http://purl.stanford.edu/kq131cs7229", 
+          {
+            "@id": "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg", 
+            "@type": "dctypes:Image"
+          }
+        ]
+      }')
+      has_target_stmts = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+      expect(has_target_stmts.size).to eql 2
+      targets_graph = svc.send(:targets_graph, graph)
+      expect(targets_graph).to be_a RDF::Graph
+      expect(targets_graph.size).to eql 1
+      expect(targets_graph.query([RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg"), RDF.type, RDF::DCMIType.Image]).size).to eql 1
     end
   end
   
