@@ -15,6 +15,7 @@
 #
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 ENV["RAILS_ENV"] ||= 'test'
+ENV["RSPEC_RUNNING"] = 'true'
 
 require 'engine_cart'
 EngineCart.load_application!

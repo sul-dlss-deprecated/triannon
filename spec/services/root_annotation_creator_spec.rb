@@ -3,18 +3,15 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 describe Triannon::RootAnnotationCreator, :vcr do
 
   describe "#create" do
-    before(:all) do
-      @old_url = Triannon.config[:ldp_url]
-      Triannon.config[:ldp_url] = 'http://localhost:8080/rest/bork'
+    let(:dummy_url) { 'http://localhost:8080/rest/bork' }
+    let(:conn) { Faraday.new :url => dummy_url  }
+
+    before(:each) do
+       config = { :ldp_url =>  dummy_url }
+       allow(Triannon).to receive(:config).and_return(config)
+       conn.delete
     end
 
-    after(:all) do
-      Triannon.config[:ldp_url] = @old_url
-    end
-
-    let(:conn) { Faraday.new :url => Triannon.config[:ldp_url]  }
-
-    before(:each) { conn.delete }
     after(:each) { conn.delete }
 
     it "creates the root annotations container if it does not already exist" do
