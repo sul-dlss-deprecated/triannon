@@ -1,0 +1,238 @@
+---
+http_interactions:
+- request:
+    method: delete
+    uri: http://localhost:8080/rest/bork
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - Jetty(8.1.11.v20130520)
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Fri, 17 Oct 2014 20:09:59 GMT
+- request:
+    method: head
+    uri: http://localhost:8080/rest/bork
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.0
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      Content-Type:
+      - text/html;charset=ISO-8859-1
+      Cache-Control:
+      - must-revalidate,no-cache,no-store
+      Content-Length:
+      - '1374'
+      Server:
+      - Jetty(8.1.11.v20130520)
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Fri, 17 Oct 2014 20:09:59 GMT
+- request:
+    method: post
+    uri: http://localhost:8080/rest/
+    body:
+      encoding: UTF-8
+      string: |2
+
+        <http://localhost:8080/rest/bork> a <http://www.w3.org/ns/ldp#BasicContainer> .
+    headers:
+      User-Agent:
+      - Faraday v0.9.0
+      Content-Type:
+      - text/turtle
+      Slug:
+      - bork
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - '"c395323978a9c805d66b20fdf3cdae270298f0a3"'
+      Last-Modified:
+      - Fri, 17 Oct 2014 20:09:59 GMT
+      Content-Length:
+      - '31'
+      Location:
+      - http://localhost:8080/rest/bork
+      Content-Type:
+      - text/plain
+      Server:
+      - Jetty(8.1.11.v20130520)
+    body:
+      encoding: UTF-8
+      string: http://localhost:8080/rest/bork
+    http_version: 
+  recorded_at: Fri, 17 Oct 2014 20:09:59 GMT
+- request:
+    method: head
+    uri: http://localhost:8080/rest/bork
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.0
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Etag:
+      - '"c395323978a9c805d66b20fdf3cdae270298f0a3"'
+      Last-Modified:
+      - Fri, 17 Oct 2014 20:09:59 GMT
+      Link:
+      - <http://www.w3.org/ns/ldp#DirectContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      Accept-Patch:
+      - application/sparql-update
+      Accept-Post:
+      - text/turtle,text/rdf+n3,application/n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      Allow:
+      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
+      Content-Type:
+      - text/turtle
+      Content-Length:
+      - '0'
+      Server:
+      - Jetty(8.1.11.v20130520)
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Fri, 17 Oct 2014 20:09:59 GMT
+- request:
+    method: get
+    uri: http://localhost:8080/rest/bork
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Etag:
+      - '"c395323978a9c805d66b20fdf3cdae270298f0a3"'
+      Last-Modified:
+      - Fri, 17 Oct 2014 20:09:59 GMT
+      Link:
+      - <http://www.w3.org/ns/ldp#DirectContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      Accept-Patch:
+      - application/sparql-update
+      Accept-Post:
+      - text/turtle,text/rdf+n3,application/n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      Allow:
+      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
+      Preference-Applied:
+      - return=representation
+      Vary:
+      - Accept, Range, Accept-Encoding, Accept-Language
+      - Prefer
+      Content-Length:
+      - '2662'
+      Content-Type:
+      - text/turtle
+      Server:
+      - Jetty(8.1.11.v20130520)
+    body:
+      encoding: UTF-8
+      string: "\n<http://localhost:8080/rest/bork> <http://fedora.info/definitions/v4/rest-api#exportsAs>
+        <http://localhost:8080/rest/bork/fcr:export?format=jcr/xml> .\n\n<http://fedora.info/definitions/v4/repository#jcr/xml>
+        <http://www.w3.org/2000/01/rdf-schema#label> \"jcr/xml\"^^<http://www.w3.org/2001/XMLSchema#string>
+        .\n\n<http://localhost:8080/rest/bork/fcr:export?format=jcr/xml> <http://purl.org/dc/elements/1.1/format>
+        <http://fedora.info/definitions/v4/repository#jcr/xml> .\n\n<http://localhost:8080/rest/bork>
+        <http://www.w3.org/ns/ldp#hasMemberRelation> <http://www.w3.org/ns/ldp#member>
+        ;\n\t<http://www.w3.org/ns/ldp#membershipResource> <http://localhost:8080/rest/bork>
+        ;\n\ta <http://www.w3.org/ns/ldp#Container> , <http://www.w3.org/ns/ldp#DirectContainer>
+        ;\n\t<http://fedora.info/definitions/v4/repository#hasParent> <http://localhost:8080/rest/>
+        ;\n\ta <http://www.jcp.org/jcr/nt/1.0folder> , <http://www.jcp.org/jcr/nt/1.0hierarchyNode>
+        , <http://www.jcp.org/jcr/nt/1.0base> , <http://www.jcp.org/jcr/mix/1.0created>
+        , <http://fedora.info/definitions/v4/rest-api#resource> , <http://www.w3.org/ns/ldp#BasicContainer>
+        , <http://fedora.info/definitions/v4/rest-api#object> , <http://fedora.info/definitions/v4/rest-api#relations>
+        , <http://www.jcp.org/jcr/mix/1.0created> , <http://www.jcp.org/jcr/mix/1.0lastModified>
+        , <http://www.jcp.org/jcr/mix/1.0lockable> , <http://www.jcp.org/jcr/mix/1.0referenceable>
+        , <http://purl.org/dc/elements/1.1/describable> , <http://fedora.info/definitions/v4/rest-api#resource>
+        , <http://www.w3.org/ns/ldp#Container> ;\n\t<http://fedora.info/definitions/v4/rest-api#writable>
+        \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> ;\n\t<http://fedora.info/definitions/v4/repository#primaryType>
+        \"nt:folder\"^^<http://www.w3.org/2001/XMLSchema#string> ;\n\t<http://fedora.info/definitions/v4/repository#created>
+        \"2014-10-17T20:09:59.726Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\t<http://fedora.info/definitions/v4/repository#lastModified> \"2014-10-17T20:09:59.726Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\t<http://fedora.info/definitions/v4/repository#mixinTypes> \"fedora:resource\"^^<http://www.w3.org/2001/XMLSchema#string>
+        , \"ldp:BasicContainer\"^^<http://www.w3.org/2001/XMLSchema#string> , \"fedora:object\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\t<http://fedora.info/definitions/v4/repository#lastModifiedBy> \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\t<http://fedora.info/definitions/v4/repository#uuid> \"83505378-9c45-4190-bce2-3d390486e897\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\t<http://fedora.info/definitions/v4/repository#createdBy> \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
+        .\n"
+    http_version: 
+  recorded_at: Fri, 17 Oct 2014 20:09:59 GMT
+- request:
+    method: delete
+    uri: http://localhost:8080/rest/bork
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 204
+      message: No Content
+    headers:
+      Server:
+      - Jetty(8.1.11.v20130520)
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Fri, 17 Oct 2014 20:09:59 GMT
+recorded_with: VCR 2.9.3
