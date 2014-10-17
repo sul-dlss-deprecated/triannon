@@ -92,30 +92,121 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
   end
   
   describe '#targets_graph' do
-    it 'empty when target is a URI' do
-      targets_graph = svc.send(:targets_graph, anno.graph)
+    it 'empty when target is a URI with no additional properties' do
+      graph = RDF::Graph.new
+      graph.from_ttl('<> <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq131cs7229>.')
+      targets_graph = svc.send(:targets_graph, graph)
       expect(targets_graph).to be_a RDF::Graph
       expect(targets_graph.size).to eql 0
     end
+    it 'includes any additional properties of target URI nodes' do
+      graph = RDF::Graph.new
+      graph.from_jsonld('{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@type": "oa:Annotation", 
+        "motivatedBy": "oa:commenting", 
+        "hasTarget": {
+          "@id": "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg#xywh=0,0,200,200", 
+          "@type": "dctypes:Image"
+        }
+      }')
+      targets_graph = svc.send(:targets_graph, graph)
+      expect(targets_graph).to be_a RDF::Graph
+      expect(targets_graph.size).to eql 1
+      target_resource = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil]).first.object
+      expect(targets_graph.query([target_resource, RDF.type, RDF::DCMIType.Image]).size).to eql 1
+    end
     it 'contains all appropriate statements when has_target contains a blank node, recursively' do
       graph = RDF::Graph.new
-      graph.from_jsonld(Triannon.annotation_fixture("html-frag-pos-selector.json"))
-      has_target_stmts = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
-      expect(has_target_stmts.size).to eql 1
-      target_resource = has_target_stmts.first.object
-      expect(target_resource).to be_a RDF::Node
-      
+      graph.from_jsonld('{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@type": "oa:Annotation", 
+        "motivatedBy": "oa:commenting", 
+        "hasTarget": {
+          "@type": "oa:SpecificResource", 
+          "hasSource": "http://purl.stanford.edu/kq131cs7229.html", 
+          "hasSelector": {
+            "@type": "oa:TextPositionSelector", 
+            "start": 0, 
+            "end": 66
+          }
+        }
+      }')
       targets_graph = svc.send(:targets_graph, graph)
       expect(targets_graph).to be_a RDF::Graph
       expect(targets_graph.size).to eql 6
+      target_resource = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil]).first.object
       expect(targets_graph.query([target_resource, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
       expect(targets_graph.query([target_resource, RDF::OpenAnnotation.hasSource, RDF::URI.new("http://purl.stanford.edu/kq131cs7229.html")]).size).to eql 1
-      has_selector_stmts = graph.query([target_resource, RDF::OpenAnnotation.hasSelector, nil])
-      selector_resource = has_selector_stmts.first.object
+      selector_resource = graph.query([target_resource, RDF::OpenAnnotation.hasSelector, nil]).first.object
       expect(targets_graph.query([target_resource, RDF::OpenAnnotation.hasSelector, selector_resource]).size).to eql 1
       expect(targets_graph.query([selector_resource, RDF.type, RDF::OpenAnnotation.TextPositionSelector]).size).to eql 1
       expect(targets_graph.query([selector_resource, RDF::OpenAnnotation.start, RDF::Literal.new(0)]).size).to eql 1
       expect(targets_graph.query([selector_resource, RDF::OpenAnnotation.end, RDF::Literal.new(66)]).size).to eql 1
+    end
+    it 'multiple blank nodes at target second level' do
+      graph = RDF::Graph.new
+      graph.from_jsonld('{  
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@type": "oa:Annotation", 
+        "motivatedBy": "oa:commenting", 
+        "hasTarget": {
+          "@type": "oa:SpecificResource", 
+          "hasSource": {
+            "@id": "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg", 
+            "@type": "dctypes:Image"
+          }, 
+          "hasSelector": {
+            "@type": "oa:FragmentSelector", 
+            "value": "xywh=0,0,200,200", 
+            "conformsTo": "http://www.w3.org/TR/media-frags/"
+          }
+        }
+      }')
+      targets_graph = svc.send(:targets_graph, graph)
+      expect(targets_graph).to be_a RDF::Graph
+      expect(targets_graph.size).to eql 7
+      target_resource = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil]).first.object
+      expect(targets_graph.query([target_resource, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
+      source_resource = graph.query([target_resource, RDF::OpenAnnotation.hasSource, nil]).first.object
+      expect(targets_graph.query([target_resource, RDF::OpenAnnotation.hasSource, RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg")]).size).to eql 1
+      expect(targets_graph.query([target_resource, RDF::OpenAnnotation.hasSource, source_resource]).size).to eql 1
+      expect(targets_graph.query([source_resource, RDF.type, RDF::DCMIType.Image]).size).to eql 1
+      selector_resource = graph.query([target_resource, RDF::OpenAnnotation.hasSelector, nil]).first.object
+      expect(targets_graph.query([target_resource, RDF::OpenAnnotation.hasSelector, selector_resource]).size).to eql 1
+      expect(targets_graph.query([selector_resource, RDF.type, RDF::OpenAnnotation.FragmentSelector]).size).to eql 1
+      expect(targets_graph.query([selector_resource, RDF.value, RDF::Literal.new("xywh=0,0,200,200")]).size).to eql 1
+      expect(targets_graph.query([selector_resource, RDF::DC.conformsTo, RDF::URI.new("http://www.w3.org/TR/media-frags/")]).size).to eql 1
+    end
+    it 'target is html frag selector' do
+      graph = RDF::Graph.new
+      graph.from_jsonld('{  
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@type": "oa:Annotation", 
+        "motivatedBy": "oa:commenting", 
+        "hasTarget": {
+          "@type": "oa:SpecificResource", 
+          "hasSource": "http://purl.stanford.edu/kq131cs7229.html", 
+          "hasSelector": {
+            "@type": "oa:TextQuoteSelector", 
+            "suffix": " and The Canonical Epistles,", 
+            "exact": "third and fourth Gospels", 
+            "prefix": "manuscript which comprised the "
+          }
+        }
+      }')
+      targets_graph = svc.send(:targets_graph, graph)
+      expect(targets_graph).to be_a RDF::Graph
+      expect(targets_graph.size).to eql 7
+      target_resource = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil]).first.object
+      expect(targets_graph.query([target_resource, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
+      expect(targets_graph.query([target_resource, RDF::OpenAnnotation.hasSource, RDF::URI.new("http://purl.stanford.edu/kq131cs7229.html")]).size).to eql 1
+      selector_resource = graph.query([target_resource, RDF::OpenAnnotation.hasSelector, nil]).first.object
+      expect(targets_graph.query([target_resource, RDF::OpenAnnotation.hasSelector, selector_resource]).size).to eql 1
+      expect(targets_graph.query([selector_resource, RDF.type, RDF::OpenAnnotation.TextQuoteSelector]).size).to eql 1
+      expect(targets_graph.query([selector_resource, RDF::OpenAnnotation.suffix, RDF::Literal.new(" and The Canonical Epistles,")]).size).to eql 1
+      expect(targets_graph.query([selector_resource, RDF::OpenAnnotation.exact, RDF::Literal.new("third and fourth Gospels")]).size).to eql 1
+      expect(targets_graph.query([selector_resource, RDF::OpenAnnotation.prefix, RDF::Literal.new("manuscript which comprised the ")]).size).to eql 1
     end
     it 'multiple targets' do
       skip "to be implemented"
