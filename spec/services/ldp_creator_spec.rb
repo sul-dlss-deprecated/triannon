@@ -98,11 +98,29 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(has_body_stmts.size).to eql 1
       body_resource = has_body_stmts.first.object
       expect(body_resource).to be_a RDF::Node
+      
       body_stmts = svc.send(:subject_statements, body_resource, anno.graph)
       expect(body_stmts.size).to eql 3
       expect(body_stmts).to include([body_resource, RDF::Content::chars, "I love this!"])
       expect(body_stmts).to include([body_resource, RDF.type, RDF::Content.ContentAsText])
       expect(body_stmts).to include([body_resource, RDF.type, RDF::DCMIType.Text])
+    end
+    it 'should recurse when the object of a subject statement is a blank node' do
+      graph = RDF::Graph.new
+      graph.from_jsonld(Triannon.annotation_fixture("html-frag-pos-selector.json"))
+      has_target_stmts = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+      target_resource = has_target_stmts.first.object
+
+      target_stmts = svc.send(:subject_statements, target_resource, graph)
+      expect(target_stmts.size).to eql 6
+      expect(target_stmts).to include([target_resource, RDF.type, RDF::OpenAnnotation.SpecificResource])
+      expect(target_stmts).to include([target_resource, RDF::OpenAnnotation.hasSource, "http://purl.stanford.edu/kq131cs7229.html"])
+      has_selector_stmts = graph.query([target_resource, RDF::OpenAnnotation.hasSelector, nil])
+      selector_resource = has_selector_stmts.first.object
+      expect(target_stmts).to include([target_resource, RDF::OpenAnnotation.hasSelector, selector_resource])
+      expect(target_stmts).to include([selector_resource, RDF.type, RDF::OpenAnnotation.TextPositionSelector])
+      expect(target_stmts).to include([selector_resource, RDF::OpenAnnotation.start, RDF::Literal.new(0)])
+      expect(target_stmts).to include([selector_resource, RDF::OpenAnnotation.end, RDF::Literal.new(66)])
     end
     it 'empty Array when the subject is an RDF::Node not in the graph' do
       expect(svc.send(:subject_statements, RDF::Node.new, anno.graph)).to eql []

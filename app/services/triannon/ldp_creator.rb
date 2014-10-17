@@ -139,17 +139,20 @@ module Triannon
     end
     
     # @param subject the RDF object to be used as the subject in the graph query.  Should be an RDF::Node or RDF::URI
-    # @param [RDF::Graph] graph 
+    # @param [RDF::Graph] graph
     # @return [Array[RDF::Statement]] all the triples with the given subject
     def subject_statements(subject, graph)      
       result = []
       if subject.is_a? RDF::Node
         stmts = graph.query([subject, nil, nil])
-        stmts.each { |s|  
+        stmts.each { |s|
           result << s
+          if s.object.is_a? RDF::Node
+            subject_statements(s.object, graph).each { |s| result << s }
+          end
         }
       end
-      result
+      result.uniq
     end 
     
   end
