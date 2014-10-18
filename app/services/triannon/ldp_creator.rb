@@ -120,25 +120,33 @@ module Triannon
     end
     
     # @param [RDF::Graph] graph a Triannon::Annotation as a graph
-    # @return [RDF::Graph] all the triples with a body as a subject, as a single graph object
-    def get_bodies_graph graph
-      
+    # @return [RDF::Graph] a single graph object containing subgraphs of each body object 
+    def bodies_graph graph
+      result = RDF::Graph.new      
+      stmts = []
+      bodies_solns = graph.query([nil, RDF::OpenAnnotation.hasBody, nil])      
+      bodies_solns.each { |has_body_stmt | 
+        body_obj = has_body_stmt.object
+        subject_statements(body_obj, graph).each { |s| 
+          result << s 
+        }
+      }
+      result
     end
     
     # @param [RDF::Graph] graph a Triannon::Annotation as a graph
-    # @return [Array[RDF::Statement]] all the triples with a target as a subject, as a single graph object
+    # @return [RDF::Graph] a single graph object containing subgraphs of each target object 
     def targets_graph graph
+      result = RDF::Graph.new
       stmts = []
       targets_solns = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
       targets_solns.each { |has_target_stmt | 
         target_obj = has_target_stmt.object
-        stmts = subject_statements(target_obj, graph)
+        subject_statements(target_obj, graph).each { |s| 
+          result << s 
+        }
       }
-      g = RDF::Graph.new
-      stmts.each { |s| 
-        g << s 
-      }
-      g
+      result
     end
     
     # given an RDF::Resource (an RDF::Node or RDF::URI), look for all the statements with that object 

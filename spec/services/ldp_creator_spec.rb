@@ -90,16 +90,154 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(resp.body).to match /hasTarget/
     end
   end
+
+  describe '#bodies_graph' do
+    it 'empty when no bodies' do
+      graph = RDF::Graph.new
+      graph.from_jsonld('{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@type": "oa:Annotation", 
+        "motivatedBy": "oa:bookmarking", 
+        "hasTarget": "http://purl.stanford.edu/kq131cs7229"
+      }')
+      bodies_graph = svc.send(:bodies_graph, graph)
+      expect(bodies_graph).to be_a RDF::Graph
+      expect(bodies_graph.size).to eql 0
+    end
+    it 'contains all appropriate statements for has_body blank nodes, recursively' do
+      graph = RDF::Graph.new
+      graph.from_jsonld('{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@type": "oa:Annotation", 
+        "hasBody": {
+          "@type": [
+            "cnt:ContentAsText", 
+            "dctypes:Text"
+          ], 
+          "chars": "I love this!",
+          "language": "en"
+        } 
+      }')
+      bodies_graph = svc.send(:bodies_graph, graph)
+      expect(bodies_graph).to be_a RDF::Graph
+      expect(bodies_graph.size).to eql 4
+      body_resource = graph.query([nil, RDF::OpenAnnotation.hasBody, nil]).first.object
+      expect(bodies_graph.query([body_resource, RDF.type, RDF::Content.ContentAsText]).size).to eql 1
+      expect(bodies_graph.query([body_resource, RDF.type, RDF::DCMIType.Text]).size).to eql 1
+      expect(bodies_graph.query([body_resource, RDF::Content.chars, RDF::Literal.new("I love this!")]).size).to eql 1
+      expect(bodies_graph.query([body_resource, RDF::DC11.language, RDF::Literal.new("en")]).size).to eql 1
+
+      graph = RDF::Graph.new
+      graph.from_jsonld('{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@type": "oa:Annotation", 
+        "hasBody": {
+          "@type": "oa:Choice", 
+          "default": {
+            "@type": [
+              "cnt:ContentAsText", 
+              "dctypes:Text"
+            ], 
+            "chars": "I love this Englishly!", 
+            "language": "en"
+          }, 
+          "item": [
+            {
+              "@type": [
+                "cnt:ContentAsText", 
+                "dctypes:Text"
+              ], 
+              "chars": "Je l\'aime en Francais!", 
+              "language": "fr"
+            }
+          ]
+        } 
+      }')
+      bodies_graph = svc.send(:bodies_graph, graph)
+      expect(bodies_graph).to be_a RDF::Graph
+      expect(bodies_graph.size).to eql 11
+      body_resource = graph.query([nil, RDF::OpenAnnotation.hasBody, nil]).first.object
+      expect(bodies_graph.query([body_resource, RDF.type, RDF::OpenAnnotation.Choice]).size).to eql 1
+      expect(bodies_graph.query([body_resource, RDF::OpenAnnotation.default, nil]).size).to eql 1
+      expect(bodies_graph.query([body_resource, RDF::OpenAnnotation.item, nil]).size).to eql 1
+      default_body_node = bodies_graph.query([body_resource, RDF::OpenAnnotation.default, nil]).first.object
+      expect(bodies_graph.query([default_body_node, RDF.type, RDF::Content.ContentAsText]).size).to eql 1
+      expect(bodies_graph.query([default_body_node, RDF.type, RDF::DCMIType.Text]).size).to eql 1
+      expect(bodies_graph.query([default_body_node, RDF::Content.chars, RDF::Literal.new("I love this Englishly!")]).size).to eql 1
+      expect(bodies_graph.query([default_body_node, RDF::DC11.language, RDF::Literal.new("en")]).size).to eql 1
+      item_body_node = bodies_graph.query([body_resource, RDF::OpenAnnotation.item, nil]).first.object
+      expect(bodies_graph.query([item_body_node, RDF.type, RDF::Content.ContentAsText]).size).to eql 1
+      expect(bodies_graph.query([item_body_node, RDF.type, RDF::DCMIType.Text]).size).to eql 1
+      expect(bodies_graph.query([item_body_node, RDF::Content.chars, RDF::Literal.new("Je l'aime en Francais!")]).size).to eql 1
+      expect(bodies_graph.query([item_body_node, RDF::DC11.language, RDF::Literal.new("fr")]).size).to eql 1
+    end
+    it 'empty when body is URI with no addl properties' do
+      graph = RDF::Graph.new
+      graph.from_jsonld('{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@type": "oa:Annotation", 
+        "hasBody": "http://dbpedia.org/resource/Otto_Ege", 
+      }')
+      bodies_graph = svc.send(:bodies_graph, graph)
+      expect(bodies_graph).to be_a RDF::Graph
+      expect(bodies_graph.size).to eql 0
+    end
+    it 'includes any addl properties of body URI nodes' do
+      graph = RDF::Graph.new
+      graph.from_jsonld('{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@type": "oa:Annotation", 
+        "hasBody": {
+          "@id": "http://www.example.org/comment.pdf", 
+          "@type": "dctypes:Text"
+        }
+      }')
+      bodies_graph = svc.send(:bodies_graph, graph)
+      expect(bodies_graph).to be_a RDF::Graph
+      expect(bodies_graph.size).to eql 1
+      body_resource = graph.query([nil, RDF::OpenAnnotation.hasBody, nil]).first.object
+      expect(bodies_graph.query([body_resource, RDF.type, RDF::DCMIType.Text]).size).to eql 1
+    end
+    it 'multiple bodies' do
+      graph = RDF::Graph.new
+      graph.from_jsonld('{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@type": "oa:Annotation", 
+        "hasBody": [
+          {
+            "@type": [
+              "cnt:ContentAsText", 
+              "dctypes:Text"
+            ], 
+            "chars": "I love this!"
+          }, 
+          {
+            "@id": "http://dbpedia.org/resource/Love", 
+            "@type": "oa:SemanticTag"
+          }
+        ]
+      }')
+      bodies_graph = svc.send(:bodies_graph, graph)
+      expect(bodies_graph).to be_a RDF::Graph
+      expect(bodies_graph.size).to eql 4
+      first_body = graph.query([nil, RDF::OpenAnnotation.hasBody, nil]).first.object
+      second_body = graph.query([nil, RDF::OpenAnnotation.hasBody, nil]).to_a[1].object
+      expect(bodies_graph.query([first_body, RDF.type, RDF::Content.ContentAsText]).size).to eql 1
+      expect(bodies_graph.query([first_body, RDF.type, RDF::DCMIType.Text]).size).to eql 1
+      expect(bodies_graph.query([first_body, RDF::Content.chars, RDF::Literal.new("I love this!")]).size).to eql 1
+      expect(bodies_graph.query([second_body, RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
+    end
+  end
   
   describe '#targets_graph' do
-    it 'empty when target is a URI with no additional properties' do
+    it 'empty when target is URI with no addl properties' do
       graph = RDF::Graph.new
       graph.from_ttl('<> <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq131cs7229>.')
       targets_graph = svc.send(:targets_graph, graph)
       expect(targets_graph).to be_a RDF::Graph
       expect(targets_graph.size).to eql 0
     end
-    it 'includes any additional properties of target URI nodes' do
+    it 'includes any addl properties of target URI nodes' do
       graph = RDF::Graph.new
       graph.from_jsonld('{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
@@ -115,7 +253,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       target_resource = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil]).first.object
       expect(targets_graph.query([target_resource, RDF.type, RDF::DCMIType.Image]).size).to eql 1
     end
-    it 'contains all appropriate statements when has_target contains a blank node, recursively' do
+    it 'contains all appropriate statements for has_target blank nodes, recursively' do
       graph = RDF::Graph.new
       graph.from_jsonld('{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
@@ -212,17 +350,22 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         "hasTarget": [
           "http://purl.stanford.edu/kq131cs7229", 
           {
+            "@id": "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_thumb.jpg", 
+            "@type": "dctypes:Image"
+          },
+          {
             "@id": "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg", 
             "@type": "dctypes:Image"
           }
         ]
       }')
       has_target_stmts = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
-      expect(has_target_stmts.size).to eql 2
+      expect(has_target_stmts.size).to eql 3
       targets_graph = svc.send(:targets_graph, graph)
       expect(targets_graph).to be_a RDF::Graph
-      expect(targets_graph.size).to eql 1
+      expect(targets_graph.size).to eql 2
       expect(targets_graph.query([RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg"), RDF.type, RDF::DCMIType.Image]).size).to eql 1
+      expect(targets_graph.query([RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_thumb.jpg"), RDF.type, RDF::DCMIType.Image]).size).to eql 1
     end
   end
   
