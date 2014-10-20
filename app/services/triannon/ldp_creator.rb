@@ -86,7 +86,7 @@ module Triannon
     end
 
     def create_target_container
-      create_direct_container RDF::OpenAnnotation.hasBody
+      create_direct_container RDF::OpenAnnotation.hasTarget
     end
 
     # TODO might have to send as blank node since triples getting mixed with fedora internal triples
@@ -133,7 +133,8 @@ module Triannon
         req.headers['Content-Type'] = 'text/turtle'
         req.body = body
       end
-      response.headers['Location'].split('/').last
+      new_url = response.headers['Location'] ? response.headers['Location'] : response.headers['location']
+      new_url.split('/').last
     end
     
     # Creates an empty LDP DirectContainer in LDP Storage that is a member of the base container and has the memberRelation per the oa_vocab_term
@@ -146,7 +147,7 @@ module Triannon
       g << [blank_node, RDF::LDP.hasMemberRelation, oa_vocab_term]
       g << [blank_node, RDF::LDP.membershipResource, RDF::URI.new("#{@base_uri}/#{id}")]
 
-      result = conn.post do |req|
+      response = conn.post do |req|
         req.url "#{id}"
         req.headers['Content-Type'] = 'text/turtle'
         # OA vocab relationships all of form "hasXXX"
