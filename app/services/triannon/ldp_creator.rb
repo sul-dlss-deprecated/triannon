@@ -82,29 +82,11 @@ module Triannon
     end
 
     def create_body_container
-      ttl =<<-TTL
-        @prefix ldp: <http://www.w3.org/ns/ldp#> .
-        @prefix oa: <http://www.w3.org/ns/oa#> .
-
-        <> a ldp:DirectContainer;
-           ldp:hasMemberRelation oa:hasBody;
-           ldp:membershipResource <#{@base_uri}/#{id}> .
-      TTL
-
-      create_container :body, ttl
+      create_direct_container RDF::OpenAnnotation.hasBody
     end
 
     def create_target_container
-      ttl =<<-TTL
-        @prefix ldp: <http://www.w3.org/ns/ldp#> .
-        @prefix oa: <http://www.w3.org/ns/oa#> .
-
-        <> a ldp:DirectContainer;
-           ldp:hasMemberRelation oa:hasTarget;
-           ldp:membershipResource <#{@base_uri}/#{id}> .
-      TTL
-
-      create_container :target, ttl
+      create_direct_container RDF::OpenAnnotation.hasBody
     end
 
     # TODO might have to send as blank node since triples getting mixed with fedora internal triples
@@ -173,13 +155,5 @@ module Triannon
       end
     end
 
-    def create_container type, body
-      conn.post do |req|
-        req.url "#{id}"
-        req.headers['Content-Type'] = 'text/turtle'
-        req.headers['Slug'] = type.to_s.chars.first
-        req.body = body
-      end
-    end 
   end
 end
