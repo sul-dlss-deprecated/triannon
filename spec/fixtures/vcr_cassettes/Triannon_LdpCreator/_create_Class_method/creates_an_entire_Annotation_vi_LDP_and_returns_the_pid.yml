@@ -5,9 +5,12 @@ http_interactions:
     uri: http://localhost:8080/rest/anno
     body:
       encoding: UTF-8
-      string: |2
-                <> a <http://www.w3.org/ns/oa#Annotation>;
-                   <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#commenting> .
+      string: |
+        @prefix openannotation: <http://www.w3.org/ns/oa#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+        <> a openannotation:Annotation;
+           openannotation:motivatedBy openannotation:commenting .
     headers:
       User-Agent:
       - Faraday v0.9.0
@@ -23,34 +26,35 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"64f6ae5e968c40bfbbc1e08c3503a906710be08f"'
+      - "\"6dbe72b5fb2bc4412e7c7d160270781f31268a42\""
       Last-Modified:
-      - Mon, 13 Oct 2014 18:33:39 GMT
+      - Mon, 20 Oct 2014 22:04:42 GMT
       Content-Length:
       - '68'
       Location:
-      - http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb
+      - http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688
       Content-Type:
       - text/plain
       Server:
       - Jetty(8.1.11.v20130520)
     body:
       encoding: UTF-8
-      string: http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb
+      string: http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688
     http_version: 
-  recorded_at: Mon, 13 Oct 2014 18:33:39 GMT
+  recorded_at: Mon, 20 Oct 2014 22:04:42 GMT
 - request:
     method: post
-    uri: http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb
+    uri: http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688
     body:
       encoding: UTF-8
-      string: |2
-                @prefix ldp: <http://www.w3.org/ns/ldp#> .
-                @prefix oa: <http://www.w3.org/ns/oa#> .
+      string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix openannotation: <http://www.w3.org/ns/oa#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
-                <> a ldp:DirectContainer;
-                   ldp:hasMemberRelation oa:hasBody;
-                   ldp:membershipResource <http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb> .
+        <> a ldp:DirectContainer;
+           ldp:hasMemberRelation openannotation:hasBody;
+           ldp:membershipResource <http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688> .
     headers:
       User-Agent:
       - Faraday v0.9.0
@@ -68,70 +72,25 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"f3e2acc415a2534e60cce23005c06169f93a21b6"'
+      - "\"62d0c07e4ff76e7b4d5f4dcd8ced021aae6abbd9\""
       Last-Modified:
-      - Mon, 13 Oct 2014 18:33:39 GMT
+      - Mon, 20 Oct 2014 22:04:42 GMT
       Content-Length:
       - '70'
       Location:
-      - http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b
+      - http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/b
       Content-Type:
       - text/plain
       Server:
       - Jetty(8.1.11.v20130520)
     body:
       encoding: UTF-8
-      string: http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b
+      string: http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/b
     http_version: 
-  recorded_at: Mon, 13 Oct 2014 18:33:39 GMT
+  recorded_at: Mon, 20 Oct 2014 22:04:42 GMT
 - request:
     method: post
-    uri: http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb
-    body:
-      encoding: UTF-8
-      string: |2
-                @prefix ldp: <http://www.w3.org/ns/ldp#> .
-                @prefix oa: <http://www.w3.org/ns/oa#> .
-
-                <> a ldp:DirectContainer;
-                   ldp:hasMemberRelation oa:hasTarget;
-                   ldp:membershipResource <http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb> .
-    headers:
-      User-Agent:
-      - Faraday v0.9.0
-      Content-Type:
-      - text/turtle
-      Slug:
-      - t
-      Accept-Encoding:
-      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
-      Accept:
-      - "*/*"
-  response:
-    status:
-      code: 201
-      message: Created
-    headers:
-      Etag:
-      - '"c75b634f841bc636761c702f65ef8c56c1b8bc2b"'
-      Last-Modified:
-      - Mon, 13 Oct 2014 18:33:39 GMT
-      Content-Length:
-      - '70'
-      Location:
-      - http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/t
-      Content-Type:
-      - text/plain
-      Server:
-      - Jetty(8.1.11.v20130520)
-    body:
-      encoding: UTF-8
-      string: http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/t
-    http_version: 
-  recorded_at: Mon, 13 Oct 2014 18:33:39 GMT
-- request:
-    method: post
-    uri: http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b
+    uri: http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/b
     body:
       encoding: UTF-8
       string: |2
@@ -155,25 +114,71 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"03fa373a42a95b98e872db72706dbf8295317cda"'
+      - "\"af64d88446170e1b96142aa7a971ab1e61a21385\""
       Last-Modified:
-      - Mon, 13 Oct 2014 18:33:39 GMT
+      - Mon, 20 Oct 2014 22:04:42 GMT
       Content-Length:
       - '107'
       Location:
-      - http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23
+      - http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/b/4c5fde84-31f7-495e-ae1a-97ea84941bc7
       Content-Type:
       - text/plain
       Server:
       - Jetty(8.1.11.v20130520)
     body:
       encoding: UTF-8
-      string: http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23
+      string: http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/b/4c5fde84-31f7-495e-ae1a-97ea84941bc7
     http_version: 
-  recorded_at: Mon, 13 Oct 2014 18:33:39 GMT
+  recorded_at: Mon, 20 Oct 2014 22:04:42 GMT
 - request:
     method: post
-    uri: http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/t
+    uri: http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688
+    body:
+      encoding: UTF-8
+      string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix openannotation: <http://www.w3.org/ns/oa#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+        <> a ldp:DirectContainer;
+           ldp:hasMemberRelation openannotation:hasTarget;
+           ldp:membershipResource <http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688> .
+    headers:
+      User-Agent:
+      - Faraday v0.9.0
+      Content-Type:
+      - text/turtle
+      Slug:
+      - t
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - "\"32b4d6fd239695351cb98d0861304a6b6afa40af\""
+      Last-Modified:
+      - Mon, 20 Oct 2014 22:04:42 GMT
+      Content-Length:
+      - '70'
+      Location:
+      - http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/t
+      Content-Type:
+      - text/plain
+      Server:
+      - Jetty(8.1.11.v20130520)
+    body:
+      encoding: UTF-8
+      string: http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/t
+    http_version: 
+  recorded_at: Mon, 20 Oct 2014 22:04:42 GMT
+- request:
+    method: post
+    uri: http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/t
     body:
       encoding: UTF-8
       string: |2
@@ -199,25 +204,25 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"b8e591269496ac21e6c5b0b30654a7440594a884"'
+      - "\"bd9452a870084c6c9f61c25c3ec37047e075592b\""
       Last-Modified:
-      - Mon, 13 Oct 2014 18:33:39 GMT
+      - Mon, 20 Oct 2014 22:04:42 GMT
       Content-Length:
       - '107'
       Location:
-      - http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1
+      - http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/t/8e5e8f7a-31cc-46a2-a7f0-103b13ea2111
       Content-Type:
       - text/plain
       Server:
       - Jetty(8.1.11.v20130520)
     body:
       encoding: UTF-8
-      string: http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1
+      string: http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/t/8e5e8f7a-31cc-46a2-a7f0-103b13ea2111
     http_version: 
-  recorded_at: Mon, 13 Oct 2014 18:33:39 GMT
+  recorded_at: Mon, 20 Oct 2014 22:04:42 GMT
 - request:
     method: get
-    uri: http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb
+    uri: http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688
     body:
       encoding: US-ASCII
       string: ''
@@ -234,12 +239,12 @@ http_interactions:
       message: OK
     headers:
       Etag:
-      - '"487d5c4f192375598aa2cb16c4fe4fc4ee53cf69"'
+      - "\"e45e8c67c19c5264fd4840d4826b50e1ad315b01\""
       Last-Modified:
-      - Mon, 13 Oct 2014 18:33:39 GMT
+      - Mon, 20 Oct 2014 22:04:42 GMT
       Link:
-      - <http://www.w3.org/ns/ldp#DirectContainer>;rel="type"
-      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      - "<http://www.w3.org/ns/ldp#DirectContainer>;rel=\"type\""
+      - "<http://www.w3.org/ns/ldp#Resource>;rel=\"type\""
       Accept-Patch:
       - application/sparql-update
       Accept-Post:
@@ -252,33 +257,33 @@ http_interactions:
       - Accept, Range, Accept-Encoding, Accept-Language
       - Prefer
       Content-Length:
-      - '3973'
+      - '3976'
       Content-Type:
       - text/turtle
       Server:
       - Jetty(8.1.11.v20130520)
     body:
       encoding: UTF-8
-      string: "\n<http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/fcr:export?format=jcr/xml>
+      string: "\n<http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/fcr:export?format=jcr/xml>
         <http://purl.org/dc/elements/1.1/format> <http://fedora.info/definitions/v4/repository#jcr/xml>
         .\n\n<http://fedora.info/definitions/v4/repository#jcr/xml> <http://www.w3.org/2000/01/rdf-schema#label>
-        \"jcr/xml\"^^<http://www.w3.org/2001/XMLSchema#string> .\n\n<http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb>
-        <http://fedora.info/definitions/v4/rest-api#exportsAs> <http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/fcr:export?format=jcr/xml>
-        ;\n\t<http://www.w3.org/ns/ldp#membershipResource> <http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb>
+        \"jcr/xml\"^^<http://www.w3.org/2001/XMLSchema#string> .\n\n<http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688>
+        <http://fedora.info/definitions/v4/rest-api#exportsAs> <http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/fcr:export?format=jcr/xml>
+        ;\n\t<http://www.w3.org/ns/ldp#membershipResource> <http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688>
         ;\n\t<http://www.w3.org/ns/ldp#hasMemberRelation> <http://www.w3.org/ns/ldp#member>
         ;\n\ta <http://www.w3.org/ns/ldp#Container> , <http://www.w3.org/ns/ldp#DirectContainer>
-        ;\n\t<http://www.w3.org/ns/ldp#member> <http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b>
-        , <http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/t>
-        ;\n\t<http://www.w3.org/ns/oa#hasBody> <http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23>
-        ;\n\t<http://www.w3.org/ns/oa#hasTarget> <http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1>
-        ;\n\t<http://www.w3.org/ns/ldp#contains> <http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b>
-        , <http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/t>
+        ;\n\t<http://www.w3.org/ns/ldp#member> <http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/b>
+        , <http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/t>
+        ;\n\t<http://www.w3.org/ns/oa#hasBody> <http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/b/4c5fde84-31f7-495e-ae1a-97ea84941bc7>
+        ;\n\t<http://www.w3.org/ns/oa#hasTarget> <http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/t/8e5e8f7a-31cc-46a2-a7f0-103b13ea2111>
+        ;\n\t<http://www.w3.org/ns/ldp#contains> <http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/b>
+        , <http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/t>
         ;\n\t<http://fedora.info/definitions/v4/repository#hasParent> <http://localhost:8080/rest/anno>
-        .\n\n<http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b>
-        <http://www.w3.org/ns/ldp#membershipResource> <http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb>
-        .\n\n<http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/t>
-        <http://www.w3.org/ns/ldp#membershipResource> <http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb>
-        .\n\n<http://localhost:8080/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb>
+        .\n\n<http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/b>
+        <http://www.w3.org/ns/ldp#membershipResource> <http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688>
+        .\n\n<http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688/t>
+        <http://www.w3.org/ns/ldp#membershipResource> <http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688>
+        .\n\n<http://localhost:8080/rest/anno/517fe52b-88b6-411f-9f7f-1b418efbd688>
         a <http://www.jcp.org/jcr/nt/1.0folder> , <http://www.jcp.org/jcr/nt/1.0hierarchyNode>
         , <http://www.jcp.org/jcr/nt/1.0base> , <http://www.jcp.org/jcr/mix/1.0created>
         , <http://fedora.info/definitions/v4/rest-api#resource> , <http://fedora.info/definitions/v4/rest-api#object>
@@ -290,14 +295,14 @@ http_interactions:
         \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> ;\n\t<http://fedora.info/definitions/v4/repository#primaryType>
         \"nt:folder\"^^<http://www.w3.org/2001/XMLSchema#string> ;\n\t<http://www.w3.org/ns/oa#motivatedBy>
         <http://www.w3.org/ns/oa#commenting> ;\n\t<http://fedora.info/definitions/v4/repository#created>
-        \"2014-10-13T18:33:39.191Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
-        ;\n\t<http://fedora.info/definitions/v4/repository#lastModified> \"2014-10-13T18:33:39.265Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        \"2014-10-20T22:04:42.701Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\t<http://fedora.info/definitions/v4/repository#lastModified> \"2014-10-20T22:04:42.774Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
         ;\n\t<http://fedora.info/definitions/v4/repository#mixinTypes> \"fedora:resource\"^^<http://www.w3.org/2001/XMLSchema#string>
-        , \"fedora:object\"^^<http://www.w3.org/2001/XMLSchema#string> , \"oa:Annotation\"^^<http://www.w3.org/2001/XMLSchema#string>
+        , \"fedora:object\"^^<http://www.w3.org/2001/XMLSchema#string> , \"ns001:Annotation\"^^<http://www.w3.org/2001/XMLSchema#string>
         ;\n\t<http://fedora.info/definitions/v4/repository#lastModifiedBy> \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
-        ;\n\t<http://fedora.info/definitions/v4/repository#uuid> \"88694f22-640b-4006-97cd-5135690987cc\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\t<http://fedora.info/definitions/v4/repository#uuid> \"ec4426f7-ae67-4d21-a6f7-8861cf07e946\"^^<http://www.w3.org/2001/XMLSchema#string>
         ;\n\t<http://fedora.info/definitions/v4/repository#createdBy> \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
         .\n"
     http_version: 
-  recorded_at: Mon, 13 Oct 2014 18:33:39 GMT
+  recorded_at: Mon, 20 Oct 2014 22:04:42 GMT
 recorded_with: VCR 2.9.3

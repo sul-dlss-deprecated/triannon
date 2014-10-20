@@ -4,25 +4,56 @@ vcr_options = {:re_record_interval => 45.days}  # TODO will make shorter once we
 describe Triannon::LdpCreator, :vcr => vcr_options do
 
   let(:anno) { Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl") }
-  let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
 
-  describe "#create" do
-    let(:svc) { Triannon::LdpCreator.new anno }
-    it "POSTS a ttl representation of the Annotation to the correct LDP container" do
-      new_pid = svc.create
-
+  describe "#create_base" do
+    let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
+    it 'LDP store creates retrievable object representing the annotation and returns id' do
+      svc = Triannon::LdpCreator.new anno
+      new_pid = svc.create_base
       resp = conn.get do |req|
-        req.url " #{new_pid}"
-        req.headers['Accept'] = 'text/turtle'
+        req.url "#{new_pid}"
+        req.headers['Accept'] = 'application/x-turtle'
       end
+      expect(resp.body).to match /oa#Annotation/
+      expect(resp.body).to match /oa#motivatedBy/
       expect(resp.body).to match /oa#commenting/
+    end
+    it 'keeps multiple motivations if present' do
+      my_anno = Triannon::Annotation.new data: '{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@id": "http://example.org/annos/annotation/mult-motivations.json", 
+        "@type": "oa:Annotation", 
+        "motivatedBy": [
+          "oa:moderating", 
+          "oa:tagging"
+        ], 
+        "hasBody": {
+          "@id": "http://dbpedia.org/resource/Banhammer", 
+          "@type": "oa:SemanticTag"
+        }, 
+        "hasTarget": "http://purl.stanford.edu/kq131cs7229"
+      }'
+      my_svc = Triannon::LdpCreator.new my_anno
+      new_pid = my_svc.create_base
+      resp = conn.get do |req|
+        req.url "#{new_pid}"
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      expect(resp.body).to match /oa#Annotation/
+      expect(resp.body).to match /oa#motivatedBy/
+      expect(resp.body).to match /oa#moderating/
+      expect(resp.body).to match /oa#tagging/
+    end
+    it 'posts provenance if present' do
+      skip "provenance not yet implemented"
     end
   end
 
   describe "#create_body_container" do
     let(:svc) { Triannon::LdpCreator.new anno }
+    let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
     it "POSTS a ttl representation of an LDP directContainer to the newly created Annotation" do
-      new_pid = svc.create
+      new_pid = svc.create_base
       svc.create_body_container
 
       resp = conn.get do |req|
@@ -37,8 +68,9 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
 
   describe "#create_target_container" do
     let(:svc) { Triannon::LdpCreator.new anno }
+    let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
     it "POSTS a ttl representation of an LDP directContainer to the newly created Annotation" do
-      new_pid = svc.create
+      new_pid = svc.create_base
       svc.create_target_container
 
       resp = conn.get do |req|
@@ -52,8 +84,9 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
 
   describe "#create_body" do
     let(:svc) { Triannon::LdpCreator.new anno }
+    let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
     it "POSTS a ttl representation of a body to the body container" do
-      new_pid = svc.create
+      new_pid = svc.create_base
       svc.create_body_container
       body_pid = svc.create_body
 
@@ -68,8 +101,9 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
 
   describe "#create_target" do
     let(:svc) { Triannon::LdpCreator.new anno }
+    let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
     it "POSTS a ttl representation of a target to the target container" do
-      new_pid = svc.create
+      new_pid = svc.create_base
       svc.create_target_container
       target_pid = svc.create_target
 
@@ -82,8 +116,9 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     end
   end
 
-  describe ".create" do
+  describe ".create Class method" do
     let(:svc) { Triannon::LdpCreator.new anno }
+    let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
     it "creates an entire Annotation vi LDP and returns the pid" do
       id = Triannon::LdpCreator.create anno
 
@@ -98,8 +133,9 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
   
   describe '#create_direct_container' do
     let(:svc) { Triannon::LdpCreator.new anno }
+    let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
     before(:each) do
-      @new_pid = svc.create
+      @new_pid = svc.create_base
     end
     it 'LDP store creates retrievable, empty LDP DirectContainer with expected id and LDP member relationships' do
       svc.send(:create_direct_container, RDF::OpenAnnotation.hasTarget)

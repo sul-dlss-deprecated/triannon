@@ -6,7 +6,7 @@ module Triannon
 
     def self.create(anno)                       # TODO just pass simple strings/arrays/hashes? :body => [,,], :target => [,,], :motivation => [,,]
       res = Triannon::LdpCreator.new anno
-      res.create
+      res.create_base
       # TODO:  create body containers with bodies for EACH body
       res.create_body_container
       res.create_body
@@ -67,18 +67,19 @@ module Triannon
       @anno = anno
       @base_uri = Triannon.config[:ldp_url]
     end
-
+    
     # POSTS a ttl representation of the LDP Annotation container to the LDP store
-    #  uses inline hardcoded ttl, and only looks at single motivation
-    # @deprecated - use create_base
-    def create
-      motivation = @anno.motivated_by.first
-      ttl  =<<-EOTL
-        <> a <http://www.w3.org/ns/oa#Annotation>;
-           <http://www.w3.org/ns/oa#motivatedBy> <#{motivation}> .
-      EOTL
-
-      @id = create_resource ttl
+    def create_base
+      # TODO:  given that we already have a graph ...
+      # remove the hasBody and hasTarget statements, and any blank nodes associated with them 
+      #  (see bodies_graph and targets_graph)
+      blank_node = RDF::URI.new
+      g = RDF::Graph.new
+      g << [blank_node, RDF.type, RDF::OpenAnnotation.Annotation]
+      @anno.motivated_by.each { |url|
+        g << [blank_node, RDF::OpenAnnotation.motivatedBy, RDF::URI.new(url)]
+      }
+      @id = create_resource g.to_ttl
     end
 
     def create_body_container
