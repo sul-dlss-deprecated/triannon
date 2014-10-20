@@ -1,0 +1,87 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: http://localhost:8080/rest/anno
+    body:
+      encoding: UTF-8
+      string: |2
+                <> a <http://www.w3.org/ns/oa#Annotation>;
+                   <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#commenting> .
+    headers:
+      User-Agent:
+      - Faraday v0.9.0
+      Content-Type:
+      - text/turtle
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - "\"8b610ae4f43ec68e5d71baeef14df9dc5c622ba2\""
+      Last-Modified:
+      - Mon, 20 Oct 2014 18:59:40 GMT
+      Content-Length:
+      - '68'
+      Location:
+      - http://localhost:8080/rest/anno/f17a35c9-405c-401a-8a84-d9196d3e1ab9
+      Content-Type:
+      - text/plain
+      Server:
+      - Jetty(8.1.11.v20130520)
+    body:
+      encoding: UTF-8
+      string: http://localhost:8080/rest/anno/f17a35c9-405c-401a-8a84-d9196d3e1ab9
+    http_version: 
+  recorded_at: Mon, 20 Oct 2014 18:59:40 GMT
+- request:
+    method: post
+    uri: http://localhost:8080/rest/anno/f17a35c9-405c-401a-8a84-d9196d3e1ab9
+    body:
+      encoding: UTF-8
+      string: |2
+                @prefix ldp: <http://www.w3.org/ns/ldp#> .
+                @prefix oa: <http://www.w3.org/ns/oa#> .
+
+                <> a ldp:DirectContainer;
+                   ldp:hasMemberRelation oa:hasBody;
+                   ldp:membershipResource <http://localhost:8080/rest/anno/f17a35c9-405c-401a-8a84-d9196d3e1ab9> .
+    headers:
+      User-Agent:
+      - Faraday v0.9.0
+      Content-Type:
+      - text/turtle
+      Slug:
+      - b
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - "\"d9864a6a5dba734160b6770ffe9baed61388c1dd\""
+      Last-Modified:
+      - Mon, 20 Oct 2014 18:59:40 GMT
+      Content-Length:
+      - '70'
+      Location:
+      - http://localhost:8080/rest/anno/f17a35c9-405c-401a-8a84-d9196d3e1ab9/b
+      Content-Type:
+      - text/plain
+      Server:
+      - Jetty(8.1.11.v20130520)
+    body:
+      encoding: UTF-8
+      string: http://localhost:8080/rest/anno/f17a35c9-405c-401a-8a84-d9196d3e1ab9/b
+    http_version: 
+  recorded_at: Mon, 20 Oct 2014 18:59:40 GMT
+recorded_with: VCR 2.9.3

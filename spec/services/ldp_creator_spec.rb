@@ -4,11 +4,11 @@ vcr_options = {:re_record_interval => 45.days}  # TODO will make shorter once we
 describe Triannon::LdpCreator, :vcr => vcr_options do
 
   let(:anno) { Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl") }
-  let(:svc) { Triannon::LdpCreator.new anno }
   let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
 
   describe "#create" do
-    it "POSTS a ttl represntation of the Annotation to the correct LDP container" do
+    let(:svc) { Triannon::LdpCreator.new anno }
+    it "POSTS a ttl representation of the Annotation to the correct LDP container" do
       new_pid = svc.create
 
       resp = conn.get do |req|
@@ -20,7 +20,8 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
   end
 
   describe "#create_body_container" do
-    it "POSTS a ttl represntation of an LDP directContainer to the newly created Annotation" do
+    let(:svc) { Triannon::LdpCreator.new anno }
+    it "POSTS a ttl representation of an LDP directContainer to the newly created Annotation" do
       new_pid = svc.create
       svc.create_body_container
 
@@ -35,7 +36,8 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
   end
 
   describe "#create_target_container" do
-    it "POSTS a ttl represntation of an LDP directContainer to the newly created Annotation" do
+    let(:svc) { Triannon::LdpCreator.new anno }
+    it "POSTS a ttl representation of an LDP directContainer to the newly created Annotation" do
       new_pid = svc.create
       svc.create_target_container
 
@@ -49,7 +51,8 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
   end
 
   describe "#create_body" do
-    it "POSTS a ttl represntation of a body to the body container" do
+    let(:svc) { Triannon::LdpCreator.new anno }
+    it "POSTS a ttl representation of a body to the body container" do
       new_pid = svc.create
       svc.create_body_container
       body_pid = svc.create_body
@@ -64,7 +67,8 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
   end
 
   describe "#create_target" do
-    it "POSTS a ttl represntation of a target to the target container" do
+    let(:svc) { Triannon::LdpCreator.new anno }
+    it "POSTS a ttl representation of a target to the target container" do
       new_pid = svc.create
       svc.create_target_container
       target_pid = svc.create_target
@@ -79,6 +83,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
   end
 
   describe ".create" do
+    let(:svc) { Triannon::LdpCreator.new anno }
     it "creates an entire Annotation vi LDP and returns the pid" do
       id = Triannon::LdpCreator.create anno
 
@@ -96,7 +101,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     before(:each) do
       @new_pid = svc.create
     end
-    it 'creates an empty ldp:DirectContainer with expected id and ldp:memberRelation per param' do
+    it 'LDP store creates retrievable, empty LDP DirectContainer with expected id and LDP member relationships' do
       svc.send(:create_direct_container, RDF::OpenAnnotation.hasTarget)
       resp = conn.get do |req|
         req.url " #{@new_pid}/t"
@@ -130,7 +135,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         "motivatedBy": "oa:bookmarking", 
         "hasTarget": "http://purl.stanford.edu/kq131cs7229"
       }')
-      bodies_graph = svc.send(:bodies_graph, graph)
+      bodies_graph = Triannon::LdpCreator.bodies_graph graph
       expect(bodies_graph).to be_a RDF::Graph
       expect(bodies_graph.size).to eql 0
     end
@@ -148,7 +153,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           "language": "en"
         } 
       }')
-      bodies_graph = svc.send(:bodies_graph, graph)
+      bodies_graph = Triannon::LdpCreator.bodies_graph graph
       expect(bodies_graph).to be_a RDF::Graph
       expect(bodies_graph.size).to eql 4
       body_resource = graph.query([nil, RDF::OpenAnnotation.hasBody, nil]).first.object
@@ -183,7 +188,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           ]
         } 
       }')
-      bodies_graph = svc.send(:bodies_graph, graph)
+      bodies_graph = Triannon::LdpCreator.bodies_graph graph
       expect(bodies_graph).to be_a RDF::Graph
       expect(bodies_graph.size).to eql 11
       body_resource = graph.query([nil, RDF::OpenAnnotation.hasBody, nil]).first.object
@@ -208,7 +213,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         "@type": "oa:Annotation", 
         "hasBody": "http://dbpedia.org/resource/Otto_Ege", 
       }')
-      bodies_graph = svc.send(:bodies_graph, graph)
+      bodies_graph = Triannon::LdpCreator.bodies_graph graph
       expect(bodies_graph).to be_a RDF::Graph
       expect(bodies_graph.size).to eql 0
     end
@@ -222,7 +227,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           "@type": "dctypes:Text"
         }
       }')
-      bodies_graph = svc.send(:bodies_graph, graph)
+      bodies_graph = Triannon::LdpCreator.bodies_graph graph
       expect(bodies_graph).to be_a RDF::Graph
       expect(bodies_graph.size).to eql 1
       body_resource = graph.query([nil, RDF::OpenAnnotation.hasBody, nil]).first.object
@@ -247,7 +252,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           }
         ]
       }')
-      bodies_graph = svc.send(:bodies_graph, graph)
+      bodies_graph = Triannon::LdpCreator.bodies_graph graph
       expect(bodies_graph).to be_a RDF::Graph
       expect(bodies_graph.size).to eql 4
       first_body = graph.query([nil, RDF::OpenAnnotation.hasBody, nil]).first.object
@@ -263,7 +268,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     it 'empty when target is URI with no addl properties' do
       graph = RDF::Graph.new
       graph.from_ttl('<> <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq131cs7229>.')
-      targets_graph = svc.send(:targets_graph, graph)
+      targets_graph = Triannon::LdpCreator.targets_graph graph
       expect(targets_graph).to be_a RDF::Graph
       expect(targets_graph.size).to eql 0
     end
@@ -277,7 +282,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           "@type": "dctypes:Image"
         }
       }')
-      targets_graph = svc.send(:targets_graph, graph)
+      targets_graph = Triannon::LdpCreator.targets_graph graph
       expect(targets_graph).to be_a RDF::Graph
       expect(targets_graph.size).to eql 1
       target_resource = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil]).first.object
@@ -298,7 +303,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           }
         }
       }')
-      targets_graph = svc.send(:targets_graph, graph)
+      targets_graph = Triannon::LdpCreator.targets_graph graph
       expect(targets_graph).to be_a RDF::Graph
       expect(targets_graph.size).to eql 6
       target_resource = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil]).first.object
@@ -328,7 +333,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           }
         }
       }')
-      targets_graph = svc.send(:targets_graph, graph)
+      targets_graph = Triannon::LdpCreator.targets_graph graph
       expect(targets_graph).to be_a RDF::Graph
       expect(targets_graph.size).to eql 7
       target_resource = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil]).first.object
@@ -359,7 +364,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           }
         }
       }')
-      targets_graph = svc.send(:targets_graph, graph)
+      targets_graph = Triannon::LdpCreator.targets_graph graph
       expect(targets_graph).to be_a RDF::Graph
       expect(targets_graph.size).to eql 7
       target_resource = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil]).first.object
@@ -391,7 +396,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       }')
       has_target_stmts = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
       expect(has_target_stmts.size).to eql 3
-      targets_graph = svc.send(:targets_graph, graph)
+      targets_graph = Triannon::LdpCreator.targets_graph graph
       expect(targets_graph).to be_a RDF::Graph
       expect(targets_graph.size).to eql 2
       expect(targets_graph.query([RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg"), RDF.type, RDF::DCMIType.Image]).size).to eql 1
@@ -408,7 +413,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
            <http://www.w3.org/2011/content#chars> "I love this!"
          ] .')
       body_resource = graph.query([nil, RDF::OpenAnnotation.hasBody, nil]).first.object
-      body_stmts = svc.send(:subject_statements, body_resource, graph)
+      body_stmts = Triannon::LdpCreator.subject_statements(body_resource, graph)
       expect(body_stmts.size).to eql 3
       expect(body_stmts).to include([body_resource, RDF::Content::chars, "I love this!"])
       expect(body_stmts).to include([body_resource, RDF.type, RDF::Content.ContentAsText])
@@ -429,7 +434,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         }
       }')
       target_resource = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil]).first.object
-      target_stmts = svc.send(:subject_statements, target_resource, graph)
+      target_stmts = Triannon::LdpCreator.subject_statements(target_resource, graph)
       expect(target_stmts.size).to eql 6
       expect(target_stmts).to include([target_resource, RDF.type, RDF::OpenAnnotation.SpecificResource])
       expect(target_stmts).to include([target_resource, RDF::OpenAnnotation.hasSource, "http://purl.stanford.edu/kq131cs7229.html"])
@@ -452,7 +457,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         }
       }')
       target_resource = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil]).first.object
-      target_stmts = svc.send(:subject_statements, target_resource, graph)
+      target_stmts = Triannon::LdpCreator.subject_statements(target_resource, graph)
       expect(target_stmts.size).to eql 5
       expect(target_stmts).to include([target_resource, RDF.type, RDF::OpenAnnotation.SpecificResource])
       selector_resource =  graph.query([target_resource, RDF::OpenAnnotation.hasSelector, nil]).first.object
@@ -474,7 +479,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         }
       }')
       target_resource = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil]).first.object
-      target_stmts = svc.send(:subject_statements, target_resource, graph)
+      target_stmts = Triannon::LdpCreator.subject_statements(target_resource, graph)
       expect(target_stmts.size).to eql 3
       expect(target_stmts).to include([target_resource, RDF.type, RDF::OpenAnnotation.SpecificResource])
       expect(target_stmts).to include([target_resource, RDF::OpenAnnotation.hasSource, "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg"])
@@ -489,20 +494,20 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
              <http://purl.org/dc/dcmitype/Text>;
            <http://www.w3.org/2011/content#chars> "I love this!"
          ] .')
-      expect(svc.send(:subject_statements, RDF::Node.new, graph)).to eql []
-      expect(svc.send(:subject_statements, RDF::URI.new("http://not.there.org"), graph)).to eql []
+      expect(Triannon::LdpCreator.subject_statements(RDF::Node.new, graph)).to eql []
+      expect(Triannon::LdpCreator.subject_statements(RDF::URI.new("http://not.there.org"), graph)).to eql []
     end
     it 'empty Array when the subject is an RDF::URI with no additional properties' do
       graph = RDF::Graph.new
       graph.from_ttl('<http://example.org/annos/annotation/body-chars.ttl> <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq131cs7229>.')
       target_resource = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil]).first.object
       expect(target_resource).to be_a RDF::URI
-      expect(svc.send(:subject_statements, target_resource, graph)).to eql []
+      expect(Triannon::LdpCreator.subject_statements(target_resource, graph)).to eql []
     end
     it 'empty Array when subject is not RDF::Node or RDF::URI' do
       graph = RDF::Graph.new
       graph.from_ttl('<http://example.org/annos/annotation/body-chars.ttl> <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq131cs7229>.')
-      expect(svc.send(:subject_statements, RDF.type, graph)).to eql []
+      expect(Triannon::LdpCreator.subject_statements(RDF.type, graph)).to eql []
     end
   end
 

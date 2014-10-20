@@ -16,6 +16,50 @@ module Triannon
       res.id                                     # TODO just return the pid?
     end
 
+    # @param [RDF::Graph] graph a Triannon::Annotation as a graph
+    # @return [RDF::Graph] a single graph object containing subgraphs of each body object 
+    def self.bodies_graph graph
+      result = RDF::Graph.new
+      stmts = []
+      bodies_solns = graph.query([nil, RDF::OpenAnnotation.hasBody, nil])
+      bodies_solns.each { |has_body_stmt | 
+        body_obj = has_body_stmt.object
+        subject_statements(body_obj, graph).each { |s| 
+          result << s 
+        }
+      }
+      result
+    end
+    
+    # @param [RDF::Graph] graph a Triannon::Annotation as a graph
+    # @return [RDF::Graph] a single graph object containing subgraphs of each target object 
+    def self.targets_graph graph
+      result = RDF::Graph.new
+      stmts = []
+      targets_solns = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+      targets_solns.each { |has_target_stmt | 
+        target_obj = has_target_stmt.object
+        subject_statements(target_obj, graph).each { |s| 
+          result << s 
+        }
+      }
+      result
+    end
+    
+    # given an RDF::Resource (an RDF::Node or RDF::URI), look for all the statements with that object 
+    #  as the subject, and recurse through the graph to find all descendant statements pertaining to the subject
+    # @param subject the RDF object to be used as the subject in the graph query.  Should be an RDF::Node or RDF::URI
+    # @param [RDF::Graph] graph
+    # @return [Array[RDF::Statement]] all the triples with the given subject
+    def self.subject_statements(subject, graph)
+      result = []
+      graph.query([subject, nil, nil]).each { |stmt|
+        result << stmt
+        subject_statements(stmt.object, graph).each { |s| result << s }
+      }
+      result.uniq
+    end 
+
     attr_accessor :id
 
     # @param [Triannon::Annotation] anno a Triannon::Annotation object
@@ -136,51 +180,6 @@ module Triannon
         req.headers['Slug'] = type.to_s.chars.first
         req.body = body
       end
-    end
-    
-    # @param [RDF::Graph] graph a Triannon::Annotation as a graph
-    # @return [RDF::Graph] a single graph object containing subgraphs of each body object 
-    def bodies_graph graph
-      result = RDF::Graph.new      
-      stmts = []
-      bodies_solns = graph.query([nil, RDF::OpenAnnotation.hasBody, nil])      
-      bodies_solns.each { |has_body_stmt | 
-        body_obj = has_body_stmt.object
-        subject_statements(body_obj, graph).each { |s| 
-          result << s 
-        }
-      }
-      result
-    end
-    
-    # @param [RDF::Graph] graph a Triannon::Annotation as a graph
-    # @return [RDF::Graph] a single graph object containing subgraphs of each target object 
-    def targets_graph graph
-      result = RDF::Graph.new
-      stmts = []
-      targets_solns = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
-      targets_solns.each { |has_target_stmt | 
-        target_obj = has_target_stmt.object
-        subject_statements(target_obj, graph).each { |s| 
-          result << s 
-        }
-      }
-      result
-    end
-    
-    # given an RDF::Resource (an RDF::Node or RDF::URI), look for all the statements with that object 
-    #  as the subject, and recurse through the graph to find all descendant statements pertaining to the subject
-    # @param subject the RDF object to be used as the subject in the graph query.  Should be an RDF::Node or RDF::URI
-    # @param [RDF::Graph] graph
-    # @return [Array[RDF::Statement]] all the triples with the given subject
-    def subject_statements(subject, graph)      
-      result = []
-      graph.query([subject, nil, nil]).each { |stmt|
-        result << stmt
-        subject_statements(stmt.object, graph).each { |s| result << s }
-      }
-      result.uniq
     end 
-    
   end
 end
