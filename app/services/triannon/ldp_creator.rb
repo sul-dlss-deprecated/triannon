@@ -82,10 +82,12 @@ module Triannon
       @id = create_resource g.to_ttl
     end
 
+    # creates the LDP container for any and all bodies for this annotation
     def create_body_container
       create_direct_container RDF::OpenAnnotation.hasBody
     end
 
+    # creates the LDP container for any and all targets for this annotation
     def create_target_container
       create_direct_container RDF::OpenAnnotation.hasTarget
     end
@@ -131,7 +133,7 @@ module Triannon
     def create_resource body, url = nil
       response = conn.post do |req|
         req.url url if url
-        req.headers['Content-Type'] = 'text/turtle'
+        req.headers['Content-Type'] = 'application/x-turtle'
         req.body = body
       end
       new_url = response.headers['Location'] ? response.headers['Location'] : response.headers['location']
@@ -150,7 +152,7 @@ module Triannon
 
       response = conn.post do |req|
         req.url "#{id}"
-        req.headers['Content-Type'] = 'text/turtle'
+        req.headers['Content-Type'] = 'application/x-turtle'
         # OA vocab relationships all of form "hasXXX"
         req.headers['Slug'] = oa_vocab_term.fragment.slice(3).downcase
         req.body = g.to_ttl

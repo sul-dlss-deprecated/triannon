@@ -52,33 +52,44 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
   describe "#create_body_container" do
     let(:svc) { Triannon::LdpCreator.new anno }
     let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
-    it "POSTS a ttl representation of an LDP directContainer to the newly created Annotation" do
+    it 'calls #create_direct_container with hasBody' do
+      expect(svc).to receive(:create_direct_container).with(RDF::OpenAnnotation.hasBody)
+      svc.create_body_container
+    end
+    it 'LDP store creates retrievable LDP DirectContainer with correct member relationships' do
       new_pid = svc.create_base
       svc.create_body_container
-
       resp = conn.get do |req|
         req.url " #{new_pid}/b"
-        req.headers['Accept'] = 'text/turtle'
+        req.headers['Accept'] = 'application/x-turtle'
       end
-      expect(resp.body).to match /oa#hasBody/
+      expect(resp.body).to match /ldp#membershipResource/
       expect(resp.body).to match /#{new_pid}/
-      # fails now hasMemberRelation <http://www.w3.org/ns/ldp#hasMemberRelation> <http://fedora.info/definitions/v4/repository#hasChild>
+      expect(resp.body).to match /ldp#hasMemberRelation/
+      expect(resp.body).to match /oa#hasBody/
+      expect(resp.body).not_to match /ldp#contains/
     end
   end
 
   describe "#create_target_container" do
     let(:svc) { Triannon::LdpCreator.new anno }
     let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
-    it "POSTS a ttl representation of an LDP directContainer to the newly created Annotation" do
+    it 'calls #create_direct_container with hasBody' do
+      expect(svc).to receive(:create_direct_container).with(RDF::OpenAnnotation.hasTarget)
+      svc.create_target_container
+    end
+    it 'LDP store creates retrievable LDP DirectContainer with correct member relationships' do
       new_pid = svc.create_base
       svc.create_target_container
-
       resp = conn.get do |req|
         req.url " #{new_pid}/t"
-        req.headers['Accept'] = 'text/turtle'
+        req.headers['Accept'] = 'application/x-turtle'
       end
-      expect(resp.body).to match /oa#hasTarget/
+      expect(resp.body).to match /ldp#membershipResource/
       expect(resp.body).to match /#{new_pid}/
+      expect(resp.body).to match /ldp#hasMemberRelation/
+      expect(resp.body).to match /oa#hasTarget/
+      expect(resp.body).not_to match /ldp#contains/
     end
   end
 
@@ -92,7 +103,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
 
       resp = conn.get do |req|
         req.url " #{new_pid}/b/#{body_pid}"
-        req.headers['Accept'] = 'text/turtle'
+        req.headers['Accept'] = 'application/x-turtle'
       end
       expect(resp.body).to match /I love this/
       expect(resp.body).to match /#{new_pid}/
@@ -109,7 +120,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
 
       resp = conn.get do |req|
         req.url " #{new_pid}/t/#{target_pid}"
-        req.headers['Accept'] = 'text/turtle'
+        req.headers['Accept'] = 'application/x-turtle'
       end
       expect(resp.body).to match /purl.stanford.edu/
       expect(resp.body).to match /triannon.*\/externalReference/
@@ -124,7 +135,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
 
       resp = conn.get do |req|
         req.url " #{id}"
-        req.headers['Accept'] = 'text/turtle'
+        req.headers['Accept'] = 'application/x-turtle'
       end
       expect(resp.body).to match /hasBody/
       expect(resp.body).to match /hasTarget/
