@@ -109,6 +109,25 @@ module Triannon
       end
       response.headers['Location'].split('/').last
     end
+    
+    # Creates an empty LDP DirectContainer in LDP Storage that is a member of the base container and has the memberRelation per the oa_vocab_term
+    # The id of the created containter will be (base container id)b  if hasBody or  (base container id)/t  if hasTarget 
+    # @param [RDF::Vocabulary::Term] oa_vocab_term RDF::OpenAnnotation.hasTarget or RDF::OpenAnnotation.hasBody
+    def create_direct_container oa_vocab_term
+      blank_node = RDF::URI.new
+      g = RDF::Graph.new
+      g << [blank_node, RDF.type, RDF::LDP.DirectContainer]
+      g << [blank_node, RDF::LDP.hasMemberRelation, oa_vocab_term]
+      g << [blank_node, RDF::LDP.membershipResource, RDF::URI.new("#{@base_uri}/#{id}")]
+
+      result = conn.post do |req|
+        req.url "#{id}"
+        req.headers['Content-Type'] = 'text/turtle'
+        # OA vocab relationships all of form "hasXXX"
+        req.headers['Slug'] = oa_vocab_term.fragment.slice(3).downcase
+        req.body = g.to_ttl
+      end
+    end
 
     def create_container type, body
       conn.post do |req|

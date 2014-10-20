@@ -90,6 +90,36 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(resp.body).to match /hasTarget/
     end
   end
+  
+  describe '#create_direct_container' do
+    let(:svc) { Triannon::LdpCreator.new anno }
+    before(:each) do
+      @new_pid = svc.create
+    end
+    it 'creates an empty ldp:DirectContainer with expected id and ldp:memberRelation per param' do
+      svc.send(:create_direct_container, RDF::OpenAnnotation.hasTarget)
+      resp = conn.get do |req|
+        req.url " #{@new_pid}/t"
+        req.headers['Accept'] = 'text/turtle'
+      end
+      expect(resp.body).to match /DirectContainer/
+      expect(resp.body).to match /membershipResource/
+      expect(resp.body).to match  "#{Triannon.config[:ldp_url]}/#{@new_pid}"
+      expect(resp.body).to match /hasMemberRelation/
+      expect(resp.body).to match /hasTarget/
+    end
+    it 'has the correct ldp:memberRelation and id for hasTarget' do
+      # see previous spec
+    end
+    it 'has the correct ldp:memberRelation and id for hasBody' do
+      svc.send(:create_direct_container, RDF::OpenAnnotation.hasBody)
+      resp = conn.get do |req|
+        req.url " #{@new_pid}/b"
+        req.headers['Accept'] = 'text/turtle'
+      end
+      expect(resp.body).to match /hasBody/
+    end
+  end
 
   describe '#bodies_graph' do
     it 'empty when no bodies' do

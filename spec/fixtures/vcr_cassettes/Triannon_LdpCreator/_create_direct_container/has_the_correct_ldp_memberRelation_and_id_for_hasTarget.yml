@@ -1,0 +1,42 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: http://localhost:8080/rest/anno
+    body:
+      encoding: UTF-8
+      string: |2
+                <> a <http://www.w3.org/ns/oa#Annotation>;
+                   <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#commenting> .
+    headers:
+      User-Agent:
+      - Faraday v0.9.0
+      Content-Type:
+      - text/turtle
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - "\"ecb27fb9a02d04db573c9fdb8c1ea71881dfb461\""
+      Last-Modified:
+      - Mon, 20 Oct 2014 18:40:20 GMT
+      Content-Length:
+      - '68'
+      Location:
+      - http://localhost:8080/rest/anno/10888115-468f-4e8e-8f7e-d2df3c011fcf
+      Content-Type:
+      - text/plain
+      Server:
+      - Jetty(8.1.11.v20130520)
+    body:
+      encoding: UTF-8
+      string: http://localhost:8080/rest/anno/10888115-468f-4e8e-8f7e-d2df3c011fcf
+    http_version: 
+  recorded_at: Mon, 20 Oct 2014 18:40:20 GMT
+recorded_with: VCR 2.9.3
