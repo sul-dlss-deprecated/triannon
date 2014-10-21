@@ -15,6 +15,9 @@ describe Triannon::AnnotationsController, type: :controller, :vcr => vcr_options
   end
 
   it "should have an index" do
+    a1 = Triannon::Annotation.new :id => 'abc'
+    a2 = Triannon::Annotation.new :id => 'dce'
+    allow(Triannon::Annotation).to receive(:all).and_return [a1, a2]
     get :index
   end
 
