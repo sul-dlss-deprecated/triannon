@@ -1,10 +1,8 @@
 module Triannon
   class Annotation
     include ActiveModel::Model
-    include ActiveModel::Validations
-    include Rails.application.routes.url_helpers
 
-    attr_accessor :key, :data
+    attr_accessor :id, :data
 
     validates_each :data do |record, attr, value|
       record.errors.add attr, 'less than 30 chars' if value.to_s.length < 30
@@ -15,8 +13,9 @@ module Triannon
     # and perhaps modeled on this:
     #   https://github.com/uq-eresearch/lorestore/blob/3e9aa1c69aafd3692c69aa39c64bfdc32b757892/src/main/resources/OAConstraintsSPARQL.json
 
-    def id
-      @key
+
+    def persisted?
+      self.id.present?
     end
 
     def url
@@ -136,9 +135,10 @@ module Triannon
       anno
     end
 
-    def base_uri
-      annotation_path(self)
+    def self.all
+      Triannon::LdpLoader.find_all
     end
+
 
 private
 

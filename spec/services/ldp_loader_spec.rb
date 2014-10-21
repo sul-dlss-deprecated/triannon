@@ -5,6 +5,7 @@ describe Triannon::LdpLoader do
   let(:anno_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_base.ttl') }
   let(:body_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_body.ttl') }
   let(:target_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_target.ttl') }
+  let(:root_anno_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_root_anno_container.ttl') }
 
   describe "#load_annotation" do
 
@@ -62,6 +63,19 @@ describe Triannon::LdpLoader do
       result = loader.annotation.graph.query [loader.annotation.target_uri, RDF::URI.new("http://triannon.stanford.edu/ns/externalReference"), nil]
       expect(result.first.object.to_s).to match /kq131cs7229/
     end
+  end
+
+  describe ".find_all" do
+    it "returns an array of Triannon::Annnotation objects, with just id set" do
+      loader = Triannon::LdpLoader.new
+      allow(loader).to receive(:get_ttl).and_return(root_anno_ttl)
+      objs = loader.find_all
+
+      expect(objs.size).to be > 0
+      expect(objs.first.class).to eq Triannon::Annotation
+      expect(objs.first.id).to_not be_nil
+    end
+
   end
 
 end
