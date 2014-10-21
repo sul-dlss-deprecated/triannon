@@ -167,6 +167,8 @@ describe Triannon::Annotation, :vcr => vcr_options do
 
   context ".all" do
     it "returns an array of all Annotation identifiers in the repository" do
+      root_anno_ttl = File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_root_anno_container.ttl')
+      allow_any_instance_of(Triannon::LdpLoader).to receive(:get_ttl).and_return(root_anno_ttl)
       results = Triannon::Annotation.all
       expect(results).to be_an_instance_of Array
       expect(results[0]).to be_an_instance_of Triannon::Annotation
