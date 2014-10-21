@@ -1,6 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
-describe Triannon::AnnotationLdpMapper do
+describe Triannon::LdpToOaMapper do
   let(:anno_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_base.ttl') }
   let(:body_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_body.ttl') }
   let(:target_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_target.ttl') }
@@ -12,7 +12,7 @@ describe Triannon::AnnotationLdpMapper do
       ldp_anno.load_data_into_graph anno_ttl
       ldp_anno.load_data_into_graph body_ttl
       ldp_anno.load_data_into_graph target_ttl
-      oa_graph = Triannon::AnnotationLdpMapper.ldp_to_oa ldp_anno
+      oa_graph = Triannon::LdpToOaMapper.ldp_to_oa ldp_anno
 
       resp = oa_graph.query [nil,RDF.type, RDF::OpenAnnotation.Annotation ]
       expect(resp.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/deb27887-1241-4ccc-a09c-439293d73fbb"
@@ -27,7 +27,7 @@ describe Triannon::AnnotationLdpMapper do
       a
     }
 
-    let(:mapper) { Triannon::AnnotationLdpMapper.new ldp_anno  }
+    let(:mapper) { Triannon::LdpToOaMapper.new ldp_anno  }
 
     # TODO what to do about id in the graph?  Config option? Config.open_annotation_base_uri ?
     it "extracts the id from the root subject" do
@@ -64,7 +64,7 @@ describe Triannon::AnnotationLdpMapper do
       }
 
       it "sets the hasBody statement with a blank node of type ContentAsText, dcmitype/Text with content#chars" do
-        mapper = Triannon::AnnotationLdpMapper.new ldp_anno
+        mapper = Triannon::LdpToOaMapper.new ldp_anno
         mapper.extract_base
         mapper.extract_body
 
@@ -91,7 +91,7 @@ describe Triannon::AnnotationLdpMapper do
     }
 
     it "sets the hasTarget url from externalReference" do
-      mapper = Triannon::AnnotationLdpMapper.new ldp_anno
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
       mapper.extract_target
 
