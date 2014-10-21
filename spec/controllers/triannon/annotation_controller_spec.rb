@@ -4,7 +4,7 @@ vcr_options = { :cassette_name => "controllers_annotations_index" }
 describe Triannon::AnnotationsController, type: :controller, :vcr => vcr_options do
 
   routes { Triannon::Engine.routes }
-  let(:annotation) { Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json"), key: '123'}
+  let(:annotation) { Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json"), id: '123'}
 
   # regex: \A and \Z and m are needed instead of ^$ due to \n in data)
   json_regex = /\A\{.+\}\Z/m
@@ -15,7 +15,6 @@ describe Triannon::AnnotationsController, type: :controller, :vcr => vcr_options
   end
 
   it "should have an index" do
-    skip 'Need to create Annotation.all method'
     get :index
   end
 

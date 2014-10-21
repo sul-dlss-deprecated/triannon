@@ -64,7 +64,7 @@ describe "viewing an annotation", type: :feature, :vcr => vcr_options do
   end
 
   def create_annotation f
-    Triannon::Annotation.new data: annotation_fixture(f), key: '1234'
+    Triannon::Annotation.new data: annotation_fixture(f), id: '1234'
   end
 
   def annotation_fixture fixture
