@@ -167,9 +167,18 @@ describe Triannon::Annotation, :vcr => vcr_options do
 
   context ".all" do
     it "returns an array of all Annotation identifiers in the repository" do
-      skip ".all to be implemented"
+      results = Triannon::Annotation.all
+      expect(results).to be_an_instance_of Array
+      expect(results[0]).to be_an_instance_of Triannon::Annotation
+      expect(results[0].id).to be_an_instance_of String
+      # result only contains populated id attribute
+      expect(results[0].url).to eql nil
+      expect(results[0].type).to eql nil
     end
-
+    it "calls LdpLoader.find_all" do
+      expect_any_instance_of(Triannon::LdpLoader).to receive(:find_all)
+      Triannon::Annotation.all
+    end
   end
 
 end
