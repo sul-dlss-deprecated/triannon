@@ -6,55 +6,90 @@ module Triannon
 
     def self.create(anno)                       # TODO just pass simple strings/arrays/hashes? :body => [,,], :target => [,,], :motivation => [,,]
       res = Triannon::LdpCreator.new anno
-      res.create
+      res.create_base
+      # TODO:  create body containers with bodies for EACH body
       res.create_body_container
-      res.create_target_container
       res.create_body
+      # TODO:  create target containers with bodies for EACH target
+      res.create_target_container
       res.create_target
       res.id                                     # TODO just return the pid?
     end
 
+    # @param [RDF::Graph] graph a Triannon::Annotation as a graph
+    # @return [RDF::Graph] a single graph object containing subgraphs of each body object 
+    def self.bodies_graph graph
+      result = RDF::Graph.new
+      stmts = []
+      bodies_solns = graph.query([nil, RDF::OpenAnnotation.hasBody, nil])
+      bodies_solns.each { |has_body_stmt | 
+        body_obj = has_body_stmt.object
+        subject_statements(body_obj, graph).each { |s| 
+          result << s 
+        }
+      }
+      result
+    end
+    
+    # @param [RDF::Graph] graph a Triannon::Annotation as a graph
+    # @return [RDF::Graph] a single graph object containing subgraphs of each target object 
+    def self.targets_graph graph
+      result = RDF::Graph.new
+      stmts = []
+      targets_solns = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+      targets_solns.each { |has_target_stmt | 
+        target_obj = has_target_stmt.object
+        subject_statements(target_obj, graph).each { |s| 
+          result << s 
+        }
+      }
+      result
+    end
+    
+    # given an RDF::Resource (an RDF::Node or RDF::URI), look for all the statements with that object 
+    #  as the subject, and recurse through the graph to find all descendant statements pertaining to the subject
+    # @param subject the RDF object to be used as the subject in the graph query.  Should be an RDF::Node or RDF::URI
+    # @param [RDF::Graph] graph
+    # @return [Array[RDF::Statement]] all the triples with the given subject
+    def self.subject_statements(subject, graph)
+      result = []
+      graph.query([subject, nil, nil]).each { |stmt|
+        result << stmt
+        subject_statements(stmt.object, graph).each { |s| result << s }
+      }
+      result.uniq
+    end 
+
     attr_accessor :id
 
+    # @param [Triannon::Annotation] anno a Triannon::Annotation object
     def initialize(anno)
       @anno = anno
       @base_uri = Triannon.config[:ldp_url]
     end
-
-    def create
-      motivation = @anno.motivated_by.first
-      ttl  =<<-EOTL
-        <> a <http://www.w3.org/ns/oa#Annotation>;
-           <http://www.w3.org/ns/oa#motivatedBy> <#{motivation}> .
-      EOTL
-
-      @id = create_resource ttl
+    
+    # POSTS a ttl representation of the LDP Annotation container to the LDP store
+    def create_base
+      # TODO:  given that we already have a graph ...
+      # remove the hasBody and hasTarget statements, and any blank nodes associated with them 
+      #  (see bodies_graph and targets_graph)
+      blank_node = RDF::URI.new
+      g = RDF::Graph.new
+      g << [blank_node, RDF.type, RDF::OpenAnnotation.Annotation]
+      @anno.motivated_by.each { |url|
+        g << [blank_node, RDF::OpenAnnotation.motivatedBy, RDF::URI.new(url)]
+      }
+      @id = create_resource g.to_ttl
     end
 
+    # creates the LDP container for any and all bodies for this annotation
     def create_body_container
-      ttl =<<-TTL
-        @prefix ldp: <http://www.w3.org/ns/ldp#> .
-        @prefix oa: <http://www.w3.org/ns/oa#> .
-
-        <> a ldp:DirectContainer;
-           ldp:hasMemberRelation oa:hasBody;
-           ldp:membershipResource <#{@base_uri}/#{id}> .
-      TTL
-
-      create_container :body, ttl
+      create_direct_container RDF::OpenAnnotation.hasBody
     end
 
+    # creates the LDP container for any and all targets for this annotation
     def create_target_container
-      ttl =<<-TTL
-        @prefix ldp: <http://www.w3.org/ns/ldp#> .
-        @prefix oa: <http://www.w3.org/ns/oa#> .
-
-        <> a ldp:DirectContainer;
-           ldp:hasMemberRelation oa:hasTarget;
-           ldp:membershipResource <#{@base_uri}/#{id}> .
-      TTL
-
-      create_container :target, ttl
+      create_direct_container RDF::OpenAnnotation.hasTarget
     end
 
     # TODO might have to send as blank node since triples getting mixed with fedora internal triples
@@ -98,19 +133,31 @@ module Triannon
     def create_resource body, url = nil
       response = conn.post do |req|
         req.url url if url
-        req.headers['Content-Type'] = 'text/turtle'
+        req.headers['Content-Type'] = 'application/x-turtle'
         req.body = body
       end
-      response.headers['Location'].split('/').last
+      new_url = response.headers['Location'] ? response.headers['Location'] : response.headers['location']
+      new_url.split('/').last
+    end
+    
+    # Creates an empty LDP DirectContainer in LDP Storage that is a member of the base container and has the memberRelation per the oa_vocab_term
+    # The id of the created containter will be (base container id)b  if hasBody or  (base container id)/t  if hasTarget 
+    # @param [RDF::Vocabulary::Term] oa_vocab_term RDF::OpenAnnotation.hasTarget or RDF::OpenAnnotation.hasBody
+    def create_direct_container oa_vocab_term
+      blank_node = RDF::URI.new
+      g = RDF::Graph.new
+      g << [blank_node, RDF.type, RDF::LDP.DirectContainer]
+      g << [blank_node, RDF::LDP.hasMemberRelation, oa_vocab_term]
+      g << [blank_node, RDF::LDP.membershipResource, RDF::URI.new("#{@base_uri}/#{id}")]
+
+      response = conn.post do |req|
+        req.url "#{id}"
+        req.headers['Content-Type'] = 'application/x-turtle'
+        # OA vocab relationships all of form "hasXXX"
+        req.headers['Slug'] = oa_vocab_term.fragment.slice(3).downcase
+        req.body = g.to_ttl
+      end
     end
 
-    def create_container type, body
-      conn.post do |req|
-        req.url "#{id}"
-        req.headers['Content-Type'] = 'text/turtle'
-        req.headers['Slug'] = type.to_s.chars.first
-        req.body = body
-      end
-    end
   end
 end

@@ -23,34 +23,35 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"670489786f94d615b22912e87fd7a3119999d8cf"'
+      - "\"07dd436b2bcfa84af202146f419ed10b82a7b5f2\""
       Last-Modified:
-      - Mon, 13 Oct 2014 18:33:38 GMT
+      - Mon, 20 Oct 2014 20:32:50 GMT
       Content-Length:
       - '68'
       Location:
-      - http://localhost:8080/rest/anno/aa43cc2d-29f7-4ced-976a-663973515cc8
+      - http://localhost:8080/rest/anno/a8b23764-8928-4bc2-a00e-5ac149567646
       Content-Type:
       - text/plain
       Server:
       - Jetty(8.1.11.v20130520)
     body:
       encoding: UTF-8
-      string: http://localhost:8080/rest/anno/aa43cc2d-29f7-4ced-976a-663973515cc8
+      string: http://localhost:8080/rest/anno/a8b23764-8928-4bc2-a00e-5ac149567646
     http_version: 
-  recorded_at: Mon, 13 Oct 2014 18:33:38 GMT
+  recorded_at: Mon, 20 Oct 2014 20:32:50 GMT
 - request:
     method: post
-    uri: http://localhost:8080/rest/anno/aa43cc2d-29f7-4ced-976a-663973515cc8
+    uri: http://localhost:8080/rest/anno/a8b23764-8928-4bc2-a00e-5ac149567646
     body:
       encoding: UTF-8
-      string: |2
-                @prefix ldp: <http://www.w3.org/ns/ldp#> .
-                @prefix oa: <http://www.w3.org/ns/oa#> .
+      string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix openannotation: <http://www.w3.org/ns/oa#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
-                <> a ldp:DirectContainer;
-                   ldp:hasMemberRelation oa:hasBody;
-                   ldp:membershipResource <http://localhost:8080/rest/anno/aa43cc2d-29f7-4ced-976a-663973515cc8> .
+        <> a ldp:DirectContainer;
+           ldp:hasMemberRelation openannotation:hasBody;
+           ldp:membershipResource <http://localhost:8080/rest/anno/a8b23764-8928-4bc2-a00e-5ac149567646> .
     headers:
       User-Agent:
       - Faraday v0.9.0
@@ -68,25 +69,25 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"d28ccce79120ea9701ac838131354ba535fc3aa7"'
+      - "\"ac55653a662e43cee3fea67bce74d66a8983f8c9\""
       Last-Modified:
-      - Mon, 13 Oct 2014 18:33:38 GMT
+      - Mon, 20 Oct 2014 20:32:50 GMT
       Content-Length:
       - '70'
       Location:
-      - http://localhost:8080/rest/anno/aa43cc2d-29f7-4ced-976a-663973515cc8/b
+      - http://localhost:8080/rest/anno/a8b23764-8928-4bc2-a00e-5ac149567646/b
       Content-Type:
       - text/plain
       Server:
       - Jetty(8.1.11.v20130520)
     body:
       encoding: UTF-8
-      string: http://localhost:8080/rest/anno/aa43cc2d-29f7-4ced-976a-663973515cc8/b
+      string: http://localhost:8080/rest/anno/a8b23764-8928-4bc2-a00e-5ac149567646/b
     http_version: 
-  recorded_at: Mon, 13 Oct 2014 18:33:38 GMT
+  recorded_at: Mon, 20 Oct 2014 20:32:50 GMT
 - request:
     method: get
-    uri: http://localhost:8080/rest/anno/aa43cc2d-29f7-4ced-976a-663973515cc8/b
+    uri: http://localhost:8080/rest/anno/a8b23764-8928-4bc2-a00e-5ac149567646/b
     body:
       encoding: US-ASCII
       string: ''
@@ -103,12 +104,12 @@ http_interactions:
       message: OK
     headers:
       Etag:
-      - '"d28ccce79120ea9701ac838131354ba535fc3aa7"'
+      - "\"ac55653a662e43cee3fea67bce74d66a8983f8c9\""
       Last-Modified:
-      - Mon, 13 Oct 2014 18:33:38 GMT
+      - Mon, 20 Oct 2014 20:32:50 GMT
       Link:
-      - <http://www.w3.org/ns/ldp#DirectContainer>;rel="type"
-      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      - "<http://www.w3.org/ns/ldp#DirectContainer>;rel=\"type\""
+      - "<http://www.w3.org/ns/ldp#Resource>;rel=\"type\""
       Accept-Patch:
       - application/sparql-update
       Accept-Post:
@@ -121,20 +122,21 @@ http_interactions:
       - Accept, Range, Accept-Encoding, Accept-Language
       - Prefer
       Content-Length:
-      - '2825'
+      - '2898'
       Content-Type:
       - text/turtle
       Server:
       - Jetty(8.1.11.v20130520)
     body:
       encoding: UTF-8
-      string: "\n<http://localhost:8080/rest/anno/aa43cc2d-29f7-4ced-976a-663973515cc8/b/fcr:export?format=jcr/xml>
+      string: "\n<http://localhost:8080/rest/anno/a8b23764-8928-4bc2-a00e-5ac149567646/b/fcr:export?format=jcr/xml>
         <http://purl.org/dc/elements/1.1/format> <http://fedora.info/definitions/v4/repository#jcr/xml>
+        .\n\n<http://localhost:8080/rest/anno/a8b23764-8928-4bc2-a00e-5ac149567646/b>
+        <http://fedora.info/definitions/v4/rest-api#exportsAs> <http://localhost:8080/rest/anno/a8b23764-8928-4bc2-a00e-5ac149567646/b/fcr:export?format=jcr/xml>
         .\n\n<http://fedora.info/definitions/v4/repository#jcr/xml> <http://www.w3.org/2000/01/rdf-schema#label>
-        \"jcr/xml\"^^<http://www.w3.org/2001/XMLSchema#string> .\n\n<http://localhost:8080/rest/anno/aa43cc2d-29f7-4ced-976a-663973515cc8/b>
-        <http://fedora.info/definitions/v4/rest-api#exportsAs> <http://localhost:8080/rest/anno/aa43cc2d-29f7-4ced-976a-663973515cc8/b/fcr:export?format=jcr/xml>
-        ;\n\ta <http://www.w3.org/ns/ldp#Container> , <http://www.w3.org/ns/ldp#DirectContainer>
-        ;\n\t<http://fedora.info/definitions/v4/repository#hasParent> <http://localhost:8080/rest/anno/aa43cc2d-29f7-4ced-976a-663973515cc8>
+        \"jcr/xml\"^^<http://www.w3.org/2001/XMLSchema#string> .\n\n<http://localhost:8080/rest/anno/a8b23764-8928-4bc2-a00e-5ac149567646/b>
+        a <http://www.w3.org/ns/ldp#Container> , <http://www.w3.org/ns/ldp#DirectContainer>
+        ;\n\t<http://fedora.info/definitions/v4/repository#hasParent> <http://localhost:8080/rest/anno/a8b23764-8928-4bc2-a00e-5ac149567646>
         ;\n\ta <http://www.jcp.org/jcr/nt/1.0folder> , <http://www.jcp.org/jcr/nt/1.0hierarchyNode>
         , <http://www.jcp.org/jcr/nt/1.0base> , <http://www.jcp.org/jcr/mix/1.0created>
         , <http://fedora.info/definitions/v4/rest-api#resource> , <http://fedora.info/definitions/v4/rest-api#object>
@@ -145,16 +147,16 @@ http_interactions:
         , <http://www.w3.org/ns/ldp#Container> ;\n\t<http://fedora.info/definitions/v4/rest-api#writable>
         \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> ;\n\t<http://fedora.info/definitions/v4/repository#primaryType>
         \"nt:folder\"^^<http://www.w3.org/2001/XMLSchema#string> ;\n\t<http://www.w3.org/ns/ldp#membershipResource>
-        <http://localhost:8080/rest/anno/aa43cc2d-29f7-4ced-976a-663973515cc8> ;\n\t<http://fedora.info/definitions/v4/repository#created>
-        \"2014-10-13T18:33:38.745Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
-        ;\n\t<http://fedora.info/definitions/v4/repository#lastModified> \"2014-10-13T18:33:38.745Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        <http://localhost:8080/rest/anno/a8b23764-8928-4bc2-a00e-5ac149567646> ;\n\t<http://fedora.info/definitions/v4/repository#created>
+        \"2014-10-20T20:32:50.264Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\t<http://fedora.info/definitions/v4/repository#lastModified> \"2014-10-20T20:32:50.264Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
         ;\n\t<http://fedora.info/definitions/v4/repository#mixinTypes> \"fedora:resource\"^^<http://www.w3.org/2001/XMLSchema#string>
         , \"fedora:object\"^^<http://www.w3.org/2001/XMLSchema#string> , \"ldp:DirectContainer\"^^<http://www.w3.org/2001/XMLSchema#string>
         ;\n\t<http://www.w3.org/ns/ldp#hasMemberRelation> <http://www.w3.org/ns/oa#hasBody>
         ;\n\t<http://fedora.info/definitions/v4/repository#lastModifiedBy> \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
-        ;\n\t<http://fedora.info/definitions/v4/repository#uuid> \"0f2508d7-9607-4a5e-afd9-472a0e01cda8\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\t<http://fedora.info/definitions/v4/repository#uuid> \"8ea9a573-990c-4e25-85c5-b9f4a27b07a6\"^^<http://www.w3.org/2001/XMLSchema#string>
         ;\n\t<http://fedora.info/definitions/v4/repository#createdBy> \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
         .\n"
     http_version: 
-  recorded_at: Mon, 13 Oct 2014 18:33:38 GMT
+  recorded_at: Mon, 20 Oct 2014 20:32:50 GMT
 recorded_with: VCR 2.9.3
