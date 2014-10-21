@@ -1,8 +1,8 @@
 module Triannon
-  class AnnotationLdpMapper
+  class LdpToOaMapper
 
     def self.ldp_to_oa ldp_anno
-      mapper = Triannon::AnnotationLdpMapper.new ldp_anno
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
       mapper.extract_body
       mapper.extract_target
