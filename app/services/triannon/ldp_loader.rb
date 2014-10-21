@@ -14,9 +14,14 @@ module Triannon
       oa_graph
     end
 
+    def self.find_all
+      l = Triannon::LdpLoader.new
+      l.find_all
+    end
+
     attr_accessor :annotation
 
-    def initialize key
+    def initialize key = nil
       @key = key
       @base_uri = Triannon.config[:ldp_url]
       @annotation = Triannon::AnnotationLdp.new
@@ -38,11 +43,28 @@ module Triannon
       @annotation.load_data_into_graph get_ttl sub_path
     end
 
+    # @return [Array<Triannon::Annotation>] an array of Triannon::Annotation objects with just the id set. Enough info to build the index page
+    def find_all
+      root_ttl = get_ttl
+      objs = []
+
+      g = RDF::Graph.new
+      g.from_ttl root_ttl
+      root_uri = RDF::URI.new @base_uri
+      results = g.query [root_uri, RDF::LDP.contains, nil]
+      results.each do |stmt|
+        id = stmt.object.to_s.split('/').last
+        objs << Triannon::Annotation.new(:id => id)
+      end
+
+      objs
+    end
+
     protected
 
-    def get_ttl sub_path
+    def get_ttl sub_path = nil
       resp = conn.get do |req|
-        req.url " #{sub_path}"
+        req.url " #{sub_path}" if sub_path
         req.headers['Accept'] = 'text/turtle'
       end
       resp.body

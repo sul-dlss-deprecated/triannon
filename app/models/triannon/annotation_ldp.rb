@@ -5,7 +5,7 @@ module Triannon
     def graph
       @g ||= RDF::Graph.new
     end
-    
+
     # RDF::Graph without any back end (e.g. LDP, Fedora) triples
     def stripped_graph
       @stripped_graph ||= begin

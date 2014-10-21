@@ -135,9 +135,10 @@ module Triannon
       anno
     end
 
-    def base_uri
-      annotation_path(self)
+    def self.all
+      Triannon::LdpLoader.find_all
     end
+
 
 private
 
