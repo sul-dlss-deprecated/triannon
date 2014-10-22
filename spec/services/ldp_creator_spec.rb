@@ -390,15 +390,15 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(bodies_graph).to be_a RDF::Graph
       expect(bodies_graph.size).to eql 11
       body_resource = graph.query([nil, RDF::OpenAnnotation.hasBody, nil]).first.object
-      expect(bodies_graph.query([body_resource, RDF.type, RDF::OpenAnnotation.Choice]).size).to eql 1
-      expect(bodies_graph.query([body_resource, RDF::OpenAnnotation.default, nil]).size).to eql 1
-      expect(bodies_graph.query([body_resource, RDF::OpenAnnotation.item, nil]).size).to eql 1
-      default_body_node = bodies_graph.query([body_resource, RDF::OpenAnnotation.default, nil]).first.object
+      expect(bodies_graph.query([nil, RDF.type, RDF::OpenAnnotation.Choice]).size).to eql 1
+      expect(bodies_graph.query([nil, RDF::OpenAnnotation.default, nil]).size).to eql 1
+      expect(bodies_graph.query([nil, RDF::OpenAnnotation.item, nil]).size).to eql 1
+      default_body_node = bodies_graph.query([nil, RDF::OpenAnnotation.default, nil]).first.object
       expect(bodies_graph.query([default_body_node, RDF.type, RDF::Content.ContentAsText]).size).to eql 1
       expect(bodies_graph.query([default_body_node, RDF.type, RDF::DCMIType.Text]).size).to eql 1
       expect(bodies_graph.query([default_body_node, RDF::Content.chars, RDF::Literal.new("I love this Englishly!")]).size).to eql 1
       expect(bodies_graph.query([default_body_node, RDF::DC11.language, RDF::Literal.new("en")]).size).to eql 1
-      item_body_node = bodies_graph.query([body_resource, RDF::OpenAnnotation.item, nil]).first.object
+      item_body_node = bodies_graph.query([nil, RDF::OpenAnnotation.item, nil]).first.object
       expect(bodies_graph.query([item_body_node, RDF.type, RDF::Content.ContentAsText]).size).to eql 1
       expect(bodies_graph.query([item_body_node, RDF.type, RDF::DCMIType.Text]).size).to eql 1
       expect(bodies_graph.query([item_body_node, RDF::Content.chars, RDF::Literal.new("Je l'aime en Francais!")]).size).to eql 1
@@ -453,7 +453,9 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       bodies_graph = Triannon::LdpCreator.bodies_graph graph
       expect(bodies_graph).to be_a RDF::Graph
       expect(bodies_graph.size).to eql 4
-      first_body = graph.query([nil, RDF::OpenAnnotation.hasBody, nil]).first.object
+      # first_body is morphed from an RDF::Node (a blank node) to a null relative URI to work with LDP
+      # first_body = graph.query([nil, RDF::OpenAnnotation.hasBody, nil]).first.object
+      first_body = RDF::URI.new
       second_body = graph.query([nil, RDF::OpenAnnotation.hasBody, nil]).to_a[1].object
       expect(bodies_graph.query([first_body, RDF.type, RDF::Content.ContentAsText]).size).to eql 1
       expect(bodies_graph.query([first_body, RDF.type, RDF::DCMIType.Text]).size).to eql 1
