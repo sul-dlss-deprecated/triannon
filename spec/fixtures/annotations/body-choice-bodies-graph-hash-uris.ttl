@@ -1,0 +1,20 @@
+@prefix content: <http://www.w3.org/2011/content#> .
+@prefix dc11: <http://purl.org/dc/elements/1.1/> .
+@prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+@prefix openannotation: <http://www.w3.org/ns/oa#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<> a openannotation:Choice;
+   openannotation:default <#default>;
+   openannotation:item <#item>.
+
+<#default> a content:ContentAsText,
+      dcmitype:Text;
+    dc11:language "en";
+    content:chars "I love this Englishly!" .
+
+<#item> a content:ContentAsText,
+       dcmitype:Text;
+     dc11:language "fr";
+     content:chars "Je l\'aime en Francais!" .
