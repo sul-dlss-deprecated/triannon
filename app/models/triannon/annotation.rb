@@ -128,6 +128,10 @@ module Triannon
       @key = Triannon::LdpCreator.create self
     end
 
+    def destroy
+      Triannon::LdpDestroyer.destroy @id
+    end
+
     def self.find(key)
       oa_graph = LdpLoader.load key
       anno = Triannon::Annotation.new

@@ -1,0 +1,102 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: http://localhost:8080/rest/anno
+    body:
+      encoding: UTF-8
+      string: |
+        @prefix openannotation: <http://www.w3.org/ns/oa#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+        <> a openannotation:Annotation;
+           openannotation:motivatedBy openannotation:commenting .
+    headers:
+      User-Agent:
+      - Faraday v0.9.0
+      Content-Type:
+      - application/x-turtle
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - '"6aedb2956dd8ac4a2e10d6e21665c5d5cefcba30"'
+      Last-Modified:
+      - Wed, 22 Oct 2014 19:35:52 GMT
+      Content-Length:
+      - '68'
+      Location:
+      - http://localhost:8080/rest/anno/cf09e048-1536-4ba8-b17c-75dc1e2472ed
+      Content-Type:
+      - text/plain
+      Server:
+      - Jetty(8.1.11.v20130520)
+    body:
+      encoding: UTF-8
+      string: http://localhost:8080/rest/anno/cf09e048-1536-4ba8-b17c-75dc1e2472ed
+    http_version: 
+  recorded_at: Wed, 22 Oct 2014 19:35:52 GMT
+- request:
+    method: delete
+    uri: http://localhost:8080/rest/anno/cf09e048-1536-4ba8-b17c-75dc1e2472ed
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 204
+      message: No Content
+    headers:
+      Server:
+      - Jetty(8.1.11.v20130520)
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Wed, 22 Oct 2014 19:35:52 GMT
+- request:
+    method: get
+    uri: http://localhost:8080/rest/anno/cf09e048-1536-4ba8-b17c-75dc1e2472ed
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.0
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 410
+      message: Gone
+    headers:
+      Content-Length:
+      - '78'
+      Link:
+      - <http://localhost:8080/rest/anno/cf09e048-1536-4ba8-b17c-75dc1e2472ed/fcr:tombstone>;
+        rel="hasTombstone"
+      Content-Type:
+      - text/turtle
+      Server:
+      - Jetty(8.1.11.v20130520)
+    body:
+      encoding: UTF-8
+      string: Discovered tombstone resource at org.fcrepo.kernel.impl.TombstoneImpl@66c2f3ca
+    http_version: 
+  recorded_at: Wed, 22 Oct 2014 19:35:52 GMT
+recorded_with: VCR 2.9.3
