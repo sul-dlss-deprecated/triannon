@@ -35,7 +35,7 @@ module Triannon
         body_node = RDF::Node.new
         @oa_graph << [@root_uri, RDF::OpenAnnotation.hasBody, body_node]
         @oa_graph << [body_node, RDF.type, RDF::Content.ContentAsText]
-        @oa_graph << [body_node, RDF.type, RDF::URI.new('http://purl.org/dc/dcmitype/Text')]
+        @oa_graph << [body_node, RDF.type, RDF::DCMIType.Text]
         res_chars = @ldp.stripped_graph.query [@ldp.body_uri, RDF::Content.chars, nil]
         if res_chars.count > 0
           @oa_graph << [body_node, RDF::Content.chars, res_chars.first.object]

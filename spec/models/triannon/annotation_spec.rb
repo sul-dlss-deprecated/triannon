@@ -183,4 +183,15 @@ describe Triannon::Annotation, :vcr => vcr_options do
     end
   end
 
+  context "#destroy" do
+
+    it "calls LdpDestroyer.destroy with it's own id" do
+      id = 'someid'
+
+      expect(Triannon::LdpDestroyer).to receive(:destroy).with(id)
+      a = Triannon::Annotation.new :id => id
+      a.destroy
+    end
+  end
+
 end

@@ -73,7 +73,7 @@ describe Triannon::LdpToOaMapper do
         body_node = res.first.object
         res = mapper.oa_graph.query [body_node, RDF.type, RDF::Content.ContentAsText]
         expect(res.count).to eq 1
-        res = mapper.oa_graph.query [body_node, RDF.type, RDF::URI.new('http://purl.org/dc/dcmitype/Text')]
+        res = mapper.oa_graph.query [body_node, RDF.type, RDF::DCMIType.Text]
         expect(res.count).to eq 1
         res = mapper.oa_graph.query [body_node, RDF::Content.chars, nil]
         expect(res.first.object.to_s).to match /I love this!/
