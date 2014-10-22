@@ -135,6 +135,162 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     end
   end
   
+  describe '.create_from_graph' do
+    it 'should not create a body container if there are no bodies' do
+      skip
+    end
+    it 'should create a single body container with multiple resources if there are multiple bodies' do
+      skip
+    end
+    it 'should create a single target container with multiple resources if there are multiple targets' do
+      skip
+    end
+    it 'should call create_body_resource for each body resource' do
+      skip
+    end
+    it 'should call create_target_resource for each target resource' do
+      skip
+    end
+    it 'should create something or other for external resources' do
+      skip
+    end
+  end
+  
+  describe '#create_body_resources' do
+    it 'creates resources in the body container' do
+      new_pid = svc.create_base
+      svc.create_body_container
+      body_uuid = svc.create_body_resources Triannon::LdpCreator.bodies_graph(anno.graph)
+      body_pid = "#{new_pid}/b/#{body_uuid}"
+      body_resp = conn.get do |req|
+        req.url body_pid
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      expect(body_resp.body).to match /cnt\:ContentAsText/
+      expect(body_resp.body).to match /\:Text/
+      expect(body_resp.body).to match /chars "I love this!"/
+      
+      body_container_id = "#{Triannon.config[:ldp_url]}/#{new_pid}/b"
+      body_container_resp = conn.get do |req|
+        req.url body_container_id
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      expect(body_container_resp.body).to match /ldp:contains/
+      expect(body_container_resp.body).to match body_pid
+    end
+    it 'creates all appropriate statements for has_body blank nodes, recursively' do
+      graph = RDF::Graph.new
+      graph.from_jsonld('{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@type": "oa:Annotation", 
+        "hasBody": {
+          "@type": [
+            "cnt:ContentAsText", 
+            "dctypes:Text"
+          ], 
+          "chars": "I love this!",
+          "language": "en"
+        } 
+      }')
+      new_pid = svc.create_base
+      svc.create_body_container
+      body_uuid = svc.create_body_resources Triannon::LdpCreator.bodies_graph(graph)
+      body_pid = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuid}"
+      body_resp = conn.get do |req|
+        req.url body_pid
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      expect(body_resp.body).to match /cnt\:ContentAsText/
+      expect(body_resp.body).to match /\:Text/
+      expect(body_resp.body).to match /chars "I love this!"/
+      expect(body_resp.body).to match /language "en"/
+    end
+    it 'contains all appropriate statements for has_body blank nodes, recursively, oa:Choice' do
+      graph = RDF::Graph.new
+      graph.from_jsonld('{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@type": "oa:Annotation", 
+        "hasBody": {
+          "@type": "oa:Choice", 
+          "default": {
+            "@type": [
+              "cnt:ContentAsText", 
+              "dctypes:Text"
+            ], 
+            "chars": "I love this Englishly!", 
+            "language": "en"
+          }, 
+          "item": [
+            {
+              "@type": [
+                "cnt:ContentAsText", 
+                "dctypes:Text"
+              ], 
+              "chars": "Je l\'aime en Francais!", 
+              "language": "fr"
+            }
+          ]
+        } 
+      }')
+      new_pid = svc.create_base
+      svc.create_body_container
+      body_uuid = svc.create_body_resources Triannon::LdpCreator.bodies_graph(graph)
+      body_pid = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuid}"
+      body_resp = conn.get do |req|
+        req.url body_pid
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      expect(body_resp.body).to match /:Choice/
+      expect(body_resp.body).to match /:default/
+      expect(body_resp.body).to match /:item/
+      
+      # find the default blank node object / ttl
+      g = RDF::Graph.new
+      g.from_ttl body_resp.body
+      stmts = g.query([RDF::URI.new(body_pid), RDF::OpenAnnotation.default, :default_blank_node])
+      expect(stmts.size).to eql 1
+      default_node_pid = stmts.first.object.to_s
+      expect(default_node_pid).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
+      resp = conn.get do |req|
+        req.url default_node_pid
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      default_node_ttl = resp.body
+      expect(default_node_ttl).to match /cnt\:ContentAsText/
+      expect(default_node_ttl).to match /:Text/
+      expect(default_node_ttl).to match /:default/
+      expect(default_node_ttl).to match /language "en"/
+      expect(default_node_ttl).to match /chars\s+"I love this Englishly!/
+
+      # find the item blank node object / ttl
+      g = RDF::Graph.new
+      g.from_ttl body_resp.body
+      stmts = g.query([RDF::URI.new(body_pid), RDF::OpenAnnotation.item, :item_blank_node])
+      expect(stmts.size).to eql 1
+      item_node_pid = stmts.first.object.to_s
+      expect(item_node_pid).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
+      resp = conn.get do |req|
+        req.url item_node_pid
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      item_node_ttl = resp.body
+      expect(item_node_ttl).to match /cnt\:ContentAsText/
+      expect(item_node_ttl).to match /:Text/
+      expect(item_node_ttl).to match /:item/
+      expect(item_node_ttl).to match /language "fr"/
+      expect(item_node_ttl).to match /chars "Je l'aime en Francais!"/
+    end
+    it 'does the right thing when the body is a simple URI' do
+      skip
+    end
+    it 'creates any additional properties associated with a body URI' do
+      skip
+    end
+    it 'creates multiple bodies properly' do
+      skip
+    end
+  end
+  
   describe '#create_direct_container' do
     let(:svc) { Triannon::LdpCreator.new anno }
     let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
