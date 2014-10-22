@@ -4,11 +4,11 @@ vcr_options = {:re_record_interval => 45.days}  # TODO will make shorter once we
 describe Triannon::LdpCreator, :vcr => vcr_options do
 
   let(:anno) { Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl") }
+  let(:svc) { Triannon::LdpCreator.new anno }
+  let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
 
   describe "#create_base" do
-    let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
     it 'LDP store creates retrievable object representing the annotation and returns id' do
-      svc = Triannon::LdpCreator.new anno
       new_pid = svc.create_base
       resp = conn.get do |req|
         req.url "#{new_pid}"
@@ -50,8 +50,6 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
   end
 
   describe "#create_body_container" do
-    let(:svc) { Triannon::LdpCreator.new anno }
-    let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
     it 'calls #create_direct_container with hasBody' do
       expect(svc).to receive(:create_direct_container).with(RDF::OpenAnnotation.hasBody)
       svc.create_body_container
@@ -72,8 +70,6 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
   end
 
   describe "#create_target_container" do
-    let(:svc) { Triannon::LdpCreator.new anno }
-    let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
     it 'calls #create_direct_container with hasBody' do
       expect(svc).to receive(:create_direct_container).with(RDF::OpenAnnotation.hasTarget)
       svc.create_target_container
@@ -93,9 +89,8 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     end
   end
 
+  # OLD
   describe "#create_body" do
-    let(:svc) { Triannon::LdpCreator.new anno }
-    let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
     it "POSTS a ttl representation of a body to the body container" do
       new_pid = svc.create_base
       svc.create_body_container
@@ -110,9 +105,8 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     end
   end
 
+  # OLD
   describe "#create_target" do
-    let(:svc) { Triannon::LdpCreator.new anno }
-    let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
     it "POSTS a ttl representation of a target to the target container" do
       new_pid = svc.create_base
       svc.create_target_container
@@ -127,9 +121,8 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     end
   end
 
+  # OLD
   describe ".create Class method" do
-    let(:svc) { Triannon::LdpCreator.new anno }
-    let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
     it "creates an entire Annotation vi LDP and returns the pid" do
       id = Triannon::LdpCreator.create anno
 
@@ -204,11 +197,13 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(bodies_graph).to be_a RDF::Graph
       expect(bodies_graph.size).to eql 4
       body_resource = graph.query([nil, RDF::OpenAnnotation.hasBody, nil]).first.object
-      expect(bodies_graph.query([body_resource, RDF.type, RDF::Content.ContentAsText]).size).to eql 1
-      expect(bodies_graph.query([body_resource, RDF.type, RDF::DCMIType.Text]).size).to eql 1
-      expect(bodies_graph.query([body_resource, RDF::Content.chars, RDF::Literal.new("I love this!")]).size).to eql 1
-      expect(bodies_graph.query([body_resource, RDF::DC11.language, RDF::Literal.new("en")]).size).to eql 1
+      expect(bodies_graph.query([nil, RDF.type, RDF::Content.ContentAsText]).size).to eql 1
+      expect(bodies_graph.query([nil, RDF.type, RDF::DCMIType.Text]).size).to eql 1
+      expect(bodies_graph.query([nil, RDF::Content.chars, RDF::Literal.new("I love this!")]).size).to eql 1
+      expect(bodies_graph.query([nil, RDF::DC11.language, RDF::Literal.new("en")]).size).to eql 1
+    end
 
+    it 'contains all appropriate statements for has_body blank nodes, recursively, oa:Choice' do
       graph = RDF::Graph.new
       graph.from_jsonld('{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
