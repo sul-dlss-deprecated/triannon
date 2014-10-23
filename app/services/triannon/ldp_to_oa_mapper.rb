@@ -1,6 +1,7 @@
 module Triannon
   class LdpToOaMapper
 
+    # maps an AnnotationLdp to an OA RDF::Graph
     def self.ldp_to_oa ldp_anno
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
