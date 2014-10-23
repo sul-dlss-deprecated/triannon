@@ -3,7 +3,15 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 vcr_options = {:re_record_interval => 45.days}  # TODO will make shorter once we have jetty running fedora4
 describe Triannon::LdpCreator, :vcr => vcr_options do
 
-  let(:anno) { Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl") }
+  let(:anno) { Triannon::Annotation.new data: '
+    <> a <http://www.w3.org/ns/oa#Annotation>;
+       <http://www.w3.org/ns/oa#hasBody> [
+         a <http://www.w3.org/2011/content#ContentAsText>,
+           <http://purl.org/dc/dcmitype/Text>;
+         <http://www.w3.org/2011/content#chars> "I love this!"
+       ];
+       <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq131cs7229>;
+       <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#commenting> .' }
   let(:svc) { Triannon::LdpCreator.new anno }
   let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
 
@@ -23,7 +31,6 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     it 'keeps multiple motivations if present' do
       my_anno = Triannon::Annotation.new data: '{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@id": "http://example.org/annos/annotation/mult-motivations.json", 
         "@type": "oa:Annotation", 
         "motivatedBy": [
           "oa:moderating", 
@@ -49,7 +56,45 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.tagging]).size).to eql 1
     end
     it 'posts provenance if present' do
-      skip "provenance not yet implemented"
+      my_anno = Triannon::Annotation.new data: '{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@type": "oa:Annotation", 
+        "motivatedBy": "oa:commenting", 
+        "annotatedAt": "2014-09-03T17:16:13Z", 
+        "annotatedBy": {
+          "@id": "mailto:azaroth42@gmail.com", 
+          "@type": "foaf:Person", 
+          "name": "Rob Sanderson"
+        }, 
+        "serializedAt": "2014-09-03T17:16:13Z", 
+        "serializedBy": {
+          "@type": "prov:SoftwareAgent", 
+          "name": "Annotation Factory"
+        }, 
+        "hasBody": {
+          "@type": [
+            "cnt:ContentAsText", 
+            "dctypes:Text"
+          ], 
+          "chars": "I love this!"
+        }, 
+        "hasTarget": "http://purl.stanford.edu/kq131cs7229"
+      }'
+      my_svc = Triannon::LdpCreator.new my_anno
+      new_pid = my_svc.create_base
+      resp = conn.get do |req|
+        req.url "#{new_pid}"
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      full_url = "#{Triannon.config[:ldp_url]}/#{new_pid}"
+      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.annotatedAt, "2014-09-03T17:16:13Z"]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.annotatedBy, nil]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.serializedAt, "2014-09-03T17:16:13Z"]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.serializedBy, nil]).size).to eql 1
     end
   end
 
@@ -121,11 +166,13 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       target_pid = svc.create_target
 
       resp = conn.get do |req|
-        req.url " #{new_pid}/t/#{target_pid}"
+        req.url "#{new_pid}/t/#{target_pid}"
         req.headers['Accept'] = 'application/x-turtle'
       end
-      expect(resp.body).to match /purl.stanford.edu/
-      expect(resp.body).to match /triannon.*\/externalReference/
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      full_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/t/#{target_pid}"
+      expect(g.query([RDF::URI.new(full_url), RDF::Triannon.externalReference, RDF::URI.new("http://purl.stanford.edu/kq131cs7229")]).size).to eql 1
     end
   end
 
@@ -138,8 +185,11 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url " #{id}"
         req.headers['Accept'] = 'application/x-turtle'
       end
-      expect(resp.body).to match /hasBody/
-      expect(resp.body).to match /hasTarget/
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      full_url = "#{Triannon.config[:ldp_url]}/#{id}"
+      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.hasBody, nil]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.hasTarget, nil]).size).to eql 1
     end
   end
   
@@ -296,7 +346,6 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(g.query([RDF::URI.new(item_node_pid), RDF::DC11.language, "fr"]).size).to eql 1
     end
     it 'does the right thing when the body is a simple URI' do
-skip "need to implement external resources for bodies"
       my_anno = Triannon::Annotation.new data: '{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
         "@type": "oa:Annotation", 
@@ -304,6 +353,7 @@ skip "need to implement external resources for bodies"
         "hasBody": "http://dbpedia.org/resource/Otto_Ege", 
       }'
       my_svc = Triannon::LdpCreator.new my_anno
+skip "need to implement external references for bodies"      
       new_pid = my_svc.create_base
       my_svc.create_body_container
       body_uuids = my_svc.create_body_resources 
@@ -314,6 +364,18 @@ skip "need to implement external resources for bodies"
         req.headers['Accept'] = 'application/x-turtle'
       end
       body = resp.body
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      contains_stmts = g.query([RDF::URI.new(body_cont_url), RDF::LDP.contains, :body_url])
+      expect(contains_stmts.size).to eql 1
+      body_url = contains_stmts.first.object.to_s
+      resp = conn.get do |req|
+        req.url body_url
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      expect(g.query([RDF::URI.new(first_body_url), RDF::Triannon.externalReference, "http://dbpedia.org/resource/Otto_Ege"]).size).to eql 1
     end
     it 'creates any additional properties associated with a body URI' do
       skip "need to implement external resources for bodies"
