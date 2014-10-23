@@ -169,10 +169,15 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url "#{new_pid}/t/#{target_pid}"
         req.headers['Accept'] = 'application/x-turtle'
       end
+<<<<<<< HEAD
       g = RDF::Graph.new
       g.from_ttl(resp.body)
       full_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/t/#{target_pid}"
       expect(g.query([RDF::URI.new(full_url), RDF::Triannon.externalReference, RDF::URI.new("http://purl.stanford.edu/kq131cs7229")]).size).to eql 1
+=======
+      expect(resp.body).to match /purl.stanford.edu/
+      expect(resp.body).to match /triannon:externalReference/
+>>>>>>> Use latest fcrepo4 war file in dlss branch of hydra-jetty
     end
   end
 

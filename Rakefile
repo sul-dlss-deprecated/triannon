@@ -4,7 +4,7 @@ rescue LoadError
   puts 'You must `gem install bundler` and `bundle install` to run rake tasks'
 end
 
-ZIP_URL = "https://github.com/projecthydra/hydra-jetty/archive/fedora-4/edge.zip"
+ZIP_URL = "https://github.com/sul-dlss/hydra-jetty/archive/fedora-4/edge.zip"
 
 require 'active_support/benchmarkable'
 require 'jettywrapper'
