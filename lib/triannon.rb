@@ -2,6 +2,7 @@ require 'linkeddata'
 require 'rdf/open_annotation'
 require 'rdf/ldp'
 require 'rdf/fcrepo4'
+require 'rdf/triannon_vocab'
 require 'bootstrap-sass'
 require 'faraday'
 
