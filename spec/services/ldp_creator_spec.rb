@@ -169,8 +169,9 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     it 'creates resources in the body container' do
       new_pid = svc.create_base
       svc.create_body_container
-      body_uuid = svc.create_body_resources Triannon::LdpCreator.bodies_graph(anno.graph)
-      body_pid = "#{new_pid}/b/#{body_uuid}"
+      body_uuids = svc.create_body_resources
+      expect(body_uuids.size).to eql 1
+      body_pid = "#{new_pid}/b/#{body_uuids[0]}"
       resp = conn.get do |req|
         req.url body_pid
         req.headers['Accept'] = 'application/x-turtle'
@@ -193,10 +194,10 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(g.query([RDF::URI.new(full_url), RDF::LDP.contains, RDF::URI.new(body_pid)]).size).to eql 0
     end
     it 'creates all appropriate statements for has_body blank nodes, recursively' do
-      graph = RDF::Graph.new
-      graph.from_jsonld('{
+      my_anno = Triannon::Annotation.new data: '{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
         "@type": "oa:Annotation", 
+        "motivatedBy": "oa:commenting", 
         "hasBody": {
           "@type": [
             "cnt:ContentAsText", 
@@ -205,11 +206,12 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           "chars": "I love this!",
           "language": "en"
         } 
-      }')
-      new_pid = svc.create_base
-      svc.create_body_container
-      body_uuid = svc.create_body_resources Triannon::LdpCreator.bodies_graph(graph)
-      body_pid = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuid}"
+      }'
+      my_svc = Triannon::LdpCreator.new my_anno
+      new_pid = my_svc.create_base
+      my_svc.create_body_container
+      body_uuids = my_svc.create_body_resources
+      body_pid = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuids[0]}"
       resp = conn.get do |req|
         req.url body_pid
         req.headers['Accept'] = 'application/x-turtle'
@@ -222,10 +224,10 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(g.query([RDF::URI.new(body_pid), RDF::DC11.language, "en"]).size).to eql 1
     end
     it 'contains all appropriate statements for has_body blank nodes, recursively, oa:Choice' do
-      graph = RDF::Graph.new
-      graph.from_jsonld('{
+      my_anno = Triannon::Annotation.new data: '{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
         "@type": "oa:Annotation", 
+        "motivatedBy": "oa:commenting", 
         "hasBody": {
           "@type": "oa:Choice", 
           "default": {
@@ -247,11 +249,13 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
             }
           ]
         } 
-      }')
-      new_pid = svc.create_base
-      svc.create_body_container
-      body_uuid = svc.create_body_resources Triannon::LdpCreator.bodies_graph(graph)
-      body_pid = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuid}"
+      }'
+      my_svc = Triannon::LdpCreator.new my_anno
+      new_pid = my_svc.create_base
+      my_svc.create_body_container
+      body_uuids = my_svc.create_body_resources
+      expect(body_uuids.size).to eql 1
+      body_pid = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuids[0]}"
       body_resp = conn.get do |req|
         req.url body_pid
         req.headers['Accept'] = 'application/x-turtle'
@@ -292,17 +296,19 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(g.query([RDF::URI.new(item_node_pid), RDF::DC11.language, "fr"]).size).to eql 1
     end
     it 'does the right thing when the body is a simple URI' do
-      skip "need to implement external resources"
-      graph = RDF::Graph.new
-      graph.from_jsonld('{
+skip "need to implement external resources for bodies"
+      my_anno = Triannon::Annotation.new data: '{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
         "@type": "oa:Annotation", 
+        "motivatedBy": "oa:commenting", 
         "hasBody": "http://dbpedia.org/resource/Otto_Ege", 
-      }')
-      new_pid = svc.create_base
-      svc.create_body_container
-      body_uuid = svc.create_body_resources Triannon::LdpCreator.bodies_graph(graph)
-      body_pid = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuid}"
+      }'
+      my_svc = Triannon::LdpCreator.new my_anno
+      new_pid = my_svc.create_base
+      my_svc.create_body_container
+      body_uuids = my_svc.create_body_resources 
+      expect(body_uuids.size).to eql 1
+      body_pid = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuid[0]}"
       resp = conn.get do |req|
         req.url body_pid
         req.headers['Accept'] = 'application/x-turtle'
@@ -310,10 +316,123 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       body = resp.body
     end
     it 'creates any additional properties associated with a body URI' do
-      skip "need to implement external resources"
+      skip "need to implement external resources for bodies"
     end
-    it 'creates multiple bodies properly' do
-      skip
+    it 'creates multiple bodies properly no URIs' do
+      my_anno = Triannon::Annotation.new data: '{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@type": "oa:Annotation", 
+        "motivatedBy": "oa:commenting", 
+        "hasBody": [
+          {
+            "@type": [
+              "cnt:ContentAsText", 
+              "dctypes:Text"
+            ], 
+            "chars": "I love this!"
+          }, 
+          {
+            "@type": [
+              "cnt:ContentAsText", 
+              "dctypes:Text"
+            ], 
+            "chars": "I hate this!"
+          }
+        ]
+      }'
+      my_svc = Triannon::LdpCreator.new my_anno
+      new_pid = my_svc.create_base
+      my_svc.create_body_container
+      body_uuids = my_svc.create_body_resources
+      expect(body_uuids.size).to eql 2
+      body_cont_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/b"
+      resp = conn.get do |req|
+        req.url body_cont_url
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      contains_stmts = g.query([RDF::URI.new(body_cont_url), RDF::LDP.contains, :body_url])
+      expect(contains_stmts.size).to eql 2
+
+      first_body_url = contains_stmts.first.object.to_s
+      resp = conn.get do |req|
+        req.url first_body_url
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
+      expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::DCMIType.Text]).size).to eql 1
+      expect(g.query([RDF::URI.new(first_body_url), RDF::Content.chars, "I love this!"]).size).to eql 1
+
+      second_body_url = contains_stmts.to_a[1].object.to_s
+      resp = conn.get do |req|
+        req.url second_body_url
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
+      expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::DCMIType.Text]).size).to eql 1
+      expect(g.query([RDF::URI.new(second_body_url), RDF::Content.chars, "I hate this!"]).size).to eql 1
+    end
+    it 'creates multiple bodies properly (one URI)' do
+      my_anno = Triannon::Annotation.new data: '{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@type": "oa:Annotation", 
+        "motivatedBy": "oa:commenting", 
+        "hasBody": [
+          {
+            "@type": [
+              "cnt:ContentAsText", 
+              "dctypes:Text"
+            ], 
+            "chars": "I love this!"
+          }, 
+          {
+            "@id": "http://dbpedia.org/resource/Love", 
+            "@type": "oa:SemanticTag"
+          }
+        ]
+      }'
+      my_svc = Triannon::LdpCreator.new my_anno
+      new_pid = my_svc.create_base
+      my_svc.create_body_container
+      body_uuids = my_svc.create_body_resources
+      expect(body_uuids.size).to eql 2
+      body_cont_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/b"
+      resp = conn.get do |req|
+        req.url body_cont_url
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      contains_stmts = g.query([RDF::URI.new(body_cont_url), RDF::LDP.contains, :body_url])
+      expect(contains_stmts.size).to eql 2
+      
+      first_body_url = contains_stmts.first.object.to_s
+      resp = conn.get do |req|
+        req.url first_body_url
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
+      expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::DCMIType.Text]).size).to eql 1
+      expect(g.query([RDF::URI.new(first_body_url), RDF::Content.chars, "I love this!"]).size).to eql 1
+
+      second_body_url = contains_stmts.to_a[1].object.to_s
+      resp = conn.get do |req|
+        req.url second_body_url
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+skip "need to implement external references for bodies"      
+p "second body resource:"
+puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
+      expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
     end
   end
   
