@@ -44,8 +44,7 @@ module Triannon
     end
 
     def extract_target
-      ext_ref = RDF::URI.new 'http://triannon.stanford.edu/ns/externalReference'  # TODO make vocab for
-      res = @ldp.stripped_graph.query [@ldp.target_uri, ext_ref, nil]
+      res = @ldp.stripped_graph.query [@ldp.target_uri, RDF::Triannon.externalReference, nil]
       if res.count > 0
         ext_uri = res.first.object
         @oa_graph << [@root_uri, RDF::OpenAnnotation.hasTarget, ext_uri]

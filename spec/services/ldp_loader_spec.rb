@@ -60,7 +60,7 @@ describe Triannon::LdpLoader do
       loader.load_annotation
       loader.load_target
 
-      result = loader.annotation.graph.query [loader.annotation.target_uri, RDF::URI.new("http://triannon.stanford.edu/ns/externalReference"), nil]
+      result = loader.annotation.graph.query [loader.annotation.target_uri, RDF::Triannon.externalReference, nil]
       expect(result.first.object.to_s).to match /kq131cs7229/
     end
   end
