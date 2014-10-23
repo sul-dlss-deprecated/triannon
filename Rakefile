@@ -4,7 +4,7 @@ rescue LoadError
   puts 'You must `gem install bundler` and `bundle install` to run rake tasks'
 end
 
-ZIP_URL = "https://github.com/projecthydra/hydra-jetty/archive/v8.0.0.rc2.zip"
+ZIP_URL = "https://github.com/projecthydra/hydra-jetty/archive/fedora-4/edge.zip"
 
 require 'active_support/benchmarkable'
 require 'jettywrapper'
@@ -68,7 +68,7 @@ namespace :triannon do
   end
   desc 'run test rails console w triannon but no jetty'
   task :console => :console_no_jetty
-  
+
 end
 
 

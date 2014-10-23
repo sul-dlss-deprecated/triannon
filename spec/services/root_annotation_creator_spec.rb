@@ -3,7 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 describe Triannon::RootAnnotationCreator, :vcr do
 
   describe "#create" do
-    let(:dummy_url) { 'http://localhost:8080/rest/bork' }
+    let(:dummy_url) { 'http://localhost:8983/fedora/rest/bork' }
     let(:conn) { Faraday.new :url => dummy_url  }
 
     before(:each) do
