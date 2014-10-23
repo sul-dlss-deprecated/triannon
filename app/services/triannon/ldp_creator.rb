@@ -22,7 +22,6 @@ module Triannon
     # use LDP protocol to create the OpenAnnotation.Annotation in an RDF store
     # @param [RDF::Graph] anno_graph an OpenAnnotation.Annotation as an RDF::Graph object
     def self.create_from_graph(anno_graph)
-      
       # TODO:  we should not get here if the Annotation object already has an id
       result = Triannon::LdpCreator.new anno
       result.create_base
@@ -138,15 +137,50 @@ module Triannon
     
     # POSTS a ttl representation of the LDP Annotation container to the LDP store
     def create_base
-      # TODO:  given that we already have a graph ...
-      # remove the hasBody and hasTarget statements, and any blank nodes associated with them 
-      #  (see bodies_graph and targets_graph)
-      null_rel_uri = RDF::URI.new
+      # TODO:  we should error if the Annotation object already has an id
+
       g = RDF::Graph.new
-      g << [null_rel_uri, RDF.type, RDF::OpenAnnotation.Annotation]
-      @anno.motivated_by.each { |url|
-        g << [null_rel_uri, RDF::OpenAnnotation.motivatedBy, RDF::URI.new(url)]
+      @anno.graph.each { |s|  
+        g << s
       }
+
+      # remove the hasBody statements and any other statements associated with them 
+      bodies_stmts = g.query([nil, RDF::OpenAnnotation.hasBody, nil])
+      bodies_stmts.each { |has_body_stmt |
+        g.delete has_body_stmt
+        body_obj = has_body_stmt.object
+        Triannon::LdpCreator.subject_statements(body_obj, g).each { |s|  
+          g.delete s
+        }
+      }
+      # remove the hasTarget statements and any other statements associated with them 
+      targets_stmts = g.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+      targets_stmts.each { |has_target_stmt |
+        g.delete has_target_stmt
+        target_obj = has_target_stmt.object
+        Triannon::LdpCreator.subject_statements(target_obj, g).each { |s|  
+          g.delete s
+        }
+      }
+      
+      # transform an outer blank node into a null relative URI
+      anno_stmts = g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation])
+      anno_rdf_obj = anno_stmts.first.subject
+      if anno_rdf_obj.is_a?(RDF::Node)
+        # we need to use the null relative URI representation of blank nodes to write to LDP
+        anno_subject = RDF::URI.new
+      else # it's already a URI
+        anno_subject = anno_rdf_obj
+      end
+      Triannon::LdpCreator.subject_statements(anno_rdf_obj, g).each { |s|
+        if s.subject == anno_rdf_obj && anno_subject != anno_rdf_obj
+          g << RDF::Statement({:subject => anno_subject,
+                               :predicate => s.predicate,
+                               :object => s.object})
+          g.delete s
+        end
+      }
+
       @id = create_resource g.to_ttl
     end
 
