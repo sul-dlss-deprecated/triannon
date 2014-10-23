@@ -14,9 +14,11 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url "#{new_pid}"
         req.headers['Accept'] = 'application/x-turtle'
       end
-      expect(resp.body).to match /oa#Annotation/
-      expect(resp.body).to match /oa#motivatedBy/
-      expect(resp.body).to match /oa#commenting/
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      full_url = "#{Triannon.config[:ldp_url]}/#{new_pid}"
+      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
     end
     it 'keeps multiple motivations if present' do
       my_anno = Triannon::Annotation.new data: '{
@@ -39,10 +41,12 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url "#{new_pid}"
         req.headers['Accept'] = 'application/x-turtle'
       end
-      expect(resp.body).to match /oa#Annotation/
-      expect(resp.body).to match /oa#motivatedBy/
-      expect(resp.body).to match /oa#moderating/
-      expect(resp.body).to match /oa#tagging/
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      full_url = "#{Triannon.config[:ldp_url]}/#{new_pid}"
+      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.moderating]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.tagging]).size).to eql 1
     end
     it 'posts provenance if present' do
       skip "provenance not yet implemented"
@@ -61,11 +65,13 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url " #{new_pid}/b"
         req.headers['Accept'] = 'application/x-turtle'
       end
-      expect(resp.body).to match /ldp#membershipResource/
-      expect(resp.body).to match /#{new_pid}/
-      expect(resp.body).to match /ldp#hasMemberRelation/
-      expect(resp.body).to match /oa#hasBody/
-      expect(resp.body).not_to match /ldp#contains/
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      full_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/b"
+      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::LDP.DirectContainer]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::LDP.membershipResource, RDF::URI.new("#{Triannon.config[:ldp_url]}/#{new_pid}")]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::LDP.hasMemberRelation, RDF::OpenAnnotation.hasBody]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::LDP.contains, nil]).size).to eql 0
     end
   end
 
@@ -81,11 +87,13 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url " #{new_pid}/t"
         req.headers['Accept'] = 'application/x-turtle'
       end
-      expect(resp.body).to match /ldp#membershipResource/
-      expect(resp.body).to match /#{new_pid}/
-      expect(resp.body).to match /ldp#hasMemberRelation/
-      expect(resp.body).to match /oa#hasTarget/
-      expect(resp.body).not_to match /ldp#contains/
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      full_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/t"
+      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::LDP.DirectContainer]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::LDP.membershipResource, RDF::URI.new("#{Triannon.config[:ldp_url]}/#{new_pid}")]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::LDP.hasMemberRelation, RDF::OpenAnnotation.hasTarget]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::LDP.contains, nil]).size).to eql 0
     end
   end
 
@@ -135,6 +143,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     end
   end
   
+  # TODO
   describe '.create_from_graph' do
     it 'should not create a body container if there are no bodies' do
       skip
@@ -162,21 +171,26 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       svc.create_body_container
       body_uuid = svc.create_body_resources Triannon::LdpCreator.bodies_graph(anno.graph)
       body_pid = "#{new_pid}/b/#{body_uuid}"
-      body_resp = conn.get do |req|
+      resp = conn.get do |req|
         req.url body_pid
         req.headers['Accept'] = 'application/x-turtle'
       end
-      expect(body_resp.body).to match /cnt\:ContentAsText/
-      expect(body_resp.body).to match /\:Text/
-      expect(body_resp.body).to match /chars "I love this!"/
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      full_url = "#{Triannon.config[:ldp_url]}/#{body_pid}"
+      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::DCMIType.Text]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Content.chars, "I love this!"]).size).to eql 1
       
       body_container_id = "#{Triannon.config[:ldp_url]}/#{new_pid}/b"
       body_container_resp = conn.get do |req|
         req.url body_container_id
         req.headers['Accept'] = 'application/x-turtle'
       end
-      expect(body_container_resp.body).to match /ldp:contains/
-      expect(body_container_resp.body).to match body_pid
+      g = RDF::Graph.new
+      g.from_ttl(body_container_resp.body)
+      full_url = "#{Triannon.config[:ldp_url]}/#{body_pid}"
+      expect(g.query([RDF::URI.new(full_url), RDF::LDP.contains, RDF::URI.new(body_pid)]).size).to eql 0
     end
     it 'creates all appropriate statements for has_body blank nodes, recursively' do
       graph = RDF::Graph.new
@@ -196,14 +210,16 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       svc.create_body_container
       body_uuid = svc.create_body_resources Triannon::LdpCreator.bodies_graph(graph)
       body_pid = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuid}"
-      body_resp = conn.get do |req|
+      resp = conn.get do |req|
         req.url body_pid
         req.headers['Accept'] = 'application/x-turtle'
       end
-      expect(body_resp.body).to match /cnt\:ContentAsText/
-      expect(body_resp.body).to match /\:Text/
-      expect(body_resp.body).to match /chars "I love this!"/
-      expect(body_resp.body).to match /language "en"/
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      expect(g.query([RDF::URI.new(body_pid), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
+      expect(g.query([RDF::URI.new(body_pid), RDF.type, RDF::DCMIType.Text]).size).to eql 1
+      expect(g.query([RDF::URI.new(body_pid), RDF::Content.chars, "I love this!"]).size).to eql 1
+      expect(g.query([RDF::URI.new(body_pid), RDF::DC11.language, "en"]).size).to eql 1
     end
     it 'contains all appropriate statements for has_body blank nodes, recursively, oa:Choice' do
       graph = RDF::Graph.new
@@ -240,51 +256,61 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url body_pid
         req.headers['Accept'] = 'application/x-turtle'
       end
-      expect(body_resp.body).to match /:Choice/
-      expect(body_resp.body).to match /:default/
-      expect(body_resp.body).to match /:item/
-      
-      # find the default blank node object / ttl
       g = RDF::Graph.new
-      g.from_ttl body_resp.body
-      stmts = g.query([RDF::URI.new(body_pid), RDF::OpenAnnotation.default, :default_blank_node])
-      expect(stmts.size).to eql 1
-      default_node_pid = stmts.first.object.to_s
+      g.from_ttl(body_resp.body)
+      expect(g.query([RDF::URI.new(body_pid), RDF.type, RDF::OpenAnnotation.Choice]).size).to eql 1
+      expect(g.query([RDF::URI.new(body_pid), RDF::OpenAnnotation.default, nil]).size).to eql 1
+      expect(g.query([RDF::URI.new(body_pid), RDF::OpenAnnotation.item, nil]).size).to eql 1
+
+      default_node_pid = g.query([RDF::URI.new(body_pid), RDF::OpenAnnotation.default, :default_blank_node]).first.object.to_s
+      item_node_pid = g.query([RDF::URI.new(body_pid), RDF::OpenAnnotation.item, :item_blank_node]).first.object.to_s
+      
+      # the default blank node object / ttl
       expect(default_node_pid).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
       resp = conn.get do |req|
         req.url default_node_pid
         req.headers['Accept'] = 'application/x-turtle'
       end
-      default_node_ttl = resp.body
-      expect(default_node_ttl).to match /cnt\:ContentAsText/
-      expect(default_node_ttl).to match /:Text/
-      expect(default_node_ttl).to match /:default/
-      expect(default_node_ttl).to match /language "en"/
-      expect(default_node_ttl).to match /chars\s+"I love this Englishly!/
-
-      # find the item blank node object / ttl
       g = RDF::Graph.new
-      g.from_ttl body_resp.body
-      stmts = g.query([RDF::URI.new(body_pid), RDF::OpenAnnotation.item, :item_blank_node])
-      expect(stmts.size).to eql 1
-      item_node_pid = stmts.first.object.to_s
+      g.from_ttl(resp.body)
+      expect(g.query([RDF::URI.new(default_node_pid), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
+      expect(g.query([RDF::URI.new(default_node_pid), RDF.type, RDF::DCMIType.Text]).size).to eql 1
+      expect(g.query([RDF::URI.new(default_node_pid), RDF::Content.chars, "I love this Englishly!"]).size).to eql 1
+      expect(g.query([RDF::URI.new(default_node_pid), RDF::DC11.language, "en"]).size).to eql 1
+
+      # the item blank node object / ttl
       expect(item_node_pid).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
       resp = conn.get do |req|
         req.url item_node_pid
         req.headers['Accept'] = 'application/x-turtle'
       end
-      item_node_ttl = resp.body
-      expect(item_node_ttl).to match /cnt\:ContentAsText/
-      expect(item_node_ttl).to match /:Text/
-      expect(item_node_ttl).to match /:item/
-      expect(item_node_ttl).to match /language "fr"/
-      expect(item_node_ttl).to match /chars "Je l'aime en Francais!"/
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      expect(g.query([RDF::URI.new(item_node_pid), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
+      expect(g.query([RDF::URI.new(item_node_pid), RDF.type, RDF::DCMIType.Text]).size).to eql 1
+      expect(g.query([RDF::URI.new(item_node_pid), RDF::Content.chars, "Je l'aime en Francais!"]).size).to eql 1
+      expect(g.query([RDF::URI.new(item_node_pid), RDF::DC11.language, "fr"]).size).to eql 1
     end
     it 'does the right thing when the body is a simple URI' do
-      skip
+      skip "need to implement external resources"
+      graph = RDF::Graph.new
+      graph.from_jsonld('{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@type": "oa:Annotation", 
+        "hasBody": "http://dbpedia.org/resource/Otto_Ege", 
+      }')
+      new_pid = svc.create_base
+      svc.create_body_container
+      body_uuid = svc.create_body_resources Triannon::LdpCreator.bodies_graph(graph)
+      body_pid = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuid}"
+      resp = conn.get do |req|
+        req.url body_pid
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      body = resp.body
     end
     it 'creates any additional properties associated with a body URI' do
-      skip
+      skip "need to implement external resources"
     end
     it 'creates multiple bodies properly' do
       skip
@@ -299,15 +325,17 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     end
     it 'LDP store creates retrievable, empty LDP DirectContainer with expected id and LDP member relationships' do
       svc.send(:create_direct_container, RDF::OpenAnnotation.hasTarget)
+      cont_url = "#{@new_pid}/t"
       resp = conn.get do |req|
-        req.url " #{@new_pid}/t"
+        req.url cont_url
         req.headers['Accept'] = 'text/turtle'
       end
-      expect(resp.body).to match /DirectContainer/
-      expect(resp.body).to match /membershipResource/
-      expect(resp.body).to match  "#{Triannon.config[:ldp_url]}/#{@new_pid}"
-      expect(resp.body).to match /hasMemberRelation/
-      expect(resp.body).to match /hasTarget/
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      full_cont_url = "#{Triannon.config[:ldp_url]}/#{cont_url}"
+      expect(g.query([RDF::URI.new(full_cont_url), RDF.type, RDF::LDP.DirectContainer]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_cont_url), RDF::LDP.membershipResource, RDF::URI.new("#{Triannon.config[:ldp_url]}/#{@new_pid}")]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_cont_url), RDF::LDP.hasMemberRelation, RDF::OpenAnnotation.hasTarget]).size).to eql 1
     end
     it 'has the correct ldp:memberRelation and id for hasTarget' do
       # see previous spec
@@ -315,10 +343,13 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     it 'has the correct ldp:memberRelation and id for hasBody' do
       svc.send(:create_direct_container, RDF::OpenAnnotation.hasBody)
       resp = conn.get do |req|
-        req.url " #{@new_pid}/b"
+        req.url "#{@new_pid}/b"
         req.headers['Accept'] = 'text/turtle'
       end
-      expect(resp.body).to match /hasBody/
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      full_cont_url = "#{Triannon.config[:ldp_url]}/#{@new_pid}/b"
+      expect(g.query([RDF::URI.new(full_cont_url), RDF::LDP.hasMemberRelation, RDF::OpenAnnotation.hasBody]).size).to eql 1
     end
   end
 
