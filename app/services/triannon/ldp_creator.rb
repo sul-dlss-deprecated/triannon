@@ -42,36 +42,6 @@ module Triannon
       result.id
     end
 
-    # target container stuff:  if there are any blank nodes, the graph to be WRITTEN to
-    # LDP needs to represent them as relative URI resources (no id) with approp descendants
-    #   if there are references to external resources (e.g.  a url not in our fedora4 repo), then
-    #   they need to become externalReferences  in fcrepo4
-    # Need targets(s) represented in a way that they can be added to the newly created body container
-
-
-    # TODO:  transform the graph as nec. for writing to LDP Container
-    #  (i.e.  blank nodes become relative URIs and external references are transformed, and ...)
-    #
-    # NOTE:  not clear this is still useful.  It was conceived believing it would be useful for
-    #  both building target resources and for removing targe related statements from the graph for
-    #  building the Annotation object sans bodies and targets.  The latter may still be a valid use
-    #  case; the former is not.
-    #
-    # @param [RDF::Graph] graph a Triannon::Annotation as a graph
-    # @return [RDF::Graph] a single graph object containing subgraphs of each target object
-    def self.targets_graph graph
-      result = RDF::Graph.new
-      stmts = []
-      targets_solns = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
-      targets_solns.each { |has_target_stmt |
-        target_obj = has_target_stmt.object
-        subject_statements(target_obj, graph).each { |s|
-          result << s
-        }
-      }
-      result
-    end
-
     # given an RDF::Resource (an RDF::Node or RDF::URI), look for all the statements with that object
     #  as the subject, and recurse through the graph to find all descendant statements pertaining to the subject
     # @param subject the RDF object to be used as the subject in the graph query.  Should be an RDF::Node or RDF::URI
