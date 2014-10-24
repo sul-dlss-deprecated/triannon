@@ -5,23 +5,8 @@ module Triannon
   class LdpCreator
 
     # use LDP protocol to create the OpenAnnotation.Annotation in an RDF store
-    # @param [Triannon::Annotation] anno a Triannon::Annotation object
-    # @deprecated - use create_from_graph
-    def self.create(anno)
-      res = Triannon::LdpCreator.new anno
-      res.create_base
-      # TODO:  create body containers with bodies for EACH body
-      res.create_body_container
-      res.create_body
-      # TODO:  create target containers with bodies for EACH target
-      res.create_target_container
-      res.create_target
-      res.id                                     # TODO just return the pid?
-    end
-
-    # use LDP protocol to create the OpenAnnotation.Annotation in an RDF store
     # @param [Triannon::Annotation] anno a Triannon::Annotation object, from which we use the graph
-    def self.create_from_graph(anno)
+    def self.create(anno)
       # TODO:  we should not get here if the Annotation object already has an id
       result = Triannon::LdpCreator.new anno
       result.create_base
@@ -231,42 +216,6 @@ module Triannon
         target_ids << create_resource(graph_for_resource.to_ttl, "#{@id}/t")
       }
       target_ids
-    end
-
-
-    # TODO might have to send as blank node since triples getting mixed with fedora internal triples
-    #   or create sub-resource /rest/anno/34/b/1/x
-    # <> [
-    #
-    # ]
-    # @deprecated use create_body_resources
-    def create_body
-      body_chars = @anno.has_body.first        # TODO handle more than just one body or different types
-      ttl =<<-TTL
-        @prefix cnt: <http://www.w3.org/2011/content#> .
-        @prefix dctypes: <http://purl.org/dc/dcmitype/> .
-
-        <> a cnt:ContentAsText, dctypes:Text;
-           cnt:chars '#{body_chars}' .
-      TTL
-
-      @body_id = create_resource ttl, "#{@id}/b"
-    end
-
-    # @deprecated use create_target_resources
-    def create_target
-      target = @anno.has_target.first        # TODO handle more than just one target or different types
-      ttl =<<-TTL
-        @prefix dc: <http://purl.org/dc/elements/1.1/> .
-        @prefix dctypes: <http://purl.org/dc/dcmitype/> .
-        @prefix triannon: <http://triannon.stanford.edu/ns/> .
-
-        <> a dctypes:Text;
-           dc:format 'text/html';
-           triannon:externalReference <#{target}> .
-      TTL
-
-      @target_id = create_resource ttl, "#{@id}/t"
     end
 
     def conn
