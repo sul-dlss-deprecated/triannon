@@ -20,24 +20,24 @@ module Triannon
     end
 
     # use LDP protocol to create the OpenAnnotation.Annotation in an RDF store
-    # @param [RDF::Graph] anno_graph an OpenAnnotation.Annotation as an RDF::Graph object
-    def self.create_from_graph(anno_graph)
+    # @param [Triannon::Annotation] anno a Triannon::Annotation object, from which we use the graph
+    def self.create_from_graph(anno)
       # TODO:  we should not get here if the Annotation object already has an id
       result = Triannon::LdpCreator.new anno
       result.create_base
 
-      bodies_solns = anno_graph.query([nil, RDF::OpenAnnotation.hasBody, nil])
+      bodies_solns = anno.graph.query([nil, RDF::OpenAnnotation.hasBody, nil])
       if bodies_solns.size > 0
         result.create_body_container
         result.create_body_resources
       end
 
-      targets_solns = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+      targets_solns = anno.graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
       # NOTE:  Annotation is invalid if there are no target statements
-      result.create_target_container if targets_solns.size > 0
-      targets_solns.each { |has_target_stmt|
-        create_target_resource subject_statements(has_target_stmt.object, graph)
-      }
+      if targets_solns.size > 0
+        result.create_target_container
+        result.create_target_resources
+      end
 
       result.id
     end

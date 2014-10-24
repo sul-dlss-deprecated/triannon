@@ -194,25 +194,112 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     end
   end
 
-  # TODO
   describe '.create_from_graph' do
+    it 'should call create_base' do
+      expect_any_instance_of(Triannon::LdpCreator).to receive(:create_base)
+      Triannon::LdpCreator.create_from_graph anno
+    end
+    it 'should return the pid of the annotation container in fedora' do
+      id = Triannon::LdpCreator.create_from_graph anno
+      expect(id).to be_a String
+      expect(id.size).to be > 10
+      resp = conn.get do |req|
+        req.url "#{id}"
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      full_url = "#{Triannon.config[:ldp_url]}/#{id}"
+      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
+    end
     it 'should not create a body container if there are no bodies' do
-      skip
+      my_anno = Triannon::Annotation.new data: '{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
+        "hasTarget": "http://purl.stanford.edu/kq131cs7229"
+      }'
+      expect_any_instance_of(Triannon::LdpCreator).not_to receive(:create_body_container)
+      Triannon::LdpCreator.create_from_graph my_anno
+    end
+    it 'should create a fedora resource for bodies ldp container at (id)/b' do
+      pid = Triannon::LdpCreator.create_from_graph anno
+      container_url = "#{Triannon.config[:ldp_url]}/#{pid}/b"
+      container_resp = conn.get do |req|
+        req.url container_url
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      g = RDF::Graph.new
+      g.from_ttl(container_resp.body)
+      expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 1
+    end
+    it 'should call create_body_container and create_body_resources if there are bodies' do
+      expect_any_instance_of(Triannon::LdpCreator).to receive(:create_body_container).and_call_original
+      expect_any_instance_of(Triannon::LdpCreator).to receive(:create_body_resources)
+      Triannon::LdpCreator.create_from_graph anno
     end
     it 'should create a single body container with multiple resources if there are multiple bodies' do
-      skip
+      my_anno = Triannon::Annotation.new data: '{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
+        "motivatedBy": "oa:commenting",
+        "hasBody": [
+          {
+            "@type": [
+              "cnt:ContentAsText",
+              "dctypes:Text"
+            ],
+            "chars": "I love this!"
+          },
+          {
+            "@id": "http://dbpedia.org/resource/Love",
+            "@type": "oa:SemanticTag"
+          }
+        ]
+      }'
+      id = Triannon::LdpCreator.create_from_graph my_anno
+      container_url = "#{Triannon.config[:ldp_url]}/#{id}/b"
+      container_resp = conn.get do |req|
+        req.url container_url
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      g = RDF::Graph.new
+      g.from_ttl(container_resp.body)
+      expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 2
+    end
+    it 'should call create_target_container and create_target_resource' do
+      expect_any_instance_of(Triannon::LdpCreator).to receive(:create_target_container).and_call_original
+      expect_any_instance_of(Triannon::LdpCreator).to receive(:create_target_resources)
+      Triannon::LdpCreator.create_from_graph anno
+    end
+    it 'should create a fedora resource for targets ldp container at (id)/t' do
+      pid = Triannon::LdpCreator.create_from_graph anno
+      container_url = "#{Triannon.config[:ldp_url]}/#{pid}/t"
+      container_resp = conn.get do |req|
+        req.url container_url
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      g = RDF::Graph.new
+      g.from_ttl(container_resp.body)
+      expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 1
     end
     it 'should create a single target container with multiple resources if there are multiple targets' do
-      skip
-    end
-    it 'should call create_body_resource for each body resource' do
-      skip
-    end
-    it 'should call create_target_resource for each target resource' do
-      skip
-    end
-    it 'should create something or other for external resources' do
-      skip
+      my_anno = Triannon::Annotation.new data: '{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
+        "hasTarget": [
+          "http://purl.stanford.edu/kq131cs7229",
+          "http://purl.stanford.edu/oo000oo1234"
+        ]
+      }'
+      id = Triannon::LdpCreator.create_from_graph my_anno
+      container_url = "#{Triannon.config[:ldp_url]}/#{id}/t"
+      container_resp = conn.get do |req|
+        req.url container_url
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      g = RDF::Graph.new
+      g.from_ttl(container_resp.body)
+      expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 2
     end
   end
 
