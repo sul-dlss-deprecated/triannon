@@ -584,42 +584,6 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     end
   end
 
-  describe '#create_direct_container' do
-    let(:svc) { Triannon::LdpCreator.new anno }
-    let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
-    before(:each) do
-      @new_pid = svc.create_base
-    end
-    it 'LDP store creates retrievable, empty LDP DirectContainer with expected id and LDP member relationships' do
-      svc.send(:create_direct_container, RDF::OpenAnnotation.hasTarget)
-      cont_url = "#{@new_pid}/t"
-      resp = conn.get do |req|
-        req.url cont_url
-        req.headers['Accept'] = 'text/turtle'
-      end
-      g = RDF::Graph.new
-      g.from_ttl(resp.body)
-      full_cont_url = "#{Triannon.config[:ldp_url]}/#{cont_url}"
-      expect(g.query([RDF::URI.new(full_cont_url), RDF.type, RDF::LDP.DirectContainer]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_cont_url), RDF::LDP.membershipResource, RDF::URI.new("#{Triannon.config[:ldp_url]}/#{@new_pid}")]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_cont_url), RDF::LDP.hasMemberRelation, RDF::OpenAnnotation.hasTarget]).size).to eql 1
-    end
-    it 'has the correct ldp:memberRelation and id for hasTarget' do
-      # see previous spec
-    end
-    it 'has the correct ldp:memberRelation and id for hasBody' do
-      svc.send(:create_direct_container, RDF::OpenAnnotation.hasBody)
-      resp = conn.get do |req|
-        req.url "#{@new_pid}/b"
-        req.headers['Accept'] = 'text/turtle'
-      end
-      g = RDF::Graph.new
-      g.from_ttl(resp.body)
-      full_cont_url = "#{Triannon.config[:ldp_url]}/#{@new_pid}/b"
-      expect(g.query([RDF::URI.new(full_cont_url), RDF::LDP.hasMemberRelation, RDF::OpenAnnotation.hasBody]).size).to eql 1
-    end
-  end
-
   describe '#targets_graph' do
     it 'empty when target is URI with no addl properties' do
       graph = RDF::Graph.new
@@ -757,6 +721,42 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(targets_graph.size).to eql 2
       expect(targets_graph.query([RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg"), RDF.type, RDF::DCMIType.Image]).size).to eql 1
       expect(targets_graph.query([RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_thumb.jpg"), RDF.type, RDF::DCMIType.Image]).size).to eql 1
+    end
+  end
+
+  describe '#create_direct_container' do
+    let(:svc) { Triannon::LdpCreator.new anno }
+    let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
+    before(:each) do
+      @new_pid = svc.create_base
+    end
+    it 'LDP store creates retrievable, empty LDP DirectContainer with expected id and LDP member relationships' do
+      svc.send(:create_direct_container, RDF::OpenAnnotation.hasTarget)
+      cont_url = "#{@new_pid}/t"
+      resp = conn.get do |req|
+        req.url cont_url
+        req.headers['Accept'] = 'text/turtle'
+      end
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      full_cont_url = "#{Triannon.config[:ldp_url]}/#{cont_url}"
+      expect(g.query([RDF::URI.new(full_cont_url), RDF.type, RDF::LDP.DirectContainer]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_cont_url), RDF::LDP.membershipResource, RDF::URI.new("#{Triannon.config[:ldp_url]}/#{@new_pid}")]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_cont_url), RDF::LDP.hasMemberRelation, RDF::OpenAnnotation.hasTarget]).size).to eql 1
+    end
+    it 'has the correct ldp:memberRelation and id for hasTarget' do
+      # see previous spec
+    end
+    it 'has the correct ldp:memberRelation and id for hasBody' do
+      svc.send(:create_direct_container, RDF::OpenAnnotation.hasBody)
+      resp = conn.get do |req|
+        req.url "#{@new_pid}/b"
+        req.headers['Accept'] = 'text/turtle'
+      end
+      g = RDF::Graph.new
+      g.from_ttl(resp.body)
+      full_cont_url = "#{Triannon.config[:ldp_url]}/#{@new_pid}/b"
+      expect(g.query([RDF::URI.new(full_cont_url), RDF::LDP.hasMemberRelation, RDF::OpenAnnotation.hasBody]).size).to eql 1
     end
   end
 
