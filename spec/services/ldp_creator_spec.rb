@@ -760,17 +760,13 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(resp.body)
-#p "container"
-#puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl            
       target_obj = RDF::URI.new(target_obj_url)
       expect(g.query([target_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
       source_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSource, :source_node]).first.object.to_s
       # it's a hashURI so it's in the same response due to fcrepo4 implementation of hash URI nodes
       expect(source_node_url).to match "#{target_obj_url}#source"
-# TODO:  fix this!!!  hopefully fixed with update to fedora, per Chris Beer https://github.com/fcrepo4/fcrepo4/pull/565
-#p source_node_url      
-#      expect(g.query([RDF::URI.new(source_node_url), RDF::Triannon.externalReference, RDF::URI.new("http://purl.stanford.edu/kq131cs7229.html/kq131cs7229_05_0032_large.jpg")]).size).to eql 1
-#      expect(g.query([RDF::URI.new(source_node_url), RDF.type, RDF::DCMIType.Image]).size).to eql 1
+      expect(g.query([RDF::URI.new(source_node_url), RDF::Triannon.externalReference, RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg")]).size).to eql 1
+      expect(g.query([RDF::URI.new(source_node_url), RDF.type, RDF::DCMIType.Image]).size).to eql 1
       
       # the selector node object / ttl
       selector_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSelector, :selector_node]).first.object.to_s
@@ -979,8 +975,6 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(container_resp.body)
-#p "container"      
-#puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl            
       expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 3
       
       first_target_url = "#{container_url}/#{target_uuids[0]}"
@@ -1029,16 +1023,13 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(resp.body)
-#p "third target"      
-#puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl      
       target_obj = RDF::URI.new(third_target_url)
       expect(g.query([target_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
       source_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSource, :source_node]).first.object.to_s
       # it's a hashURI so it's in the same response due to fcrepo4 implementation of hash URI nodes
       expect(source_node_url).to match "#{third_target_url}#source"
       expect(g.query([RDF::URI.new(source_node_url), RDF::Triannon.externalReference, RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg")]).size).to eql 1
-# TODO:  fix this!!!  hopefully fixed with update to fedora, per Chris Beer https://github.com/fcrepo4/fcrepo4/pull/565
-#      expect(g.query([RDF::URI.new(source_node_url), RDF.type, RDF::DCMIType.Image]).size).to eql 1
+      expect(g.query([RDF::URI.new(source_node_url), RDF.type, RDF::DCMIType.Image]).size).to eql 1
       
       # the selector node object / ttl
       selector_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSelector, :selector_node]).first.object.to_s
