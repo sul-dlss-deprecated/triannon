@@ -622,7 +622,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       g = RDF::Graph.new
       g.from_ttl(resp.body)
       full_target_obj_url = "#{Triannon.config[:ldp_url]}/#{target_pid}"
-      expect(g.query([RDF::URI.new(full_target_obj_url), RDF::Triannon.externalReference, "http://purl.stanford.edu/kq131cs7229"]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_target_obj_url), RDF::Triannon.externalReference, RDF::URI.new("http://purl.stanford.edu/kq131cs7229")]).size).to eql 1
     end
     it 'target URI has additional properties' do
       my_anno = Triannon::Annotation.new data: '{
@@ -646,7 +646,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       g = RDF::Graph.new
       g.from_ttl(resp.body)
       target_obj = RDF::URI.new(target_obj_url)
-      expect(g.query([target_obj, RDF::Triannon.externalReference, "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg#xywh=0,0,200,200"]).size).to eql 1
+      expect(g.query([target_obj, RDF::Triannon.externalReference, RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg#xywh=0,0,200,200")]).size).to eql 1
       expect(g.query([target_obj, RDF.type, RDF::DCMIType.Image]).size).to eql 1
     end
     it 'target is blank node' do
@@ -678,21 +678,12 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       target_obj = RDF::URI.new(target_obj_url)
       expect(g.query([target_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
       source_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSource, :source_node]).first.object.to_s
-      selector_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSelector, :selector_node]).first.object.to_s
-
-      # the source node object / ttl
-=begin  TODO: implement this!
-      expect(source_node_url).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
-      resp = conn.get do |req|
-        req.url source_node_url
-        req.headers['Accept'] = 'application/x-turtle'
-      end
-      g = RDF::Graph.new
-      g.from_ttl(resp.body)
+      # it's a hashURI so it's in the same response due to fcrepo4 implementation of hash URI nodes
+      expect(source_node_url).to match "#{target_obj_url}#source"  # this is a fcrepo4 implementation of hash URI node
       expect(g.query([RDF::URI.new(source_node_url), RDF::Triannon.externalReference, RDF::URI.new("http://purl.stanford.edu/kq131cs7229.html")]).size).to eql 1
-=end
       
       # the selector node object / ttl
+      selector_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSelector, :selector_node]).first.object.to_s
       expect(selector_node_url).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
       resp = conn.get do |req|
         req.url selector_node_url
@@ -734,25 +725,20 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(resp.body)
+#p "container"
+#puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl            
       target_obj = RDF::URI.new(target_obj_url)
       expect(g.query([target_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
       source_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSource, :source_node]).first.object.to_s
-      selector_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSelector, :selector_node]).first.object.to_s
-
-      # the source node object / ttl
-=begin  TODO: implement this!
-      expect(source_node_url).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
-      resp = conn.get do |req|
-        req.url source_node_url
-        req.headers['Accept'] = 'application/x-turtle'
-      end
-      g = RDF::Graph.new
-      g.from_ttl(resp.body)
-      expect(g.query([RDF::URI.new(source_node_url), RDF::Triannon.externalReference, RDF::URI.new("http://purl.stanford.edu/kq131cs7229.html")]).size).to eql 1
-      expect(g.query([RDF::URI.new(source_node_url), RDF.type, RDF::DCMIType.Image]).size).to eql 1
-=end
+      # it's a hashURI so it's in the same response due to fcrepo4 implementation of hash URI nodes
+      expect(source_node_url).to match "#{target_obj_url}#source"
+# TODO:  fix this!!!  hopefully fixed with update to fedora, per Chris Beer https://github.com/fcrepo4/fcrepo4/pull/565
+#p source_node_url      
+#      expect(g.query([RDF::URI.new(source_node_url), RDF::Triannon.externalReference, RDF::URI.new("http://purl.stanford.edu/kq131cs7229.html/kq131cs7229_05_0032_large.jpg")]).size).to eql 1
+#      expect(g.query([RDF::URI.new(source_node_url), RDF.type, RDF::DCMIType.Image]).size).to eql 1
       
       # the selector node object / ttl
+      selector_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSelector, :selector_node]).first.object.to_s
       expect(selector_node_url).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
       resp = conn.get do |req|
         req.url selector_node_url
@@ -795,21 +781,12 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       target_obj = RDF::URI.new(target_obj_url)
       expect(g.query([target_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
       source_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSource, :source_node]).first.object.to_s
-      selector_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSelector, :selector_node]).first.object.to_s
-
-      # the source node object / ttl
-=begin  TODO: implement this!
-      expect(source_node_url).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
-      resp = conn.get do |req|
-        req.url source_node_url
-        req.headers['Accept'] = 'application/x-turtle'
-      end
-      g = RDF::Graph.new
-      g.from_ttl(resp.body)
+      # it's a hashURI so it's in the same response due to fcrepo4 implementation of hash URI nodes
+      expect(source_node_url).to match "#{target_obj_url}#source"
       expect(g.query([RDF::URI.new(source_node_url), RDF::Triannon.externalReference, RDF::URI.new("http://purl.stanford.edu/kq131cs7229.html")]).size).to eql 1
-=end
       
       # the selector node object / ttl
+      selector_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSelector, :selector_node]).first.object.to_s
       expect(selector_node_url).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
       resp = conn.get do |req|
         req.url selector_node_url
@@ -854,7 +831,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(resp.body)
-      expect(g.query([RDF::URI.new(first_target_url), RDF::Triannon.externalReference, "http://purl.stanford.edu/kq131cs7229"]).size).to eql 1
+      expect(g.query([RDF::URI.new(first_target_url), RDF::Triannon.externalReference, RDF::URI.new("http://purl.stanford.edu/kq131cs7229")]).size).to eql 1
 
       second_target_url = "#{container_url}/#{target_uuids[1]}"
       resp = conn.get do |req|
@@ -863,7 +840,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(resp.body)
-      expect(g.query([RDF::URI.new(second_target_url), RDF::Triannon.externalReference, "http://purl.stanford.edu/oo000oo1234"]).size).to eql 1
+      expect(g.query([RDF::URI.new(second_target_url), RDF::Triannon.externalReference, RDF::URI.new("http://purl.stanford.edu/oo000oo1234")]).size).to eql 1
     end
     it 'mult targets (URIs with addl properties)' do
       my_anno = Triannon::Annotation.new data: '{
@@ -903,7 +880,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(resp.body)
-      expect(g.query([RDF::URI.new(first_target_url), RDF::Triannon.externalReference, "http://purl.stanford.edu/kq131cs7229"]).size).to eql 1
+      expect(g.query([RDF::URI.new(first_target_url), RDF::Triannon.externalReference, RDF::URI.new("http://purl.stanford.edu/kq131cs7229")]).size).to eql 1
 
       second_target_url = "#{container_url}/#{target_uuids[1]}"
       resp = conn.get do |req|
@@ -912,7 +889,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(resp.body)
-      expect(g.query([RDF::URI.new(second_target_url), RDF::Triannon.externalReference, "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_thumb.jpg"]).size).to eql 1
+      expect(g.query([RDF::URI.new(second_target_url), RDF::Triannon.externalReference, RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_thumb.jpg")]).size).to eql 1
       expect(g.query([RDF::URI.new(second_target_url), RDF.type, RDF::DCMIType.Image]).size).to eql 1
       
       third_target_url = "#{container_url}/#{target_uuids[2]}"
@@ -922,7 +899,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(resp.body)
-      expect(g.query([RDF::URI.new(third_target_url), RDF::Triannon.externalReference, "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg"]).size).to eql 1
+      expect(g.query([RDF::URI.new(third_target_url), RDF::Triannon.externalReference, RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg")]).size).to eql 1
       expect(g.query([RDF::URI.new(third_target_url), RDF.type, RDF::DCMIType.Image]).size).to eql 1
     end
     it 'mult target blank nodes' do
@@ -967,6 +944,8 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(container_resp.body)
+#p "container"      
+#puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl            
       expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 3
       
       first_target_url = "#{container_url}/#{target_uuids[0]}"
@@ -976,7 +955,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(resp.body)
-      expect(g.query([RDF::URI.new(first_target_url), RDF::Triannon.externalReference, "http://purl.stanford.edu/kq131cs7229"]).size).to eql 1
+      expect(g.query([RDF::URI.new(first_target_url), RDF::Triannon.externalReference, RDF::URI.new("http://purl.stanford.edu/kq131cs7229")]).size).to eql 1
 
 
       second_target_url = "#{container_url}/#{target_uuids[1]}"
@@ -989,20 +968,12 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       target_obj = RDF::URI.new(second_target_url)
       expect(g.query([target_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
       source_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSource, :source_node]).first.object.to_s
-      selector_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSelector, :selector_node]).first.object.to_s
-
-      # the source node object / ttl
-=begin  TODO: implement this! 
-      expect(source_node_url).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
-      resp = conn.get do |req|
-        req.url source_node_url
-        req.headers['Accept'] = 'application/x-turtle'
-      end
-      g = RDF::Graph.new
-      g.from_ttl(resp.body)
+      # it's a hashURI so it's in the same response due to fcrepo4 implementation of hash URI nodes
+      expect(source_node_url).to match "#{second_target_url}#source"
       expect(g.query([RDF::URI.new(source_node_url), RDF::Triannon.externalReference, RDF::URI.new("http://purl.stanford.edu/kq666cs6666.html")]).size).to eql 1
-=end      
+      
       # the selector node object / ttl
+      selector_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSelector, :selector_node]).first.object.to_s
       expect(selector_node_url).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
       resp = conn.get do |req|
         req.url selector_node_url
@@ -1023,25 +994,19 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(resp.body)
+#p "third target"      
+#puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl      
       target_obj = RDF::URI.new(third_target_url)
       expect(g.query([target_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
       source_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSource, :source_node]).first.object.to_s
-      selector_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSelector, :selector_node]).first.object.to_s
-
-      # the source node object / ttl
-=begin  TODO: implement this!
-      expect(source_node_url).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
-      resp = conn.get do |req|
-        req.url source_node_url
-        req.headers['Accept'] = 'application/x-turtle'
-      end
-      g = RDF::Graph.new
-      g.from_ttl(resp.body)
-      source_obj = RDF::URI.new(source_node_url)
-      expect(g.query([source_obj, RDF::Triannon.externalReference, RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg")]).size).to eql 1
-      expect(g.query([source_obj, RDF.type, RDF::DCMIType.Image]).size).to eql 1
-=end
+      # it's a hashURI so it's in the same response due to fcrepo4 implementation of hash URI nodes
+      expect(source_node_url).to match "#{third_target_url}#source"
+      expect(g.query([RDF::URI.new(source_node_url), RDF::Triannon.externalReference, RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg")]).size).to eql 1
+# TODO:  fix this!!!  hopefully fixed with update to fedora, per Chris Beer https://github.com/fcrepo4/fcrepo4/pull/565
+#      expect(g.query([RDF::URI.new(source_node_url), RDF.type, RDF::DCMIType.Image]).size).to eql 1
+      
       # the selector node object / ttl
+      selector_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSelector, :selector_node]).first.object.to_s
       expect(selector_node_url).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
       resp = conn.get do |req|
         req.url selector_node_url

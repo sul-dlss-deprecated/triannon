@@ -184,7 +184,7 @@ module Triannon
             target_subject = RDF::URI.new
             graph_for_resource << RDF::Statement({:subject => target_subject,
                                                   :predicate => RDF::Triannon.externalReference,
-                                                  :object => RDF::Literal.new(target_obj.to_str)})
+                                                  :object => RDF::URI.new(target_obj.to_str)})
             addl_stmts = @anno.graph.query([target_obj, nil, nil])
             addl_stmts.each { |s|  
               graph_for_resource << RDF::Statement({:subject => target_subject,
@@ -198,9 +198,32 @@ module Triannon
         # add statements with target_obj as the subject
         Triannon::LdpCreator.subject_statements(target_obj, @anno.graph).each { |s|
           if s.subject == target_obj
-            graph_for_resource << RDF::Statement({:subject => target_subject,
-                                                  :predicate => s.predicate,
-                                                  :object => s.object})
+            # deal with external references in hasSource statements (i.e.  targetObject, OA.hasSource, (url) )
+            if s.predicate == RDF::OpenAnnotation.hasSource && s.object.is_a?(RDF::URI) && s.object.to_str
+              # we need to represent the source URL as an externalReference - use a hash URI
+              source_object = RDF::URI.new("#source")
+              graph_for_resource << RDF::Statement({:subject => source_object,
+                                                    :predicate => RDF::Triannon.externalReference,
+                                                    :object => RDF::URI.new(s.object.to_str)})
+              # and all of the source URL's addl props
+              Triannon::LdpCreator.subject_statements(s.object, @anno.graph).each { |ss|
+                if ss.subject == s.object
+                  graph_for_resource << RDF::Statement({:subject => source_object,
+                                                        :predicate => ss.predicate,
+                                                        :object => ss.object})
+                else
+                  graph_for_resource << ss
+                end
+              }
+              # add the targetObj, OA.hasSource, (hash URI representation) to graph
+              graph_for_resource << RDF::Statement({:subject => target_subject,
+                                                    :predicate => s.predicate,
+                                                    :object => source_object})
+            else
+              graph_for_resource << RDF::Statement({:subject => target_subject,
+                                                    :predicate => s.predicate,
+                                                    :object => s.object})
+            end
           else
             graph_for_resource << s
           end
