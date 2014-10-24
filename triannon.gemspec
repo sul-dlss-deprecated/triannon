@@ -23,7 +23,6 @@ Gem::Specification.new do |s|
   s.add_dependency "sass-rails", ">= 5.0.0.beta1"
   s.add_dependency "faraday"
 
-  s.add_development_dependency "sqlite3"
   s.add_development_dependency "rspec", "~> 3.0"
   s.add_development_dependency "rspec-rails", "~> 3.0"
   s.add_development_dependency "engine_cart", "~> 0.4"

@@ -30,16 +30,16 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     end
     it 'keeps multiple motivations if present' do
       my_anno = Triannon::Annotation.new data: '{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
         "motivatedBy": [
-          "oa:moderating", 
+          "oa:moderating",
           "oa:tagging"
-        ], 
+        ],
         "hasBody": {
-          "@id": "http://dbpedia.org/resource/Banhammer", 
+          "@id": "http://dbpedia.org/resource/Banhammer",
           "@type": "oa:SemanticTag"
-        }, 
+        },
         "hasTarget": "http://purl.stanford.edu/kq131cs7229"
       }'
       my_svc = Triannon::LdpCreator.new my_anno
@@ -57,27 +57,27 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     end
     it 'posts provenance if present' do
       my_anno = Triannon::Annotation.new data: '{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
-        "motivatedBy": "oa:commenting", 
-        "annotatedAt": "2014-09-03T17:16:13Z", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
+        "motivatedBy": "oa:commenting",
+        "annotatedAt": "2014-09-03T17:16:13Z",
         "annotatedBy": {
-          "@id": "mailto:azaroth42@gmail.com", 
-          "@type": "foaf:Person", 
+          "@id": "mailto:azaroth42@gmail.com",
+          "@type": "foaf:Person",
           "name": "Rob Sanderson"
-        }, 
-        "serializedAt": "2014-09-03T17:16:13Z", 
+        },
+        "serializedAt": "2014-09-03T17:16:13Z",
         "serializedBy": {
-          "@type": "prov:SoftwareAgent", 
+          "@type": "prov:SoftwareAgent",
           "name": "Annotation Factory"
-        }, 
+        },
         "hasBody": {
           "@type": [
-            "cnt:ContentAsText", 
+            "cnt:ContentAsText",
             "dctypes:Text"
-          ], 
+          ],
           "chars": "I love this!"
-        }, 
+        },
         "hasTarget": "http://purl.stanford.edu/kq131cs7229"
       }'
       my_svc = Triannon::LdpCreator.new my_anno
@@ -169,6 +169,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url "#{new_pid}/t/#{target_pid}"
         req.headers['Accept'] = 'application/x-turtle'
       end
+
       g = RDF::Graph.new
       g.from_ttl(resp.body)
       full_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/t/#{target_pid}"
@@ -192,7 +193,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.hasTarget, nil]).size).to eql 1
     end
   end
-  
+
   # TODO
   describe '.create_from_graph' do
     it 'should not create a body container if there are no bodies' do
@@ -214,7 +215,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       skip
     end
   end
-  
+
   describe '#create_body_resources' do
     it 'creates resources in the body container' do
       new_pid = svc.create_base
@@ -232,7 +233,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
       expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::DCMIType.Text]).size).to eql 1
       expect(g.query([RDF::URI.new(full_url), RDF::Content.chars, "I love this!"]).size).to eql 1
-      
+
       body_container_id = "#{Triannon.config[:ldp_url]}/#{new_pid}/b"
       body_container_resp = conn.get do |req|
         req.url body_container_id
@@ -245,17 +246,17 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     end
     it 'creates all appropriate statements for has_body blank nodes, recursively' do
       my_anno = Triannon::Annotation.new data: '{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
-        "motivatedBy": "oa:commenting", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
+        "motivatedBy": "oa:commenting",
         "hasBody": {
           "@type": [
-            "cnt:ContentAsText", 
+            "cnt:ContentAsText",
             "dctypes:Text"
-          ], 
+          ],
           "chars": "I love this!",
           "language": "en"
-        } 
+        }
       }'
       my_svc = Triannon::LdpCreator.new my_anno
       new_pid = my_svc.create_base
@@ -275,30 +276,30 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     end
     it 'contains all appropriate statements for has_body blank nodes, recursively, oa:Choice' do
       my_anno = Triannon::Annotation.new data: '{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
-        "motivatedBy": "oa:commenting", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
+        "motivatedBy": "oa:commenting",
         "hasBody": {
-          "@type": "oa:Choice", 
+          "@type": "oa:Choice",
           "default": {
             "@type": [
-              "cnt:ContentAsText", 
+              "cnt:ContentAsText",
               "dctypes:Text"
-            ], 
-            "chars": "I love this Englishly!", 
+            ],
+            "chars": "I love this Englishly!",
             "language": "en"
-          }, 
+          },
           "item": [
             {
               "@type": [
-                "cnt:ContentAsText", 
+                "cnt:ContentAsText",
                 "dctypes:Text"
-              ], 
-              "chars": "Je l\'aime en Francais!", 
+              ],
+              "chars": "Je l\'aime en Francais!",
               "language": "fr"
             }
           ]
-        } 
+        }
       }'
       my_svc = Triannon::LdpCreator.new my_anno
       new_pid = my_svc.create_base
@@ -318,7 +319,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
 
       default_node_pid = g.query([RDF::URI.new(body_pid), RDF::OpenAnnotation.default, :default_blank_node]).first.object.to_s
       item_node_pid = g.query([RDF::URI.new(body_pid), RDF::OpenAnnotation.item, :item_blank_node]).first.object.to_s
-      
+
       # the default blank node object / ttl
       expect(default_node_pid).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
       resp = conn.get do |req|
@@ -347,16 +348,16 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     end
     it 'does the right thing when the body is a simple URI' do
       my_anno = Triannon::Annotation.new data: '{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
-        "motivatedBy": "oa:commenting", 
-        "hasBody": "http://dbpedia.org/resource/Otto_Ege", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
+        "motivatedBy": "oa:commenting",
+        "hasBody": "http://dbpedia.org/resource/Otto_Ege",
       }'
       my_svc = Triannon::LdpCreator.new my_anno
-skip "need to implement external references for bodies"      
+skip "need to implement external references for bodies"
       new_pid = my_svc.create_base
       my_svc.create_body_container
-      body_uuids = my_svc.create_body_resources 
+      body_uuids = my_svc.create_body_resources
       expect(body_uuids.size).to eql 1
       body_pid = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuid[0]}"
       resp = conn.get do |req|
@@ -382,22 +383,22 @@ skip "need to implement external references for bodies"
     end
     it 'creates multiple bodies properly no URIs' do
       my_anno = Triannon::Annotation.new data: '{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
-        "motivatedBy": "oa:commenting", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
+        "motivatedBy": "oa:commenting",
         "hasBody": [
           {
             "@type": [
-              "cnt:ContentAsText", 
+              "cnt:ContentAsText",
               "dctypes:Text"
-            ], 
+            ],
             "chars": "I love this!"
-          }, 
+          },
           {
             "@type": [
-              "cnt:ContentAsText", 
+              "cnt:ContentAsText",
               "dctypes:Text"
-            ], 
+            ],
             "chars": "I hate this!"
           }
         ]
@@ -441,19 +442,19 @@ skip "need to implement external references for bodies"
     end
     it 'creates multiple bodies properly (one URI)' do
       my_anno = Triannon::Annotation.new data: '{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
-        "motivatedBy": "oa:commenting", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
+        "motivatedBy": "oa:commenting",
         "hasBody": [
           {
             "@type": [
-              "cnt:ContentAsText", 
+              "cnt:ContentAsText",
               "dctypes:Text"
-            ], 
+            ],
             "chars": "I love this!"
-          }, 
+          },
           {
-            "@id": "http://dbpedia.org/resource/Love", 
+            "@id": "http://dbpedia.org/resource/Love",
             "@type": "oa:SemanticTag"
           }
         ]
@@ -472,7 +473,7 @@ skip "need to implement external references for bodies"
       g.from_ttl(resp.body)
       contains_stmts = g.query([RDF::URI.new(body_cont_url), RDF::LDP.contains, :body_url])
       expect(contains_stmts.size).to eql 2
-      
+
       first_body_url = contains_stmts.first.object.to_s
       resp = conn.get do |req|
         req.url first_body_url
@@ -491,13 +492,13 @@ skip "need to implement external references for bodies"
       end
       g = RDF::Graph.new
       g.from_ttl(resp.body)
-skip "need to implement external references for bodies"      
+skip "need to implement external references for bodies"
 p "second body resource:"
 puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
       expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
     end
   end
-  
+
   describe '#create_direct_container' do
     let(:svc) { Triannon::LdpCreator.new anno }
     let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
@@ -538,9 +539,9 @@ puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
     it 'empty when no bodies' do
       graph = RDF::Graph.new
       graph.from_jsonld('{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
-        "motivatedBy": "oa:bookmarking", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
+        "motivatedBy": "oa:bookmarking",
         "hasTarget": "http://purl.stanford.edu/kq131cs7229"
       }')
       bodies_graph = Triannon::LdpCreator.bodies_graph graph
@@ -550,16 +551,16 @@ puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
     it 'contains all appropriate statements for has_body blank nodes, recursively' do
       graph = RDF::Graph.new
       graph.from_jsonld('{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
         "hasBody": {
           "@type": [
-            "cnt:ContentAsText", 
+            "cnt:ContentAsText",
             "dctypes:Text"
-          ], 
+          ],
           "chars": "I love this!",
           "language": "en"
-        } 
+        }
       }')
       bodies_graph = Triannon::LdpCreator.bodies_graph graph
       expect(bodies_graph).to be_a RDF::Graph
@@ -574,29 +575,29 @@ puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
     it 'contains all appropriate statements for has_body blank nodes, recursively, oa:Choice' do
       graph = RDF::Graph.new
       graph.from_jsonld('{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
         "hasBody": {
-          "@type": "oa:Choice", 
+          "@type": "oa:Choice",
           "default": {
             "@type": [
-              "cnt:ContentAsText", 
+              "cnt:ContentAsText",
               "dctypes:Text"
-            ], 
-            "chars": "I love this Englishly!", 
+            ],
+            "chars": "I love this Englishly!",
             "language": "en"
-          }, 
+          },
           "item": [
             {
               "@type": [
-                "cnt:ContentAsText", 
+                "cnt:ContentAsText",
                 "dctypes:Text"
-              ], 
-              "chars": "Je l\'aime en Francais!", 
+              ],
+              "chars": "Je l\'aime en Francais!",
               "language": "fr"
             }
           ]
-        } 
+        }
       }')
       bodies_graph = Triannon::LdpCreator.bodies_graph graph
       expect(bodies_graph).to be_a RDF::Graph
@@ -619,9 +620,9 @@ puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
     it 'empty when body is URI with no addl properties' do
       graph = RDF::Graph.new
       graph.from_jsonld('{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
-        "hasBody": "http://dbpedia.org/resource/Otto_Ege", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
+        "hasBody": "http://dbpedia.org/resource/Otto_Ege",
       }')
       bodies_graph = Triannon::LdpCreator.bodies_graph graph
       expect(bodies_graph).to be_a RDF::Graph
@@ -630,10 +631,10 @@ puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
     it 'includes any addl properties of body URI nodes' do
       graph = RDF::Graph.new
       graph.from_jsonld('{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
         "hasBody": {
-          "@id": "http://www.example.org/comment.pdf", 
+          "@id": "http://www.example.org/comment.pdf",
           "@type": "dctypes:Text"
         }
       }')
@@ -646,18 +647,18 @@ puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
     it 'multiple bodies' do
       graph = RDF::Graph.new
       graph.from_jsonld('{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
         "hasBody": [
           {
             "@type": [
-              "cnt:ContentAsText", 
+              "cnt:ContentAsText",
               "dctypes:Text"
-            ], 
+            ],
             "chars": "I love this!"
-          }, 
+          },
           {
-            "@id": "http://dbpedia.org/resource/Love", 
+            "@id": "http://dbpedia.org/resource/Love",
             "@type": "oa:SemanticTag"
           }
         ]
@@ -675,7 +676,7 @@ puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
       expect(bodies_graph.query([second_body, RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
     end
   end
-  
+
   describe '#targets_graph' do
     it 'empty when target is URI with no addl properties' do
       graph = RDF::Graph.new
@@ -687,10 +688,10 @@ puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
     it 'includes any addl properties of target URI nodes' do
       graph = RDF::Graph.new
       graph.from_jsonld('{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
         "hasTarget": {
-          "@id": "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg#xywh=0,0,200,200", 
+          "@id": "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg#xywh=0,0,200,200",
           "@type": "dctypes:Image"
         }
       }')
@@ -703,14 +704,14 @@ puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
     it 'contains all appropriate statements for has_target blank nodes, recursively' do
       graph = RDF::Graph.new
       graph.from_jsonld('{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
         "hasTarget": {
-          "@type": "oa:SpecificResource", 
-          "hasSource": "http://purl.stanford.edu/kq131cs7229.html", 
+          "@type": "oa:SpecificResource",
+          "hasSource": "http://purl.stanford.edu/kq131cs7229.html",
           "hasSelector": {
-            "@type": "oa:TextPositionSelector", 
-            "start": 0, 
+            "@type": "oa:TextPositionSelector",
+            "start": 0,
             "end": 66
           }
         }
@@ -729,18 +730,18 @@ puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
     end
     it 'multiple blank nodes at target second level' do
       graph = RDF::Graph.new
-      graph.from_jsonld('{  
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
+      graph.from_jsonld('{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
         "hasTarget": {
-          "@type": "oa:SpecificResource", 
+          "@type": "oa:SpecificResource",
           "hasSource": {
-            "@id": "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg", 
+            "@id": "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg",
             "@type": "dctypes:Image"
-          }, 
+          },
           "hasSelector": {
-            "@type": "oa:FragmentSelector", 
-            "value": "xywh=0,0,200,200", 
+            "@type": "oa:FragmentSelector",
+            "value": "xywh=0,0,200,200",
             "conformsTo": "http://www.w3.org/TR/media-frags/"
           }
         }
@@ -762,16 +763,16 @@ puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
     end
     it 'target is html frag selector' do
       graph = RDF::Graph.new
-      graph.from_jsonld('{  
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
+      graph.from_jsonld('{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
         "hasTarget": {
-          "@type": "oa:SpecificResource", 
-          "hasSource": "http://purl.stanford.edu/kq131cs7229.html", 
+          "@type": "oa:SpecificResource",
+          "hasSource": "http://purl.stanford.edu/kq131cs7229.html",
           "hasSelector": {
-            "@type": "oa:TextQuoteSelector", 
-            "suffix": " and The Canonical Epistles,", 
-            "exact": "third and fourth Gospels", 
+            "@type": "oa:TextQuoteSelector",
+            "suffix": " and The Canonical Epistles,",
+            "exact": "third and fourth Gospels",
             "prefix": "manuscript which comprised the "
           }
         }
@@ -792,16 +793,16 @@ puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
     it 'multiple targets' do
       graph = RDF::Graph.new
       graph.from_jsonld('{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-        "@type": "oa:Annotation", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@type": "oa:Annotation",
         "hasTarget": [
-          "http://purl.stanford.edu/kq131cs7229", 
+          "http://purl.stanford.edu/kq131cs7229",
           {
-            "@id": "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_thumb.jpg", 
+            "@id": "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_thumb.jpg",
             "@type": "dctypes:Image"
           },
           {
-            "@id": "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg", 
+            "@id": "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg",
             "@type": "dctypes:Image"
           }
         ]
@@ -815,7 +816,7 @@ puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
       expect(targets_graph.query([RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_thumb.jpg"), RDF.type, RDF::DCMIType.Image]).size).to eql 1
     end
   end
-  
+
   describe '#subject_statements' do
     it 'returns appropriate blank node statements when the subject is an RDF::Node in the graph' do
       graph = RDF::Graph.new
@@ -834,13 +835,13 @@ puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
     it 'recurses to get triples from objects of the subject statements' do
       graph = RDF::Graph.new
       graph.from_jsonld('{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
         "hasTarget": {
-          "@type": "oa:SpecificResource", 
-          "hasSource": "http://purl.stanford.edu/kq131cs7229.html", 
+          "@type": "oa:SpecificResource",
+          "hasSource": "http://purl.stanford.edu/kq131cs7229.html",
           "hasSelector": {
-            "@type": "oa:TextPositionSelector", 
-            "start": 0, 
+            "@type": "oa:TextPositionSelector",
+            "start": 0,
             "end": 66
           }
         }
@@ -855,15 +856,15 @@ puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
       expect(target_stmts).to include([selector_resource, RDF.type, RDF::OpenAnnotation.TextPositionSelector])
       expect(target_stmts).to include([selector_resource, RDF::OpenAnnotation.start, RDF::Literal.new(0)])
       expect(target_stmts).to include([selector_resource, RDF::OpenAnnotation.end, RDF::Literal.new(66)])
-      
+
       graph = RDF::Graph.new
-      graph.from_jsonld('{  
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+      graph.from_jsonld('{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
         "hasTarget": {
-          "@type": "oa:SpecificResource", 
+          "@type": "oa:SpecificResource",
           "hasSelector": {
-            "@type": "oa:FragmentSelector", 
-            "value": "xywh=0,0,200,200", 
+            "@type": "oa:FragmentSelector",
+            "value": "xywh=0,0,200,200",
             "conformsTo": "http://www.w3.org/TR/media-frags/"
           }
         }
@@ -880,12 +881,12 @@ puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl
     end
     it 'finds all properties of URI nodes' do
       graph = RDF::Graph.new
-      graph.from_jsonld('{  
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+      graph.from_jsonld('{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
         "hasTarget": {
-          "@type": "oa:SpecificResource", 
+          "@type": "oa:SpecificResource",
           "hasSource": {
-            "@id": "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg", 
+            "@id": "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg",
             "@type": "dctypes:Image"
           }
         }

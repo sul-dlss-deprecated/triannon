@@ -9,10 +9,10 @@ module Triannon
     def create_triannon_yml_file
       default_yml =<<-YML
 development:
-  ldp_url: http://localhost:8080/rest/anno
+  ldp_url: http://localhost:8983/fedora/rest/anno
   triannon_base_url: http://your.triannon-server.com
 test: &test
-  ldp_url: http://localhost:8080/rest/anno
+  ldp_url: http://localhost:8983/fedora/rest/anno
   triannon_base_url: http://your.triannon-server.com
 production:
   ldp_url:

@@ -3,16 +3,22 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 describe Triannon::RootAnnotationCreator, :vcr do
 
   describe "#create" do
-    let(:dummy_url) { 'http://localhost:8080/rest/bork' }
+    let(:dummy_url) { 'http://localhost:8983/fedora/rest/bork' }
+    let(:tombstone_url) { dummy_url + '/fcr:tombstone'}
     let(:conn) { Faraday.new :url => dummy_url  }
+
+    def delete_root
+      conn.delete
+      Faraday.new(:url => tombstone_url).delete
+    end
 
     before(:each) do
        config = { :ldp_url =>  dummy_url }
        allow(Triannon).to receive(:config).and_return(config)
-       conn.delete
+       delete_root
     end
 
-    after(:each) { conn.delete }
+    after(:each) { delete_root }
 
     it "creates the root annotations container if it does not already exist" do
       expect(Triannon::RootAnnotationCreator.create).to eq true
@@ -26,7 +32,7 @@ describe Triannon::RootAnnotationCreator, :vcr do
       g = RDF::Graph.new
       g.from_ttl resp.body
       q = RDF::Query.new
-      q << [uri, RDF.type, RDF::LDP.BasicContainer]
+      q << [uri, RDF.type, RDF::LDP.Container]
       soln = g.query q
       expect(soln.size).to eq 1
     end

@@ -2,14 +2,14 @@
 http_interactions:
 - request:
     method: post
-    uri: http://localhost:8080/rest/anno
+    uri: http://localhost:8983/fedora/rest/anno
     body:
       encoding: UTF-8
       string: |
         @prefix openannotation: <http://www.w3.org/ns/oa#> .
         @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
-        <> a openannotation:Annotation;
+        <http://example.org/annos/annotation/body-chars.ttl> a openannotation:Annotation;
            openannotation:motivatedBy openannotation:commenting .
     headers:
       User-Agent:
@@ -26,25 +26,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"6aedb2956dd8ac4a2e10d6e21665c5d5cefcba30"'
+      - '"ef8f91a65f36bab3ed304df40fc81ba20174a32f"'
       Last-Modified:
-      - Wed, 22 Oct 2014 19:35:52 GMT
+      - Thu, 23 Oct 2014 23:47:02 GMT
       Content-Length:
-      - '68'
+      - '75'
       Location:
-      - http://localhost:8080/rest/anno/cf09e048-1536-4ba8-b17c-75dc1e2472ed
+      - http://localhost:8983/fedora/rest/anno/d2c0728c-34ce-4020-b509-7ebba2daac52
       Content-Type:
       - text/plain
-      Server:
-      - Jetty(8.1.11.v20130520)
     body:
       encoding: UTF-8
-      string: http://localhost:8080/rest/anno/cf09e048-1536-4ba8-b17c-75dc1e2472ed
+      string: http://localhost:8983/fedora/rest/anno/d2c0728c-34ce-4020-b509-7ebba2daac52
     http_version: 
-  recorded_at: Wed, 22 Oct 2014 19:35:52 GMT
+  recorded_at: Thu, 23 Oct 2014 23:47:02 GMT
 - request:
     method: delete
-    uri: http://localhost:8080/rest/anno/cf09e048-1536-4ba8-b17c-75dc1e2472ed
+    uri: http://localhost:8983/fedora/rest/anno/d2c0728c-34ce-4020-b509-7ebba2daac52
     body:
       encoding: US-ASCII
       string: ''
@@ -59,17 +57,15 @@ http_interactions:
     status:
       code: 204
       message: No Content
-    headers:
-      Server:
-      - Jetty(8.1.11.v20130520)
+    headers: {}
     body:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Wed, 22 Oct 2014 19:35:52 GMT
+  recorded_at: Thu, 23 Oct 2014 23:47:02 GMT
 - request:
     method: get
-    uri: http://localhost:8080/rest/anno/cf09e048-1536-4ba8-b17c-75dc1e2472ed
+    uri: http://localhost:8983/fedora/rest/anno/d2c0728c-34ce-4020-b509-7ebba2daac52
     body:
       encoding: US-ASCII
       string: ''
@@ -88,15 +84,13 @@ http_interactions:
       Content-Length:
       - '78'
       Link:
-      - <http://localhost:8080/rest/anno/cf09e048-1536-4ba8-b17c-75dc1e2472ed/fcr:tombstone>;
+      - <http://localhost:8983/fedora/rest/anno/d2c0728c-34ce-4020-b509-7ebba2daac52/fcr:tombstone>;
         rel="hasTombstone"
       Content-Type:
       - text/turtle
-      Server:
-      - Jetty(8.1.11.v20130520)
     body:
       encoding: UTF-8
-      string: Discovered tombstone resource at org.fcrepo.kernel.impl.TombstoneImpl@66c2f3ca
+      string: Discovered tombstone resource at org.fcrepo.kernel.impl.TombstoneImpl@286f238a
     http_version: 
-  recorded_at: Wed, 22 Oct 2014 19:35:52 GMT
+  recorded_at: Thu, 23 Oct 2014 23:47:02 GMT
 recorded_with: VCR 2.9.3

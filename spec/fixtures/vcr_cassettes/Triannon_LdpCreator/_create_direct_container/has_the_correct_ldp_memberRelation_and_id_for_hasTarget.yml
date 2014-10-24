@@ -2,17 +2,20 @@
 http_interactions:
 - request:
     method: post
-    uri: http://localhost:8080/rest/anno
+    uri: http://localhost:8983/fedora/rest/anno
     body:
       encoding: UTF-8
-      string: |2
-                <> a <http://www.w3.org/ns/oa#Annotation>;
-                   <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#commenting> .
+      string: |
+        @prefix openannotation: <http://www.w3.org/ns/oa#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+        <> a openannotation:Annotation;
+           openannotation:motivatedBy openannotation:commenting .
     headers:
       User-Agent:
       - Faraday v0.9.0
       Content-Type:
-      - text/turtle
+      - application/x-turtle
       Accept-Encoding:
       - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
       Accept:
@@ -23,20 +26,18 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - "\"51f53b9fc524663e23f3c4e992f358e75a2e4d72\""
+      - '"15439593ffa59a91c3d8d427807db8a76a900248"'
       Last-Modified:
-      - Mon, 20 Oct 2014 20:32:50 GMT
+      - Thu, 23 Oct 2014 23:46:55 GMT
       Content-Length:
-      - '68'
+      - '75'
       Location:
-      - http://localhost:8080/rest/anno/99367321-ee3b-4bc9-8f1e-0411e9500261
+      - http://localhost:8983/fedora/rest/anno/e757b96c-40ba-4d81-b87c-84c98a1eac0b
       Content-Type:
       - text/plain
-      Server:
-      - Jetty(8.1.11.v20130520)
     body:
       encoding: UTF-8
-      string: http://localhost:8080/rest/anno/99367321-ee3b-4bc9-8f1e-0411e9500261
+      string: http://localhost:8983/fedora/rest/anno/e757b96c-40ba-4d81-b87c-84c98a1eac0b
     http_version: 
-  recorded_at: Mon, 20 Oct 2014 20:32:50 GMT
+  recorded_at: Thu, 23 Oct 2014 23:46:55 GMT
 recorded_with: VCR 2.9.3
