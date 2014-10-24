@@ -206,15 +206,29 @@ module Triannon
         if body_obj.is_a?(RDF::Node)
           # we need to use the null relative URI representation of blank nodes to write to LDP
           body_subject = RDF::URI.new
-        else # it's already a URI
-          body_subject = body_obj
+        else 
+          # it's already a URI, but we need to use the null relative URI representation so we can
+          # write out as a Triannon:externalRef property with the URL, and any addl props too.
+          if body_obj.to_str
+            body_subject = RDF::URI.new
+            graph_for_resource << RDF::Statement({:subject => body_subject,
+                                                  :predicate => RDF::Triannon.externalReference,
+                                                  :object => RDF::Literal.new(body_obj.to_str)})
+            addl_stmts = @anno.graph.query([body_obj, nil, nil])
+            addl_stmts.each { |s|  
+              graph_for_resource << RDF::Statement({:subject => body_subject,
+                                                    :predicate => s.predicate,
+                                                    :object => s.object})
+            }
+          else
+            body_subject = body_obj
+          end
         end
-# TODO:  deal with external resource references  (see github issues #43 and #10)
         Triannon::LdpCreator.subject_statements(body_obj, @anno.graph).each { |s|
           if s.subject == body_obj
             graph_for_resource << RDF::Statement({:subject => body_subject,
-                                      :predicate => s.predicate,
-                                      :object => s.object})
+                                                  :predicate => s.predicate,
+                                                  :object => s.object})
           else
             graph_for_resource << s
           end
@@ -229,6 +243,7 @@ module Triannon
     # <> [
     #
     # ]
+    # @deprecated use create_body_resources
     def create_body
       body_chars = @anno.has_body.first        # TODO handle more than just one body or different types
       ttl =<<-TTL
@@ -242,6 +257,7 @@ module Triannon
       @body_id = create_resource ttl, "#{@id}/b"
     end
 
+    # @deprecated use create_target_resources
     def create_target
       target = @anno.has_target.first        # TODO handle more than just one target or different types
       ttl =<<-TTL
