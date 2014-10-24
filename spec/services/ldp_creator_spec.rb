@@ -365,7 +365,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(resp.body)
-      expect(g.query([RDF::URI.new(body_obj_url), RDF::Triannon.externalReference, "http://dbpedia.org/resource/Otto_Ege"]).size).to eql 1
+      expect(g.query([RDF::URI.new(body_obj_url), RDF::Triannon.externalReference, RDF::URI.new("http://dbpedia.org/resource/Otto_Ege")]).size).to eql 1
     end
     it 'body URI has semantic tag' do
       my_anno = Triannon::Annotation.new data: '{
@@ -389,7 +389,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(resp.body)
-      expect(g.query([RDF::URI.new(body_obj_url), RDF::Triannon.externalReference, "http://dbpedia.org/resource/Love"]).size).to eql 1
+      expect(g.query([RDF::URI.new(body_obj_url), RDF::Triannon.externalReference, RDF::URI.new("http://dbpedia.org/resource/Love")]).size).to eql 1
       expect(g.query([RDF::URI.new(body_obj_url), RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
     end
     it 'body URI has additional properties' do
@@ -414,7 +414,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(resp.body)
-      expect(g.query([RDF::URI.new(body_obj_url), RDF::Triannon.externalReference, "http://www.example.org/comment.pdf"]).size).to eql 1
+      expect(g.query([RDF::URI.new(body_obj_url), RDF::Triannon.externalReference, RDF::URI.new("http://www.example.org/comment.pdf")]).size).to eql 1
       expect(g.query([RDF::URI.new(body_obj_url), RDF.type, RDF::DCMIType.Text]).size).to eql 1
     end
     it 'multiple bodies (no URIs)' do
@@ -528,7 +528,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(resp.body)
-      expect(g.query([RDF::URI.new(second_body_url), RDF::Triannon.externalReference, "http://dbpedia.org/resource/Love"]).size).to eql 1
+      expect(g.query([RDF::URI.new(second_body_url), RDF::Triannon.externalReference, RDF::URI.new("http://dbpedia.org/resource/Love")]).size).to eql 1
       expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
     end
     it 'multiple URI bodies with addl properties' do
@@ -569,7 +569,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(resp.body)
-      expect(g.query([RDF::URI.new(first_body_url), RDF::Triannon.externalReference, "http://dbpedia.org/resource/Love"]).size).to eql 1
+      expect(g.query([RDF::URI.new(first_body_url), RDF::Triannon.externalReference, RDF::URI.new("http://dbpedia.org/resource/Love")]).size).to eql 1
       expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
 
       second_body_url = contains_stmts.to_a[1].object.to_s
@@ -579,13 +579,12 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       end
       g = RDF::Graph.new
       g.from_ttl(resp.body)
-      expect(g.query([RDF::URI.new(second_body_url), RDF::Triannon.externalReference, "http://www.example.org/comment.mp3"]).size).to eql 1
+      expect(g.query([RDF::URI.new(second_body_url), RDF::Triannon.externalReference, RDF::URI.new("http://www.example.org/comment.mp3")]).size).to eql 1
       expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::DCMIType.Sound]).size).to eql 1
     end
   end # create_body_resources
 
   describe '#create_target_resources' do
-#puts RDF::FCRepo4.remove_fedora_triples(g).to_ttl      
     it 'creates resources in the target container' do
       new_pid = svc.create_base
       svc.create_target_container

@@ -171,7 +171,7 @@ module Triannon
             body_subject = RDF::URI.new
             graph_for_resource << RDF::Statement({:subject => body_subject,
                                                   :predicate => RDF::Triannon.externalReference,
-                                                  :object => RDF::Literal.new(body_obj.to_str)})
+                                                  :object => RDF::URI.new(body_obj.to_str)})
             addl_stmts = @anno.graph.query([body_obj, nil, nil])
             addl_stmts.each { |s|  
               graph_for_resource << RDF::Statement({:subject => body_subject,
