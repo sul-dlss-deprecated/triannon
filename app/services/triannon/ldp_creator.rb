@@ -47,48 +47,7 @@ module Triannon
     #   if there are references to external resources (e.g.  a url not in our fedora4 repo), then
     #   they need to become externalReferences  in fcrepo4
     # Need targets(s) represented in a way that they can be added to the newly created body container
-    #
-    # body container stuff:
-    #   if there are references to external resources (e.g.  a url not in our fedora4 repo), then
-    #   they need to become externalReferences  in fcrepo4
 
-
-    # NOTE:  not clear this is still useful.  It was conceived believing it would be useful for
-    #  both building body resources and for removing body related statements from the graph for
-    #  building the Annotation object sans bodies and targets.  The latter may still be a valid use
-    #  case; the former is not.
-    # Returns a single graph object containing subgraphs of each body object.  In the result,
-    # blank nodes represented as an RDF::Node object in the original graph are transformed
-    # into an empty RDF::URI object in the resulting graph as these are relative uris that will
-    # be given a specific value when written to the LDP store.
-    #
-    # @param [RDF::Graph] graph a Triannon::Annotation as a graph
-    # @return [RDF::Graph] a single graph object containing subgraphs of each body object
-    def self.bodies_graph graph
-      result = RDF::Graph.new
-      bodies_solns = graph.query([nil, RDF::OpenAnnotation.hasBody, nil])
-      bodies_solns.each { |has_body_stmt |
-        body_obj = has_body_stmt.object
-        if body_obj.is_a?(RDF::Node)
-          # we need to use the null relative URI representation of blank nodes to write to LDP
-          body_subject = RDF::URI.new
-        else # it's already a URI
-          body_subject = body_obj
-        end
-        # TODO:  deal with external resource references  (see github issues #43 and #10)
-        subject_statements(body_obj, graph).each { |s|
-          # FIXME:  this isn't correct when multiple (diff) blank nodes duplicate some properties ...
-          if s.subject == body_obj
-            result << RDF::Statement({:subject => body_subject,
-                                      :predicate => s.predicate,
-                                      :object => s.object})
-          else
-            result << s
-          end
-        }
-      }
-      result
-    end
 
     # TODO:  transform the graph as nec. for writing to LDP Container
     #  (i.e.  blank nodes become relative URIs and external references are transformed, and ...)
