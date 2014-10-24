@@ -317,8 +317,8 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(g.query([RDF::URI.new(body_url), RDF::OpenAnnotation.default, nil]).size).to eql 1
       expect(g.query([RDF::URI.new(body_url), RDF::OpenAnnotation.item, nil]).size).to eql 1
 
-      default_node_pid = g.query([RDF::URI.new(body_pid), RDF::OpenAnnotation.default, :default_blank_node]).first.object.to_s
-      item_node_pid = g.query([RDF::URI.new(body_pid), RDF::OpenAnnotation.item, :item_blank_node]).first.object.to_s
+      default_node_pid = g.query([RDF::URI.new(body_url), RDF::OpenAnnotation.default, :default_blank_node]).first.object.to_s
+      item_node_pid = g.query([RDF::URI.new(body_url), RDF::OpenAnnotation.item, :item_blank_node]).first.object.to_s
 
       # the default blank node object / ttl
       expect(default_node_pid).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
