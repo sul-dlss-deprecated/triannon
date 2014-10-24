@@ -243,6 +243,7 @@ module Triannon
     # <> [
     #
     # ]
+    # @deprecated use create_body_resources
     def create_body
       body_chars = @anno.has_body.first        # TODO handle more than just one body or different types
       ttl =<<-TTL
@@ -256,6 +257,7 @@ module Triannon
       @body_id = create_resource ttl, "#{@id}/b"
     end
 
+    # @deprecated use create_target_resources
     def create_target
       target = @anno.has_target.first        # TODO handle more than just one target or different types
       ttl =<<-TTL
