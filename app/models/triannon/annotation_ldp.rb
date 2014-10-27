@@ -22,7 +22,7 @@ module Triannon
       q = anno_query
       q << [:s, RDF::OpenAnnotation.hasBody, :uri]
       res = graph.query q
-      res.first.uri
+      res.first.uri if res.size > 0
     end
 
     def target_uri

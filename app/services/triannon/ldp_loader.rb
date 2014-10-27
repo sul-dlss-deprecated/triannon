@@ -10,7 +10,7 @@ module Triannon
       l.load_body
       l.load_target
 
-      oa_graph = LdpToOaMapper.ldp_to_oa l.annotation
+      oa_graph = Triannon::LdpToOaMapper.ldp_to_oa l.annotation
       oa_graph
     end
 
@@ -32,9 +32,11 @@ module Triannon
     end
 
     def load_body
-      uri = @annotation.body_uri.to_s
-      sub_path = uri.split(@base_uri + '/').last
-      @annotation.load_data_into_graph get_ttl sub_path
+      if @annotation.body_uri
+        uri = @annotation.body_uri.to_s
+        sub_path = uri.split(@base_uri + '/').last
+        @annotation.load_data_into_graph get_ttl sub_path
+      end
     end
 
     def load_target
@@ -64,7 +66,7 @@ module Triannon
 
     def get_ttl sub_path = nil
       resp = conn.get do |req|
-        req.url " #{sub_path}" if sub_path
+        req.url "#{sub_path}" if sub_path
         req.headers['Accept'] = 'text/turtle'
       end
       resp.body
