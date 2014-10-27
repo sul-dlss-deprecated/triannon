@@ -5,112 +5,26 @@ module Triannon
   class LdpCreator
 
     # use LDP protocol to create the OpenAnnotation.Annotation in an RDF store
-    # @param [Triannon::Annotation] anno a Triannon::Annotation object
-    # @deprecated - use create_from_graph
+    # @param [Triannon::Annotation] anno a Triannon::Annotation object, from which we use the graph
     def self.create(anno)
-      res = Triannon::LdpCreator.new anno
-      res.create_base
-      # TODO:  create body containers with bodies for EACH body
-      res.create_body_container
-      res.create_body
-      # TODO:  create target containers with bodies for EACH target
-      res.create_target_container
-      res.create_target
-      res.id                                     # TODO just return the pid?
-    end
-
-    # use LDP protocol to create the OpenAnnotation.Annotation in an RDF store
-    # @param [RDF::Graph] anno_graph an OpenAnnotation.Annotation as an RDF::Graph object
-    def self.create_from_graph(anno_graph)
       # TODO:  we should not get here if the Annotation object already has an id
       result = Triannon::LdpCreator.new anno
       result.create_base
 
-      bodies_solns = anno_graph.query([nil, RDF::OpenAnnotation.hasBody, nil])
+      bodies_solns = anno.graph.query([nil, RDF::OpenAnnotation.hasBody, nil])
       if bodies_solns.size > 0
         result.create_body_container
         result.create_body_resources
       end
 
-      targets_solns = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+      targets_solns = anno.graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
       # NOTE:  Annotation is invalid if there are no target statements
-      result.create_target_container if targets_solns.size > 0
-      targets_solns.each { |has_target_stmt|
-        create_target_resource subject_statements(has_target_stmt.object, graph)
-      }
+      if targets_solns.size > 0
+        result.create_target_container
+        result.create_target_resources
+      end
 
       result.id
-    end
-
-    # target container stuff:  if there are any blank nodes, the graph to be WRITTEN to
-    # LDP needs to represent them as relative URI resources (no id) with approp descendants
-    #   if there are references to external resources (e.g.  a url not in our fedora4 repo), then
-    #   they need to become externalReferences  in fcrepo4
-    # Need targets(s) represented in a way that they can be added to the newly created body container
-    #
-    # body container stuff:
-    #   if there are references to external resources (e.g.  a url not in our fedora4 repo), then
-    #   they need to become externalReferences  in fcrepo4
-
-
-    # NOTE:  not clear this is still useful.  It was conceived believing it would be useful for
-    #  both building body resources and for removing body related statements from the graph for
-    #  building the Annotation object sans bodies and targets.  The latter may still be a valid use
-    #  case; the former is not.
-    # Returns a single graph object containing subgraphs of each body object.  In the result,
-    # blank nodes represented as an RDF::Node object in the original graph are transformed
-    # into an empty RDF::URI object in the resulting graph as these are relative uris that will
-    # be given a specific value when written to the LDP store.
-    #
-    # @param [RDF::Graph] graph a Triannon::Annotation as a graph
-    # @return [RDF::Graph] a single graph object containing subgraphs of each body object
-    def self.bodies_graph graph
-      result = RDF::Graph.new
-      bodies_solns = graph.query([nil, RDF::OpenAnnotation.hasBody, nil])
-      bodies_solns.each { |has_body_stmt |
-        body_obj = has_body_stmt.object
-        if body_obj.is_a?(RDF::Node)
-          # we need to use the null relative URI representation of blank nodes to write to LDP
-          body_subject = RDF::URI.new
-        else # it's already a URI
-          body_subject = body_obj
-        end
-        # TODO:  deal with external resource references  (see github issues #43 and #10)
-        subject_statements(body_obj, graph).each { |s|
-          # FIXME:  this isn't correct when multiple (diff) blank nodes duplicate some properties ...
-          if s.subject == body_obj
-            result << RDF::Statement({:subject => body_subject,
-                                      :predicate => s.predicate,
-                                      :object => s.object})
-          else
-            result << s
-          end
-        }
-      }
-      result
-    end
-
-    # TODO:  transform the graph as nec. for writing to LDP Container
-    #  (i.e.  blank nodes become relative URIs and external references are transformed, and ...)
-    #
-    # NOTE:  not clear this is still useful.  It was conceived believing it would be useful for
-    #  both building target resources and for removing targe related statements from the graph for
-    #  building the Annotation object sans bodies and targets.  The latter may still be a valid use
-    #  case; the former is not.
-    #
-    # @param [RDF::Graph] graph a Triannon::Annotation as a graph
-    # @return [RDF::Graph] a single graph object containing subgraphs of each target object
-    def self.targets_graph graph
-      result = RDF::Graph.new
-      stmts = []
-      targets_solns = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
-      targets_solns.each { |has_target_stmt |
-        target_obj = has_target_stmt.object
-        subject_statements(target_obj, graph).each { |s|
-          result << s
-        }
-      }
-      result
     end
 
     # given an RDF::Resource (an RDF::Node or RDF::URI), look for all the statements with that object
@@ -195,8 +109,7 @@ module Triannon
       create_direct_container RDF::OpenAnnotation.hasTarget
     end
 
-    # create the body resources inside the body container
-    # @param [RDF::Graph] graph a single graph object containing subgraphs of each body object
+    # create the body resources inside the (already created) body container
     def create_body_resources
       bodies_solns = @anno.graph.query([nil, RDF::OpenAnnotation.hasBody, nil])
       body_ids = []
@@ -213,17 +126,18 @@ module Triannon
             body_subject = RDF::URI.new
             graph_for_resource << RDF::Statement({:subject => body_subject,
                                                   :predicate => RDF::Triannon.externalReference,
-                                                  :object => RDF::Literal.new(body_obj.to_str)})
+                                                  :object => RDF::URI.new(body_obj.to_str)})
             addl_stmts = @anno.graph.query([body_obj, nil, nil])
             addl_stmts.each { |s|  
               graph_for_resource << RDF::Statement({:subject => body_subject,
                                                     :predicate => s.predicate,
                                                     :object => s.object})
             }
-          else
+          else # it's already a null relative URI
             body_subject = body_obj
           end
         end
+        # add statements with body_obj as the subject
         Triannon::LdpCreator.subject_statements(body_obj, @anno.graph).each { |s|
           if s.subject == body_obj
             graph_for_resource << RDF::Statement({:subject => body_subject,
@@ -238,39 +152,79 @@ module Triannon
       body_ids
     end
 
-    # TODO might have to send as blank node since triples getting mixed with fedora internal triples
-    #   or create sub-resource /rest/anno/34/b/1/x
-    # <> [
-    #
-    # ]
-    # @deprecated use create_body_resources
-    def create_body
-      body_chars = @anno.has_body.first        # TODO handle more than just one body or different types
-      ttl =<<-TTL
-        @prefix cnt: <http://www.w3.org/2011/content#> .
-        @prefix dctypes: <http://purl.org/dc/dcmitype/> .
-
-        <> a cnt:ContentAsText, dctypes:Text;
-           cnt:chars '#{body_chars}' .
-      TTL
-
-      @body_id = create_resource ttl, "#{@id}/b"
-    end
-
-    # @deprecated use create_target_resources
-    def create_target
-      target = @anno.has_target.first        # TODO handle more than just one target or different types
-      ttl =<<-TTL
-        @prefix dc: <http://purl.org/dc/elements/1.1/> .
-        @prefix dctypes: <http://purl.org/dc/dcmitype/> .
-        @prefix triannon: <http://triannon.stanford.edu/ns/> .
-
-        <> a dctypes:Text;
-           dc:format 'text/html';
-           triannon:externalReference <#{target}> .
-      TTL
-
-      @target_id = create_resource ttl, "#{@id}/t"
+    # create the target resources inside the (already created) target container
+    def create_target_resources
+      target_solns = @anno.graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+      target_ids = []
+      target_solns.each { |has_target_stmt |
+        graph_for_resource = RDF::Graph.new
+        target_obj = has_target_stmt.object
+        if target_obj.is_a?(RDF::Node)
+          # we need to use the null relative URI representation of blank nodes to write to LDP
+          target_subject = RDF::URI.new
+        else 
+          # it's already a URI, but we need to use the null relative URI representation so we can
+          # write out as a Triannon:externalRef property with the URL, and any addl props too.
+          if target_obj.to_str
+            target_subject = RDF::URI.new
+            graph_for_resource << RDF::Statement({:subject => target_subject,
+                                                  :predicate => RDF::Triannon.externalReference,
+                                                  :object => RDF::URI.new(target_obj.to_str)})
+            addl_stmts = @anno.graph.query([target_obj, nil, nil])
+            addl_stmts.each { |s|  
+              graph_for_resource << RDF::Statement({:subject => target_subject,
+                                                    :predicate => s.predicate,
+                                                    :object => s.object})
+            }
+          else # it's already a null relative URI
+            target_subject = target_obj
+          end
+        end
+        # add statements with target_obj as the subject
+        orig_source_objects = [] # the object URI nodes  from  targetObject, OA.hasSource, (uri) statements
+        Triannon::LdpCreator.subject_statements(target_obj, @anno.graph).each { |s|
+          if s.subject == target_obj
+            # deal with external references in hasSource statements (i.e.  targetObject, OA.hasSource, (url) )
+            if s.predicate == RDF::OpenAnnotation.hasSource && s.object.is_a?(RDF::URI) && s.object.to_str
+              # we need to represent the source URL as an externalReference - use a hash URI
+              source_object = RDF::URI.new("#source")
+              orig_source_objects << s.object
+              graph_for_resource << RDF::Statement({:subject => source_object,
+                                                    :predicate => RDF::Triannon.externalReference,
+                                                    :object => RDF::URI.new(s.object.to_str)})
+              # and all of the source URL's addl props
+              Triannon::LdpCreator.subject_statements(s.object, @anno.graph).each { |ss|
+                if ss.subject == s.object
+                  graph_for_resource << RDF::Statement({:subject => source_object,
+                                                        :predicate => ss.predicate,
+                                                        :object => ss.object})
+                else
+                  graph_for_resource << ss
+                end
+              }
+              # add the targetObj, OA.hasSource, (hash URI representation) to graph
+              graph_for_resource << RDF::Statement({:subject => target_subject,
+                                                    :predicate => s.predicate,
+                                                    :object => source_object})
+            else
+              graph_for_resource << RDF::Statement({:subject => target_subject,
+                                                    :predicate => s.predicate,
+                                                    :object => s.object})
+            end
+          else
+            graph_for_resource << s
+          end
+        }
+        # make sure the graph we will write contains no extraneous statements about source URI
+        #  now represented as hash URI (#source)
+        orig_source_objects.each { |rdf_uri_node| 
+          Triannon::LdpCreator.subject_statements(rdf_uri_node, graph_for_resource).each { |s|  
+            graph_for_resource.delete(s)
+          }
+        }
+        target_ids << create_resource(graph_for_resource.to_ttl, "#{@id}/t")
+      }
+      target_ids
     end
 
     def conn
