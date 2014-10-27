@@ -133,7 +133,7 @@ module Triannon
     end
 
     def self.find(key)
-      oa_graph = LdpLoader.load key
+      oa_graph = Triannon::LdpLoader.load key
       anno = Triannon::Annotation.new
       anno.graph = oa_graph
       anno
