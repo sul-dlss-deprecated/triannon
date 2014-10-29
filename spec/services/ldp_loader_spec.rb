@@ -43,24 +43,24 @@ describe Triannon::LdpLoader do
     end
   end
 
-  describe "#load_body" do
-    it "retrieves the body by using the hasBody value from the annotation" do
+  describe "#load_bodies" do
+    it "retrieves the bodies via hasBody objects in anno container" do
       loader = Triannon::LdpLoader.new 'somekey'
       allow(loader).to receive(:get_ttl).and_return(anno_ttl, body_ttl)
       loader.load_annotation
-      loader.load_body
+      loader.load_bodies
       body_uri = loader.annotation.body_uris.first
       result = loader.annotation.graph.query [body_uri, RDF::Content.chars, nil]
       expect(result.first.object.to_s).to match /I love this/
     end
   end
 
-  describe "#load_target" do
-    it "retrieves the target by using hasTarget value from the annotation" do
+  describe "#load_targets" do
+    it "retrieves the targets via hasTarget objects in anno container" do
       loader = Triannon::LdpLoader.new 'somekey'
       allow(loader).to receive(:get_ttl).and_return(anno_ttl, target_ttl)
       loader.load_annotation
-      loader.load_target
+      loader.load_targets
       target_uri = loader.annotation.target_uris.first
       result = loader.annotation.graph.query [target_uri, RDF::Triannon.externalReference, nil]
       expect(result.first.object.to_s).to match /kq131cs7229/

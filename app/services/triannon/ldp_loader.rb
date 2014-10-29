@@ -7,8 +7,8 @@ module Triannon
     def self.load key
       l = Triannon::LdpLoader.new key
       l.load_annotation
-      l.load_body
-      l.load_target
+      l.load_bodies
+      l.load_targets
 
       oa_graph = Triannon::LdpToOaMapper.ldp_to_oa l.annotation
       oa_graph
@@ -31,14 +31,14 @@ module Triannon
       @annotation.load_data_into_graph get_ttl @key
     end
 
-    def load_body
+    def load_bodies
       @annotation.body_uris.each { |body_uri|  
         sub_path = body_uri.to_s.split(@base_uri + '/').last
         @annotation.load_data_into_graph get_ttl sub_path
       }
     end
 
-    def load_target
+    def load_targets
       @annotation.target_uris.each { |target_uri| 
         sub_path = target_uri.to_s.split(@base_uri + '/').last
         @annotation.load_data_into_graph get_ttl sub_path
@@ -64,10 +64,11 @@ module Triannon
 
     protected
 
+    # gets object from back end storage as turtle
     def get_ttl sub_path = nil
       resp = conn.get do |req|
         req.url "#{sub_path}" if sub_path
-        req.headers['Accept'] = 'text/turtle'
+        req.headers['Accept'] = 'application/x-turtle'
       end
       resp.body
     end
