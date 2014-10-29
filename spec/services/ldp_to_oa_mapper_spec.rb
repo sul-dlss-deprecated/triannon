@@ -1,17 +1,20 @@
-require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
+require 'spec_helper'
 
 describe Triannon::LdpToOaMapper do
   let(:anno_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_base.ttl') }
+  let(:base_stmts) { RDF::Graph.new.from_ttl(anno_ttl).statements }
   let(:body_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_body.ttl') }
+  let(:body_stmts) { RDF::Graph.new.from_ttl(body_ttl).statements }
   let(:target_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_target.ttl') }
+  let(:target_stmts) { RDF::Graph.new.from_ttl(target_ttl).statements }
 
   describe ".ldp_to_oa" do
 
     it "maps an AnnotationLdp to an OA RDF::Graph" do
       ldp_anno = Triannon::AnnotationLdp.new
-      ldp_anno.load_data_into_graph anno_ttl
-      ldp_anno.load_data_into_graph body_ttl
-      ldp_anno.load_data_into_graph target_ttl
+      ldp_anno.load_statements_into_graph base_stmts
+      ldp_anno.load_statements_into_graph body_stmts
+      ldp_anno.load_statements_into_graph target_stmts
       oa_graph = Triannon::LdpToOaMapper.ldp_to_oa ldp_anno
 
       resp = oa_graph.query [nil,RDF.type, RDF::OpenAnnotation.Annotation ]
@@ -23,7 +26,7 @@ describe Triannon::LdpToOaMapper do
   describe "#extract_base" do
     let(:ldp_anno) {
       a = Triannon::AnnotationLdp.new
-      a.load_data_into_graph anno_ttl
+      a.load_statements_into_graph base_stmts
       a
     }
 
@@ -58,8 +61,8 @@ describe Triannon::LdpToOaMapper do
     context "when the RDF.type is ContentAsText" do
       let(:ldp_anno) {
         a = Triannon::AnnotationLdp.new
-        a.load_data_into_graph anno_ttl
-        a.load_data_into_graph body_ttl
+        a.load_statements_into_graph base_stmts
+        a.load_statements_into_graph body_stmts
         a
       }
 
@@ -85,8 +88,8 @@ describe Triannon::LdpToOaMapper do
   describe "#extract_target" do
     let(:ldp_anno) {
       a = Triannon::AnnotationLdp.new
-      a.load_data_into_graph anno_ttl
-      a.load_data_into_graph target_ttl
+      a.load_statements_into_graph base_stmts
+      a.load_statements_into_graph target_stmts
       a
     }
 

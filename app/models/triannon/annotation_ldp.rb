@@ -8,9 +8,7 @@ module Triannon
 
     # RDF::Graph without any back end (e.g. LDP, Fedora) triples
     def stripped_graph
-      @stripped_graph ||= begin
-        new_graph = RDF::LDP.remove_ldp_triples (RDF::FCRepo4.remove_fedora_triples(graph))
-      end
+      new_graph = RDF::LDP.remove_ldp_triples (RDF::FCRepo4.remove_fedora_triples(graph))
     end
 
     def base_uri
@@ -39,9 +37,11 @@ module Triannon
       }
       result
     end
-
-    def load_data_into_graph ttl
-      graph.from_ttl ttl
+    
+    # add the passed statements to #graph
+    # @param [Array<RDF::Statement>] statements an array of RDF statements to be loaded into the graph
+    def load_statements_into_graph statements
+      graph.insert(statements) if statements && statements.size > 0
     end
 
 private

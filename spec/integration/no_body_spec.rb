@@ -1,7 +1,6 @@
-require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
+require 'spec_helper'
 
-vcr_options = {:cassette_name => "integration_no_body", 
-              :re_record_interval => 45.days}  # TODO will make shorter once we have jetty running fedora4
+vcr_options = {:re_record_interval => 45.days}  # TODO will make shorter once we have jetty running fedora4
 describe "integration tests for annos with no body", :vcr => vcr_options do
 
   it 'bookmark' do
