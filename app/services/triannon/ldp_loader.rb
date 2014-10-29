@@ -27,21 +27,24 @@ module Triannon
       @annotation = Triannon::AnnotationLdp.new
     end
 
+    # load annotation object into @annotation's (our Triannon::AnnotationLdp object) graph
     def load_annotation
-      @annotation.load_data_into_graph get_ttl @key
+      load_object_into_annotation_graph(@key)
     end
 
+    # load body objects into @annotation's (our Triannon::AnnotationLdp object) graph
     def load_bodies
       @annotation.body_uris.each { |body_uri|  
-        sub_path = body_uri.to_s.split(@base_uri + '/').last
-        @annotation.load_data_into_graph get_ttl sub_path
+        body_obj_path = body_uri.to_s.split(@base_uri + '/').last
+        load_object_into_annotation_graph(body_obj_path)
       }
     end
 
+    # load target objects into @annotation's (our Triannon::AnnotationLdp object) graph
     def load_targets
       @annotation.target_uris.each { |target_uri| 
-        sub_path = target_uri.to_s.split(@base_uri + '/').last
-        @annotation.load_data_into_graph get_ttl sub_path
+        target_obj_path = target_uri.to_s.split(@base_uri + '/').last
+        load_object_into_annotation_graph(target_obj_path)
       }
     end
     
@@ -64,7 +67,14 @@ module Triannon
 
     protected
 
-    # gets object from back end storage as turtle
+    # given a path to the back end storage url, retrieve the object from storage and load
+    #  the triples (except storage specific triples) into the graph for @annotation, our Triannon::AnnotationLdp object
+    # @param [String] path the path to the object, e.g. the pid, or  pid/t/target_pid
+    def load_object_into_annotation_graph(path)
+      @annotation.load_statements_into_graph(statements_from_ttl_minus_fedora(get_ttl path))
+    end
+
+    # gets object from back end storage as turtle serialization
     def get_ttl sub_path = nil
       resp = conn.get do |req|
         req.url "#{sub_path}" if sub_path
@@ -73,11 +83,20 @@ module Triannon
       resp.body
     end
 
+    # turns turtle serialization into Array of RDF::Statements, removing fedora-specific triples
+    #  (leaving LDP and OA triples)
+    # @param [String] ttl a String containing RDF serialized as turtle
+    # @return [Array<RDF::Statements>] the RDF statements represented in the ttl 
+    def statements_from_ttl_minus_fedora ttl
+      # RDF::Turtle::Reader.new(ttl).statements.to_a
+      g = RDF::Graph.new.from_ttl(ttl)
+      RDF::FCRepo4.remove_fedora_triples(g).statements
+    end
+
     def conn
       @c ||= Faraday.new @base_uri
     end
 
   end
-
 
 end

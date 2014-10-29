@@ -37,9 +37,11 @@ module Triannon
       }
       result
     end
-
-    def load_data_into_graph ttl
-      graph.from_ttl ttl
+    
+    # add the passed statements to #graph
+    # @param [Array<RDF::Statement>] statements an array of RDF statements to be loaded into the graph
+    def load_statements_into_graph statements
+      graph.insert(statements) if statements && statements.size > 0
     end
 
 private
