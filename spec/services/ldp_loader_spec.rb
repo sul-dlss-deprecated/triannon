@@ -28,7 +28,8 @@ describe Triannon::LdpLoader do
       loader = Triannon::LdpLoader.new 'somekey'
       allow(loader).to receive(:get_ttl).and_return(anno_ttl)
       loader.load_annotation
-      result = loader.annotation.graph.query [loader.annotation.body_uri, nil, nil]
+      body_uri = loader.annotation.body_uris.first
+      result = loader.annotation.graph.query [body_uri, nil, nil]
       expect(result.size).to eq 0
     end
 
@@ -47,8 +48,8 @@ describe Triannon::LdpLoader do
       allow(loader).to receive(:get_ttl).and_return(anno_ttl, body_ttl)
       loader.load_annotation
       loader.load_body
-
-      result = loader.annotation.graph.query [loader.annotation.body_uri, RDF::Content.chars, nil]
+      body_uri = loader.annotation.body_uris.first
+      result = loader.annotation.graph.query [body_uri, RDF::Content.chars, nil]
       expect(result.first.object.to_s).to match /I love this/
     end
   end

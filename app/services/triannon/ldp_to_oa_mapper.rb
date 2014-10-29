@@ -31,17 +31,19 @@ module Triannon
     end
 
     def extract_body
-      res = @ldp.stripped_graph.query [@ldp.body_uri, RDF.type, RDF::Content.ContentAsText]
-      if res.count > 0 # TODO raise if this fails?
-        body_node = RDF::Node.new
-        @oa_graph << [@root_uri, RDF::OpenAnnotation.hasBody, body_node]
-        @oa_graph << [body_node, RDF.type, RDF::Content.ContentAsText]
-        @oa_graph << [body_node, RDF.type, RDF::DCMIType.Text]
-        res_chars = @ldp.stripped_graph.query [@ldp.body_uri, RDF::Content.chars, nil]
-        if res_chars.count > 0
-          @oa_graph << [body_node, RDF::Content.chars, res_chars.first.object]
+      @ldp.body_uris.each { |body_uri|  
+        res = @ldp.stripped_graph.query [body_uri, RDF.type, RDF::Content.ContentAsText]
+        if res.count > 0 # TODO raise if this fails?
+          body_node = RDF::Node.new
+          @oa_graph << [@root_uri, RDF::OpenAnnotation.hasBody, body_node]
+          @oa_graph << [body_node, RDF.type, RDF::Content.ContentAsText]
+          @oa_graph << [body_node, RDF.type, RDF::DCMIType.Text]
+          res_chars = @ldp.stripped_graph.query [body_uri, RDF::Content.chars, nil]
+          if res_chars.count > 0
+            @oa_graph << [body_node, RDF::Content.chars, res_chars.first.object]
+          end
         end
-      end
+      }
     end
 
     def extract_target
