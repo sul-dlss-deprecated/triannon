@@ -18,18 +18,26 @@ module Triannon
       res.first.s
     end
 
-    def body_uri
+    def body_uris
       q = anno_query
-      q << [:s, RDF::OpenAnnotation.hasBody, :uri]
-      res = graph.query q
-      res.first.uri if res.size > 0
+      q << [:s, RDF::OpenAnnotation.hasBody, :body_uri]
+      solns = graph.query q
+      result = []
+      solns.distinct.each { |soln| 
+        result << soln.body_uri 
+      }
+      result
     end
 
-    def target_uri
+    def target_uris
       q = anno_query
-      q << [:s, RDF::OpenAnnotation.hasTarget, :uri]
-      res = graph.query q
-      res.first.uri
+      q << [:s, RDF::OpenAnnotation.hasTarget, :target_uri]
+      solns = graph.query q
+      result = []
+      solns.distinct.each { |soln| 
+        result << soln.target_uri 
+      }
+      result
     end
 
     def load_data_into_graph ttl

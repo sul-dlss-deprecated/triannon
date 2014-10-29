@@ -32,19 +32,19 @@ module Triannon
     end
 
     def load_body
-      if @annotation.body_uri
-        uri = @annotation.body_uri.to_s
-        sub_path = uri.split(@base_uri + '/').last
+      @annotation.body_uris.each { |body_uri|  
+        sub_path = body_uri.to_s.split(@base_uri + '/').last
         @annotation.load_data_into_graph get_ttl sub_path
-      end
+      }
     end
 
     def load_target
-      uri = @annotation.target_uri.to_s
-      sub_path = uri.split(@base_uri + '/').last
-      @annotation.load_data_into_graph get_ttl sub_path
+      @annotation.target_uris.each { |target_uri| 
+        sub_path = target_uri.to_s.split(@base_uri + '/').last
+        @annotation.load_data_into_graph get_ttl sub_path
+      }
     end
-
+    
     # @return [Array<Triannon::Annotation>] an array of Triannon::Annotation objects with just the id set. Enough info to build the index page
     def find_all
       root_ttl = get_ttl
