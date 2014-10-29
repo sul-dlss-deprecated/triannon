@@ -8,9 +8,7 @@ module Triannon
 
     # RDF::Graph without any back end (e.g. LDP, Fedora) triples
     def stripped_graph
-      @stripped_graph ||= begin
-        new_graph = RDF::LDP.remove_ldp_triples (RDF::FCRepo4.remove_fedora_triples(graph))
-      end
+      new_graph = RDF::LDP.remove_ldp_triples (RDF::FCRepo4.remove_fedora_triples(graph))
     end
 
     def base_uri
