@@ -65,10 +65,49 @@ describe Triannon::AnnotationLdp do
     end
   end
 
-  describe "#target_uri" do
-    it "returns the URI to the resource stored in the annotation's target container" do
+  describe "#target_uris" do
+    it 'returns an Array of target object ids as URIs - one target' do
       anno.load_data_into_graph anno_ttl
-      expect(anno.target_uri.path).to match /\/t\/ee774031-74d9-4f5a-9b03-cdd21267e4e1/
+      expect(anno.target_uris.class).to eql Array
+      expect(anno.target_uris.size).to eq 1
+      target_uri = anno.target_uris.first
+      expect(target_uri.class).to eql RDF::URI
+      expect(target_uri.path).to match "#{anno.base_uri.path}/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1"
+    end
+    it 'returns an Array of target object ids as URIs - 2 targets' do
+      target_url1 = "http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2/t/14788e2d-fe2a-424b-89b3-f73e77d81c62"
+      target_url2 = "http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2/t/b20b2bd7-bbfa-4209-997c-e21ad8032e28"
+      anno.load_data_into_graph "
+      @prefix openannotation: <http://www.w3.org/ns/oa#> .
+      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+      <http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2> a openannotation:Annotation;
+         openannotation:motivatedBy openannotation:commenting;
+      	 openannotation:hasTarget <#{target_url1}>,
+      	    <#{target_url2}> .
+      "
+      expect(anno.target_uris.class).to eql Array
+      expect(anno.target_uris.size).to eq 2
+      expect(anno.target_uris).to include RDF::URI.new(target_url1)
+      expect(anno.target_uris).to include RDF::URI.new(target_url2)
+    end
+    it "target object URIs are LDP resources stored in the annotation's target container" do
+      anno.load_data_into_graph anno_ttl
+      expect(anno.target_uris.first.path).to match "#{anno.base_uri.path}\/t\/.+"
+    end
+    it 'returns empty Array if there are no targets' do
+      anno.load_data_into_graph "
+      @prefix ldp: <http://www.w3.org/ns/ldp#> .
+      @prefix openannotation: <http://www.w3.org/ns/oa#> .
+      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+      <http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2> a ldp:Container,
+           ldp:DirectContainer,
+           ldp:RDFSource,
+           openannotation:Annotation;
+         ldp:hasMemberRelation ldp:member;
+         ldp:membershipResource <http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2>;
+         openannotation:motivatedBy openannotation:bookmarking .
+      "
+      expect(anno.target_uris).to eql []
     end
   end
 

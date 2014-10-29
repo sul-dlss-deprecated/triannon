@@ -47,11 +47,13 @@ module Triannon
     end
 
     def extract_target
-      res = @ldp.stripped_graph.query [@ldp.target_uri, RDF::Triannon.externalReference, nil]
-      if res.count > 0
-        ext_uri = res.first.object
-        @oa_graph << [@root_uri, RDF::OpenAnnotation.hasTarget, ext_uri]
-      end
+      @ldp.target_uris.each { |target_uri|  
+        res = @ldp.stripped_graph.query [target_uri, RDF::Triannon.externalReference, nil]
+        if res.count > 0
+          ext_uri = res.first.object
+          @oa_graph << [@root_uri, RDF::OpenAnnotation.hasTarget, ext_uri]
+        end
+      }
     end
 
   end
