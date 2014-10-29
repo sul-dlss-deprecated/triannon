@@ -1,4 +1,4 @@
-require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
+require 'spec_helper'
 
 vcr_options = {:re_record_interval => 45.days}  # TODO will make shorter once we have jetty running fedora4
 describe Triannon::LdpDestroyer, :vcr => vcr_options do
