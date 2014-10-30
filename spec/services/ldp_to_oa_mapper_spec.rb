@@ -92,6 +92,7 @@ describe Triannon::LdpToOaMapper do
       a.load_statements_into_graph target_stmts
       a
     }
+    let(:target_url) { "http://purl.stanford.edu/kq131cs7229" }
 
     it "sets the hasTarget url from externalReference" do
       mapper = Triannon::LdpToOaMapper.new ldp_anno
@@ -102,7 +103,88 @@ describe Triannon::LdpToOaMapper do
       expect(res.count).to eq 1
       uri = res.first.object
       expect(uri.class).to eq RDF::URI
-      expect(uri.to_s).to match /purl.stanford.edu\/kq131cs7229/
+      expect(uri.to_s).to eql target_url
+    end
+  end
+  
+  describe '#map_external_ref' do
+    let(:ldp_anno) {
+      a = Triannon::AnnotationLdp.new
+      a.load_statements_into_graph base_stmts
+      a
+    }
+    let(:target_url) { "http://purl.stanford.edu/kq131cs7229" }
+    it "adds statement with external uri from externalReference statement to oa_graph" do
+      ldp_anno.load_statements_into_graph target_stmts
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      expect(solns.count).to eq 0
+      
+      target_uri = ldp_anno.target_uris.first
+      mapper.map_external_ref(target_uri, RDF::OpenAnnotation.hasTarget)
+      
+      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      expect(solns.count).to eq 1
+      uri = solns.first.object
+      expect(uri.class).to eq RDF::URI
+      expect(uri.to_s).to eql target_url
+    end
+    it "returns true if it adds statements to oa_graph" do
+      ldp_anno.load_statements_into_graph target_stmts
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      expect(solns.count).to eq 0
+      
+      target_uri = ldp_anno.target_uris.first
+      expect(mapper.map_external_ref(target_uri, RDF::OpenAnnotation.hasTarget)).to be true
+    end
+    it "returns false if it doesn't change oa_graph" do
+      ldp_anno.load_statements_into_graph body_stmts
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      expect(solns.count).to eq 0
+      
+      body_uri = ldp_anno.body_uris.first
+      expect(mapper.map_external_ref(body_uri, RDF::OpenAnnotation.hasTarget)).to be false
+    end
+    it "doesn't change @oa_graph if there is no Triannon:externalReference in @ldp_anno_graph" do
+      ldp_anno.load_statements_into_graph body_stmts
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      expect(solns.count).to eq 0
+      
+      body_uri = ldp_anno.body_uris.first
+      mapper.map_external_ref(body_uri, RDF::OpenAnnotation.hasTarget)
+      
+      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      expect(solns.count).to eq 0
+    end
+    it "only maps the first Triannon:externalReference if there is more than one in the container" do
+      # there should only ever be one Triannon:externalReference in the object LDP container
+      target_url1 = target_url
+      target_url2 = "http://purl.stanford.edu/ab123cd4567"
+      target_ttl = "
+        <http://localhost:8983/fedora/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1> 
+        <http://triannon.stanford.edu/ns/externalReference> <#{target_url1}>, <#{target_url2}>; ."
+      my_target_stmts = RDF::Graph.new.from_ttl(target_ttl).statements
+      ldp_anno.load_statements_into_graph my_target_stmts
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      expect(solns.count).to eq 0
+      
+      target_uri = ldp_anno.target_uris.first
+      mapper.map_external_ref(target_uri, RDF::OpenAnnotation.hasTarget)
+      
+      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, RDF::URI.new(target_url1)]
+      expect(solns.count).to eq 1
+      
+      solns = mapper.oa_graph.query [nil, nil, RDF::URI.new(target_url2)]
+      expect(solns.count).to eq 0
     end
   end
 
