@@ -24,10 +24,10 @@ describe "integration tests for annos with external URIs", :vcr => vcr_options d
      anno = Triannon::Annotation.find id
      h = anno.graph
      expect(h.size).to eql 3
-     uri_resource = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
-     expect(h.query([uri_resource, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-     expect(h.query([uri_resource, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.bookmarking]).size).to eql 1
-     expect(h.query([uri_resource, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1     
+     anno_uri_obj = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
+     expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
+     expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.bookmarking]).size).to eql 1
+     expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1     
   end
   
   it 'mult targets with external URIs' do
@@ -55,11 +55,11 @@ describe "integration tests for annos with external URIs", :vcr => vcr_options d
      anno = Triannon::Annotation.find id
      h = anno.graph
      expect(h.size).to eql 4
-     uri_resource = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
-     expect(h.query([uri_resource, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-     expect(h.query([uri_resource, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.bookmarking]).size).to eql 1
-     expect(h.query([uri_resource, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri1)]).size).to eql 1     
-     expect(h.query([uri_resource, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri2)]).size).to eql 1     
+     anno_uri_obj = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
+     expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
+     expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.bookmarking]).size).to eql 1
+     expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri1)]).size).to eql 1     
+     expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri2)]).size).to eql 1     
   end
 
   it 'body and target have plain external URI' do
@@ -80,18 +80,18 @@ describe "integration tests for annos with external URIs", :vcr => vcr_options d
     expect(g.size).to eql 4
     expect(g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
     expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasBody, RDF::URI("http://dbpedia.org/resource/Otto_Ege")]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI("http://purl.stanford.edu/kq131cs7229")]).size).to eql 1
+    expect(g.query([nil, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri)]).size).to eql 1
+    expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
 
     id = write_anno.save
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql 4
-    uri_resource = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
-    expect(h.query([uri_resource, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(h.query([uri_resource, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
-    expect(g.query([uri_resource, RDF::OpenAnnotation.hasBody, RDF::URI("http://dbpedia.org/resource/Otto_Ege")]).size).to eql 1
-    expect(h.query([uri_resource, RDF::OpenAnnotation.hasTarget, RDF::URI("http://purl.stanford.edu/kq131cs7229")]).size).to eql 1
+    anno_uri_obj = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
+    expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
+    expect(g.query([anno_uri_obj, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri)]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
   end
   
   it 'target uri has additional properties' do
