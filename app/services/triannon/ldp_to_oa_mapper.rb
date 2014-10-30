@@ -33,15 +33,17 @@ module Triannon
 
     def extract_body
       @ldp_anno.body_uris.each { |body_uri|
-        solns = @ldp_anno_graph.query [body_uri, RDF.type, RDF::Content.ContentAsText]
-        if solns.count > 0
-          body_node = RDF::Node.new
-          @oa_graph << [@root_uri, RDF::OpenAnnotation.hasBody, body_node]
-          @oa_graph << [body_node, RDF.type, RDF::Content.ContentAsText]
-          @oa_graph << [body_node, RDF.type, RDF::DCMIType.Text]
-          chars_solns = @ldp_anno_graph.query [body_uri, RDF::Content.chars, nil]
-          if chars_solns.count > 0
-            @oa_graph << [body_node, RDF::Content.chars, chars_solns.first.object]
+        if !map_external_ref(body_uri, RDF::OpenAnnotation.hasBody)
+          solns = @ldp_anno_graph.query [body_uri, RDF.type, RDF::Content.ContentAsText]
+          if solns.count > 0
+            body_node = RDF::Node.new
+            @oa_graph << [@root_uri, RDF::OpenAnnotation.hasBody, body_node]
+            @oa_graph << [body_node, RDF.type, RDF::Content.ContentAsText]
+            @oa_graph << [body_node, RDF.type, RDF::DCMIType.Text]
+            chars_solns = @ldp_anno_graph.query [body_uri, RDF::Content.chars, nil]
+            if chars_solns.count > 0
+              @oa_graph << [body_node, RDF::Content.chars, chars_solns.first.object]
+            end
           end
         end
       }
@@ -64,9 +66,10 @@ module Triannon
       if solns.count > 0
         external_uri = solns.first.object
         @oa_graph << [@root_uri, predicate, external_uri]
-        return true
+        true
+      else
+        false
       end
-      false
     end
     
   end
