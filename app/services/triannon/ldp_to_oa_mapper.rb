@@ -34,17 +34,7 @@ module Triannon
     def extract_body
       @ldp_anno.body_uris.each { |body_uri|
         if !map_external_ref(body_uri, RDF::OpenAnnotation.hasBody)
-          solns = @ldp_anno_graph.query [body_uri, RDF.type, RDF::Content.ContentAsText]
-          if solns.count > 0
-            body_node = RDF::Node.new
-            @oa_graph << [@root_uri, RDF::OpenAnnotation.hasBody, body_node]
-            @oa_graph << [body_node, RDF.type, RDF::Content.ContentAsText]
-            @oa_graph << [body_node, RDF.type, RDF::DCMIType.Text]
-            chars_solns = @ldp_anno_graph.query [body_uri, RDF::Content.chars, nil]
-            if chars_solns.count > 0
-              @oa_graph << [body_node, RDF::Content.chars, chars_solns.first.object]
-            end
-          end
+          map_content_as_text(body_uri, RDF::OpenAnnotation.hasBody)
         end
       }
     end
@@ -56,7 +46,7 @@ module Triannon
     end
     
     # if uri_obj is the subject of a Triannon.externalReference then add appropriate
-    #  statements to @oa_graph
+    #  statements to @oa_graph and return true
     # @param [RDF::URI] uri_obj the object that may have RDF::Triannon.externalReference
     # @param [RDF::URI] predicate the predicate for [@root_uri, predicate, (ext_url)] statement
     # to be added to @oa_graph, e.g. RDF::OpenAnnotation.hasTarget
@@ -72,6 +62,32 @@ module Triannon
       end
     end
     
+    # if uri_obj has a type of RDF::Content.ContentAsText, then this is a skolemized blank node;
+    #  add appropriate statements to @oa_graph to represent the blank node and its contents and return true
+    # @param [RDF::URI] uri_obj the object that may have RDF::Triannon.externalReference
+    # @param [RDF::URI] predicate the predicate for [@root_uri, predicate, (ext_url)] statement
+    # to be added to @oa_graph, e.g. RDF::OpenAnnotation.hasTarget
+    # @returns [Boolean] true if it adds statements to @oa_graph, false otherwise
+    def map_content_as_text uri_obj, predicate
+      solns = @ldp_anno_graph.query [uri_obj, RDF.type, RDF::Content.ContentAsText]
+      if solns.count > 0
+        blank_node = RDF::Node.new
+        @oa_graph << [@root_uri, predicate, blank_node]
+        
+        Triannon::LdpCreator.subject_statements(uri_obj, @ldp_anno_graph).each { |stmt|
+          if stmt.subject == uri_obj
+            @oa_graph << [blank_node, stmt.predicate, stmt.object]
+          else
+            # it is a descendant statment - take as is
+            @oa_graph << stmt
+          end
+        }
+        true
+      else
+        false
+      end
+    end
+
   end
 
 end
