@@ -13,12 +13,13 @@ module Triannon
     attr_accessor :id, :oa_graph
 
     def initialize ldp_anno
-      @ldp = ldp_anno
+      @ldp_anno = ldp_anno
+      @ldp_anno_graph = ldp_anno.stripped_graph
       @oa_graph = RDF::Graph.new
     end
 
     def extract_base
-      @ldp.stripped_graph.each_statement do |stmnt|
+      @ldp_anno_graph.each_statement do |stmnt|
         if stmnt.predicate == RDF.type && stmnt.object == RDF::OpenAnnotation.Annotation
           @id = stmnt.subject.to_s.split('/').last
           @root_uri = RDF::URI.new(Triannon.config[:triannon_base_url] + "/#{@id}")
@@ -31,29 +32,60 @@ module Triannon
     end
 
     def extract_body
-      @ldp.body_uris.each { |body_uri|  
-        res = @ldp.stripped_graph.query [body_uri, RDF.type, RDF::Content.ContentAsText]
-        if res.count > 0 # TODO raise if this fails?
-          body_node = RDF::Node.new
-          @oa_graph << [@root_uri, RDF::OpenAnnotation.hasBody, body_node]
-          @oa_graph << [body_node, RDF.type, RDF::Content.ContentAsText]
-          @oa_graph << [body_node, RDF.type, RDF::DCMIType.Text]
-          res_chars = @ldp.stripped_graph.query [body_uri, RDF::Content.chars, nil]
-          if res_chars.count > 0
-            @oa_graph << [body_node, RDF::Content.chars, res_chars.first.object]
-          end
+      @ldp_anno.body_uris.each { |body_uri|
+        if !map_external_ref(body_uri, RDF::OpenAnnotation.hasBody)
+          map_content_as_text(body_uri, RDF::OpenAnnotation.hasBody)
         end
       }
     end
 
     def extract_target
-      @ldp.target_uris.each { |target_uri|  
-        res = @ldp.stripped_graph.query [target_uri, RDF::Triannon.externalReference, nil]
-        if res.count > 0
-          ext_uri = res.first.object
-          @oa_graph << [@root_uri, RDF::OpenAnnotation.hasTarget, ext_uri]
-        end
+      @ldp_anno.target_uris.each { |target_uri| 
+        map_external_ref(target_uri, RDF::OpenAnnotation.hasTarget)
       }
+    end
+    
+    # if uri_obj is the subject of a Triannon.externalReference then add appropriate
+    #  statements to @oa_graph and return true
+    # @param [RDF::URI] uri_obj the object that may have RDF::Triannon.externalReference
+    # @param [RDF::URI] predicate the predicate for [@root_uri, predicate, (ext_url)] statement
+    # to be added to @oa_graph, e.g. RDF::OpenAnnotation.hasTarget
+    # @returns [Boolean] true if it adds statements to @oa_graph, false otherwise
+    def map_external_ref uri_obj, predicate
+      solns = @ldp_anno_graph.query [uri_obj, RDF::Triannon.externalReference, nil]
+      if solns.count > 0
+        external_uri = solns.first.object
+        @oa_graph << [@root_uri, predicate, external_uri]
+        true
+      else
+        false
+      end
+    end
+    
+    # if uri_obj has a type of RDF::Content.ContentAsText, then this is a skolemized blank node;
+    #  add appropriate statements to @oa_graph to represent the blank node and its contents and return true
+    # @param [RDF::URI] uri_obj the object that may have RDF::Triannon.externalReference
+    # @param [RDF::URI] predicate the predicate for [@root_uri, predicate, (ext_url)] statement
+    # to be added to @oa_graph, e.g. RDF::OpenAnnotation.hasTarget
+    # @returns [Boolean] true if it adds statements to @oa_graph, false otherwise
+    def map_content_as_text uri_obj, predicate
+      solns = @ldp_anno_graph.query [uri_obj, RDF.type, RDF::Content.ContentAsText]
+      if solns.count > 0
+        blank_node = RDF::Node.new
+        @oa_graph << [@root_uri, predicate, blank_node]
+        
+        Triannon::LdpCreator.subject_statements(uri_obj, @ldp_anno_graph).each { |stmt|
+          if stmt.subject == uri_obj
+            @oa_graph << [blank_node, stmt.predicate, stmt.object]
+          else
+            # it is a descendant statment - take as is
+            @oa_graph << stmt
+          end
+        }
+        true
+      else
+        false
+      end
     end
 
   end

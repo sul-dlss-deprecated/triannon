@@ -20,10 +20,10 @@ describe "integration tests for annos with no body", :vcr => vcr_options do
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql 3
-    uri_resource = RDF::URI.new("#{Triannon.config[:triannon_base_url]}/#{id}")
-    expect(h.query([uri_resource, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(h.query([uri_resource, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.bookmarking]).size).to eql 1
-    expect(h.query([uri_resource, RDF::OpenAnnotation.hasTarget, RDF::URI("http://purl.stanford.edu/kq131cs7229")]).size).to eql 1
+    anno_uri_obj = RDF::URI.new("#{Triannon.config[:triannon_base_url]}/#{id}")
+    expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.bookmarking]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI("http://purl.stanford.edu/kq131cs7229")]).size).to eql 1
   end
   
 end
