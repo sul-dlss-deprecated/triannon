@@ -132,8 +132,80 @@ describe "integration tests for annos with external URIs", :vcr => vcr_options d
     skip "need to implement addl props for targets"
   end
   
-  it 'body uri has additional properties' do
-    skip "need to implement addl props for bodies"
+  it 'body uri with semantic tag' do
+    body_uri = "http://dbpedia.org/resource/Otto_Ege"
+    target_uri = "http://purl.stanford.edu/kq131cs7229"
+    write_anno = Triannon::Annotation.new data: 
+    "@prefix openannotation: <http://www.w3.org/ns/oa#> .
+    @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+     [
+        a openannotation:Annotation;
+        openannotation:hasBody <#{body_uri}>;
+        openannotation:hasTarget <#{target_uri}>;
+        openannotation:motivatedBy openannotation:identifying
+     ] .
+     
+     <#{body_uri}> a openannotation:SemanticTag ."
+    g = write_anno.graph
+    expect(g.size).to eql 5
+    expect(g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
+    expect(g.query([nil, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri)]).size).to eql 1
+    expect(g.query([RDF::URI(body_uri), RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
+    expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
+    expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
+
+    id = write_anno.save
+    anno = Triannon::Annotation.find id
+    h = anno.graph
+    expect(h.size).to eql 5
+    anno_uri_obj = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
+    expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri)]).size).to eql 1
+    expect(h.query([RDF::URI(body_uri), RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
+  end
+  
+  it "body uri with metadata" do
+    body_uri = "http://www.myaudioblog.com/post/1.mp3"
+    body_format = "audio/mpeg3"
+    target_uri = "http://purl.stanford.edu/kq131cs7229"
+    write_anno = Triannon::Annotation.new data: 
+    "@prefix openannotation: <http://www.w3.org/ns/oa#> .
+    @prefix dc11: <http://purl.org/dc/elements/1.1/> .
+    @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+    @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+     [
+        a openannotation:Annotation;
+        openannotation:hasBody <#{body_uri}>;
+        openannotation:hasTarget <#{target_uri}>;
+        openannotation:motivatedBy openannotation:identifying
+     ] .
+     
+     <#{body_uri}> a dcmitype:Sound; 
+        dc11:format \"#{body_format}\" ."
+    g = write_anno.graph
+    expect(g.size).to eql 6
+    expect(g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
+    expect(g.query([nil, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri)]).size).to eql 1
+    expect(g.query([RDF::URI(body_uri), RDF.type, RDF::DCMIType.Sound]).size).to eql 1
+    expect(g.query([RDF::URI(body_uri), RDF::DC11.format, body_format]).size).to eql 1
+    expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
+    expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
+
+    id = write_anno.save
+    anno = Triannon::Annotation.find id
+    h = anno.graph
+    expect(h.size).to eql 6
+    anno_uri_obj = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
+    expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
+    expect(h.query([RDF::URI(body_uri), RDF.type, RDF::DCMIType.Sound]).size).to eql 1
+    expect(h.query([RDF::URI(body_uri), RDF::DC11.format, body_format]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri)]).size).to eql 1
   end
   
 end
