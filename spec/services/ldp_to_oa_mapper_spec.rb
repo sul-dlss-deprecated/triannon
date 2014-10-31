@@ -57,53 +57,44 @@ describe Triannon::LdpToOaMapper do
     end
   end
 
-  describe "#extract_body" do
-    context "when the RDF.type is ContentAsText" do
-      let(:ldp_anno) {
-        a = Triannon::AnnotationLdp.new
-        a.load_statements_into_graph base_stmts
-        a.load_statements_into_graph body_stmts
-        a
-      }
-
-      it "sets the hasBody statement with a blank node of type ContentAsText, dcmitype/Text with content#chars" do
-        mapper = Triannon::LdpToOaMapper.new ldp_anno
-        mapper.extract_base
-        mapper.extract_body
-
-        res = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasBody, nil]
-        expect(res.count).to eq 1
-        body_node = res.first.object
-        res = mapper.oa_graph.query [body_node, RDF.type, RDF::Content.ContentAsText]
-        expect(res.count).to eq 1
-        res = mapper.oa_graph.query [body_node, RDF.type, RDF::DCMIType.Text]
-        expect(res.count).to eq 1
-        res = mapper.oa_graph.query [body_node, RDF::Content.chars, nil]
-        expect(res.first.object.to_s).to match /I love this!/
-      end
-    end
-
-  end
-
-  describe "#extract_target" do
+  describe "#extract_bodies" do
     let(:ldp_anno) {
       a = Triannon::AnnotationLdp.new
       a.load_statements_into_graph base_stmts
-      a.load_statements_into_graph target_stmts
       a
     }
-    let(:target_url) { "http://purl.stanford.edu/kq131cs7229" }
-
-    it "sets the hasTarget url from externalReference" do
+    it "should call #map_external_ref when the body is an external ref" do
+      body_ttl = "
+        <http://localhost:8983/fedora/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23> 
+        <http://triannon.stanford.edu/ns/externalReference> <http://some.external.ref> ."
+      my_body_stmts = RDF::Graph.new.from_ttl(body_ttl).statements
+      ldp_anno.load_statements_into_graph my_body_stmts
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
-      mapper.extract_target
+      expect(mapper).to receive(:map_external_ref)
+      mapper.extract_bodies
+    end
+    it "should call #map_content_as_text when the content is text" do
+      ldp_anno.load_statements_into_graph body_stmts
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      expect(mapper).to receive(:map_content_as_text)
+      mapper.extract_bodies
+    end
+  end
 
-      res = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
-      expect(res.count).to eq 1
-      uri = res.first.object
-      expect(uri.class).to eq RDF::URI
-      expect(uri.to_s).to eql target_url
+  describe "#extract_targets" do
+    let(:ldp_anno) {
+      a = Triannon::AnnotationLdp.new
+      a.load_statements_into_graph base_stmts
+      a
+    }
+    it "should call #map_external_ref when the body is an external ref" do
+      ldp_anno.load_statements_into_graph target_stmts
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      expect(mapper).to receive(:map_external_ref)
+      mapper.extract_targets
     end
   end
   
