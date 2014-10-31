@@ -56,6 +56,14 @@ module Triannon
       if solns.count > 0
         external_uri = solns.first.object
         @oa_graph << [@root_uri, predicate, external_uri]
+        
+        Triannon::LdpCreator.subject_statements(uri_obj, @ldp_anno_graph).each { |stmt|
+          if stmt.subject == uri_obj && stmt.predicate != RDF::Triannon.externalReference
+            @oa_graph << [external_uri, stmt.predicate, stmt.object]
+          else
+            # we should never get here for external references ...
+          end
+        }
         true
       else
         false
