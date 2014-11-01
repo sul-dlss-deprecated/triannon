@@ -5,8 +5,8 @@ module Triannon
     def self.ldp_to_oa ldp_anno
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
-      mapper.extract_body
-      mapper.extract_target
+      mapper.extract_bodies
+      mapper.extract_targets
       mapper.oa_graph
     end
 
@@ -31,7 +31,7 @@ module Triannon
       end
     end
 
-    def extract_body
+    def extract_bodies
       @ldp_anno.body_uris.each { |body_uri|
         if !map_external_ref(body_uri, RDF::OpenAnnotation.hasBody)
           map_content_as_text(body_uri, RDF::OpenAnnotation.hasBody)
@@ -39,7 +39,7 @@ module Triannon
       }
     end
 
-    def extract_target
+    def extract_targets
       @ldp_anno.target_uris.each { |target_uri| 
         map_external_ref(target_uri, RDF::OpenAnnotation.hasTarget)
       }
@@ -56,6 +56,14 @@ module Triannon
       if solns.count > 0
         external_uri = solns.first.object
         @oa_graph << [@root_uri, predicate, external_uri]
+        
+        Triannon::LdpCreator.subject_statements(uri_obj, @ldp_anno_graph).each { |stmt|
+          if stmt.subject == uri_obj && stmt.predicate != RDF::Triannon.externalReference
+            @oa_graph << [external_uri, stmt.predicate, stmt.object]
+          else
+            # we should never get here for external references ...
+          end
+        }
         true
       else
         false

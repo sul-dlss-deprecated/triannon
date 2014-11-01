@@ -57,53 +57,44 @@ describe Triannon::LdpToOaMapper do
     end
   end
 
-  describe "#extract_body" do
-    context "when the RDF.type is ContentAsText" do
-      let(:ldp_anno) {
-        a = Triannon::AnnotationLdp.new
-        a.load_statements_into_graph base_stmts
-        a.load_statements_into_graph body_stmts
-        a
-      }
-
-      it "sets the hasBody statement with a blank node of type ContentAsText, dcmitype/Text with content#chars" do
-        mapper = Triannon::LdpToOaMapper.new ldp_anno
-        mapper.extract_base
-        mapper.extract_body
-
-        res = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasBody, nil]
-        expect(res.count).to eq 1
-        body_node = res.first.object
-        res = mapper.oa_graph.query [body_node, RDF.type, RDF::Content.ContentAsText]
-        expect(res.count).to eq 1
-        res = mapper.oa_graph.query [body_node, RDF.type, RDF::DCMIType.Text]
-        expect(res.count).to eq 1
-        res = mapper.oa_graph.query [body_node, RDF::Content.chars, nil]
-        expect(res.first.object.to_s).to match /I love this!/
-      end
-    end
-
-  end
-
-  describe "#extract_target" do
+  describe "#extract_bodies" do
     let(:ldp_anno) {
       a = Triannon::AnnotationLdp.new
       a.load_statements_into_graph base_stmts
-      a.load_statements_into_graph target_stmts
       a
     }
-    let(:target_url) { "http://purl.stanford.edu/kq131cs7229" }
-
-    it "sets the hasTarget url from externalReference" do
+    it "should call #map_external_ref when the body is an external ref" do
+      body_ttl = "
+        <http://localhost:8983/fedora/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23> 
+        <http://triannon.stanford.edu/ns/externalReference> <http://some.external.ref> ."
+      my_body_stmts = RDF::Graph.new.from_ttl(body_ttl).statements
+      ldp_anno.load_statements_into_graph my_body_stmts
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
-      mapper.extract_target
+      expect(mapper).to receive(:map_external_ref)
+      mapper.extract_bodies
+    end
+    it "should call #map_content_as_text when the content is text" do
+      ldp_anno.load_statements_into_graph body_stmts
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      expect(mapper).to receive(:map_content_as_text)
+      mapper.extract_bodies
+    end
+  end
 
-      res = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
-      expect(res.count).to eq 1
-      uri = res.first.object
-      expect(uri.class).to eq RDF::URI
-      expect(uri.to_s).to eql target_url
+  describe "#extract_targets" do
+    let(:ldp_anno) {
+      a = Triannon::AnnotationLdp.new
+      a.load_statements_into_graph base_stmts
+      a
+    }
+    it "should call #map_external_ref when the body is an external ref" do
+      ldp_anno.load_statements_into_graph target_stmts
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      expect(mapper).to receive(:map_external_ref)
+      mapper.extract_targets
     end
   end
   
@@ -125,7 +116,7 @@ describe Triannon::LdpToOaMapper do
       expect(solns.count).to eq 0
       
       mapper.map_external_ref(target_uri, RDF::OpenAnnotation.hasTarget)
-      
+
       solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
       expect(solns.count).to eq 1
       uri = solns.first.object
@@ -176,6 +167,59 @@ describe Triannon::LdpToOaMapper do
       mapper.map_external_ref(target_uri, RDF::OpenAnnotation.hasTarget)
       expect(mapper.oa_graph.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI.new(target_url1)]).size).to eq 1
       expect(mapper.oa_graph.query([nil, nil, RDF::URI.new(target_url2)]).size).to eq 0
+    end
+    it "includes SemanticTags when present" do
+      body_ext_url = "http://some.external.ref"
+      stored_body_obj_url = "#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23"
+      body_ttl = "
+      @prefix openannotation: <http://www.w3.org/ns/oa#> .
+      @prefix triannon: <http://triannon.stanford.edu/ns/> .
+      <#{stored_body_obj_url}> a openannotation:SemanticTag;
+         triannon:externalReference <#{body_ext_url}> ."
+      my_body_stmts = RDF::Graph.new.from_ttl(body_ttl).statements
+      ldp_anno.load_statements_into_graph my_body_stmts
+
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      orig_size = mapper.oa_graph.size
+
+      mapper.map_external_ref(RDF::URI.new(stored_body_obj_url), RDF::OpenAnnotation.hasBody)
+      
+      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasBody, nil]
+      expect(solns.count).to eq 1
+      uri_obj = solns.first.object
+      expect(uri_obj).to eql RDF::URI.new(body_ext_url)
+      expect(mapper.oa_graph.query([uri_obj, RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
+      expect(mapper.oa_graph.size).to eql orig_size + 2
+    end
+    it "includes additional metadata when present" do
+      body_ext_url = "http://some.external.ref"
+      body_format = "audio/mpeg3"
+      stored_body_obj_url = "#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23"
+      body_ttl = "
+      @prefix openannotation: <http://www.w3.org/ns/oa#> .
+      @prefix triannon: <http://triannon.stanford.edu/ns/> .
+      @prefix dc11: <http://purl.org/dc/elements/1.1/> .
+      @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+      <#{stored_body_obj_url}> a dcmitype:Sound;
+         triannon:externalReference <#{body_ext_url}>;
+         dc11:format \"#{body_format}\" ."
+      my_body_stmts = RDF::Graph.new.from_ttl(body_ttl).statements
+      ldp_anno.load_statements_into_graph my_body_stmts
+
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      orig_size = mapper.oa_graph.size
+
+      mapper.map_external_ref(RDF::URI.new(stored_body_obj_url), RDF::OpenAnnotation.hasBody)
+
+      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasBody, nil]
+      expect(solns.count).to eq 1
+      uri_obj = solns.first.object
+      expect(uri_obj).to eql RDF::URI.new(body_ext_url)
+      expect(mapper.oa_graph.query([uri_obj, RDF.type, RDF::DCMIType.Sound]).size).to eql 1
+      expect(mapper.oa_graph.query([uri_obj, RDF::DC11.format, body_format]).size).to eql 1
+      expect(mapper.oa_graph.size).to eql orig_size + 3
     end
   end # #map_external_ref
 
