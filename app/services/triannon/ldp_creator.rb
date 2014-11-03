@@ -7,24 +7,26 @@ module Triannon
     # use LDP protocol to create the OpenAnnotation.Annotation in an RDF store
     # @param [Triannon::Annotation] anno a Triannon::Annotation object, from which we use the graph
     def self.create(anno)
-      # TODO:  we should not get here if the Annotation object already has an id
-      result = Triannon::LdpCreator.new anno
-      result.create_base
+      if anno && anno.graph
+        # TODO:  we should not get here if the Annotation object already has an id
+        result = Triannon::LdpCreator.new anno
+        result.create_base
 
-      bodies_solns = anno.graph.query([nil, RDF::OpenAnnotation.hasBody, nil])
-      if bodies_solns.size > 0
-        result.create_body_container
-        result.create_body_resources
+        bodies_solns = anno.graph.query([nil, RDF::OpenAnnotation.hasBody, nil])
+        if bodies_solns.size > 0
+          result.create_body_container
+          result.create_body_resources
+        end
+
+        targets_solns = anno.graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+        # NOTE:  Annotation is invalid if there are no target statements
+        if targets_solns.size > 0
+          result.create_target_container
+          result.create_target_resources
+        end
+
+        result.id
       end
-
-      targets_solns = anno.graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
-      # NOTE:  Annotation is invalid if there are no target statements
-      if targets_solns.size > 0
-        result.create_target_container
-        result.create_target_resources
-      end
-
-      result.id
     end
 
     # given an RDF::Resource (an RDF::Node or RDF::URI), look for all the statements with that object
@@ -52,7 +54,6 @@ module Triannon
     # POSTS a ttl representation of the LDP Annotation container to the LDP store
     def create_base
       # TODO:  we should error if the Annotation object already has an id
-
       g = RDF::Graph.new
       @anno.graph.each { |s|
         g << s
