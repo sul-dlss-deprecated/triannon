@@ -1045,6 +1045,14 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(g.query([selector_obj, RDF.value, RDF::Literal.new("xywh=0,0,200,200")]).size).to eql 1
       expect(g.query([selector_obj, RDF::DC.conformsTo, RDF::URI.new("http://www.w3.org/TR/media-frags/")]).size).to eql 1      
     end    
+
+    it "DataPositionSelector" do
+      skip 'DataPositionSelector not yet implemented'
+    end
+    it "SvgSelector" do
+      skip 'SvgSelector not yet implemented'
+    end
+    
   end # create_target_resources
 
   describe '#create_direct_container' do
