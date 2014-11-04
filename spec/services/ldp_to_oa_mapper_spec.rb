@@ -260,6 +260,9 @@ describe Triannon::LdpToOaMapper do
       expect(mapper.oa_graph.query([uri_obj, RDF::DC11.format, body_format]).size).to eql 1
       expect(mapper.oa_graph.size).to eql orig_size + 3
     end
+    it "attaches external ref to passed param for subject in the graph" do
+      skip 'need to implement this test'
+    end
   end # #map_external_ref
 
   describe '#map_content_as_text' do
@@ -410,33 +413,40 @@ describe Triannon::LdpToOaMapper do
       blank_node_solns = mapper.oa_graph.query [blank_node, nil, nil]
       expect(blank_node_solns.count).to eq 3
       expect(blank_node_solns).to include [blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]
-      # source obj is written as a hashURI by LdpCreator
-      source_obj = RDF::URI.new(stored_source_obj_url)
+      source_obj = RDF::URI.new(source_url)
       expect(blank_node_solns).to include [blank_node, RDF::OpenAnnotation.hasSource, source_obj]
-      selector_obj = RDF::URI.new(stored_selector_obj_url)
-      expect(blank_node_solns).to include [blank_node, RDF::OpenAnnotation.hasSelector, selector_obj]
       
-      # source obj hashURI is in the same response due to fcrepo4 implementation of hash URI nodes
+      # source obj should only be in the mapped response for addl metadata assoc with the URI
       source_obj_subject_solns = mapper.oa_graph.query [source_obj, nil, nil]
-      expect(source_obj_subject_solns.count).to eq 1
-      expect(source_obj_subject_solns).to include [source_obj, RDF::Triannon.externalReference, RDF::URI.new(source_url)]
+      expect(source_obj_subject_solns.count).to eq 0
 
-      # selector obj blank node is in the same fedora response due to fcrepo4 implementation
-      selector_obj_subject_solns = mapper.oa_graph.query [selector_obj, nil, nil]
+      # selector object
+      selector_solns = mapper.oa_graph.query [blank_node, RDF::OpenAnnotation.hasSelector, nil]
+      expect(selector_solns.count).to eq 1
+      selector_blank_node = selector_solns.first.object
+      selector_obj_subject_solns = mapper.oa_graph.query [selector_blank_node, nil, nil]
       expect(selector_obj_subject_solns.count).to eq 3
-      expect(selector_obj_subject_solns).to include [selector_obj, RDF.type, RDF::OpenAnnotation.TextPositionSelector]
-      start_obj_solns = mapper.oa_graph.query [selector_obj, RDF::OpenAnnotation.start, nil]
+      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.TextPositionSelector]
+      start_obj_solns = mapper.oa_graph.query [selector_blank_node, RDF::OpenAnnotation.start, nil]
       expect(start_obj_solns.count).to eq 1
       start_obj = start_obj_solns.first.object
       expect(start_obj.to_s).to eql "0"
 # FIXME:  these should be converted back to nonNegativeInteger, per OA spec  
-# See https://github.com/sul-dlss/triannon/issues/78  
+# See https://github.com/sul-dlss/triannon/issues/78
       expect(start_obj.datatype).to eql RDF::XSD.long
-      end_obj_solns = mapper.oa_graph.query [selector_obj, RDF::OpenAnnotation.end, nil]
+      end_obj_solns = mapper.oa_graph.query [selector_blank_node, RDF::OpenAnnotation.end, nil]
       expect(end_obj_solns.count).to eq 1
       end_obj = end_obj_solns.first.object
       expect(end_obj.to_s).to eql "66"
       expect(end_obj.datatype).to eql RDF::XSD.long
+
+      # should get no triples with stored selector or source object urls
+      expect(mapper.oa_graph.query([RDF::URI.new(stored_source_obj_url), nil, nil]).size).to eql 0
+      expect(mapper.oa_graph.query([RDF::URI.new(stored_selector_obj_url), nil, nil]).size).to eql 0
+    end
+    it "start and end in TextPositionSelector have type nonNegativeIntegers" do
+      # See https://github.com/sul-dlss/triannon/issues/78  
+      skip 'converting returned xsd:long to xsd:nonNegativeInteger not yet implemented'
     end
     it "TextQuoteSelector" do
       stored_target_obj_url = "#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1"
@@ -483,24 +493,27 @@ describe Triannon::LdpToOaMapper do
       blank_node_solns = mapper.oa_graph.query [blank_node, nil, nil]
       expect(blank_node_solns.count).to eq 3
       expect(blank_node_solns).to include [blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]
-      # source obj is written as a hashURI by LdpCreator
-      source_obj = RDF::URI.new(stored_source_obj_url)
+      source_obj = RDF::URI.new(source_url)
       expect(blank_node_solns).to include [blank_node, RDF::OpenAnnotation.hasSource, source_obj]
-      selector_obj = RDF::URI.new(stored_selector_obj_url)
-      expect(blank_node_solns).to include [blank_node, RDF::OpenAnnotation.hasSelector, selector_obj]
       
-      # source obj hashURI is in the same response due to fcrepo4 implementation of hash URI nodes
+      # source obj should only be in the mapped response for addl metadata assoc with the URI
       source_obj_subject_solns = mapper.oa_graph.query [source_obj, nil, nil]
-      expect(source_obj_subject_solns.count).to eq 1
-      expect(source_obj_subject_solns).to include [source_obj, RDF::Triannon.externalReference, source_url]
+      expect(source_obj_subject_solns.count).to eq 0
 
-      # selector obj blank node is in the same fedora response due to fcrepo4 implementation
-      selector_obj_subject_solns = mapper.oa_graph.query [selector_obj, nil, nil]
+      # selector object
+      selector_solns = mapper.oa_graph.query [blank_node, RDF::OpenAnnotation.hasSelector, nil]
+      expect(selector_solns.count).to eq 1
+      selector_blank_node = selector_solns.first.object
+      selector_obj_subject_solns = mapper.oa_graph.query [selector_blank_node, nil, nil]
       expect(selector_obj_subject_solns.count).to eq 4
-      expect(selector_obj_subject_solns).to include [selector_obj, RDF.type, RDF::OpenAnnotation.TextQuoteSelector]
-      expect(selector_obj_subject_solns).to include [selector_obj, RDF::OpenAnnotation.suffix, suffix]
-      expect(selector_obj_subject_solns).to include [selector_obj, RDF::OpenAnnotation.exact, exact]
-      expect(selector_obj_subject_solns).to include [selector_obj, RDF::OpenAnnotation.prefix, prefix]
+      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.TextQuoteSelector]
+      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF::OpenAnnotation.suffix, suffix]
+      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF::OpenAnnotation.exact, exact]
+      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF::OpenAnnotation.prefix, prefix]
+
+      # should get no triples with stored selector or source object urls
+      expect(mapper.oa_graph.query([RDF::URI.new(stored_source_obj_url), nil, nil]).size).to eql 0
+      expect(mapper.oa_graph.query([RDF::URI.new(stored_selector_obj_url), nil, nil]).size).to eql 0
     end
     it "FragmentSelector" do
       stored_target_obj_url = "#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1"
@@ -548,24 +561,27 @@ describe Triannon::LdpToOaMapper do
       blank_node_solns = mapper.oa_graph.query [blank_node, nil, nil]
       expect(blank_node_solns.count).to eq 3
       expect(blank_node_solns).to include [blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]
-      # source obj is written as a hashURI by LdpCreator
-      source_obj = RDF::URI.new(stored_source_obj_url)
+      source_obj = RDF::URI.new(source_url)
       expect(blank_node_solns).to include [blank_node, RDF::OpenAnnotation.hasSource, source_obj]
-      selector_obj = RDF::URI.new(stored_selector_obj_url)
-      expect(blank_node_solns).to include [blank_node, RDF::OpenAnnotation.hasSelector, selector_obj]
-      
-      # source obj hashURI is in the same response due to fcrepo4 implementation of hash URI nodes
+
+      # source obj should only be in the mapped response for addl metadata assoc with the URI
       source_obj_subject_solns = mapper.oa_graph.query [source_obj, nil, nil]
-      expect(source_obj_subject_solns.count).to eq 2
+      expect(source_obj_subject_solns.count).to eq 1
       expect(source_obj_subject_solns).to include [source_obj, RDF.type, RDF::DCMIType.Image]
-      expect(source_obj_subject_solns).to include [source_obj, RDF::Triannon.externalReference, source_url]
-      
-      # selector obj blank node is in the same fedora response due to fcrepo4 implementation
-      selector_obj_subject_solns = mapper.oa_graph.query [selector_obj, nil, nil]
+
+      # selector object
+      selector_solns = mapper.oa_graph.query [blank_node, RDF::OpenAnnotation.hasSelector, nil]
+      expect(selector_solns.count).to eq 1
+      selector_blank_node = selector_solns.first.object
+      selector_obj_subject_solns = mapper.oa_graph.query [selector_blank_node, nil, nil]
       expect(selector_obj_subject_solns.count).to eq 3
-      expect(selector_obj_subject_solns).to include [selector_obj, RDF.type, RDF::OpenAnnotation.FragmentSelector]
-      expect(selector_obj_subject_solns).to include [selector_obj, RDF.value, frag_value]
-      expect(selector_obj_subject_solns).to include [selector_obj, RDF::DC.conformsTo, conforms_to_url]
+      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.FragmentSelector]
+      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF.value, frag_value]
+      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF::DC.conformsTo, conforms_to_url]
+
+      # should get no triples with stored selector or source object urls
+      expect(mapper.oa_graph.query([RDF::URI.new(stored_source_obj_url), nil, nil]).size).to eql 0
+      expect(mapper.oa_graph.query([RDF::URI.new(stored_selector_obj_url), nil, nil]).size).to eql 0
     end
     it "DataPositionSelector" do
       skip 'DataPositionSelector not yet implemented'

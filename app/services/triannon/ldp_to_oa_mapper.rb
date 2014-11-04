@@ -53,12 +53,13 @@ module Triannon
     # @param [RDF::URI] uri_obj the object that may have RDF::Triannon.externalReference
     # @param [RDF::URI] predicate the predicate for [@root_uri, predicate, (ext_url)] statement
     # to be added to @oa_graph, e.g. RDF::OpenAnnotation.hasTarget
+    # @param [RDF::URI] the subject object to get the predicate statement; defaults to @root_uri
     # @returns [Boolean] true if it adds statements to @oa_graph, false otherwise
-    def map_external_ref uri_obj, predicate
+    def map_external_ref uri_obj, predicate, subject_obj = @root_uri
       solns = @ldp_anno_graph.query [uri_obj, RDF::Triannon.externalReference, nil]
       if solns.count > 0
         external_uri = solns.first.object
-        @oa_graph << [@root_uri, predicate, external_uri]
+        @oa_graph << [subject_obj, predicate, external_uri]
         
         Triannon::LdpCreator.subject_statements(uri_obj, @ldp_anno_graph).each { |stmt|
           if stmt.subject == uri_obj && stmt.predicate != RDF::Triannon.externalReference
@@ -111,12 +112,39 @@ module Triannon
         blank_node = RDF::Node.new
         @oa_graph << [@root_uri, predicate, blank_node]
         
-        Triannon::LdpCreator.subject_statements(uri_obj, @ldp_anno_graph).each { |stmt|
-          if stmt.subject == uri_obj
+        source_obj = nil
+        selector_obj = nil
+        selector_blank_node = nil
+        specific_res_stmts = Triannon::LdpCreator.subject_statements(uri_obj, @ldp_anno_graph)
+        specific_res_stmts.each { |stmt|
+          if stmt.predicate == RDF::OpenAnnotation.hasSource
+            # expecting a hash URI
+            source_obj = stmt.object
+            if source_obj.to_s.match("#{uri_obj.to_s}#source")
+              source_has_ext_uri = map_external_ref source_obj, RDF::OpenAnnotation.hasSource, blank_node
+            end
+          elsif stmt.predicate == RDF::OpenAnnotation.hasSelector
+            # this becomes a blank node.  Per http://www.openannotation.org/spec/core/specific.html#Selectors
+            # "Typically if all of the information needed to resolve the Selector (or other Specifier)
+            #  is present within the graph, such as is the case for the 
+            # FragmentSelector, TextQuoteSelector, TextPositionSelector and DataPositionSelector classes, 
+            # then there is no need to have a resolvable resource that provides the same information."
+            selector_obj = stmt.object
+            selector_blank_node = RDF::Node.new
+            @oa_graph << [blank_node, RDF::OpenAnnotation.hasSelector, selector_blank_node]
+          end
+        }
+        
+        # We can't know we'll hit hasSource and hasSelector statements in graph first, 
+        # so we must do another pass through the statements to get that information
+        specific_res_stmts.each { |stmt| 
+          if stmt.subject == uri_obj && stmt.object != source_obj && stmt.object != selector_obj
             @oa_graph << [blank_node, stmt.predicate, stmt.object]
-          else
-            # it is a descendant statment - take as is
-            @oa_graph << stmt
+          elsif stmt.subject != source_obj
+            if selector_blank_node && stmt.subject == selector_obj
+              @oa_graph << [selector_blank_node, stmt.predicate, stmt.object]
+            end
+          # there shouldn't be any other statements present
           end
         }
         true
