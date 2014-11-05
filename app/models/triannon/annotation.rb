@@ -178,7 +178,12 @@ private
     end
 
     def json_oa_context
-      @json_oa_context ||= File.read("lib/triannon/oa_context_20130208.json")
+      # FIXME:  this is a terrible place to do this!!
+      if Rails.root.to_s.match(/internal/) # testing via engine_cart
+        @json_oa_context ||= File.read(Rails.root.join("..", "..", "lib", "triannon", "oa_context_20130208.json"))
+      else
+        @json_oa_context ||= File.read(Rails.root.join("lib", "triannon", "oa_context_20130208.json"))
+      end
     end
 
     def graph_exists?

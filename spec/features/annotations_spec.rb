@@ -44,9 +44,9 @@ describe "viewing an annotation", type: :feature, :vcr => vcr_options do
       it "single body chars" do
         expect(page).to have_content "I love this!"
       end
-      it "multiple bodies" do
-        skip "to be implemented"
-      end
+#      it "multiple bodies" do
+#        skip "to be implemented"
+#      end
     end
 
     context "has motivation" do
