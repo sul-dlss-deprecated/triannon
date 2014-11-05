@@ -260,8 +260,34 @@ describe Triannon::LdpToOaMapper do
       expect(mapper.oa_graph.query([uri_obj, RDF::DC11.format, body_format]).size).to eql 1
       expect(mapper.oa_graph.size).to eql orig_size + 3
     end
-    it "attaches external ref to passed param for subject in the graph" do
-      skip 'need to implement this test'
+    it "attaches external ref to passed param for subject" do
+      body_ext_url = "http://some.external.ref"
+      stored_body_obj_url = "#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23"
+      body_ttl = "
+      @prefix openannotation: <http://www.w3.org/ns/oa#> .
+      @prefix triannon: <http://triannon.stanford.edu/ns/> .
+      <#{stored_body_obj_url}> triannon:externalReference <#{body_ext_url}> ."
+      my_body_stmts = RDF::Graph.new.from_ttl(body_ttl).statements
+      ldp_anno.load_statements_into_graph my_body_stmts
+      ldp_anno.load_statements_into_graph target_stmts
+      target_uri = ldp_anno.target_uris.first
+
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      # map target to root statement
+      mapper.map_external_ref(target_uri, RDF::OpenAnnotation.hasTarget)
+      orig_size = mapper.oa_graph.size
+      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      expect(solns.count).to eq 1
+      target_obj = solns.first.object
+      expect(mapper.oa_graph.query([target_obj, nil, nil]).size).to eq 0
+      # map body to target object
+      mapper.map_external_ref(RDF::URI.new(stored_body_obj_url), RDF::OpenAnnotation.hasBody, target_obj)
+
+      solns = mapper.oa_graph.query [target_obj, nil, nil]
+      expect(solns.count).to eq 1
+      expect(mapper.oa_graph.query([target_obj, RDF::OpenAnnotation.hasBody, RDF::URI.new(body_ext_url)]).size).to eql 1
+      expect(mapper.oa_graph.size).to eql orig_size + 1
     end
   end # #map_external_ref
 
