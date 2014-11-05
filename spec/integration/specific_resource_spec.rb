@@ -172,11 +172,12 @@ describe "integration tests for SpecificResource", :vcr do
      ] .'
     g = write_anno.graph
   end
-  it "DataPositionSelector" do
-    skip 'DataPositionSelector not yet implemented'
-  end
-  it "SvgSelector" do
-    skip 'SvgSelector not yet implemented'
-  end
+  
+#  it "DataPositionSelector" do
+#    skip 'DataPositionSelector not yet implemented'
+#  end
+#  it "SvgSelector" do
+#    skip 'SvgSelector not yet implemented'
+#  end
 
 end

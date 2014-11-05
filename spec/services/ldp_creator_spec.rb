@@ -831,12 +831,12 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         expect(g.query([selector_obj, RDF.value, RDF::Literal.new("xywh=0,0,200,200")]).size).to eql 1
         expect(g.query([selector_obj, RDF::DC.conformsTo, RDF::URI.new("http://www.w3.org/TR/media-frags/")]).size).to eql 1
       end
-      it "DataPositionSelector" do
-        skip 'DataPositionSelector not yet implemented'
-      end
-      it "SvgSelector" do
-        skip 'SvgSelector not yet implemented'
-      end
+#      it "DataPositionSelector" do
+#        skip 'DataPositionSelector not yet implemented'
+#      end
+#      it "SvgSelector" do
+#        skip 'SvgSelector not yet implemented'
+#      end
       it 'multiple SpecificResources' do
         my_anno = Triannon::Annotation.new data: '{
           "@context": "http://www.w3.org/ns/oa-context-20130208.json",

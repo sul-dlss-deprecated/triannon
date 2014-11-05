@@ -609,12 +609,12 @@ describe Triannon::LdpToOaMapper do
       expect(mapper.oa_graph.query([RDF::URI.new(stored_source_obj_url), nil, nil]).size).to eql 0
       expect(mapper.oa_graph.query([RDF::URI.new(stored_selector_obj_url), nil, nil]).size).to eql 0
     end
-    it "DataPositionSelector" do
-      skip 'DataPositionSelector not yet implemented'
-    end
-    it "SvgSelector" do
-      skip 'SvgSelector not yet implemented'
-    end
+#    it "DataPositionSelector" do
+#      skip 'DataPositionSelector not yet implemented'
+#    end
+#    it "SvgSelector" do
+#      skip 'SvgSelector not yet implemented'
+#    end
     it "returns true if it adds statements to oa_graph" do
       target_container_stmts =  RDF::Turtle::Reader.new("
       @prefix ldp: <http://www.w3.org/ns/ldp#> .
