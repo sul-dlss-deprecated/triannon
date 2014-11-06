@@ -64,7 +64,7 @@ describe Triannon::LdpToOaMapper do
   end
 
   describe "#extract_bodies" do
-    it "calls #map_external_ref when the body is an external ref" do
+    it "calls #map_external_ref when body is an external ref" do
       body_ttl = "
         <http://localhost:8983/fedora/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23> 
         <http://triannon.stanford.edu/ns/externalReference> <http://some.external.ref> ."
@@ -75,7 +75,7 @@ describe Triannon::LdpToOaMapper do
       expect(mapper).to receive(:map_external_ref)
       mapper.extract_bodies
     end
-    it "calls #map_content_as_text when the content is text" do
+    it "calls #map_content_as_text when body is ContentAsText" do
       ldp_anno.load_statements_into_graph body_stmts
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
@@ -106,22 +106,44 @@ describe Triannon::LdpToOaMapper do
       expect(mapper).to receive(:map_specific_resource)
       mapper.extract_bodies
     end
+    it "calls #map_choice when body is Choice" do
+      body_container_stmts = RDF::Turtle::Reader.new("
+      @prefix ldp: <http://www.w3.org/ns/ldp#> .
+      @prefix openannotation: <http://www.w3.org/ns/oa#> .
+      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+      @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+      <#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23> a ldp:Container,
+           ldp:DirectContainer,
+           ldp:RDFSource,
+           openannotation:Choice;
+         ldp:hasMemberRelation ldp:member;
+         ldp:membershipResource <#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23>;
+         openannotation:default <http://localhost:8983/fedora/rest/.well-known/genid/ea68448e-e50c-4274-a204-af477a0d8317>;
+         openannotation:item <http://localhost:8983/fedora/rest/.well-known/genid/6051b00b-24e9-4a10-8b7d-0c44fa5fa469> .
+      ").statements.to_a
+      ldp_anno.load_statements_into_graph body_container_stmts
+
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      expect(mapper).to receive(:map_choice)
+      mapper.extract_bodies
+    end
   end
 
   describe "#extract_targets" do
-    it "calls #map_external_ref when the body is an external ref" do
+    it "calls #map_external_ref when target is an external ref" do
       ldp_anno.load_statements_into_graph target_stmts
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
       expect(mapper).to receive(:map_external_ref)
       mapper.extract_targets
     end
-    it "calls #map_specific_resource when body is SpecificResource" do
+    it "calls #map_specific_resource when target is SpecificResource" do
       target_container_stmts =  RDF::Turtle::Reader.new("
       @prefix ldp: <http://www.w3.org/ns/ldp#> .
       @prefix openannotation: <http://www.w3.org/ns/oa#> .
       @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-      @prefix triannon: <http://triannon.stanford.edu/ns/> .
       @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
       
       <#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1> a ldp:Container,
@@ -138,6 +160,29 @@ describe Triannon::LdpToOaMapper do
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
       expect(mapper).to receive(:map_specific_resource)
+      mapper.extract_targets
+    end
+    it "calls #map_choice when target is Choice" do
+      target_container_stmts = RDF::Turtle::Reader.new("
+      @prefix ldp: <http://www.w3.org/ns/ldp#> .
+      @prefix openannotation: <http://www.w3.org/ns/oa#> .
+      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+      @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+      <#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1> a ldp:Container,
+           ldp:DirectContainer,
+           ldp:RDFSource,
+           openannotation:Choice;
+         ldp:hasMemberRelation ldp:member;
+         ldp:membershipResource <#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1>;
+         openannotation:default <http://localhost:8983/fedora/rest/.well-known/genid/ea68448e-e50c-4274-a204-af477a0d8317>;
+         openannotation:item <http://localhost:8983/fedora/rest/.well-known/genid/6051b00b-24e9-4a10-8b7d-0c44fa5fa469> .
+      ").statements.to_a
+      ldp_anno.load_statements_into_graph target_container_stmts
+
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      expect(mapper).to receive(:map_choice)
       mapper.extract_targets
     end
   end
@@ -388,6 +433,30 @@ describe Triannon::LdpToOaMapper do
     end
     it "doesn't change @oa_graph if the object doesn't have ContentAsText type" do
       # see 'returns false if it doesn't change oa_graph'
+    end
+    it "attaches external ref to passed param for subject" do
+      body_ext_url = "http://some.external.ref"
+      stored_body_obj_url = "#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23"
+      ldp_anno.load_statements_into_graph body_stmts
+      ldp_anno.load_statements_into_graph target_stmts
+      target_uri = ldp_anno.target_uris.first
+
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      # map target to root statement
+      mapper.map_external_ref(target_uri, RDF::OpenAnnotation.hasTarget)
+      orig_size = mapper.oa_graph.size
+      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      expect(solns.count).to eq 1
+      target_obj = solns.first.object
+      expect(mapper.oa_graph.query([target_obj, nil, nil]).size).to eq 0
+      # map body to target object
+      mapper.map_content_as_text(RDF::URI.new(stored_body_obj_url), RDF::OpenAnnotation.hasBody, target_obj)
+
+      solns = mapper.oa_graph.query [target_obj, nil, nil]
+      expect(solns.count).to eq 1
+      expect(mapper.oa_graph.query([target_obj, RDF::OpenAnnotation.hasBody, nil]).size).to eql 1
+      expect(mapper.oa_graph.size).to eql orig_size + 4
     end
   end # #map_content_as_text
 
@@ -657,5 +726,176 @@ describe Triannon::LdpToOaMapper do
       # see 'returns false if it doesn't change oa_graph'
     end
   end
+  
+  describe '#map_choice' do
+    let(:stored_body_obj_url) { "#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23" }
+    it "default, item both ContentAsText" do
+      stored_default_url = "http://localhost:8983/fedora/rest/.well-known/genid/ea68448e-e50c-4274-a204-af477a0d8317"
+      default_chars = "I love this Englishly!"
+      stored_item_url = "http://localhost:8983/fedora/rest/.well-known/genid/6051b00b-24e9-4a10-8b7d-0c44fa5fa469"
+      item_chars = "Je l'aime en Francais!"
+      body_container_stmts = RDF::Turtle::Reader.new("
+      @prefix content: <http://www.w3.org/2011/content#> .
+      @prefix dc11: <http://purl.org/dc/elements/1.1/> .
+      @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+      @prefix ldp: <http://www.w3.org/ns/ldp#> .
+      @prefix openannotation: <http://www.w3.org/ns/oa#> .
+      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+      @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+      <#{stored_item_url}> a dcmitype:Text,
+           content:ContentAsText;
+         dc11:language \"fr\";
+         content:chars \"#{item_chars}\" .
+
+      <#{stored_default_url}> a dcmitype:Text,
+           content:ContentAsText;
+         dc11:language \"en\";
+         content:chars \"#{default_chars}\" .
+
+      <#{stored_body_obj_url}> a ldp:Container,
+           ldp:DirectContainer,
+           ldp:RDFSource,
+           openannotation:Choice;
+         ldp:hasMemberRelation ldp:member;
+         ldp:membershipResource <#{stored_body_obj_url}>;
+         openannotation:default <#{stored_default_url}>;
+         openannotation:item <#{stored_item_url}> .
+      ").statements.to_a
+      ldp_anno.load_statements_into_graph body_container_stmts
+      body_uri = ldp_anno.body_uris.first
+      
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      mapper.map_choice(body_uri, RDF::OpenAnnotation.hasBody)
+
+      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasBody, nil]
+      expect(solns.count).to eq 1
+      body_blank_node = solns.first.object
+      blank_node_solns = mapper.oa_graph.query [body_blank_node, nil, nil]
+      expect(blank_node_solns.count).to eq 3
+      expect(blank_node_solns).to include [body_blank_node, RDF.type, RDF::OpenAnnotation.Choice]
+
+      default_solns = mapper.oa_graph.query [body_blank_node, RDF::OpenAnnotation.default, nil]
+      expect(default_solns.count).to eq 1
+      default_blank_node = default_solns.first.object
+      default_node_subject_solns = mapper.oa_graph.query [default_blank_node, nil, nil]
+      expect(default_node_subject_solns.count).to eq 4
+      expect(default_node_subject_solns).to include [default_blank_node, RDF.type, RDF::DCMIType.Text]
+      expect(default_node_subject_solns).to include [default_blank_node, RDF.type, RDF::Content.ContentAsText]
+      expect(default_node_subject_solns).to include [default_blank_node, RDF::DC11.language, "en"]
+      expect(default_node_subject_solns).to include [default_blank_node, RDF::Content.chars, default_chars]
+
+      item_solns = mapper.oa_graph.query [body_blank_node, RDF::OpenAnnotation.item, nil]
+      expect(item_solns.count).to eq 1
+      item_blank_node = item_solns.first.object
+      item_node_subject_solns = mapper.oa_graph.query [item_blank_node, nil, nil]
+      expect(item_node_subject_solns.count).to eq 4
+      expect(item_node_subject_solns).to include [item_blank_node, RDF.type, RDF::DCMIType.Text]
+      expect(item_node_subject_solns).to include [item_blank_node, RDF.type, RDF::Content.ContentAsText]
+      expect(item_node_subject_solns).to include [item_blank_node, RDF::DC11.language, "fr"]
+      expect(item_node_subject_solns).to include [item_blank_node, RDF::Content.chars, item_chars]
+
+      # should get no triples with stored default or item object urls
+      expect(mapper.oa_graph.query([RDF::URI.new(stored_default_url), nil, nil]).size).to eql 0
+      expect(mapper.oa_graph.query([RDF::URI.new(stored_item_url), nil, nil]).size).to eql 0
+    end
+    it "default, item both external URIs (default w addl metadata)" do
+      stored_target_obj_url = "#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1"
+      stored_default_url = "http://localhost:8983/fedora/rest/.well-known/genid/ea68448e-e50c-4274-a204-af477a0d8317"
+      default_url = "http://some.external.ref/default"
+      stored_item_url = "http://localhost:8983/fedora/rest/.well-known/genid/6051b00b-24e9-4a10-8b7d-0c44fa5fa469"
+      item_url = "http://some.external.ref/item"
+      target_container_stmts = RDF::Turtle::Reader.new("
+      @prefix ldp: <http://www.w3.org/ns/ldp#> .
+      @prefix openannotation: <http://www.w3.org/ns/oa#> .
+      @prefix triannon: <http://triannon.stanford.edu/ns/> .
+      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+      @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+      <#{stored_default_url}> a openannotation:SemanticTag;
+         triannon:externalReference <#{default_url}> .
+
+      <#{stored_item_url}> triannon:externalReference <#{item_url}> .
+
+      <#{stored_target_obj_url}> a ldp:Container,
+           ldp:DirectContainer,
+           ldp:RDFSource,
+           openannotation:Choice;
+         ldp:hasMemberRelation ldp:member;
+         ldp:membershipResource <#{stored_target_obj_url}>;
+         openannotation:default <#{stored_default_url}>;
+         openannotation:item <#{stored_item_url}> .
+      ").statements.to_a
+      ldp_anno.load_statements_into_graph target_container_stmts
+      target_uri = ldp_anno.target_uris.first
+      
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      mapper.map_choice(target_uri, RDF::OpenAnnotation.hasTarget)
+
+      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      expect(solns.count).to eq 1
+      target_blank_node = solns.first.object
+      target_blank_node_solns = mapper.oa_graph.query [target_blank_node, nil, nil]
+      expect(target_blank_node_solns.count).to eq 3
+      expect(target_blank_node_solns).to include [target_blank_node, RDF.type, RDF::OpenAnnotation.Choice]
+      default_uri_obj = RDF::URI.new(default_url)
+      expect(target_blank_node_solns).to include [target_blank_node, RDF::OpenAnnotation.default, default_uri_obj]
+      expect(target_blank_node_solns).to include [target_blank_node, RDF::OpenAnnotation.item, RDF::URI.new(item_url)]
+
+      default_url_subj_solns = mapper.oa_graph.query [default_uri_obj, nil, nil]
+      expect(default_url_subj_solns.size).to eql 1
+      expect(default_url_subj_solns).to include [default_uri_obj, RDF.type, RDF::OpenAnnotation.SemanticTag]
+      
+      expect(mapper.oa_graph.query([RDF::URI.new(item_url), nil, nil]).size).to eql 0
+
+      # should get no triples with stored default or item object urls
+      expect(mapper.oa_graph.query([RDF::URI.new(stored_default_url), nil, nil]).size).to eql 0
+      expect(mapper.oa_graph.query([RDF::URI.new(stored_item_url), nil, nil]).size).to eql 0
+    end
+    it "returns true if it adds statements to oa_graph" do
+      stored_default_url = "http://localhost:8983/fedora/rest/.well-known/genid/ea68448e-e50c-4274-a204-af477a0d8317"
+      stored_item_url = "http://localhost:8983/fedora/rest/.well-known/genid/6051b00b-24e9-4a10-8b7d-0c44fa5fa469"
+      body_container_stmts = RDF::Turtle::Reader.new("
+      @prefix ldp: <http://www.w3.org/ns/ldp#> .
+      @prefix openannotation: <http://www.w3.org/ns/oa#> .
+      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+      @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+      <#{stored_body_obj_url}> a ldp:Container,
+           ldp:DirectContainer,
+           ldp:RDFSource,
+           openannotation:Choice;
+         ldp:hasMemberRelation ldp:member;
+         ldp:membershipResource <#{stored_body_obj_url}>;
+         openannotation:default <#{stored_default_url}>;
+         openannotation:item <#{stored_item_url}> .
+      ").statements.to_a
+      ldp_anno.load_statements_into_graph body_container_stmts
+      body_uri = ldp_anno.body_uris.first
+      
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      orig_size = mapper.oa_graph.size
+      
+      expect(mapper.map_choice(body_uri, RDF::OpenAnnotation.hasBody)).to be true
+      expect(mapper.oa_graph.size).to be > orig_size
+    end
+    it "returns false if it doesn't change oa_graph" do
+      ldp_anno.load_statements_into_graph target_stmts
+      target_uri = ldp_anno.target_uris.first
+
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      orig_size = mapper.oa_graph.size
+      
+      expect(mapper.map_choice(target_uri, RDF::OpenAnnotation.hasTarget)).to be false
+      expect(mapper.oa_graph.size).to eql orig_size
+    end
+    it "doesn't change @oa_graph if the object doesn't have type Choice" do
+      # see 'returns false if it doesn't change oa_graph'
+    end
+  end # #map_choice
   
 end

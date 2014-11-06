@@ -34,16 +34,18 @@ module Triannon
     def extract_bodies
       @ldp_anno.body_uris.each { |body_uri|
         if !map_external_ref(body_uri, RDF::OpenAnnotation.hasBody) &&
-            !map_content_as_text(body_uri, RDF::OpenAnnotation.hasBody)
-          map_specific_resource(body_uri, RDF::OpenAnnotation.hasBody)
+            !map_content_as_text(body_uri, RDF::OpenAnnotation.hasBody) &&
+            !map_specific_resource(body_uri, RDF::OpenAnnotation.hasBody)
+          map_choice(body_uri, RDF::OpenAnnotation.hasBody)
         end
       }
     end
 
     def extract_targets
       @ldp_anno.target_uris.each { |target_uri| 
-        if !map_external_ref(target_uri, RDF::OpenAnnotation.hasTarget)
-          map_specific_resource(target_uri, RDF::OpenAnnotation.hasTarget)
+        if !map_external_ref(target_uri, RDF::OpenAnnotation.hasTarget) &&
+            !map_specific_resource(target_uri, RDF::OpenAnnotation.hasTarget)
+          map_choice(target_uri, RDF::OpenAnnotation.hasTarget)
         end
       }
     end
@@ -51,7 +53,7 @@ module Triannon
     # if uri_obj is the subject of a Triannon.externalReference then add appropriate
     #  statements to @oa_graph and return true
     # @param [RDF::URI] uri_obj the object that may have RDF::Triannon.externalReference
-    # @param [RDF::URI] predicate the predicate for [@root_uri, predicate, (ext_url)] statement
+    # @param [RDF::URI] predicate the predicate for [subject_obj, predicate, (ext_url)] statement
     # to be added to @oa_graph, e.g. RDF::OpenAnnotation.hasTarget
     # @param [RDF::URI] the subject object to get the predicate statement; defaults to @root_uri
     # @returns [Boolean] true if it adds statements to @oa_graph, false otherwise
@@ -77,14 +79,15 @@ module Triannon
     # if uri_obj has a type of RDF::Content.ContentAsText, then this is a skolemized blank node;
     #  add appropriate statements to @oa_graph to represent the blank node and its contents and return true
     # @param [RDF::URI] uri_obj the object that may type RDF::Content.ContentAsText
-    # @param [RDF::URI] predicate the predicate for [@root_uri, predicate, (ext_url)] statement
+    # @param [RDF::URI] predicate the predicate for [subject_obj, predicate, (ext_url)] statement
     # to be added to @oa_graph, e.g. RDF::OpenAnnotation.hasTarget
+    # @param [RDF::URI] the subject object to get the predicate statement; defaults to @root_uri
     # @returns [Boolean] true if it adds statements to @oa_graph, false otherwise
-    def map_content_as_text uri_obj, predicate
+    def map_content_as_text uri_obj, predicate, subject_obj = @root_uri
       solns = @ldp_anno_graph.query [uri_obj, RDF.type, RDF::Content.ContentAsText]
       if solns.count > 0
         blank_node = RDF::Node.new
-        @oa_graph << [@root_uri, predicate, blank_node]
+        @oa_graph << [subject_obj, predicate, blank_node]
         
         Triannon::LdpCreator.subject_statements(uri_obj, @ldp_anno_graph).each { |stmt|
           if stmt.subject == uri_obj
@@ -103,7 +106,7 @@ module Triannon
     # if uri_obj has a type of RDF::OpenAnnotation.SpecificResource, then this is a skolemized blank node;
     #  add appropriate statements to @oa_graph to represent the blank node and its contents and return true
     # @param [RDF::URI] uri_obj the object that may have type RDF::OpenAnnotation.SpecificResource
-    # @param [RDF::URI] predicate the predicate for [@root_uri, predicate, (ext_url)] statement
+    # @param [RDF::URI] predicate the predicate for [@root_uri, predicate, (sel_res)] statement
     # to be added to @oa_graph, e.g. RDF::OpenAnnotation.hasTarget
     # @returns [Boolean] true if it adds statements to @oa_graph, false otherwise
     def map_specific_resource uri_obj, predicate
@@ -145,6 +148,51 @@ module Triannon
               @oa_graph << [selector_blank_node, stmt.predicate, stmt.object]
             end
           # there shouldn't be any other statements present
+          end
+        }
+        true
+      else
+        false
+      end
+    end
+
+    # if uri_obj has a type of RDF::OpenAnnotation.Choice, then this is a skolemized blank node;
+    #  add appropriate statements to @oa_graph to represent the blank node and its contents and return true
+    # @param [RDF::URI] uri_obj the object that may have type RDF::OpenAnnotation.Choice
+    # @param [RDF::URI] predicate the predicate for [@root_uri, predicate, (choice)] statement
+    # to be added to @oa_graph, e.g. RDF::OpenAnnotation.hasTarget
+    # @returns [Boolean] true if it adds statements to @oa_graph, false otherwise
+    def map_choice uri_obj, predicate
+      solns = @ldp_anno_graph.query [uri_obj, RDF.type, RDF::OpenAnnotation.Choice]
+      if solns.count > 0
+        blank_node = RDF::Node.new
+        @oa_graph << [@root_uri, predicate, blank_node]
+        
+        default_obj = nil
+        item_obj = nil
+        choice_stmts = Triannon::LdpCreator.subject_statements(uri_obj, @ldp_anno_graph)
+        choice_stmts.each { |stmt|
+          if stmt.predicate == RDF::OpenAnnotation.default
+            default_obj = stmt.object
+            # assume it is either ContentAsText or external ref
+            if !map_content_as_text(default_obj, RDF::OpenAnnotation.default, blank_node)
+              map_external_ref default_obj, RDF::OpenAnnotation.default, blank_node
+            end
+          elsif stmt.predicate == RDF::OpenAnnotation.item
+            item_obj = stmt.object
+            # assume it is either ContentAsText or external ref
+            if !map_content_as_text(item_obj, RDF::OpenAnnotation.item, blank_node)
+              map_external_ref item_obj, RDF::OpenAnnotation.item, blank_node
+            end
+          end
+        }
+        
+        # We can't know we'll hit item and default statements in graph first, 
+        # so we must do another pass through the statements to get that information
+        choice_stmts.each { |stmt| 
+          if stmt.subject == uri_obj && stmt.object != default_obj && stmt.object != item_obj
+            @oa_graph << [blank_node, stmt.predicate, stmt.object]
+          # there shouldn't be any other unmapped statements present
           end
         }
         true
