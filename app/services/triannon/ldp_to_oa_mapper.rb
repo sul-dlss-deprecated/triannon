@@ -169,20 +169,20 @@ module Triannon
         @oa_graph << [@root_uri, predicate, blank_node]
         
         default_obj = nil
-        item_obj = nil
+        item_objs = []
         choice_stmts = Triannon::LdpCreator.subject_statements(uri_obj, @ldp_anno_graph)
         choice_stmts.each { |stmt|
           if stmt.predicate == RDF::OpenAnnotation.default
             default_obj = stmt.object
             # assume it is either ContentAsText or external ref
             if !map_content_as_text(default_obj, RDF::OpenAnnotation.default, blank_node)
-              map_external_ref default_obj, RDF::OpenAnnotation.default, blank_node
+              map_external_ref(default_obj, RDF::OpenAnnotation.default, blank_node)
             end
           elsif stmt.predicate == RDF::OpenAnnotation.item
-            item_obj = stmt.object
+            item_objs << stmt.object
             # assume it is either ContentAsText or external ref
-            if !map_content_as_text(item_obj, RDF::OpenAnnotation.item, blank_node)
-              map_external_ref item_obj, RDF::OpenAnnotation.item, blank_node
+            if !map_content_as_text(stmt.object, RDF::OpenAnnotation.item, blank_node)
+              map_external_ref(stmt.object, RDF::OpenAnnotation.item, blank_node)
             end
           end
         }
@@ -190,7 +190,7 @@ module Triannon
         # We can't know we'll hit item and default statements in graph first, 
         # so we must do another pass through the statements to get that information
         choice_stmts.each { |stmt| 
-          if stmt.subject == uri_obj && stmt.object != default_obj && stmt.object != item_obj
+          if stmt.subject == uri_obj && stmt.object != default_obj && !item_objs.include?(stmt.object)
             @oa_graph << [blank_node, stmt.predicate, stmt.object]
           # there shouldn't be any other unmapped statements present
           end

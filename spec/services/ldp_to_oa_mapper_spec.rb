@@ -854,6 +854,78 @@ describe Triannon::LdpToOaMapper do
       expect(mapper.oa_graph.query([RDF::URI.new(stored_default_url), nil, nil]).size).to eql 0
       expect(mapper.oa_graph.query([RDF::URI.new(stored_item_url), nil, nil]).size).to eql 0
     end
+    it "three images" do
+      stored_target_obj_url = "#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1"
+      stored_default_url = "#{stored_target_obj_url}#default"
+      stored_item1_url = "#{stored_target_obj_url}#item1"
+      stored_item2_url = "#{stored_target_obj_url}#item2"
+      default_url = "http://image.com/small"
+      item1_url = "http://images.com/large.jpg"
+      item2_url = "http://images.com/small.jpg"
+      target_container_stmts = RDF::Turtle::Reader.new("
+      @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+      @prefix ldp: <http://www.w3.org/ns/ldp#> .
+      @prefix openannotation: <http://www.w3.org/ns/oa#> .
+      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+      @prefix triannon: <http://triannon.stanford.edu/ns/> .
+      @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+      <#{stored_default_url}> a dcmitype:Image;
+         triannon:externalReference <#{default_url}> .
+
+      <#{stored_item1_url}> a dcmitype:Image;
+         triannon:externalReference <#{item1_url}> .
+
+      <#{stored_item2_url}> a dcmitype:Image;
+         triannon:externalReference <#{item2_url}> .
+
+      <#{stored_target_obj_url}> a ldp:Container,
+           ldp:DirectContainer,
+           ldp:RDFSource,
+           openannotation:Choice;
+         ldp:hasMemberRelation ldp:member;
+         ldp:membershipResource <#{stored_target_obj_url}>;
+         openannotation:default <#{stored_default_url}>;
+         openannotation:item <#{stored_item1_url}>;
+         openannotation:item <#{stored_item2_url}> .
+      ").statements.to_a
+      ldp_anno.load_statements_into_graph target_container_stmts
+      target_uri = ldp_anno.target_uris.first
+      
+      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper.extract_base
+      mapper.map_choice(target_uri, RDF::OpenAnnotation.hasTarget)
+
+      target_solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      expect(target_solns.count).to eq 1
+      target_blank_node = target_solns.first.object
+      target_blank_node_solns = mapper.oa_graph.query [target_blank_node, nil, nil]
+      expect(target_blank_node_solns.count).to eq 4
+      expect(target_blank_node_solns).to include [target_blank_node, RDF.type, RDF::OpenAnnotation.Choice]
+      default_uri_obj = RDF::URI.new(default_url)
+      expect(target_blank_node_solns).to include [target_blank_node, RDF::OpenAnnotation.default, default_uri_obj]
+      item1_uri_obj = RDF::URI.new(item1_url)
+      expect(target_blank_node_solns).to include [target_blank_node, RDF::OpenAnnotation.item, item1_uri_obj]
+      item2_uri_obj = RDF::URI.new(item2_url)
+      expect(target_blank_node_solns).to include [target_blank_node, RDF::OpenAnnotation.item, item2_uri_obj]
+
+      default_uri_subj_solns = mapper.oa_graph.query [default_uri_obj, nil, nil]
+      expect(default_uri_subj_solns.count).to eql 1
+      expect(default_uri_subj_solns).to include [default_uri_obj, RDF.type, RDF::DCMIType.Image]
+
+      item1_uri_subj_solns = mapper.oa_graph.query [item1_uri_obj, nil, nil]
+      expect(item1_uri_subj_solns.count).to eql 1
+      expect(item1_uri_subj_solns).to include [item1_uri_obj, RDF.type, RDF::DCMIType.Image]
+
+      item2_uri_subj_solns = mapper.oa_graph.query [item2_uri_obj, nil, nil]
+      expect(item2_uri_subj_solns.count).to eql 1
+      expect(item2_uri_subj_solns).to include [item2_uri_obj, RDF.type, RDF::DCMIType.Image]
+      
+      # should get no triples with stored default or item object urls
+      expect(mapper.oa_graph.query([RDF::URI.new(stored_default_url), nil, nil]).size).to eql 0
+      expect(mapper.oa_graph.query([RDF::URI.new(stored_item1_url), nil, nil]).size).to eql 0
+      expect(mapper.oa_graph.query([RDF::URI.new(stored_item2_url), nil, nil]).size).to eql 0
+    end
     it "returns true if it adds statements to oa_graph" do
       stored_default_url = "http://localhost:8983/fedora/rest/.well-known/genid/ea68448e-e50c-4274-a204-af477a0d8317"
       stored_item_url = "http://localhost:8983/fedora/rest/.well-known/genid/6051b00b-24e9-4a10-8b7d-0c44fa5fa469"
