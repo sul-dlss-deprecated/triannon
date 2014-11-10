@@ -53,6 +53,18 @@ describe Triannon::LdpLoader do
       result = loader.ldp_annotation.graph.query [body_uri, RDF::Content.chars, nil]
       expect(result.first.object.to_s).to match /I love this/
     end
+    it "retrieves triples about external refs" do
+      loader = Triannon::LdpLoader.new 'somekey'
+      my_body_ttl = File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_body_ext_refs.ttl')
+      allow(loader).to receive(:get_ttl).and_return(anno_ttl, my_body_ttl)
+      loader.load_anno_container
+      loader.load_bodies
+      body_uri = loader.ldp_annotation.body_uris.first
+      ext_ref_solns = loader.ldp_annotation.graph.query [body_uri, RDF::Triannon.externalReference, nil]
+      expect(ext_ref_solns.count).to eql 1
+      expect(ext_ref_solns).to include [body_uri, RDF::Triannon.externalReference, RDF::URI.new("http://dbpedia.org/resource/Love")]
+      expect(loader.ldp_annotation.graph.query([body_uri, RDF.type, RDF::OpenAnnotation.SemanticTag]).count).to eql 1
+    end
   end
 
   describe "#load_targets" do
@@ -64,6 +76,32 @@ describe Triannon::LdpLoader do
       target_uri = loader.ldp_annotation.target_uris.first
       result = loader.ldp_annotation.graph.query [target_uri, RDF::Triannon.externalReference, nil]
       expect(result.first.object.to_s).to match /kq131cs7229/
+    end
+    it "retrieves triples about external refs" do
+      loader = Triannon::LdpLoader.new 'somekey'
+      my_target_ttl = File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_target_ext_refs.ttl')
+      allow(loader).to receive(:get_ttl).and_return(anno_ttl, my_target_ttl)
+      loader.load_anno_container
+      loader.load_targets
+      target_uri = loader.ldp_annotation.target_uris.first
+      
+      default_uri_obj = RDF::URI.new(target_uri.to_s + "#default")
+      default_uri_solns = loader.ldp_annotation.graph.query [default_uri_obj, nil, nil]
+      expect(default_uri_solns.count).to eql 2
+      expect(default_uri_solns).to include [default_uri_obj, RDF::Triannon.externalReference, RDF::URI.new("http://images.com/small")]
+      expect(default_uri_solns).to include [default_uri_obj, RDF.type, RDF::DCMIType.Image]
+
+      item1_uri_obj = RDF::URI.new(target_uri.to_s + "#item1")
+      item1_uri_solns = loader.ldp_annotation.graph.query [item1_uri_obj, nil, nil]
+      expect(item1_uri_solns.count).to eql 2
+      expect(item1_uri_solns).to include [item1_uri_obj, RDF::Triannon.externalReference, RDF::URI.new("http://images.com/large")]
+      expect(item1_uri_solns).to include [item1_uri_obj, RDF.type, RDF::DCMIType.Image]
+
+      item2_uri_obj = RDF::URI.new(target_uri.to_s + "#item2")
+      item2_uri_solns = loader.ldp_annotation.graph.query [item2_uri_obj, nil, nil]
+      expect(item2_uri_solns.count).to eql 2
+      expect(item2_uri_solns).to include [item2_uri_obj, RDF::Triannon.externalReference, RDF::URI.new("http://images.com/huge")]
+      expect(item2_uri_solns).to include [item2_uri_obj, RDF.type, RDF::DCMIType.Image]
     end
   end
 
