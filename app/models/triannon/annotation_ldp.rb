@@ -1,4 +1,6 @@
 module Triannon
+  # an LDP aware model of an Annotation -- basically, a shim between the OA notion of an annotation 
+  #  and the LDP storage.
   class AnnotationLdp
 
     # RDF::Graph object with all triples, including back end (e.g. LDP, Fedora)
@@ -8,7 +10,7 @@ module Triannon
 
     # RDF::Graph without any back end (e.g. LDP, Fedora) triples
     def stripped_graph
-      new_graph = RDF::LDP.remove_ldp_triples (RDF::FCRepo4.remove_fedora_triples(graph))
+      RDF::LDP.remove_ldp_triples (RDF::FCRepo4.remove_fedora_triples(graph))
     end
 
     def base_uri
