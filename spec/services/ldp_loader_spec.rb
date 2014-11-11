@@ -38,7 +38,7 @@ describe Triannon::LdpLoader do
   describe "#load_anno_container" do
     it "asks the ldp store for the annotation object" do
       loader = Triannon::LdpLoader.new 'somekey'
-      expect(loader).to receive(:get_ttl).with("somekey").and_call_original
+      expect(loader).to receive(:get_ttl).with("somekey")
       loader.load_anno_container
     end
     it "calls AnnotationLdp.load_statements_into_graph for stored anno object" do
