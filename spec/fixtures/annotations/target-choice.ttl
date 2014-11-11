@@ -1,0 +1,23 @@
+@prefix openannotation: <http://www.w3.org/ns/oa#> .
+@prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ [
+    a openannotation:Annotation;
+
+    openannotation:hasBody <http://dbpedia.org/resource/Otto_Ege>;
+    openannotation:hasTarget [
+      a openannotation:Choice;
+      openannotation:default <http://images.com/small>;
+      openannotation:item <http://images.com/large>;
+      openannotation:item <http://images.com/huge>
+    ];
+    openannotation:motivatedBy openannotation:commenting
+ ] .
+
+ <http://images.com/small> a dcmitype:Image .
+
+ <http://images.com/large> a dcmitype:Image .
+
+ <http://images.com/huge> a dcmitype:Image .

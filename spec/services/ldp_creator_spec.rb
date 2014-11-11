@@ -22,8 +22,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url "#{new_pid}"
         req.headers['Accept'] = 'application/x-turtle'
       end
-      g = RDF::Graph.new
-      g.from_ttl(resp.body)
+      g = RDF::Graph.new.from_ttl(resp.body)
       full_url = "#{Triannon.config[:ldp_url]}/#{new_pid}"
       expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
       expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
@@ -48,8 +47,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url "#{new_pid}"
         req.headers['Accept'] = 'application/x-turtle'
       end
-      g = RDF::Graph.new
-      g.from_ttl(resp.body)
+      g = RDF::Graph.new.from_ttl(resp.body)
       full_url = "#{Triannon.config[:ldp_url]}/#{new_pid}"
       expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
       expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.moderating]).size).to eql 1
@@ -86,8 +84,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url "#{new_pid}"
         req.headers['Accept'] = 'application/x-turtle'
       end
-      g = RDF::Graph.new
-      g.from_ttl(resp.body)
+      g = RDF::Graph.new.from_ttl(resp.body)
       full_url = "#{Triannon.config[:ldp_url]}/#{new_pid}"
       expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
       expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
@@ -110,8 +107,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url " #{new_pid}/b"
         req.headers['Accept'] = 'application/x-turtle'
       end
-      g = RDF::Graph.new
-      g.from_ttl(resp.body)
+      g = RDF::Graph.new.from_ttl(resp.body)
       full_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/b"
       expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::LDP.DirectContainer]).size).to eql 1
       expect(g.query([RDF::URI.new(full_url), RDF::LDP.membershipResource, RDF::URI.new("#{Triannon.config[:ldp_url]}/#{new_pid}")]).size).to eql 1
@@ -132,8 +128,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url " #{new_pid}/t"
         req.headers['Accept'] = 'application/x-turtle'
       end
-      g = RDF::Graph.new
-      g.from_ttl(resp.body)
+      g = RDF::Graph.new.from_ttl(resp.body)
       full_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/t"
       expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::LDP.DirectContainer]).size).to eql 1
       expect(g.query([RDF::URI.new(full_url), RDF::LDP.membershipResource, RDF::URI.new("#{Triannon.config[:ldp_url]}/#{new_pid}")]).size).to eql 1
@@ -155,8 +150,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url "#{id}"
         req.headers['Accept'] = 'application/x-turtle'
       end
-      g = RDF::Graph.new
-      g.from_ttl(resp.body)
+      g = RDF::Graph.new.from_ttl(resp.body)
       full_url = "#{Triannon.config[:ldp_url]}/#{id}"
       expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
     end
@@ -176,8 +170,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url container_url
         req.headers['Accept'] = 'application/x-turtle'
       end
-      g = RDF::Graph.new
-      g.from_ttl(container_resp.body)
+      g = RDF::Graph.new.from_ttl(container_resp.body)
       expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 1
     end
     it 'should call create_body_container and create_body_resources if there are bodies' do
@@ -210,8 +203,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url container_url
         req.headers['Accept'] = 'application/x-turtle'
       end
-      g = RDF::Graph.new
-      g.from_ttl(container_resp.body)
+      g = RDF::Graph.new.from_ttl(container_resp.body)
       expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 2
     end
     it 'should call create_target_container and create_target_resource' do
@@ -226,8 +218,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url container_url
         req.headers['Accept'] = 'application/x-turtle'
       end
-      g = RDF::Graph.new
-      g.from_ttl(container_resp.body)
+      g = RDF::Graph.new.from_ttl(container_resp.body)
       expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 1
     end
     it 'should create a single target container with multiple resources if there are multiple targets' do
@@ -245,8 +236,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url container_url
         req.headers['Accept'] = 'application/x-turtle'
       end
-      g = RDF::Graph.new
-      g.from_ttl(container_resp.body)
+      g = RDF::Graph.new.from_ttl(container_resp.body)
       expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 2
     end
   end # create class method
@@ -268,8 +258,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url body_pid
         req.headers['Accept'] = 'application/x-turtle'
       end
-      g = RDF::Graph.new
-      g.from_ttl(resp.body)
+      g = RDF::Graph.new.from_ttl(resp.body)
       full_body_obj_url = "#{Triannon.config[:ldp_url]}/#{body_pid}"
       expect(g.query([RDF::URI.new(full_body_obj_url), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
       expect(g.query([RDF::URI.new(full_body_obj_url), RDF.type, RDF::DCMIType.Text]).size).to eql 1
@@ -281,8 +270,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url body_container_url
         req.headers['Accept'] = 'application/x-turtle'
       end
-      g = RDF::Graph.new
-      g.from_ttl(body_container_resp.body)
+      g = RDF::Graph.new.from_ttl(body_container_resp.body)
       expect(g.query([RDF::URI.new(body_container_url), RDF::LDP.contains, RDF::URI.new(full_body_obj_url)]).size).to eql 1
     end
   end # create_body_resources
@@ -304,8 +292,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url target_pid
         req.headers['Accept'] = 'application/x-turtle'
       end
-      g = RDF::Graph.new
-      g.from_ttl(resp.body)
+      g = RDF::Graph.new.from_ttl(resp.body)
       full_target_obj_url = "#{Triannon.config[:ldp_url]}/#{target_pid}"
       expect(g.query([RDF::URI.new(full_target_obj_url), RDF::LDP.contains, RDF::URI.new(target_pid)]).size).to eql 0
 
@@ -314,8 +301,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url container_url
         req.headers['Accept'] = 'application/x-turtle'
       end
-      g = RDF::Graph.new
-      g.from_ttl(container_resp.body)
+      g = RDF::Graph.new.from_ttl(container_resp.body)
       expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, RDF::URI.new(full_target_obj_url)]).size).to eql 1
     end
   end # create_target_resources
@@ -333,8 +319,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url cont_url
         req.headers['Accept'] = 'text/turtle'
       end
-      g = RDF::Graph.new
-      g.from_ttl(resp.body)
+      g = RDF::Graph.new.from_ttl(resp.body)
       full_cont_url = "#{Triannon.config[:ldp_url]}/#{cont_url}"
       expect(g.query([RDF::URI.new(full_cont_url), RDF.type, RDF::LDP.DirectContainer]).size).to eql 1
       expect(g.query([RDF::URI.new(full_cont_url), RDF::LDP.membershipResource, RDF::URI.new("#{Triannon.config[:ldp_url]}/#{@new_pid}")]).size).to eql 1
@@ -349,8 +334,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         req.url "#{@new_pid}/b"
         req.headers['Accept'] = 'text/turtle'
       end
-      g = RDF::Graph.new
-      g.from_ttl(resp.body)
+      g = RDF::Graph.new.from_ttl(resp.body)
       full_cont_url = "#{Triannon.config[:ldp_url]}/#{@new_pid}/b"
       expect(g.query([RDF::URI.new(full_cont_url), RDF::LDP.hasMemberRelation, RDF::OpenAnnotation.hasBody]).size).to eql 1
     end
@@ -388,8 +372,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url body_pid
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(body_pid), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
         expect(g.query([RDF::URI.new(body_pid), RDF.type, RDF::DCMIType.Text]).size).to eql 1
         expect(g.query([RDF::URI.new(body_pid), RDF::Content.chars, "I love this!"]).size).to eql 1
@@ -427,8 +410,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url body_cont_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         contains_stmts = g.query([RDF::URI.new(body_cont_url), RDF::LDP.contains, :body_url])
         expect(contains_stmts.size).to eql 2
 
@@ -437,8 +419,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url first_body_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
         expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::DCMIType.Text]).size).to eql 1
         expect(g.query([RDF::URI.new(first_body_url), RDF::Content.chars, "I love this!"]).size).to eql 1
@@ -448,8 +429,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url second_body_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
         expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::DCMIType.Text]).size).to eql 1
         expect(g.query([RDF::URI.new(second_body_url), RDF::Content.chars, "I hate this!"]).size).to eql 1
@@ -474,8 +454,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url body_obj_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(body_obj_url), RDF::Triannon.externalReference, RDF::URI.new("http://dbpedia.org/resource/Otto_Ege")]).size).to eql 1
       end
       it 'URI has additional properties' do
@@ -497,8 +476,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url target_obj_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         target_obj = RDF::URI.new(target_obj_url)
         expect(g.query([target_obj, RDF::Triannon.externalReference, RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg#xywh=0,0,200,200")]).size).to eql 1
         expect(g.query([target_obj, RDF.type, RDF::DCMIType.Image]).size).to eql 1
@@ -523,8 +501,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url body_obj_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(body_obj_url), RDF::Triannon.externalReference, RDF::URI.new("http://dbpedia.org/resource/Love")]).size).to eql 1
         expect(g.query([RDF::URI.new(body_obj_url), RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
       end
@@ -548,8 +525,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url container_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(container_resp.body)
+        g = RDF::Graph.new.from_ttl(container_resp.body)
         expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 2
 
         first_target_url = "#{container_url}/#{target_uuids[0]}"
@@ -597,8 +573,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url container_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(container_resp.body)
+        g = RDF::Graph.new.from_ttl(container_resp.body)
         expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 3
 
         first_target_url = "#{container_url}/#{target_uuids[0]}"
@@ -656,8 +631,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url body_cont_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         contains_stmts = g.query([RDF::URI.new(body_cont_url), RDF::LDP.contains, :body_url])
         expect(contains_stmts.size).to eql 2
 
@@ -666,8 +640,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url first_body_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(first_body_url), RDF::Triannon.externalReference, RDF::URI.new("http://dbpedia.org/resource/Love")]).size).to eql 1
         expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
 
@@ -676,8 +649,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url second_body_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(second_body_url), RDF::Triannon.externalReference, RDF::URI.new("http://www.example.org/comment.mp3")]).size).to eql 1
         expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::DCMIType.Sound]).size).to eql 1
       end     
@@ -708,8 +680,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url target_obj_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         target_obj = RDF::URI.new(target_obj_url)
         expect(g.query([target_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
         source_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSource, :source_node]).first.object.to_s
@@ -724,8 +695,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url selector_node_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         selector_obj = RDF::URI.new(selector_node_url)
         expect(g.query([selector_obj, RDF.type, RDF::OpenAnnotation.TextPositionSelector]).size).to eql 1
         expect(g.query([selector_obj, RDF::OpenAnnotation.start, RDF::Literal.new(0)]).size).to eql 1
@@ -756,8 +726,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url target_obj_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         target_obj = RDF::URI.new(target_obj_url)
         expect(g.query([target_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
         source_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSource, :source_node]).first.object.to_s
@@ -772,8 +741,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url selector_node_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         selector_obj = RDF::URI.new(selector_node_url)
         expect(g.query([selector_obj, RDF.type, RDF::OpenAnnotation.TextQuoteSelector]).size).to eql 1
         expect(g.query([selector_obj, RDF::OpenAnnotation.suffix, RDF::Literal.new(" and The Canonical Epistles,")]).size).to eql 1
@@ -807,8 +775,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url target_obj_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         target_obj = RDF::URI.new(target_obj_url)
         expect(g.query([target_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
         source_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSource, :source_node]).first.object.to_s
@@ -824,8 +791,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url selector_node_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         selector_obj = RDF::URI.new(selector_node_url)
         expect(g.query([selector_obj, RDF.type, RDF::OpenAnnotation.FragmentSelector]).size).to eql 1
         expect(g.query([selector_obj, RDF.value, RDF::Literal.new("xywh=0,0,200,200")]).size).to eql 1
@@ -877,8 +843,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url container_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(container_resp.body)
+        g = RDF::Graph.new.from_ttl(container_resp.body)
         expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 3
 
         first_target_url = "#{container_url}/#{target_uuids[0]}"
@@ -886,8 +851,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url first_target_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(first_target_url), RDF::Triannon.externalReference, RDF::URI.new("http://purl.stanford.edu/kq131cs7229")]).size).to eql 1
 
 
@@ -896,8 +860,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url second_target_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         target_obj = RDF::URI.new(second_target_url)
         expect(g.query([target_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
         source_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSource, :source_node]).first.object.to_s
@@ -912,8 +875,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url selector_node_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         selector_obj = RDF::URI.new(selector_node_url)
         expect(g.query([selector_obj, RDF.type, RDF::OpenAnnotation.TextPositionSelector]).size).to eql 1
         expect(g.query([selector_obj, RDF::OpenAnnotation.start, RDF::Literal.new(0)]).size).to eql 1
@@ -925,8 +887,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url third_target_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         target_obj = RDF::URI.new(third_target_url)
         expect(g.query([target_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
         source_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSource, :source_node]).first.object.to_s
@@ -942,8 +903,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url selector_node_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         selector_obj = RDF::URI.new(selector_node_url)
         expect(g.query([selector_obj, RDF.type, RDF::OpenAnnotation.FragmentSelector]).size).to eql 1
         expect(g.query([selector_obj, RDF.value, RDF::Literal.new("xywh=0,0,200,200")]).size).to eql 1
@@ -989,8 +949,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url body_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(body_resp.body)
+        g = RDF::Graph.new.from_ttl(body_resp.body)
         expect(g.query([RDF::URI.new(body_url), RDF.type, RDF::OpenAnnotation.Choice]).size).to eql 1
         expect(g.query([RDF::URI.new(body_url), RDF::OpenAnnotation.default, nil]).size).to eql 1
         expect(g.query([RDF::URI.new(body_url), RDF::OpenAnnotation.item, nil]).size).to eql 1
@@ -1004,8 +963,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url default_node_pid
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(default_node_pid), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
         expect(g.query([RDF::URI.new(default_node_pid), RDF.type, RDF::DCMIType.Text]).size).to eql 1
         expect(g.query([RDF::URI.new(default_node_pid), RDF::Content.chars, "I love this Englishly!"]).size).to eql 1
@@ -1017,13 +975,90 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url item_node_pid
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(item_node_pid), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
         expect(g.query([RDF::URI.new(item_node_pid), RDF.type, RDF::DCMIType.Text]).size).to eql 1
         expect(g.query([RDF::URI.new(item_node_pid), RDF::Content.chars, "Je l'aime en Francais!"]).size).to eql 1
         expect(g.query([RDF::URI.new(item_node_pid), RDF::DC11.language, "fr"]).size).to eql 1
       end      
+      it "three images" do
+        body_url = "http://dbpedia.org/resource/Otto_Ege"
+        default_url = "http://images.com/small"
+        item1_url = "http://images.com/large"
+        item2_url = "http://images.com/huge"
+        my_anno = Triannon::Annotation.new data: "
+        @prefix openannotation: <http://www.w3.org/ns/oa#> .
+        @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+        @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+         [
+            a openannotation:Annotation;
+
+            openannotation:hasBody <#{body_url}>;
+            openannotation:hasTarget [
+              a openannotation:Choice;
+              openannotation:default <#{default_url}>;
+              openannotation:item <#{item1_url}>;
+              openannotation:item <#{item2_url}>
+            ];
+            openannotation:motivatedBy openannotation:commenting
+         ] .
+
+         <#{default_url}> a dcmitype:Image .
+
+         <#{item1_url}> a dcmitype:Image .
+
+         <#{item2_url}> a dcmitype:Image ."
+         my_svc = Triannon::LdpCreator.new my_anno
+         new_pid = my_svc.create_base
+         my_svc.create_target_container
+         target_uuids = my_svc.send(:create_resources_in_container, RDF::OpenAnnotation.hasTarget)
+         expect(target_uuids.size).to eql 1
+         target_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/t/#{target_uuids[0]}"
+         target_resp = conn.get do |req|
+           req.url target_url
+           req.headers['Accept'] = 'application/x-turtle'
+         end
+         g = RDF::Graph.new.from_ttl(target_resp.body)
+         g = RDF::FCRepo4.remove_fedora_triples(g)
+         target_node_obj = RDF::URI.new(target_url)
+         expect(g.query([target_node_obj, RDF.type, RDF::OpenAnnotation.Choice]).size).to eql 1
+         default_pid_solns = g.query [target_node_obj, RDF::OpenAnnotation.default, nil] 
+         expect(default_pid_solns.count).to eql 1
+         default_node_pid = default_pid_solns.first.object.to_s
+         expect(default_node_pid).to match "#{target_url}#default" # this is a fcrepo4 implementation of hash URI node
+         item_pid_solns = g.query([target_node_obj, RDF::OpenAnnotation.item, nil])
+         expect(item_pid_solns.count).to eql 2
+         item1_pid = item_pid_solns.first.object.to_s
+         expect(item1_pid).to match "#{target_url}#item" # this is a fcrepo4 implementation of hash URI node
+         item2_pid = item_pid_solns.to_a.last.object.to_s
+         expect(item2_pid).to match "#{target_url}#item" # this is a fcrepo4 implementation of hash URI node
+
+         # the default blank node object / ttl
+         #  hashURI is in the same response due to fcrepo4 implementation
+         default_node_obj = RDF::URI.new(default_node_pid)
+         default_subj_solns = g.query([default_node_obj, nil, nil])
+         expect(default_subj_solns.count).to eql 2
+         expect(default_subj_solns).to include [default_node_obj, RDF.type, RDF::DCMIType.Image]
+         expect(default_subj_solns).to include [default_node_obj, RDF::Triannon.externalReference, RDF::URI.new(default_url)]
+         
+         # the first item blank node object / ttl
+         item1_node_obj = RDF::URI.new(item1_pid)
+         item1_subj_solns = g.query([item1_node_obj, nil, nil])
+         expect(item1_subj_solns.count).to eql 2
+         expect(item1_subj_solns).to include [item1_node_obj, RDF.type, RDF::DCMIType.Image]
+         item_url = g.query([item1_node_obj, RDF::Triannon.externalReference, nil]).first.object.to_s
+         expect([item1_url, item2_url]).to include item_url
+
+         # the second item blank node object / ttl
+         item2_node_obj = RDF::URI.new(item2_pid)
+         item2_subj_solns = g.query([item2_node_obj, nil, nil])
+         expect(item2_subj_solns.count).to eql 2
+         expect(item2_subj_solns).to include [item2_node_obj, RDF.type, RDF::DCMIType.Image]
+         item_url = g.query([item2_node_obj, RDF::Triannon.externalReference, nil]).first.object.to_s
+         expect([item1_url, item2_url]).to include item_url
+      end
     end # Choice
     
     context 'multiple resources of different types' do
@@ -1056,8 +1091,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url body_cont_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         contains_stmts = g.query([RDF::URI.new(body_cont_url), RDF::LDP.contains, :body_url])
         expect(contains_stmts.size).to eql 2
 
@@ -1066,8 +1100,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url first_body_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
         expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::DCMIType.Text]).size).to eql 1
         expect(g.query([RDF::URI.new(first_body_url), RDF::Content.chars, "I love this!"]).size).to eql 1
@@ -1077,8 +1110,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
           req.url second_body_url
           req.headers['Accept'] = 'application/x-turtle'
         end
-        g = RDF::Graph.new
-        g.from_ttl(resp.body)
+        g = RDF::Graph.new.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(second_body_url), RDF::Triannon.externalReference, RDF::URI.new("http://dbpedia.org/resource/Love")]).size).to eql 1
         expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
       end
@@ -1087,8 +1119,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
 
   describe '*subject_statements' do
     it 'returns appropriate blank node statements when the subject is an RDF::Node in the graph' do
-      graph = RDF::Graph.new
-      graph.from_ttl('<http://example.org/annos/annotation/body-chars.ttl> <http://www.w3.org/ns/oa#hasBody> [
+      graph = RDF::Graph.new.from_ttl('<http://example.org/annos/annotation/body-chars.ttl> <http://www.w3.org/ns/oa#hasBody> [
            a <http://www.w3.org/2011/content#ContentAsText>,
              <http://purl.org/dc/dcmitype/Text>;
            <http://www.w3.org/2011/content#chars> "I love this!"
@@ -1101,8 +1132,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(body_stmts).to include([body_resource, RDF.type, RDF::DCMIType.Text])
     end
     it 'recurses to get triples from objects of the subject statements' do
-      graph = RDF::Graph.new
-      graph.from_jsonld('{
+      graph = RDF::Graph.new.from_jsonld('{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json",
         "hasTarget": {
           "@type": "oa:SpecificResource",
@@ -1125,8 +1155,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(target_stmts).to include([selector_resource, RDF::OpenAnnotation.start, RDF::Literal.new(0)])
       expect(target_stmts).to include([selector_resource, RDF::OpenAnnotation.end, RDF::Literal.new(66)])
 
-      graph = RDF::Graph.new
-      graph.from_jsonld('{
+      graph = RDF::Graph.new.from_jsonld('{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json",
         "hasTarget": {
           "@type": "oa:SpecificResource",
@@ -1148,8 +1177,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(target_stmts).to include([selector_resource, RDF::DC.conformsTo, "http://www.w3.org/TR/media-frags/"])
     end
     it 'finds all properties of URI nodes' do
-      graph = RDF::Graph.new
-      graph.from_jsonld('{
+      graph = RDF::Graph.new.from_jsonld('{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json",
         "hasTarget": {
           "@type": "oa:SpecificResource",
@@ -1169,8 +1197,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(target_stmts).to include([source_resource, RDF.type, RDF::DCMIType.Image])
     end
     it 'empty Array when the subject is not in the graph' do
-      graph = RDF::Graph.new
-      graph.from_ttl('<http://example.org/annos/annotation/body-chars.ttl> <http://www.w3.org/ns/oa#hasBody> [
+      graph = RDF::Graph.new.from_ttl('<http://example.org/annos/annotation/body-chars.ttl> <http://www.w3.org/ns/oa#hasBody> [
            a <http://www.w3.org/2011/content#ContentAsText>,
              <http://purl.org/dc/dcmitype/Text>;
            <http://www.w3.org/2011/content#chars> "I love this!"
@@ -1179,15 +1206,13 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(Triannon::LdpCreator.subject_statements(RDF::URI.new("http://not.there.org"), graph)).to eql []
     end
     it 'empty Array when the subject is an RDF::URI with no additional properties' do
-      graph = RDF::Graph.new
-      graph.from_ttl('<http://example.org/annos/annotation/body-chars.ttl> <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq131cs7229>.')
+      graph = RDF::Graph.new.from_ttl('<http://example.org/annos/annotation/body-chars.ttl> <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq131cs7229>.')
       target_resource = graph.query([nil, RDF::OpenAnnotation.hasTarget, nil]).first.object
       expect(target_resource).to be_a RDF::URI
       expect(Triannon::LdpCreator.subject_statements(target_resource, graph)).to eql []
     end
     it 'empty Array when subject is not RDF::Node or RDF::URI' do
-      graph = RDF::Graph.new
-      graph.from_ttl('<http://example.org/annos/annotation/body-chars.ttl> <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq131cs7229>.')
+      graph = RDF::Graph.new.from_ttl('<http://example.org/annos/annotation/body-chars.ttl> <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq131cs7229>.')
       expect(Triannon::LdpCreator.subject_statements(RDF.type, graph)).to eql []
     end
   end

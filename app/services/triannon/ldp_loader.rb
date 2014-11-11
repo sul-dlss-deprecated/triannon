@@ -6,11 +6,11 @@ module Triannon
 
     def self.load key
       l = Triannon::LdpLoader.new key
-      l.load_annotation
+      l.load_anno_container
       l.load_bodies
       l.load_targets
 
-      oa_graph = Triannon::LdpToOaMapper.ldp_to_oa l.annotation
+      oa_graph = Triannon::LdpToOaMapper.ldp_to_oa l.ldp_annotation
       oa_graph
     end
 
@@ -19,30 +19,30 @@ module Triannon
       l.find_all
     end
 
-    attr_accessor :annotation
+    attr_accessor :ldp_annotation
 
     def initialize key = nil
       @key = key
       @base_uri = Triannon.config[:ldp_url]
-      @annotation = Triannon::AnnotationLdp.new
+      @ldp_annotation = Triannon::AnnotationLdp.new
     end
 
-    # load annotation object into @annotation's (our Triannon::AnnotationLdp object) graph
-    def load_annotation
+    # load annotation container object into @ldp_annotation's (our Triannon::AnnotationLdp object) graph
+    def load_anno_container
       load_object_into_annotation_graph(@key)
     end
 
-    # load body objects into @annotation's (our Triannon::AnnotationLdp object) graph
+    # load body objects into @ldp_annotation's (our Triannon::AnnotationLdp object) graph
     def load_bodies
-      @annotation.body_uris.each { |body_uri|  
+      @ldp_annotation.body_uris.each { |body_uri|  
         body_obj_path = body_uri.to_s.split(@base_uri + '/').last
         load_object_into_annotation_graph(body_obj_path)
       }
     end
 
-    # load target objects into @annotation's (our Triannon::AnnotationLdp object) graph
+    # load target objects into @ldp_annotation's (our Triannon::AnnotationLdp object) graph
     def load_targets
-      @annotation.target_uris.each { |target_uri| 
+      @ldp_annotation.target_uris.each { |target_uri| 
         target_obj_path = target_uri.to_s.split(@base_uri + '/').last
         load_object_into_annotation_graph(target_obj_path)
       }
@@ -68,10 +68,10 @@ module Triannon
     protected
 
     # given a path to the back end storage url, retrieve the object from storage and load
-    #  the triples (except storage specific triples) into the graph for @annotation, our Triannon::AnnotationLdp object
+    #  the triples (except storage specific triples) into the graph for @ldp_annotation, our Triannon::AnnotationLdp object
     # @param [String] path the path to the object, e.g. the pid, or  pid/t/target_pid
     def load_object_into_annotation_graph(path)
-      @annotation.load_statements_into_graph(statements_from_ttl_minus_fedora(get_ttl path))
+      @ldp_annotation.load_statements_into_graph(statements_from_ttl_minus_fedora(get_ttl path))
     end
 
     # gets object from back end storage as turtle serialization
