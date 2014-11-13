@@ -8,7 +8,8 @@ module Triannon
     # @param [Triannon::Annotation] anno a Triannon::Annotation object, from which we use the graph
     def self.create(anno)
       if anno && anno.graph
-        # TODO:  we should not get here if the Annotation object already has an id
+        # TODO:  special case if the Annotation object already has an id -- 
+        #  see https://github.com/sul-dlss/triannon/issues/84
         result = Triannon::LdpCreator.new anno
         result.create_base
 
@@ -53,15 +54,20 @@ module Triannon
 
     # POSTS a ttl representation of the LDP Annotation container to the LDP store
     def create_base
-      # TODO:  we should error if the Annotation object already has an id
+      if @anno.graph.query([nil, RDF::Triannon.externalReference, nil]).count > 0
+        raise "Incoming annotations may not have http://triannon.stanford.edu/ns/externalReference as a predicate."
+      end
+      
+      # TODO:  special case if the Annotation object already has an id -- 
+      #  see https://github.com/sul-dlss/triannon/issues/84
       g = RDF::Graph.new
       @anno.graph.each { |s|
         g << s
       }
 
-      # remove the hasBody statements and any other statements associated with them
+      # don't include the hasBody statements and any other statements associated with them
       bodies_stmts = g.query([nil, RDF::OpenAnnotation.hasBody, nil])
-      bodies_stmts.each { |has_body_stmt |
+      bodies_stmts.each { |has_body_stmt|
         g.delete has_body_stmt
         body_obj = has_body_stmt.object
         Triannon::LdpCreator.subject_statements(body_obj, g).each { |s|
@@ -69,9 +75,9 @@ module Triannon
         }
       }
 
-      # remove the hasTarget statements and any other statements associated with them
+      # don't include the hasTarget statements and any other statements associated with them
       targets_stmts = g.query([nil, RDF::OpenAnnotation.hasTarget, nil])
-      targets_stmts.each { |has_target_stmt |
+      targets_stmts.each { |has_target_stmt|
         g.delete has_target_stmt
         target_obj = has_target_stmt.object
         Triannon::LdpCreator.subject_statements(target_obj, g).each { |s|
