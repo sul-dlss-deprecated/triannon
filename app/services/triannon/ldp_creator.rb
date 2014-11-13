@@ -55,7 +55,7 @@ module Triannon
     # POSTS a ttl representation of the LDP Annotation container to the LDP store
     def create_base
       if @anno.graph.query([nil, RDF::Triannon.externalReference, nil]).count > 0
-        raise "Incoming annotations may not have http://triannon.stanford.edu/ns/externalReference as a predicate."
+        raise Triannon::ExternalReferenceError, "Incoming annotations may not have http://triannon.stanford.edu/ns/externalReference as a predicate."
       end
       
       # TODO:  special case if the Annotation object already has an id -- 
