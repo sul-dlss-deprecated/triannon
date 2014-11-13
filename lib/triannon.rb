@@ -8,6 +8,7 @@ require 'faraday'
 
 module Triannon
   require "triannon/engine"
+  require "triannon/error"
 
   class << self
     attr_accessor :config

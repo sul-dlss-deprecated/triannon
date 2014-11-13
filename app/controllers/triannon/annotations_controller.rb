@@ -4,6 +4,7 @@ module Triannon
   class AnnotationsController < ApplicationController
     before_action :default_format_jsonld, only: [:show]
     before_action :set_annotation, only: [:show, :edit, :update, :destroy]
+    rescue_from Triannon::ExternalReferenceError, with: :ext_ref_error
 
     # GET /annotations/annotations
     def index
@@ -94,6 +95,11 @@ module Triannon
             }
           end
         end
+      end
+      
+      # handle Triannon::ExternalReferenceError
+      def ext_ref_error(exception)
+        render plain: exception.message, status: 403
       end
   end
 end

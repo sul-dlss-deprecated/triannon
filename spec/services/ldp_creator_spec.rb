@@ -93,6 +93,29 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.serializedAt, "2014-09-03T17:16:13Z"]).size).to eql 1
       expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.serializedBy, nil]).size).to eql 1
     end
+    it "raises Triannon::ExternalReferenceError if incoming anno graph contains RDF::Triannon.externalReference in target" do
+      my_anno = Triannon::Annotation.new data: '
+      <> a <http://www.w3.org/ns/oa#Annotation>;
+         <http://www.w3.org/ns/oa#hasTarget> <http://our.fcrepo.org/anno/target_container>;
+         <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#bookmarking> .
+
+      <http://our.fcrepo.org/anno/target_container> <http://triannon.stanford.edu/ns/externalReference> <http://cool.resource.org> .'
+
+      my_svc = Triannon::LdpCreator.new my_anno
+      expect{my_svc.create_base}.to raise_error(Triannon::ExternalReferenceError, "Incoming annotations may not have http://triannon.stanford.edu/ns/externalReference as a predicate.")
+    end
+    it "raises Triannon::ExternalReferenceError if incoming anno graph contains RDF::Triannon.externalReference in body" do
+      my_anno = Triannon::Annotation.new data: '
+      <> a <http://www.w3.org/ns/oa#Annotation>;
+         <http://www.w3.org/ns/oa#hasBody> <http://our.fcrepo.org/anno/body_container>;
+         <http://www.w3.org/ns/oa#hasTarget> <http://cool.resource.org>;
+         <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#bookmarking> .
+
+      <http://our.fcrepo.org/anno/body_container> <http://triannon.stanford.edu/ns/externalReference> <http://anno.body.org> .'
+
+      my_svc = Triannon::LdpCreator.new my_anno
+      expect{my_svc.create_base}.to raise_error(Triannon::ExternalReferenceError, "Incoming annotations may not have http://triannon.stanford.edu/ns/externalReference as a predicate.")
+    end
   end # create_base
 
   describe "#create_body_container" do
