@@ -173,6 +173,8 @@ private
         data.sub!("\"http://www.w3.org/ns/oa-context-20130208.json\"", json_oa_context)
       elsif data.match(/"@context"\s*\:\s*"http\:\/\/www\.w3\.org\/ns\/oa\.jsonld"/)
         data.sub!("\"http://www.w3.org/ns/oa.jsonld\"", json_oa_context)
+      elsif data.match(/"@context"\s*\:\s*"http\:\/\/iiif\.io\/api\/presentation\/2\/context\.json"/)
+        data.sub!("\"http://iiif.io/api/presentation/2/context.json\"", json_iiif_context)
       end
       @json_ld ||= JSON.parse(data) rescue nil
     end
@@ -183,6 +185,15 @@ private
         @json_oa_context ||= File.read(Rails.root.join("..", "..", "lib", "triannon", "oa_context_20130208.json"))
       else
         @json_oa_context ||= File.read(Rails.root.join("lib", "triannon", "oa_context_20130208.json"))
+      end
+    end
+
+    def json_iiif_context
+      # FIXME:  this is a terrible place to do this!!
+      if Rails.root.to_s.match(/internal/) # testing via engine_cart
+        @json_oa_context ||= File.read(Rails.root.join("..", "..", "lib", "triannon", "iiif_presentation_2_context.json"))
+      else
+        @json_oa_context ||= File.read(Rails.root.join("lib", "triannon", "iiif_presentation_2_context.json"))
       end
     end
 
