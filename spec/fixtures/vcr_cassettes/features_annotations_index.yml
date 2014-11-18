@@ -19,12 +19,12 @@ http_interactions:
       message: OK
     headers:
       Etag:
-      - "\"c47cdaa7d8e19d8cc211ff68e4ecb7c0a4385ad6\""
+      - '"0315f723069fd7a252b75fb440464dba67e09b02"'
       Last-Modified:
-      - Fri, 07 Nov 2014 02:21:10 GMT
+      - Tue, 18 Nov 2014 18:52:44 GMT
       Link:
-      - "<http://www.w3.org/ns/ldp#DirectContainer>;rel=\"type\""
-      - "<http://www.w3.org/ns/ldp#Resource>;rel=\"type\""
+      - <http://www.w3.org/ns/ldp#DirectContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
       Accept-Patch:
       - application/sparql-update
       Accept-Post:
@@ -39,514 +39,131 @@ http_interactions:
       - chunked
     body:
       encoding: UTF-8
-      string: "@prefix nt: <http://www.jcp.org/jcr/nt/1.0> .\n@prefix openannotation:
-        <http://www.w3.org/ns/oa#> .\n@prefix ns001: <http://purl.org/dc/elements/1.1/>
-        .\n@prefix fcrepo: <http://fedora.info/definitions/v4/repository#> .\n@prefix
-        test: <info:fedora/test/> .\n@prefix xs: <http://www.w3.org/2001/XMLSchema>
-        .\n@prefix mode: <http://www.modeshape.org/1.0> .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n@prefix sv:
-        <http://www.jcp.org/jcr/sv/1.0> .\n@prefix dc: <http://purl.org/dc/terms/>
-        .\n@prefix prov: <http://www.w3.org/ns/prov#> .\n@prefix foaf: <http://xmlns.com/foaf/0.1/>
-        .\n@prefix fedoraconfig: <http://fedora.info/definitions/v4/config#> .\n@prefix
-        dcmitype: <http://purl.org/dc/dcmitype/> .\n@prefix image: <http://www.modeshape.org/images/1.0>
-        .\n@prefix xml: <http://www.w3.org/XML/1998/namespace> .\n@prefix fedorarelsext:
-        <http://fedora.info/definitions/v4/rels-ext#> .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0>
-        .\n@prefix premis: <http://www.loc.gov/premis/rdf/v1#> .\n@prefix content:
-        <http://www.w3.org/2011/content#> .\n@prefix triannon: <http://triannon.stanford.edu/ns/>
-        .\n@prefix xsi: <http://www.w3.org/2001/XMLSchema-instance> .\n@prefix fedora:
-        <http://fedora.info/definitions/v4/rest-api#> .\n@prefix ldp: <http://www.w3.org/ns/ldp#>
-        .\n\n\n<http://localhost:8983/fedora/rest/anno> ldp:membershipResource <http://localhost:8983/fedora/rest/anno>
-        ;\n\tldp:hasMemberRelation ldp:member ;\n\ta ldp:Container , ldp:DirectContainer
-        , ldp:RDFSource ;\n\tldp:member <http://localhost:8983/fedora/rest/anno/296c225e-c356-423a-bb5a-6849da002cbf>
-        , <http://localhost:8983/fedora/rest/anno/29512fe6-feb4-4d17-81fe-0da6ccaed9f2>
-        , <http://localhost:8983/fedora/rest/anno/4e87a723-17ea-40b6-a98d-b1b26ba9a570>
-        , <http://localhost:8983/fedora/rest/anno/1140ebf3-cefe-45eb-b5cd-94eca2dc932b>
-        , <http://localhost:8983/fedora/rest/anno/d659dd5c-5dc6-4e85-8418-7271419438c1>
-        , <http://localhost:8983/fedora/rest/anno/11f74ff3-91c5-4706-b391-44c7a0af6dcc>
-        , <http://localhost:8983/fedora/rest/anno/0d760562-f5fc-495e-a6e3-f7eeafb55059>
-        , <http://localhost:8983/fedora/rest/anno/a6979100-ec68-4081-8d86-bba8188cb1ba>
-        , <http://localhost:8983/fedora/rest/anno/86eb4a2c-7820-452e-8fb1-0455a695b519>
-        , <http://localhost:8983/fedora/rest/anno/09a41778-10ee-489b-bcf7-017c77322c2f>
-        , <http://localhost:8983/fedora/rest/anno/2a1ae8d9-f73c-431d-8e8b-14acffae938a>
-        , <http://localhost:8983/fedora/rest/anno/8ad78c19-4f1c-48f9-bc1c-8fbfbc9c7bec>
-        , <http://localhost:8983/fedora/rest/anno/8e0a543d-4a26-40c7-9b44-2d7e84bd14d5>
-        , <http://localhost:8983/fedora/rest/anno/92e047dc-bf98-4f25-a749-b37a79d41a43>
-        , <http://localhost:8983/fedora/rest/anno/504f1228-829c-4753-a03a-22f8c6563ea2>
-        , <http://localhost:8983/fedora/rest/anno/52586385-fd30-4320-8855-9ebaf9e69c11>
-        , <http://localhost:8983/fedora/rest/anno/1b256c8b-0614-4854-810b-1ea48684d271>
-        , <http://localhost:8983/fedora/rest/anno/082d8d62-8530-4002-8f24-e42999df6418>
-        , <http://localhost:8983/fedora/rest/anno/09b6cf52-3afa-4f6f-a279-c907059f722f>
-        , <http://localhost:8983/fedora/rest/anno/e81fe12c-a350-4a0f-9f71-510d110719fa>
-        , <http://localhost:8983/fedora/rest/anno/163b348a-0989-4d63-8495-ca9483984286>
-        , <http://localhost:8983/fedora/rest/anno/4b1a02e1-2c54-4055-ae0e-c0f59bb197d9>
-        , <http://localhost:8983/fedora/rest/anno/b> , <http://localhost:8983/fedora/rest/anno/t>
-        , <http://localhost:8983/fedora/rest/anno/5ef4496d-2954-4ad5-b7cb-bc60483ab4f8>
-        , <http://localhost:8983/fedora/rest/anno/91654814-4cbf-47de-a9cf-8d0d450e7a5b>
-        , <http://localhost:8983/fedora/rest/anno/404997fd-0827-46b9-89ea-7ced2063ed1a>
-        , <http://localhost:8983/fedora/rest/anno/98e55bd5-b08f-4ad1-9f96-675ebd15677a>
-        , <http://localhost:8983/fedora/rest/anno/d81a36c5-a02c-40ca-8dc4-ce3b9786c297>
-        , <http://localhost:8983/fedora/rest/anno/06721e9d-8c7c-46db-8e86-6af4c1c463e2>
-        , <http://localhost:8983/fedora/rest/anno/4c7226e1-db1d-4bfa-9a22-c39677f46631>
-        , <http://localhost:8983/fedora/rest/anno/6ffb3eb8-248e-41ca-8d9e-7a041c977afc>
-        , <http://localhost:8983/fedora/rest/anno/78835da3-7bc4-47da-8b4a-6f9046ced9c1>
-        , <http://localhost:8983/fedora/rest/anno/b1af93aa-488c-4357-a351-7dae412f065c>
-        , <http://localhost:8983/fedora/rest/anno/87186880-e7c3-4551-8620-5b96971b4c7a>
-        , <http://localhost:8983/fedora/rest/anno/31c2eded-355a-45d1-a5d3-6c0730a2d344>
-        , <http://localhost:8983/fedora/rest/anno/26551784-9483-4007-8a7a-e3f761304adf>
-        , <http://localhost:8983/fedora/rest/anno/8cbb2832-28b3-4e62-ab3e-dd737bf0ddde>
-        , <http://localhost:8983/fedora/rest/anno/244a41ef-142f-4bde-8448-aac83e17dcca>
-        , <http://localhost:8983/fedora/rest/anno/cb1375a9-f742-42af-9800-8d4be1dc2faf>
-        , <http://localhost:8983/fedora/rest/anno/8c70ab59-c5b1-439d-89da-8c2e41f00102>
-        , <http://localhost:8983/fedora/rest/anno/b967d800-4872-4f3b-95df-2083a067314e>
-        , <http://localhost:8983/fedora/rest/anno/4c8af960-68f9-4be5-ba6c-755409ec7c8a>
-        , <http://localhost:8983/fedora/rest/anno/42d4c551-ad21-4ee0-b02e-ed096d71a479>
-        , <http://localhost:8983/fedora/rest/anno/d84cb774-8ae9-4760-a00e-8ca6d167a53d>
-        , <http://localhost:8983/fedora/rest/anno/e5cda880-7269-4611-9e10-e43699225082>
-        , <http://localhost:8983/fedora/rest/anno/9ef971f1-07ac-449d-b025-75976e209e72>
-        , <http://localhost:8983/fedora/rest/anno/f9dec288-8ab1-4ef1-afaa-39ae672bf07d>
-        , <http://localhost:8983/fedora/rest/anno/e875e089-98ec-4aa4-a6df-c79328273b1f>
-        , <http://localhost:8983/fedora/rest/anno/d887f730-3b30-4df6-986d-2f023fcba7ea>
-        , <http://localhost:8983/fedora/rest/anno/fea8cf6c-ed98-4020-bcf7-4cb75703b2fd>
-        , <http://localhost:8983/fedora/rest/anno/42560ca0-e5ae-4cb9-8b60-decc99549618>
-        , <http://localhost:8983/fedora/rest/anno/649111f0-d381-49af-8fb5-3281ed891310>
-        , <http://localhost:8983/fedora/rest/anno/c03f51c8-6b5f-414d-a518-87ddcdaa9a2b>
-        , <http://localhost:8983/fedora/rest/anno/509f13d3-3b71-4842-add4-1f33c07273c8>
-        , <http://localhost:8983/fedora/rest/anno/d7f196f9-d247-434e-8b20-909d4c6466ba>
-        , <http://localhost:8983/fedora/rest/anno/bc75b574-5b92-4d7a-966f-86d053761a7a>
-        , <http://localhost:8983/fedora/rest/anno/9051f032-d943-473c-b29f-0832274af835>
-        , <http://localhost:8983/fedora/rest/anno/2828cb49-3e53-4443-a05a-6a1c69dde7b4>
-        , <http://localhost:8983/fedora/rest/anno/464522f5-de8d-40c9-830f-cb4ea0f21f5c>
-        , <http://localhost:8983/fedora/rest/anno/ecef1850-84c3-4814-9a0a-43887be6ea86>
-        , <http://localhost:8983/fedora/rest/anno/3b6aa37b-4d83-4c63-b4fb-2d877bd8c56c>
-        , <http://localhost:8983/fedora/rest/anno/f55e4383-d2ac-4828-b545-a5f0740368d0>
-        , <http://localhost:8983/fedora/rest/anno/3c472db7-a146-41cd-8406-91e21899fe70>
-        , <http://localhost:8983/fedora/rest/anno/77e55732-35b0-4796-b8d3-ddc454b2a8b1>
-        , <http://localhost:8983/fedora/rest/anno/c3713dcf-2c12-4369-b9e3-cca2929a304f>
-        , <http://localhost:8983/fedora/rest/anno/c9a7e5ad-1214-4a63-ae46-1ff2ddde3985>
-        , <http://localhost:8983/fedora/rest/anno/4b2c641f-dcc4-4a20-aeda-5ba32a8abbb9>
-        , <http://localhost:8983/fedora/rest/anno/8a02b716-10c8-43bb-9108-c87f870862a8>
-        , <http://localhost:8983/fedora/rest/anno/f0a1613b-00e6-44c9-9e99-b0bb1b026580>
-        , <http://localhost:8983/fedora/rest/anno/3a15d38e-2b1f-4dcb-b7e4-4819e001eaae>
-        , <http://localhost:8983/fedora/rest/anno/3066d9a5-81da-4049-8ca9-94827d25b0d2>
-        , <http://localhost:8983/fedora/rest/anno/193e9924-c9ca-4578-b523-403178cfe7db>
-        , <http://localhost:8983/fedora/rest/anno/705e12f5-92ba-49cc-9b96-65df269629f6>
-        , <http://localhost:8983/fedora/rest/anno/a75d8bb2-6d72-4381-a986-1cfe6c23f1c1>
-        , <http://localhost:8983/fedora/rest/anno/c0babf65-dd6c-4d79-a846-93c7f0d5b066>
-        , <http://localhost:8983/fedora/rest/anno/348852a3-78a0-4667-b688-1ef5711061f4>
-        , <http://localhost:8983/fedora/rest/anno/f68090a0-add4-47d2-ba9d-6b7265d0171a>
-        , <http://localhost:8983/fedora/rest/anno/06cfa2d4-ec63-469a-8728-cb98c67a402d>
-        , <http://localhost:8983/fedora/rest/anno/d795d3cc-f1a1-46b4-8325-f079f574c7a9>
-        , <http://localhost:8983/fedora/rest/anno/2a3d3814-5362-41a2-91c8-bf07577b6fa7>
-        , <http://localhost:8983/fedora/rest/anno/d22bb571-27a0-47ed-989b-a6a61d83d92f>
-        , <http://localhost:8983/fedora/rest/anno/83d11201-0f93-4805-bcf7-010ad8a86d4b>
-        , <http://localhost:8983/fedora/rest/anno/5c0409f8-9202-42b7-8909-a753505a8081>
-        , <http://localhost:8983/fedora/rest/anno/538e1ce0-cedf-4444-83b6-ac0152b3a59a>
-        , <http://localhost:8983/fedora/rest/anno/3ff4ff5d-2705-4b9f-acf3-0b860646704e>
-        , <http://localhost:8983/fedora/rest/anno/ca8b61e8-ea8d-4735-971f-1f82b45161cb>
-        , <http://localhost:8983/fedora/rest/anno/5a7d152c-13e1-48e8-b19e-4406304da54f>
-        , <http://localhost:8983/fedora/rest/anno/851ba4ff-a096-468d-9e61-192d7bc91a09>
-        , <http://localhost:8983/fedora/rest/anno/af2390cc-b439-41fd-b4df-8f8fed7c5899>
-        , <http://localhost:8983/fedora/rest/anno/51f02de7-2854-4589-bd70-6e736531b841>
-        , <http://localhost:8983/fedora/rest/anno/9359fc6e-f96d-483e-b187-bb64e0030598>
-        , <http://localhost:8983/fedora/rest/anno/4ae71219-f5ab-4f33-a1e1-64d235b7bb19>
-        , <http://localhost:8983/fedora/rest/anno/3710be5a-fe4c-45c2-9461-8d17085d9294>
-        , <http://localhost:8983/fedora/rest/anno/32c3a721-eced-4c93-962f-3e1c7ab5b525>
-        , <http://localhost:8983/fedora/rest/anno/8b6ee4b4-95af-4e2e-8174-13efb8fc40f1>
-        , <http://localhost:8983/fedora/rest/anno/48b83608-57a1-458a-94cb-a9ed28e3830c>
-        , <http://localhost:8983/fedora/rest/anno/a19d8c82-a582-4af7-9273-39fda50e6fa2>
-        , <http://localhost:8983/fedora/rest/anno/cc3a4d96-d027-4f5a-a719-317451838dca>
-        , <http://localhost:8983/fedora/rest/anno/481961fe-59c1-4db7-824d-7a7b83d96797>
-        , <http://localhost:8983/fedora/rest/anno/edf6ed4b-7f00-4bf3-94b4-7e1f3d8d9bbd>
-        , <http://localhost:8983/fedora/rest/anno/a50cfd15-5d3a-447f-8ab3-b92f96864645>
-        , <http://localhost:8983/fedora/rest/anno/30186bdd-de3a-4136-91c5-ff4c7b06d59e>
-        , <http://localhost:8983/fedora/rest/anno/1cfd430f-6957-4bfc-8000-9970662f61cf>
-        , <http://localhost:8983/fedora/rest/anno/a4877bbb-25e7-460d-9a51-84778b04037e>
-        , <http://localhost:8983/fedora/rest/anno/32d1aad0-80af-42d9-9df7-658fcc347f5f>
-        , <http://localhost:8983/fedora/rest/anno/4a8c47d6-c49b-45ab-907e-f8757b634319>
-        , <http://localhost:8983/fedora/rest/anno/faccc6d5-d417-4df7-b703-f24023b24e8c>
-        , <http://localhost:8983/fedora/rest/anno/657767da-f930-456e-8843-8f7f03397087>
-        , <http://localhost:8983/fedora/rest/anno/df21e5d0-fb60-4b92-b431-19030c6a9793>
-        , <http://localhost:8983/fedora/rest/anno/f6d17fb4-bf7d-48c8-b108-0b8183a970c0>
-        , <http://localhost:8983/fedora/rest/anno/9a6007c2-a13e-4357-9dd8-1e24e522ffb4>
-        , <http://localhost:8983/fedora/rest/anno/20cd2186-667d-4986-a5e1-f233922b9069>
-        , <http://localhost:8983/fedora/rest/anno/c79eb7d0-3e83-4d2c-bd2e-4fd1e96562f7>
-        , <http://localhost:8983/fedora/rest/anno/8c530f39-ba4e-4928-92ac-76ee52c30541>
-        , <http://localhost:8983/fedora/rest/anno/83414938-99ad-466a-8a9f-8359d6df19f9>
-        , <http://localhost:8983/fedora/rest/anno/d853af90-d6ec-41b6-9b99-44112b956909>
-        , <http://localhost:8983/fedora/rest/anno/55e575af-bc36-4812-ad54-3a9b470653f6>
-        , <http://localhost:8983/fedora/rest/anno/99080203-3d62-47e2-a8f6-32e8a58b3386>
-        , <http://localhost:8983/fedora/rest/anno/f7821d0a-7356-4842-b395-ac5ec3b8ef17>
-        , <http://localhost:8983/fedora/rest/anno/d10f9121-1fc3-4ae9-a1df-9e4184fde312>
-        , <http://localhost:8983/fedora/rest/anno/576cc1e2-b8c9-4e1b-a996-9a43c4356365>
-        , <http://localhost:8983/fedora/rest/anno/3538d8a3-1f3a-438e-9fce-d1c0e191dd08>
-        , <http://localhost:8983/fedora/rest/anno/39d36a84-ceea-42f8-ad5d-269943cf5257>
-        , <http://localhost:8983/fedora/rest/anno/384a8998-c752-4e85-a77a-a3760d2bd53b>
-        , <http://localhost:8983/fedora/rest/anno/b4d850aa-ea06-4381-8592-1798ce35cbee>
-        , <http://localhost:8983/fedora/rest/anno/a2e3cefd-f36d-4394-8491-6e6bfd282069>
-        , <http://localhost:8983/fedora/rest/anno/8090396b-510a-4b6f-a7c5-bb7c69c0b61e>
-        , <http://localhost:8983/fedora/rest/anno/86ac06b0-95f3-45b2-9906-e65de9abfcb7>
-        , <http://localhost:8983/fedora/rest/anno/94a43a3a-6ac9-4f51-8a69-5b3996e42616>
-        , <http://localhost:8983/fedora/rest/anno/43159260-65d8-4c55-8a85-b2d15ebd3c6b>
-        , <http://localhost:8983/fedora/rest/anno/d5d790d8-0f37-4ebc-8e6b-fca81a805659>
-        , <http://localhost:8983/fedora/rest/anno/b75c4445-92ac-4956-bb96-f4097ca67c90>
-        , <http://localhost:8983/fedora/rest/anno/d1a01f9c-26a5-4daa-ab65-bfc2ebcb644b>
-        , <http://localhost:8983/fedora/rest/anno/3b24992c-0cd5-4563-a74e-a67c2116ac62>
-        , <http://localhost:8983/fedora/rest/anno/44b7a48b-7444-4eb3-bf2e-f84323131680>
-        , <http://localhost:8983/fedora/rest/anno/f7c8d164-deec-4dd4-963f-38f3b6c42617>
-        , <http://localhost:8983/fedora/rest/anno/2c565ec4-d94c-4f64-a368-61b10f4f6dc9>
-        , <http://localhost:8983/fedora/rest/anno/ff1800be-3b61-41cb-9193-bed41caa55b6>
-        , <http://localhost:8983/fedora/rest/anno/735ad0da-aa3d-4807-9407-6e4367e8e5aa>
-        , <http://localhost:8983/fedora/rest/anno/05974af6-5c27-4f4c-b390-a44f188315bd>
-        , <http://localhost:8983/fedora/rest/anno/36190bba-f750-4a75-a0c1-bdce66baf171>
-        , <http://localhost:8983/fedora/rest/anno/1ffa46a1-7117-4431-b34c-451e43a64ebf>
-        , <http://localhost:8983/fedora/rest/anno/5f5d62b8-2fcd-4b36-b7c6-a7d3c17ecd64>
-        , <http://localhost:8983/fedora/rest/anno/3a86fd47-f220-4468-8228-a67773cd7e18>
-        , <http://localhost:8983/fedora/rest/anno/828661b0-bb1c-4f70-9854-3ef0f53b3dd6>
-        , <http://localhost:8983/fedora/rest/anno/25688cb8-a826-427a-bc54-4e7c014998ff>
-        , <http://localhost:8983/fedora/rest/anno/add75b33-c29a-4f34-bf53-374f76eaea3b>
-        , <http://localhost:8983/fedora/rest/anno/b952d3ff-e63e-48a9-88a9-bd0a62c04d4b>
-        , <http://localhost:8983/fedora/rest/anno/da66a1ea-eb48-474d-8bd0-93b491b1f2e5>
-        , <http://localhost:8983/fedora/rest/anno/3f79ebfa-1665-4ede-8f28-ae1c06f1252a>
-        , <http://localhost:8983/fedora/rest/anno/61303101-bd5c-430a-901b-abf0fa2b1335>
-        , <http://localhost:8983/fedora/rest/anno/0cf4dc41-d2f8-4819-8df3-a77d98c3c2ec>
-        , <http://localhost:8983/fedora/rest/anno/3bf4a814-0c3d-41c7-82d1-cb0dd0d73fdd>
-        , <http://localhost:8983/fedora/rest/anno/c20cfa6e-3247-481d-a938-9552493930b7>
-        , <http://localhost:8983/fedora/rest/anno/4e82cded-e639-42dd-b85a-70f593481e85>
-        , <http://localhost:8983/fedora/rest/anno/58a04860-0ffd-4890-aa44-d93c85479e46>
-        , <http://localhost:8983/fedora/rest/anno/64b694bc-88aa-498a-88f1-dd911429aa1c>
-        , <http://localhost:8983/fedora/rest/anno/b358c7be-4c40-44d4-9cff-56ea06fcabb0>
-        , <http://localhost:8983/fedora/rest/anno/17180e5f-b5e4-4588-abfe-8898baceff55>
-        , <http://localhost:8983/fedora/rest/anno/ecb5bbaf-3e7a-45b6-a1e7-439a017f570c>
-        , <http://localhost:8983/fedora/rest/anno/944f524f-a410-4694-b676-f93ac5dd61bc>
-        , <http://localhost:8983/fedora/rest/anno/2efb136d-82bd-4ee6-9358-967231c689ec>
-        , <http://localhost:8983/fedora/rest/anno/9d6c2df9-3193-4b30-8ff0-659cff4d800d>
-        , <http://localhost:8983/fedora/rest/anno/ac28cdb0-e5e6-44e1-849a-bd3cb218b88f>
-        , <http://localhost:8983/fedora/rest/anno/e6ab1139-8adb-423d-8bfc-b1d8cc563a62>
-        , <http://localhost:8983/fedora/rest/anno/31e925b3-43f5-43f6-836b-87d8dab04a94>
-        , <http://localhost:8983/fedora/rest/anno/b64c3a9c-19ef-42d0-9200-f6496b6a7397>
-        , <http://localhost:8983/fedora/rest/anno/3c1e46d3-c117-4f70-8651-172fa91ec7ab>
-        , <http://localhost:8983/fedora/rest/anno/3025692d-1a83-40b9-a656-e5093f9cb987>
-        , <http://localhost:8983/fedora/rest/anno/3ae1c751-cda7-4b2d-8cbc-f1b5e34f49d9>
-        , <http://localhost:8983/fedora/rest/anno/ed7ec659-f6bb-4b9d-8552-2994ca2ea876>
-        , <http://localhost:8983/fedora/rest/anno/20d64ea4-ba0b-4342-9313-cb783478eb7c>
-        , <http://localhost:8983/fedora/rest/anno/3e839b89-481a-4dc2-bbd9-1d3abf22497e>
-        , <http://localhost:8983/fedora/rest/anno/fa67e8a3-3a89-42e1-9695-88969432fbae>
-        , <http://localhost:8983/fedora/rest/anno/73858707-852b-41e3-ada6-2c7c42615639>
-        , <http://localhost:8983/fedora/rest/anno/fd160e61-b27b-48d1-8957-26a2d69bc775>
-        , <http://localhost:8983/fedora/rest/anno/1bbda837-9a8e-4d6f-9ac6-23e6719e9902>
-        , <http://localhost:8983/fedora/rest/anno/21d575fc-6511-46b0-a496-f6d61dafda1e>
-        , <http://localhost:8983/fedora/rest/anno/e383c39a-b96e-4a01-a639-f3ab0a0e5855>
-        , <http://localhost:8983/fedora/rest/anno/b3cdbef0-0cc3-4435-acc2-052047dc84ae>
-        , <http://localhost:8983/fedora/rest/anno/cb9e86e1-edde-413c-a4f3-3e325e96a84f>
-        , <http://localhost:8983/fedora/rest/anno/6eccd48f-1ef4-456d-a3b5-b7f96ee65cc2>
-        , <http://localhost:8983/fedora/rest/anno/03314e4a-7747-47d5-9a11-0a993052b56c>
-        , <http://localhost:8983/fedora/rest/anno/d3c2130a-72b7-4c28-aeac-362920429bf3>
-        , <http://localhost:8983/fedora/rest/anno/09c796e1-8bcb-47d3-9cc9-5048fad1a760>
-        , <http://localhost:8983/fedora/rest/anno/141c67eb-1348-4e9d-9577-39f239ef7dbc>
-        , <http://localhost:8983/fedora/rest/anno/05867bef-d57a-432c-929d-3be7c725ce79>
-        , <http://localhost:8983/fedora/rest/anno/df089850-a1da-461b-929b-565ca57134d9>
-        , <http://localhost:8983/fedora/rest/anno/754a2299-00f0-45d8-abdf-7b65602a6416>
-        , <http://localhost:8983/fedora/rest/anno/85407f9a-f793-4176-a0fb-643dfca4a64c>
-        , <http://localhost:8983/fedora/rest/anno/6352ebec-31df-4200-aea5-9c3d3044c7e4>
-        , <http://localhost:8983/fedora/rest/anno/70655f1d-ff62-439d-baee-c9b14aceaa46>
-        , <http://localhost:8983/fedora/rest/anno/c5853cec-0469-4096-b001-d2d2e604c328>
-        , <http://localhost:8983/fedora/rest/anno/820843a8-b840-49de-b788-f5e83254c181>
-        , <http://localhost:8983/fedora/rest/anno/927f36ba-e79a-44b1-a432-7250e3c158c6>
-        , <http://localhost:8983/fedora/rest/anno/4248cc78-59f2-458c-86b5-b90fdd0bb86c>
-        , <http://localhost:8983/fedora/rest/anno/920684d6-82a4-47c8-9776-f64c9909ffed>
-        , <http://localhost:8983/fedora/rest/anno/a290a14a-2651-4676-a5f8-103f9d626c75>
-        , <http://localhost:8983/fedora/rest/anno/8675037f-a6cd-4dbd-96e0-9c520b2c90d7>
-        , <http://localhost:8983/fedora/rest/anno/b4ece911-9133-4c49-9f31-4c2ec74b7343>
-        , <http://localhost:8983/fedora/rest/anno/d7c6fcd9-ba04-4e30-aeeb-b060eb58e958>
-        , <http://localhost:8983/fedora/rest/anno/9e4c7ade-c4ee-4403-aa90-476fa8932e15>
-        , <http://localhost:8983/fedora/rest/anno/aa3cd64b-f2b1-4ec0-87d9-64f2c1af9c23>
-        , <http://localhost:8983/fedora/rest/anno/7d444277-90ce-44d7-92de-71261b35a965>
-        , <http://localhost:8983/fedora/rest/anno/a0f14103-18a6-41f0-915d-d341f9cd7b41>
-        , <http://localhost:8983/fedora/rest/anno/556d5907-de28-415d-8625-3086cd7d12e6>
-        , <http://localhost:8983/fedora/rest/anno/13177c9c-6c1d-4279-9f53-ab89f950008d>
-        , <http://localhost:8983/fedora/rest/anno/6dc3d137-30ec-4073-8ebb-3f050b96814f>
-        , <http://localhost:8983/fedora/rest/anno/abf3e027-6598-4951-9a77-a47bd924e61a>
-        , <http://localhost:8983/fedora/rest/anno/f32d16e0-c0fd-4b52-be86-60aff0f1f0a4>
-        , <http://localhost:8983/fedora/rest/anno/33f69711-bcb3-407b-8246-fc6730b4f142>
-        , <http://localhost:8983/fedora/rest/anno/4cd7ca11-d1ed-4072-8729-475d9fea58db>
-        , <http://localhost:8983/fedora/rest/anno/13fb4010-f77a-4618-b6d9-cbd18e17e388>
-        , <http://localhost:8983/fedora/rest/anno/7a822073-3d43-44ee-967e-9681f0ace6de>
-        , <http://localhost:8983/fedora/rest/anno/dfe29224-cd14-471e-a89e-57ffc526ab25>
-        , <http://localhost:8983/fedora/rest/anno/8e34f7f8-4db8-4388-aef6-91d5b2331fc2>
-        , <http://localhost:8983/fedora/rest/anno/b574d3c5-4f67-4fb5-b3bd-f97f0c7ca1df>
-        , <http://localhost:8983/fedora/rest/anno/2f3d0a0a-cb0a-4080-b643-0e04b55870f0>
-        , <http://localhost:8983/fedora/rest/anno/03eb0b9e-c517-408f-b50d-840f9c03ad3a>
-        , <http://localhost:8983/fedora/rest/anno/cd9e8077-d9f4-4919-a368-197fbf4caaf9>
-        , <http://localhost:8983/fedora/rest/anno/bd6e7343-ccb6-439a-a134-5e157cc160e8>
-        , <http://localhost:8983/fedora/rest/anno/1d11bcd3-113b-487b-a972-c5130eb4ad56>
-        , <http://localhost:8983/fedora/rest/anno/ba1e04c4-e194-4196-92b3-a87b05f78f84>
-        , <http://localhost:8983/fedora/rest/anno/e02e4eaf-40ac-4b6a-85ee-0b9388d0ce4e>
-        , <http://localhost:8983/fedora/rest/anno/55a6dc7c-54cb-4fb7-bd84-77e6c19010fa>
-        , <http://localhost:8983/fedora/rest/anno/db5eae41-8196-4296-8ee0-7c9526f7c5c5>
-        , <http://localhost:8983/fedora/rest/anno/24bc3c3a-ef3d-421b-9c6f-89aa6a1f27cb>
-        , <http://localhost:8983/fedora/rest/anno/9b2fcce5-ac1e-4384-8a1d-6c0e10d51ed3>
-        , <http://localhost:8983/fedora/rest/anno/4da14de6-75ba-436d-9e96-69abd8a63ef6>
-        , <http://localhost:8983/fedora/rest/anno/ff94a502-2e01-4057-844e-3c5fa063cbc6>
-        , <http://localhost:8983/fedora/rest/anno/7ffd25e2-cf94-4a95-8e83-9897c1805e1d>
-        , <http://localhost:8983/fedora/rest/anno/e6e92662-1bdc-4a3a-8972-f3ddd86690f8>
-        , <http://localhost:8983/fedora/rest/anno/5340d0b7-d8a7-43cc-8ab3-87466d7ea487>
-        , <http://localhost:8983/fedora/rest/anno/6bd0c03f-714c-40b8-86e4-0633c92dda49>
-        , <http://localhost:8983/fedora/rest/anno/1db3c583-0c97-466a-a07c-f63acda89c4a>
-        , <http://localhost:8983/fedora/rest/anno/c2c78240-157d-4f2f-83db-42841dd574df>
-        , <http://localhost:8983/fedora/rest/anno/e8813e5b-e4ef-42ee-b249-b9324c58c945>
-        , <http://localhost:8983/fedora/rest/anno/bf1e4f45-55aa-4855-ba02-680d2a39c491>
-        ;\n\tldp:contains <http://localhost:8983/fedora/rest/anno/296c225e-c356-423a-bb5a-6849da002cbf>
-        , <http://localhost:8983/fedora/rest/anno/29512fe6-feb4-4d17-81fe-0da6ccaed9f2>
-        , <http://localhost:8983/fedora/rest/anno/4e87a723-17ea-40b6-a98d-b1b26ba9a570>
-        , <http://localhost:8983/fedora/rest/anno/1140ebf3-cefe-45eb-b5cd-94eca2dc932b>
-        , <http://localhost:8983/fedora/rest/anno/d659dd5c-5dc6-4e85-8418-7271419438c1>
-        , <http://localhost:8983/fedora/rest/anno/11f74ff3-91c5-4706-b391-44c7a0af6dcc>
-        , <http://localhost:8983/fedora/rest/anno/0d760562-f5fc-495e-a6e3-f7eeafb55059>
-        , <http://localhost:8983/fedora/rest/anno/a6979100-ec68-4081-8d86-bba8188cb1ba>
-        , <http://localhost:8983/fedora/rest/anno/86eb4a2c-7820-452e-8fb1-0455a695b519>
-        , <http://localhost:8983/fedora/rest/anno/09a41778-10ee-489b-bcf7-017c77322c2f>
-        , <http://localhost:8983/fedora/rest/anno/2a1ae8d9-f73c-431d-8e8b-14acffae938a>
-        , <http://localhost:8983/fedora/rest/anno/8ad78c19-4f1c-48f9-bc1c-8fbfbc9c7bec>
-        , <http://localhost:8983/fedora/rest/anno/8e0a543d-4a26-40c7-9b44-2d7e84bd14d5>
-        , <http://localhost:8983/fedora/rest/anno/92e047dc-bf98-4f25-a749-b37a79d41a43>
-        , <http://localhost:8983/fedora/rest/anno/504f1228-829c-4753-a03a-22f8c6563ea2>
-        , <http://localhost:8983/fedora/rest/anno/52586385-fd30-4320-8855-9ebaf9e69c11>
-        , <http://localhost:8983/fedora/rest/anno/1b256c8b-0614-4854-810b-1ea48684d271>
-        , <http://localhost:8983/fedora/rest/anno/082d8d62-8530-4002-8f24-e42999df6418>
-        , <http://localhost:8983/fedora/rest/anno/09b6cf52-3afa-4f6f-a279-c907059f722f>
-        , <http://localhost:8983/fedora/rest/anno/e81fe12c-a350-4a0f-9f71-510d110719fa>
-        , <http://localhost:8983/fedora/rest/anno/163b348a-0989-4d63-8495-ca9483984286>
-        , <http://localhost:8983/fedora/rest/anno/4b1a02e1-2c54-4055-ae0e-c0f59bb197d9>
-        , <http://localhost:8983/fedora/rest/anno/b> , <http://localhost:8983/fedora/rest/anno/t>
-        , <http://localhost:8983/fedora/rest/anno/5ef4496d-2954-4ad5-b7cb-bc60483ab4f8>
-        , <http://localhost:8983/fedora/rest/anno/91654814-4cbf-47de-a9cf-8d0d450e7a5b>
-        , <http://localhost:8983/fedora/rest/anno/404997fd-0827-46b9-89ea-7ced2063ed1a>
-        , <http://localhost:8983/fedora/rest/anno/98e55bd5-b08f-4ad1-9f96-675ebd15677a>
-        , <http://localhost:8983/fedora/rest/anno/d81a36c5-a02c-40ca-8dc4-ce3b9786c297>
-        , <http://localhost:8983/fedora/rest/anno/06721e9d-8c7c-46db-8e86-6af4c1c463e2>
-        , <http://localhost:8983/fedora/rest/anno/4c7226e1-db1d-4bfa-9a22-c39677f46631>
-        , <http://localhost:8983/fedora/rest/anno/6ffb3eb8-248e-41ca-8d9e-7a041c977afc>
-        , <http://localhost:8983/fedora/rest/anno/78835da3-7bc4-47da-8b4a-6f9046ced9c1>
-        , <http://localhost:8983/fedora/rest/anno/b1af93aa-488c-4357-a351-7dae412f065c>
-        , <http://localhost:8983/fedora/rest/anno/87186880-e7c3-4551-8620-5b96971b4c7a>
-        , <http://localhost:8983/fedora/rest/anno/31c2eded-355a-45d1-a5d3-6c0730a2d344>
-        , <http://localhost:8983/fedora/rest/anno/26551784-9483-4007-8a7a-e3f761304adf>
-        , <http://localhost:8983/fedora/rest/anno/8cbb2832-28b3-4e62-ab3e-dd737bf0ddde>
-        , <http://localhost:8983/fedora/rest/anno/244a41ef-142f-4bde-8448-aac83e17dcca>
-        , <http://localhost:8983/fedora/rest/anno/cb1375a9-f742-42af-9800-8d4be1dc2faf>
-        , <http://localhost:8983/fedora/rest/anno/8c70ab59-c5b1-439d-89da-8c2e41f00102>
-        , <http://localhost:8983/fedora/rest/anno/b967d800-4872-4f3b-95df-2083a067314e>
-        , <http://localhost:8983/fedora/rest/anno/4c8af960-68f9-4be5-ba6c-755409ec7c8a>
-        , <http://localhost:8983/fedora/rest/anno/42d4c551-ad21-4ee0-b02e-ed096d71a479>
-        , <http://localhost:8983/fedora/rest/anno/d84cb774-8ae9-4760-a00e-8ca6d167a53d>
-        , <http://localhost:8983/fedora/rest/anno/e5cda880-7269-4611-9e10-e43699225082>
-        , <http://localhost:8983/fedora/rest/anno/9ef971f1-07ac-449d-b025-75976e209e72>
-        , <http://localhost:8983/fedora/rest/anno/f9dec288-8ab1-4ef1-afaa-39ae672bf07d>
-        , <http://localhost:8983/fedora/rest/anno/e875e089-98ec-4aa4-a6df-c79328273b1f>
-        , <http://localhost:8983/fedora/rest/anno/d887f730-3b30-4df6-986d-2f023fcba7ea>
-        , <http://localhost:8983/fedora/rest/anno/fea8cf6c-ed98-4020-bcf7-4cb75703b2fd>
-        , <http://localhost:8983/fedora/rest/anno/42560ca0-e5ae-4cb9-8b60-decc99549618>
-        , <http://localhost:8983/fedora/rest/anno/649111f0-d381-49af-8fb5-3281ed891310>
-        , <http://localhost:8983/fedora/rest/anno/c03f51c8-6b5f-414d-a518-87ddcdaa9a2b>
-        , <http://localhost:8983/fedora/rest/anno/509f13d3-3b71-4842-add4-1f33c07273c8>
-        , <http://localhost:8983/fedora/rest/anno/d7f196f9-d247-434e-8b20-909d4c6466ba>
-        , <http://localhost:8983/fedora/rest/anno/bc75b574-5b92-4d7a-966f-86d053761a7a>
-        , <http://localhost:8983/fedora/rest/anno/9051f032-d943-473c-b29f-0832274af835>
-        , <http://localhost:8983/fedora/rest/anno/2828cb49-3e53-4443-a05a-6a1c69dde7b4>
-        , <http://localhost:8983/fedora/rest/anno/464522f5-de8d-40c9-830f-cb4ea0f21f5c>
-        , <http://localhost:8983/fedora/rest/anno/ecef1850-84c3-4814-9a0a-43887be6ea86>
-        , <http://localhost:8983/fedora/rest/anno/3b6aa37b-4d83-4c63-b4fb-2d877bd8c56c>
-        , <http://localhost:8983/fedora/rest/anno/f55e4383-d2ac-4828-b545-a5f0740368d0>
-        , <http://localhost:8983/fedora/rest/anno/3c472db7-a146-41cd-8406-91e21899fe70>
-        , <http://localhost:8983/fedora/rest/anno/77e55732-35b0-4796-b8d3-ddc454b2a8b1>
-        , <http://localhost:8983/fedora/rest/anno/c3713dcf-2c12-4369-b9e3-cca2929a304f>
-        , <http://localhost:8983/fedora/rest/anno/c9a7e5ad-1214-4a63-ae46-1ff2ddde3985>
-        , <http://localhost:8983/fedora/rest/anno/4b2c641f-dcc4-4a20-aeda-5ba32a8abbb9>
-        , <http://localhost:8983/fedora/rest/anno/8a02b716-10c8-43bb-9108-c87f870862a8>
-        , <http://localhost:8983/fedora/rest/anno/f0a1613b-00e6-44c9-9e99-b0bb1b026580>
-        , <http://localhost:8983/fedora/rest/anno/3a15d38e-2b1f-4dcb-b7e4-4819e001eaae>
-        , <http://localhost:8983/fedora/rest/anno/3066d9a5-81da-4049-8ca9-94827d25b0d2>
-        , <http://localhost:8983/fedora/rest/anno/193e9924-c9ca-4578-b523-403178cfe7db>
-        , <http://localhost:8983/fedora/rest/anno/705e12f5-92ba-49cc-9b96-65df269629f6>
-        , <http://localhost:8983/fedora/rest/anno/a75d8bb2-6d72-4381-a986-1cfe6c23f1c1>
-        , <http://localhost:8983/fedora/rest/anno/c0babf65-dd6c-4d79-a846-93c7f0d5b066>
-        , <http://localhost:8983/fedora/rest/anno/348852a3-78a0-4667-b688-1ef5711061f4>
-        , <http://localhost:8983/fedora/rest/anno/f68090a0-add4-47d2-ba9d-6b7265d0171a>
-        , <http://localhost:8983/fedora/rest/anno/06cfa2d4-ec63-469a-8728-cb98c67a402d>
-        , <http://localhost:8983/fedora/rest/anno/d795d3cc-f1a1-46b4-8325-f079f574c7a9>
-        , <http://localhost:8983/fedora/rest/anno/2a3d3814-5362-41a2-91c8-bf07577b6fa7>
-        , <http://localhost:8983/fedora/rest/anno/d22bb571-27a0-47ed-989b-a6a61d83d92f>
-        , <http://localhost:8983/fedora/rest/anno/83d11201-0f93-4805-bcf7-010ad8a86d4b>
-        , <http://localhost:8983/fedora/rest/anno/5c0409f8-9202-42b7-8909-a753505a8081>
-        , <http://localhost:8983/fedora/rest/anno/538e1ce0-cedf-4444-83b6-ac0152b3a59a>
-        , <http://localhost:8983/fedora/rest/anno/3ff4ff5d-2705-4b9f-acf3-0b860646704e>
-        , <http://localhost:8983/fedora/rest/anno/ca8b61e8-ea8d-4735-971f-1f82b45161cb>
-        , <http://localhost:8983/fedora/rest/anno/5a7d152c-13e1-48e8-b19e-4406304da54f>
-        , <http://localhost:8983/fedora/rest/anno/851ba4ff-a096-468d-9e61-192d7bc91a09>
-        , <http://localhost:8983/fedora/rest/anno/af2390cc-b439-41fd-b4df-8f8fed7c5899>
-        , <http://localhost:8983/fedora/rest/anno/51f02de7-2854-4589-bd70-6e736531b841>
-        , <http://localhost:8983/fedora/rest/anno/9359fc6e-f96d-483e-b187-bb64e0030598>
-        , <http://localhost:8983/fedora/rest/anno/4ae71219-f5ab-4f33-a1e1-64d235b7bb19>
-        , <http://localhost:8983/fedora/rest/anno/3710be5a-fe4c-45c2-9461-8d17085d9294>
-        , <http://localhost:8983/fedora/rest/anno/32c3a721-eced-4c93-962f-3e1c7ab5b525>
-        , <http://localhost:8983/fedora/rest/anno/8b6ee4b4-95af-4e2e-8174-13efb8fc40f1>
-        , <http://localhost:8983/fedora/rest/anno/48b83608-57a1-458a-94cb-a9ed28e3830c>
-        , <http://localhost:8983/fedora/rest/anno/a19d8c82-a582-4af7-9273-39fda50e6fa2>
-        , <http://localhost:8983/fedora/rest/anno/cc3a4d96-d027-4f5a-a719-317451838dca>
-        , <http://localhost:8983/fedora/rest/anno/481961fe-59c1-4db7-824d-7a7b83d96797>
-        , <http://localhost:8983/fedora/rest/anno/edf6ed4b-7f00-4bf3-94b4-7e1f3d8d9bbd>
-        , <http://localhost:8983/fedora/rest/anno/a50cfd15-5d3a-447f-8ab3-b92f96864645>
-        , <http://localhost:8983/fedora/rest/anno/30186bdd-de3a-4136-91c5-ff4c7b06d59e>
-        , <http://localhost:8983/fedora/rest/anno/1cfd430f-6957-4bfc-8000-9970662f61cf>
-        , <http://localhost:8983/fedora/rest/anno/a4877bbb-25e7-460d-9a51-84778b04037e>
-        , <http://localhost:8983/fedora/rest/anno/32d1aad0-80af-42d9-9df7-658fcc347f5f>
-        , <http://localhost:8983/fedora/rest/anno/4a8c47d6-c49b-45ab-907e-f8757b634319>
-        , <http://localhost:8983/fedora/rest/anno/faccc6d5-d417-4df7-b703-f24023b24e8c>
-        , <http://localhost:8983/fedora/rest/anno/657767da-f930-456e-8843-8f7f03397087>
-        , <http://localhost:8983/fedora/rest/anno/df21e5d0-fb60-4b92-b431-19030c6a9793>
-        , <http://localhost:8983/fedora/rest/anno/f6d17fb4-bf7d-48c8-b108-0b8183a970c0>
-        , <http://localhost:8983/fedora/rest/anno/9a6007c2-a13e-4357-9dd8-1e24e522ffb4>
-        , <http://localhost:8983/fedora/rest/anno/20cd2186-667d-4986-a5e1-f233922b9069>
-        , <http://localhost:8983/fedora/rest/anno/c79eb7d0-3e83-4d2c-bd2e-4fd1e96562f7>
-        , <http://localhost:8983/fedora/rest/anno/8c530f39-ba4e-4928-92ac-76ee52c30541>
-        , <http://localhost:8983/fedora/rest/anno/83414938-99ad-466a-8a9f-8359d6df19f9>
-        , <http://localhost:8983/fedora/rest/anno/d853af90-d6ec-41b6-9b99-44112b956909>
-        , <http://localhost:8983/fedora/rest/anno/55e575af-bc36-4812-ad54-3a9b470653f6>
-        , <http://localhost:8983/fedora/rest/anno/99080203-3d62-47e2-a8f6-32e8a58b3386>
-        , <http://localhost:8983/fedora/rest/anno/f7821d0a-7356-4842-b395-ac5ec3b8ef17>
-        , <http://localhost:8983/fedora/rest/anno/d10f9121-1fc3-4ae9-a1df-9e4184fde312>
-        , <http://localhost:8983/fedora/rest/anno/576cc1e2-b8c9-4e1b-a996-9a43c4356365>
-        , <http://localhost:8983/fedora/rest/anno/3538d8a3-1f3a-438e-9fce-d1c0e191dd08>
-        , <http://localhost:8983/fedora/rest/anno/39d36a84-ceea-42f8-ad5d-269943cf5257>
-        , <http://localhost:8983/fedora/rest/anno/384a8998-c752-4e85-a77a-a3760d2bd53b>
-        , <http://localhost:8983/fedora/rest/anno/b4d850aa-ea06-4381-8592-1798ce35cbee>
-        , <http://localhost:8983/fedora/rest/anno/a2e3cefd-f36d-4394-8491-6e6bfd282069>
-        , <http://localhost:8983/fedora/rest/anno/8090396b-510a-4b6f-a7c5-bb7c69c0b61e>
-        , <http://localhost:8983/fedora/rest/anno/86ac06b0-95f3-45b2-9906-e65de9abfcb7>
-        , <http://localhost:8983/fedora/rest/anno/94a43a3a-6ac9-4f51-8a69-5b3996e42616>
-        , <http://localhost:8983/fedora/rest/anno/43159260-65d8-4c55-8a85-b2d15ebd3c6b>
-        , <http://localhost:8983/fedora/rest/anno/d5d790d8-0f37-4ebc-8e6b-fca81a805659>
-        , <http://localhost:8983/fedora/rest/anno/b75c4445-92ac-4956-bb96-f4097ca67c90>
-        , <http://localhost:8983/fedora/rest/anno/d1a01f9c-26a5-4daa-ab65-bfc2ebcb644b>
-        , <http://localhost:8983/fedora/rest/anno/3b24992c-0cd5-4563-a74e-a67c2116ac62>
-        , <http://localhost:8983/fedora/rest/anno/44b7a48b-7444-4eb3-bf2e-f84323131680>
-        , <http://localhost:8983/fedora/rest/anno/f7c8d164-deec-4dd4-963f-38f3b6c42617>
-        , <http://localhost:8983/fedora/rest/anno/2c565ec4-d94c-4f64-a368-61b10f4f6dc9>
-        , <http://localhost:8983/fedora/rest/anno/ff1800be-3b61-41cb-9193-bed41caa55b6>
-        , <http://localhost:8983/fedora/rest/anno/735ad0da-aa3d-4807-9407-6e4367e8e5aa>
-        , <http://localhost:8983/fedora/rest/anno/05974af6-5c27-4f4c-b390-a44f188315bd>
-        , <http://localhost:8983/fedora/rest/anno/36190bba-f750-4a75-a0c1-bdce66baf171>
-        , <http://localhost:8983/fedora/rest/anno/1ffa46a1-7117-4431-b34c-451e43a64ebf>
-        , <http://localhost:8983/fedora/rest/anno/5f5d62b8-2fcd-4b36-b7c6-a7d3c17ecd64>
-        , <http://localhost:8983/fedora/rest/anno/3a86fd47-f220-4468-8228-a67773cd7e18>
-        , <http://localhost:8983/fedora/rest/anno/828661b0-bb1c-4f70-9854-3ef0f53b3dd6>
-        , <http://localhost:8983/fedora/rest/anno/25688cb8-a826-427a-bc54-4e7c014998ff>
-        , <http://localhost:8983/fedora/rest/anno/add75b33-c29a-4f34-bf53-374f76eaea3b>
-        , <http://localhost:8983/fedora/rest/anno/b952d3ff-e63e-48a9-88a9-bd0a62c04d4b>
-        , <http://localhost:8983/fedora/rest/anno/da66a1ea-eb48-474d-8bd0-93b491b1f2e5>
-        , <http://localhost:8983/fedora/rest/anno/3f79ebfa-1665-4ede-8f28-ae1c06f1252a>
-        , <http://localhost:8983/fedora/rest/anno/61303101-bd5c-430a-901b-abf0fa2b1335>
-        , <http://localhost:8983/fedora/rest/anno/0cf4dc41-d2f8-4819-8df3-a77d98c3c2ec>
-        , <http://localhost:8983/fedora/rest/anno/3bf4a814-0c3d-41c7-82d1-cb0dd0d73fdd>
-        , <http://localhost:8983/fedora/rest/anno/c20cfa6e-3247-481d-a938-9552493930b7>
-        , <http://localhost:8983/fedora/rest/anno/4e82cded-e639-42dd-b85a-70f593481e85>
-        , <http://localhost:8983/fedora/rest/anno/58a04860-0ffd-4890-aa44-d93c85479e46>
-        , <http://localhost:8983/fedora/rest/anno/64b694bc-88aa-498a-88f1-dd911429aa1c>
-        , <http://localhost:8983/fedora/rest/anno/b358c7be-4c40-44d4-9cff-56ea06fcabb0>
-        , <http://localhost:8983/fedora/rest/anno/17180e5f-b5e4-4588-abfe-8898baceff55>
-        , <http://localhost:8983/fedora/rest/anno/ecb5bbaf-3e7a-45b6-a1e7-439a017f570c>
-        , <http://localhost:8983/fedora/rest/anno/944f524f-a410-4694-b676-f93ac5dd61bc>
-        , <http://localhost:8983/fedora/rest/anno/2efb136d-82bd-4ee6-9358-967231c689ec>
-        , <http://localhost:8983/fedora/rest/anno/9d6c2df9-3193-4b30-8ff0-659cff4d800d>
-        , <http://localhost:8983/fedora/rest/anno/ac28cdb0-e5e6-44e1-849a-bd3cb218b88f>
-        , <http://localhost:8983/fedora/rest/anno/e6ab1139-8adb-423d-8bfc-b1d8cc563a62>
-        , <http://localhost:8983/fedora/rest/anno/31e925b3-43f5-43f6-836b-87d8dab04a94>
-        , <http://localhost:8983/fedora/rest/anno/b64c3a9c-19ef-42d0-9200-f6496b6a7397>
-        , <http://localhost:8983/fedora/rest/anno/3c1e46d3-c117-4f70-8651-172fa91ec7ab>
-        , <http://localhost:8983/fedora/rest/anno/3025692d-1a83-40b9-a656-e5093f9cb987>
-        , <http://localhost:8983/fedora/rest/anno/3ae1c751-cda7-4b2d-8cbc-f1b5e34f49d9>
-        , <http://localhost:8983/fedora/rest/anno/ed7ec659-f6bb-4b9d-8552-2994ca2ea876>
-        , <http://localhost:8983/fedora/rest/anno/20d64ea4-ba0b-4342-9313-cb783478eb7c>
-        , <http://localhost:8983/fedora/rest/anno/3e839b89-481a-4dc2-bbd9-1d3abf22497e>
-        , <http://localhost:8983/fedora/rest/anno/fa67e8a3-3a89-42e1-9695-88969432fbae>
-        , <http://localhost:8983/fedora/rest/anno/73858707-852b-41e3-ada6-2c7c42615639>
-        , <http://localhost:8983/fedora/rest/anno/fd160e61-b27b-48d1-8957-26a2d69bc775>
-        , <http://localhost:8983/fedora/rest/anno/1bbda837-9a8e-4d6f-9ac6-23e6719e9902>
-        , <http://localhost:8983/fedora/rest/anno/21d575fc-6511-46b0-a496-f6d61dafda1e>
-        , <http://localhost:8983/fedora/rest/anno/e383c39a-b96e-4a01-a639-f3ab0a0e5855>
-        , <http://localhost:8983/fedora/rest/anno/b3cdbef0-0cc3-4435-acc2-052047dc84ae>
-        , <http://localhost:8983/fedora/rest/anno/cb9e86e1-edde-413c-a4f3-3e325e96a84f>
-        , <http://localhost:8983/fedora/rest/anno/6eccd48f-1ef4-456d-a3b5-b7f96ee65cc2>
-        , <http://localhost:8983/fedora/rest/anno/03314e4a-7747-47d5-9a11-0a993052b56c>
-        , <http://localhost:8983/fedora/rest/anno/d3c2130a-72b7-4c28-aeac-362920429bf3>
-        , <http://localhost:8983/fedora/rest/anno/09c796e1-8bcb-47d3-9cc9-5048fad1a760>
-        , <http://localhost:8983/fedora/rest/anno/141c67eb-1348-4e9d-9577-39f239ef7dbc>
-        , <http://localhost:8983/fedora/rest/anno/05867bef-d57a-432c-929d-3be7c725ce79>
-        , <http://localhost:8983/fedora/rest/anno/df089850-a1da-461b-929b-565ca57134d9>
-        , <http://localhost:8983/fedora/rest/anno/754a2299-00f0-45d8-abdf-7b65602a6416>
-        , <http://localhost:8983/fedora/rest/anno/85407f9a-f793-4176-a0fb-643dfca4a64c>
-        , <http://localhost:8983/fedora/rest/anno/6352ebec-31df-4200-aea5-9c3d3044c7e4>
-        , <http://localhost:8983/fedora/rest/anno/70655f1d-ff62-439d-baee-c9b14aceaa46>
-        , <http://localhost:8983/fedora/rest/anno/c5853cec-0469-4096-b001-d2d2e604c328>
-        , <http://localhost:8983/fedora/rest/anno/820843a8-b840-49de-b788-f5e83254c181>
-        , <http://localhost:8983/fedora/rest/anno/927f36ba-e79a-44b1-a432-7250e3c158c6>
-        , <http://localhost:8983/fedora/rest/anno/4248cc78-59f2-458c-86b5-b90fdd0bb86c>
-        , <http://localhost:8983/fedora/rest/anno/920684d6-82a4-47c8-9776-f64c9909ffed>
-        , <http://localhost:8983/fedora/rest/anno/a290a14a-2651-4676-a5f8-103f9d626c75>
-        , <http://localhost:8983/fedora/rest/anno/8675037f-a6cd-4dbd-96e0-9c520b2c90d7>
-        , <http://localhost:8983/fedora/rest/anno/b4ece911-9133-4c49-9f31-4c2ec74b7343>
-        , <http://localhost:8983/fedora/rest/anno/d7c6fcd9-ba04-4e30-aeeb-b060eb58e958>
-        , <http://localhost:8983/fedora/rest/anno/9e4c7ade-c4ee-4403-aa90-476fa8932e15>
-        , <http://localhost:8983/fedora/rest/anno/aa3cd64b-f2b1-4ec0-87d9-64f2c1af9c23>
-        , <http://localhost:8983/fedora/rest/anno/7d444277-90ce-44d7-92de-71261b35a965>
-        , <http://localhost:8983/fedora/rest/anno/a0f14103-18a6-41f0-915d-d341f9cd7b41>
-        , <http://localhost:8983/fedora/rest/anno/556d5907-de28-415d-8625-3086cd7d12e6>
-        , <http://localhost:8983/fedora/rest/anno/13177c9c-6c1d-4279-9f53-ab89f950008d>
-        , <http://localhost:8983/fedora/rest/anno/6dc3d137-30ec-4073-8ebb-3f050b96814f>
-        , <http://localhost:8983/fedora/rest/anno/abf3e027-6598-4951-9a77-a47bd924e61a>
-        , <http://localhost:8983/fedora/rest/anno/f32d16e0-c0fd-4b52-be86-60aff0f1f0a4>
-        , <http://localhost:8983/fedora/rest/anno/33f69711-bcb3-407b-8246-fc6730b4f142>
-        , <http://localhost:8983/fedora/rest/anno/4cd7ca11-d1ed-4072-8729-475d9fea58db>
-        , <http://localhost:8983/fedora/rest/anno/13fb4010-f77a-4618-b6d9-cbd18e17e388>
-        , <http://localhost:8983/fedora/rest/anno/7a822073-3d43-44ee-967e-9681f0ace6de>
-        , <http://localhost:8983/fedora/rest/anno/dfe29224-cd14-471e-a89e-57ffc526ab25>
-        , <http://localhost:8983/fedora/rest/anno/8e34f7f8-4db8-4388-aef6-91d5b2331fc2>
-        , <http://localhost:8983/fedora/rest/anno/b574d3c5-4f67-4fb5-b3bd-f97f0c7ca1df>
-        , <http://localhost:8983/fedora/rest/anno/2f3d0a0a-cb0a-4080-b643-0e04b55870f0>
-        , <http://localhost:8983/fedora/rest/anno/03eb0b9e-c517-408f-b50d-840f9c03ad3a>
-        , <http://localhost:8983/fedora/rest/anno/cd9e8077-d9f4-4919-a368-197fbf4caaf9>
-        , <http://localhost:8983/fedora/rest/anno/bd6e7343-ccb6-439a-a134-5e157cc160e8>
-        , <http://localhost:8983/fedora/rest/anno/1d11bcd3-113b-487b-a972-c5130eb4ad56>
-        , <http://localhost:8983/fedora/rest/anno/ba1e04c4-e194-4196-92b3-a87b05f78f84>
-        , <http://localhost:8983/fedora/rest/anno/e02e4eaf-40ac-4b6a-85ee-0b9388d0ce4e>
-        , <http://localhost:8983/fedora/rest/anno/55a6dc7c-54cb-4fb7-bd84-77e6c19010fa>
-        , <http://localhost:8983/fedora/rest/anno/db5eae41-8196-4296-8ee0-7c9526f7c5c5>
-        , <http://localhost:8983/fedora/rest/anno/24bc3c3a-ef3d-421b-9c6f-89aa6a1f27cb>
-        , <http://localhost:8983/fedora/rest/anno/9b2fcce5-ac1e-4384-8a1d-6c0e10d51ed3>
-        , <http://localhost:8983/fedora/rest/anno/4da14de6-75ba-436d-9e96-69abd8a63ef6>
-        , <http://localhost:8983/fedora/rest/anno/ff94a502-2e01-4057-844e-3c5fa063cbc6>
-        , <http://localhost:8983/fedora/rest/anno/7ffd25e2-cf94-4a95-8e83-9897c1805e1d>
-        , <http://localhost:8983/fedora/rest/anno/e6e92662-1bdc-4a3a-8972-f3ddd86690f8>
-        , <http://localhost:8983/fedora/rest/anno/5340d0b7-d8a7-43cc-8ab3-87466d7ea487>
-        , <http://localhost:8983/fedora/rest/anno/6bd0c03f-714c-40b8-86e4-0633c92dda49>
-        , <http://localhost:8983/fedora/rest/anno/1db3c583-0c97-466a-a07c-f63acda89c4a>
-        , <http://localhost:8983/fedora/rest/anno/c2c78240-157d-4f2f-83db-42841dd574df>
-        , <http://localhost:8983/fedora/rest/anno/e8813e5b-e4ef-42ee-b249-b9324c58c945>
-        , <http://localhost:8983/fedora/rest/anno/bf1e4f45-55aa-4855-ba02-680d2a39c491>
-        ;\n\tfcrepo:hasParent <http://localhost:8983/fedora/rest/> .\n\n<http://localhost:8983/fedora/rest/anno/3b24992c-0cd5-4563-a74e-a67c2116ac62>
-        ldp:membershipResource <http://localhost:8983/fedora/rest/anno> .\n\n<http://localhost:8983/fedora/rest/anno/464522f5-de8d-40c9-830f-cb4ea0f21f5c>
-        ldp:membershipResource <http://localhost:8983/fedora/rest/anno> .\n\n<http://localhost:8983/fedora/rest/anno/b>
-        ldp:membershipResource <http://localhost:8983/fedora/rest/anno> .\n\n<http://localhost:8983/fedora/rest/anno/d1a01f9c-26a5-4daa-ab65-bfc2ebcb644b>
-        ldp:membershipResource <http://localhost:8983/fedora/rest/anno> .\n\n<http://localhost:8983/fedora/rest/anno/ecef1850-84c3-4814-9a0a-43887be6ea86>
-        ldp:membershipResource <http://localhost:8983/fedora/rest/anno> .\n\n<http://localhost:8983/fedora/rest/anno/ed7ec659-f6bb-4b9d-8552-2994ca2ea876>
-        ldp:membershipResource <http://localhost:8983/fedora/rest/anno> .\n\n<http://localhost:8983/fedora/rest/anno/13177c9c-6c1d-4279-9f53-ab89f950008d>
-        ldp:membershipResource <http://localhost:8983/fedora/rest/anno> .\n\n<http://localhost:8983/fedora/rest/anno/a19d8c82-a582-4af7-9273-39fda50e6fa2>
-        ldp:membershipResource <http://localhost:8983/fedora/rest/anno> .\n\n<http://localhost:8983/fedora/rest/anno/t>
-        ldp:membershipResource <http://localhost:8983/fedora/rest/anno> .\n\n<http://localhost:8983/fedora/rest/anno/6dc3d137-30ec-4073-8ebb-3f050b96814f>
-        ldp:membershipResource <http://localhost:8983/fedora/rest/anno> .\n\n<http://localhost:8983/fedora/rest/anno/48b83608-57a1-458a-94cb-a9ed28e3830c>
-        ldp:membershipResource <http://localhost:8983/fedora/rest/anno> .\n\n<http://localhost:8983/fedora/rest/anno/3ae1c751-cda7-4b2d-8cbc-f1b5e34f49d9>
-        ldp:membershipResource <http://localhost:8983/fedora/rest/anno> .\n\n<http://localhost:8983/fedora/rest/anno>
-        fedora:writable \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> .\n\n<http://localhost:8983/fedora/rest/anno/fcr:export?format=jcr/xml>
+      string: "@prefix premis: <http://www.loc.gov/premis/rdf/v1#> .\n@prefix fedorarelsext:
+        <http://fedora.info/definitions/v4/rels-ext#> .\n@prefix nt: <http://www.jcp.org/jcr/nt/1.0>
+        .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n@prefix content:
+        <http://www.w3.org/2011/content#> .\n@prefix ns001: <http://purl.org/dc/elements/1.1/>
+        .\n@prefix xsi: <http://www.w3.org/2001/XMLSchema-instance> .\n@prefix mode:
+        <http://www.modeshape.org/1.0> .\n@prefix openannotation: <http://www.w3.org/ns/oa#>
+        .\n@prefix xml: <http://www.w3.org/XML/1998/namespace> .\n@prefix fcrepo:
+        <http://fedora.info/definitions/v4/repository#> .\n@prefix fedoraconfig: <http://fedora.info/definitions/v4/config#>
+        .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0> .\n@prefix foaf: <http://xmlns.com/foaf/0.1/>
+        .\n@prefix image: <http://www.modeshape.org/images/1.0> .\n@prefix sv: <http://www.jcp.org/jcr/sv/1.0>
+        .\n@prefix test: <info:fedora/test/> .\n@prefix dcmitype: <http://purl.org/dc/dcmitype/>
+        .\n@prefix triannon: <http://triannon.stanford.edu/ns/> .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        .\n@prefix fedora: <http://fedora.info/definitions/v4/rest-api#> .\n@prefix
+        ldp: <http://www.w3.org/ns/ldp#> .\n@prefix xs: <http://www.w3.org/2001/XMLSchema>
+        .\n@prefix dc: <http://purl.org/dc/terms/> .\n\n\n<http://localhost:8983/fedora/rest/anno>
+        ldp:hasMemberRelation ldp:member ;\n\tldp:membershipResource <http://localhost:8983/fedora/rest/anno>
+        ;\n\ta ldp:Container , ldp:DirectContainer , ldp:RDFSource ;\n\tldp:member
+        <http://localhost:8983/fedora/rest/anno/53dbf9c3-fdb2-4d68-a438-5bd91a2cb7d1>
+        , <http://localhost:8983/fedora/rest/anno/2a50588d-1f07-4ff6-bf9c-dcbddda7ff85>
+        , <http://localhost:8983/fedora/rest/anno/f5fc2417-7f37-4099-98e6-233665956d67>
+        , <http://localhost:8983/fedora/rest/anno/0bb7b6b4-9ed8-44ec-b25b-70b6b4ab868a>
+        , <http://localhost:8983/fedora/rest/anno/23842d7e-fe26-4691-b783-14438e6f3c79>
+        , <http://localhost:8983/fedora/rest/anno/d89bd39b-3f0b-4fbd-9cf6-3433f05506c3>
+        , <http://localhost:8983/fedora/rest/anno/7290457c-9796-496c-ac98-857a2a058b99>
+        , <http://localhost:8983/fedora/rest/anno/8b19a564-3d63-424a-b21c-4f54fdfe7d92>
+        , <http://localhost:8983/fedora/rest/anno/c3605492-afb9-4fbf-915c-b409cbfc1a62>
+        , <http://localhost:8983/fedora/rest/anno/d22781af-f4c5-4414-b9a7-d86477ee2b31>
+        , <http://localhost:8983/fedora/rest/anno/fc95414d-46ff-48d4-ab4b-8720df6fb38d>
+        , <http://localhost:8983/fedora/rest/anno/ebc876e2-932a-4dcf-ad07-d2944774319c>
+        , <http://localhost:8983/fedora/rest/anno/e2538292-fed9-4209-99f2-2bf48900aef8>
+        , <http://localhost:8983/fedora/rest/anno/42b02f1e-33e8-47c9-8068-657de2e71a9a>
+        , <http://localhost:8983/fedora/rest/anno/5754edc1-b34a-4048-a62e-e3b80ae89fc6>
+        , <http://localhost:8983/fedora/rest/anno/e8ffc647-038c-4ee0-8ba5-30fae885eeea>
+        , <http://localhost:8983/fedora/rest/anno/cc5b7a89-d30f-4716-ade3-9d9a0839a515>
+        , <http://localhost:8983/fedora/rest/anno/6a345b91-e1f1-48c4-9028-9e1d2b6731b5>
+        , <http://localhost:8983/fedora/rest/anno/9e62d0c1-8900-4e6c-9355-c56fe7670ecb>
+        , <http://localhost:8983/fedora/rest/anno/57176472-16c4-414d-a6ee-1862d4249039>
+        , <http://localhost:8983/fedora/rest/anno/e5f90771-64f8-4e68-a899-a242655e80b1>
+        , <http://localhost:8983/fedora/rest/anno/b1f30599-dfa9-4234-b3fe-3f55c0f045ff>
+        , <http://localhost:8983/fedora/rest/anno/fdaf0007-5b89-42d9-8a61-ff05808fc9b4>
+        , <http://localhost:8983/fedora/rest/anno/64d0a973-9792-422a-816d-f7486d92e2db>
+        , <http://localhost:8983/fedora/rest/anno/611aea99-a976-4f4f-8a43-ebf166d95e43>
+        , <http://localhost:8983/fedora/rest/anno/e48b161d-1a04-40ef-854f-53ed830cc357>
+        , <http://localhost:8983/fedora/rest/anno/0aea2bda-a505-4e24-b494-edd34f989365>
+        , <http://localhost:8983/fedora/rest/anno/af743e44-93e7-4c2b-adb4-652f7904894f>
+        , <http://localhost:8983/fedora/rest/anno/8a27a72d-4b21-4d9a-b78e-cf3a2aef0901>
+        , <http://localhost:8983/fedora/rest/anno/1e7641e7-5e93-4bf1-b413-310e207920b5>
+        , <http://localhost:8983/fedora/rest/anno/1965ff4f-0a8c-4e5e-9bc3-e060f536f246>
+        , <http://localhost:8983/fedora/rest/anno/1b3481ec-7a29-4c8e-86ae-ec1d23e00565>
+        , <http://localhost:8983/fedora/rest/anno/b45b9a45-b1b8-4cc3-9b32-cee6fdf4c856>
+        , <http://localhost:8983/fedora/rest/anno/1a8935d9-86d4-47f9-b74e-5349835c21ca>
+        , <http://localhost:8983/fedora/rest/anno/b4e50269-bb44-4594-891b-5a531657d46a>
+        , <http://localhost:8983/fedora/rest/anno/5095550e-73f5-4732-82aa-5c4f1fb80e55>
+        , <http://localhost:8983/fedora/rest/anno/786e48d0-37da-4066-bb2a-d5e862b38f1a>
+        , <http://localhost:8983/fedora/rest/anno/6a2b631a-7ba0-4777-9015-be7d82cb6e3d>
+        , <http://localhost:8983/fedora/rest/anno/bab7b86b-f0f6-4dc9-96e9-9f5724e2edcf>
+        , <http://localhost:8983/fedora/rest/anno/7f84b8d9-8898-4f1a-81e0-c234eec865a3>
+        , <http://localhost:8983/fedora/rest/anno/0c9a1bce-4a06-4f4c-bac9-bcad025f4cab>
+        , <http://localhost:8983/fedora/rest/anno/af40c9d1-42b1-4aa0-bf2c-3b08197f769c>
+        , <http://localhost:8983/fedora/rest/anno/bb30f4d6-80c3-4d86-9ced-04eeef1e55c3>
+        , <http://localhost:8983/fedora/rest/anno/bb06e8a8-9b03-4e82-bfc7-cd9cc9fd9a0e>
+        , <http://localhost:8983/fedora/rest/anno/c84e71a0-d495-4561-99f5-98e837120364>
+        , <http://localhost:8983/fedora/rest/anno/899c8bc3-b0e9-43d0-b031-eaf962a00f22>
+        , <http://localhost:8983/fedora/rest/anno/a899c709-df36-4545-bf9b-feed5942b91c>
+        , <http://localhost:8983/fedora/rest/anno/57de5d45-f401-4e5a-aebf-8e3fab5c5907>
+        , <http://localhost:8983/fedora/rest/anno/90d8123b-6880-4fc6-bbd9-208b6bbeef9c>
+        , <http://localhost:8983/fedora/rest/anno/18473850-0a7c-4a81-b605-8e71f9a5a049>
+        , <http://localhost:8983/fedora/rest/anno/a2665cd8-32ea-491a-bac4-ae521fae91e2>
+        , <http://localhost:8983/fedora/rest/anno/781d5c01-6360-4800-bb19-ffe5cd0e5c8b>
+        , <http://localhost:8983/fedora/rest/anno/3d1182b4-c2f6-49f9-a3be-eb8e05769c1f>
+        ;\n\tldp:contains <http://localhost:8983/fedora/rest/anno/53dbf9c3-fdb2-4d68-a438-5bd91a2cb7d1>
+        , <http://localhost:8983/fedora/rest/anno/2a50588d-1f07-4ff6-bf9c-dcbddda7ff85>
+        , <http://localhost:8983/fedora/rest/anno/f5fc2417-7f37-4099-98e6-233665956d67>
+        , <http://localhost:8983/fedora/rest/anno/0bb7b6b4-9ed8-44ec-b25b-70b6b4ab868a>
+        , <http://localhost:8983/fedora/rest/anno/23842d7e-fe26-4691-b783-14438e6f3c79>
+        , <http://localhost:8983/fedora/rest/anno/d89bd39b-3f0b-4fbd-9cf6-3433f05506c3>
+        , <http://localhost:8983/fedora/rest/anno/7290457c-9796-496c-ac98-857a2a058b99>
+        , <http://localhost:8983/fedora/rest/anno/8b19a564-3d63-424a-b21c-4f54fdfe7d92>
+        , <http://localhost:8983/fedora/rest/anno/c3605492-afb9-4fbf-915c-b409cbfc1a62>
+        , <http://localhost:8983/fedora/rest/anno/d22781af-f4c5-4414-b9a7-d86477ee2b31>
+        , <http://localhost:8983/fedora/rest/anno/fc95414d-46ff-48d4-ab4b-8720df6fb38d>
+        , <http://localhost:8983/fedora/rest/anno/ebc876e2-932a-4dcf-ad07-d2944774319c>
+        , <http://localhost:8983/fedora/rest/anno/e2538292-fed9-4209-99f2-2bf48900aef8>
+        , <http://localhost:8983/fedora/rest/anno/42b02f1e-33e8-47c9-8068-657de2e71a9a>
+        , <http://localhost:8983/fedora/rest/anno/5754edc1-b34a-4048-a62e-e3b80ae89fc6>
+        , <http://localhost:8983/fedora/rest/anno/e8ffc647-038c-4ee0-8ba5-30fae885eeea>
+        , <http://localhost:8983/fedora/rest/anno/cc5b7a89-d30f-4716-ade3-9d9a0839a515>
+        , <http://localhost:8983/fedora/rest/anno/6a345b91-e1f1-48c4-9028-9e1d2b6731b5>
+        , <http://localhost:8983/fedora/rest/anno/9e62d0c1-8900-4e6c-9355-c56fe7670ecb>
+        , <http://localhost:8983/fedora/rest/anno/57176472-16c4-414d-a6ee-1862d4249039>
+        , <http://localhost:8983/fedora/rest/anno/e5f90771-64f8-4e68-a899-a242655e80b1>
+        , <http://localhost:8983/fedora/rest/anno/b1f30599-dfa9-4234-b3fe-3f55c0f045ff>
+        , <http://localhost:8983/fedora/rest/anno/fdaf0007-5b89-42d9-8a61-ff05808fc9b4>
+        , <http://localhost:8983/fedora/rest/anno/64d0a973-9792-422a-816d-f7486d92e2db>
+        , <http://localhost:8983/fedora/rest/anno/611aea99-a976-4f4f-8a43-ebf166d95e43>
+        , <http://localhost:8983/fedora/rest/anno/e48b161d-1a04-40ef-854f-53ed830cc357>
+        , <http://localhost:8983/fedora/rest/anno/0aea2bda-a505-4e24-b494-edd34f989365>
+        , <http://localhost:8983/fedora/rest/anno/af743e44-93e7-4c2b-adb4-652f7904894f>
+        , <http://localhost:8983/fedora/rest/anno/8a27a72d-4b21-4d9a-b78e-cf3a2aef0901>
+        , <http://localhost:8983/fedora/rest/anno/1e7641e7-5e93-4bf1-b413-310e207920b5>
+        , <http://localhost:8983/fedora/rest/anno/1965ff4f-0a8c-4e5e-9bc3-e060f536f246>
+        , <http://localhost:8983/fedora/rest/anno/1b3481ec-7a29-4c8e-86ae-ec1d23e00565>
+        , <http://localhost:8983/fedora/rest/anno/b45b9a45-b1b8-4cc3-9b32-cee6fdf4c856>
+        , <http://localhost:8983/fedora/rest/anno/1a8935d9-86d4-47f9-b74e-5349835c21ca>
+        , <http://localhost:8983/fedora/rest/anno/b4e50269-bb44-4594-891b-5a531657d46a>
+        , <http://localhost:8983/fedora/rest/anno/5095550e-73f5-4732-82aa-5c4f1fb80e55>
+        , <http://localhost:8983/fedora/rest/anno/786e48d0-37da-4066-bb2a-d5e862b38f1a>
+        , <http://localhost:8983/fedora/rest/anno/6a2b631a-7ba0-4777-9015-be7d82cb6e3d>
+        , <http://localhost:8983/fedora/rest/anno/bab7b86b-f0f6-4dc9-96e9-9f5724e2edcf>
+        , <http://localhost:8983/fedora/rest/anno/7f84b8d9-8898-4f1a-81e0-c234eec865a3>
+        , <http://localhost:8983/fedora/rest/anno/0c9a1bce-4a06-4f4c-bac9-bcad025f4cab>
+        , <http://localhost:8983/fedora/rest/anno/af40c9d1-42b1-4aa0-bf2c-3b08197f769c>
+        , <http://localhost:8983/fedora/rest/anno/bb30f4d6-80c3-4d86-9ced-04eeef1e55c3>
+        , <http://localhost:8983/fedora/rest/anno/bb06e8a8-9b03-4e82-bfc7-cd9cc9fd9a0e>
+        , <http://localhost:8983/fedora/rest/anno/c84e71a0-d495-4561-99f5-98e837120364>
+        , <http://localhost:8983/fedora/rest/anno/899c8bc3-b0e9-43d0-b031-eaf962a00f22>
+        , <http://localhost:8983/fedora/rest/anno/a899c709-df36-4545-bf9b-feed5942b91c>
+        , <http://localhost:8983/fedora/rest/anno/57de5d45-f401-4e5a-aebf-8e3fab5c5907>
+        , <http://localhost:8983/fedora/rest/anno/90d8123b-6880-4fc6-bbd9-208b6bbeef9c>
+        , <http://localhost:8983/fedora/rest/anno/18473850-0a7c-4a81-b605-8e71f9a5a049>
+        , <http://localhost:8983/fedora/rest/anno/a2665cd8-32ea-491a-bac4-ae521fae91e2>
+        , <http://localhost:8983/fedora/rest/anno/781d5c01-6360-4800-bb19-ffe5cd0e5c8b>
+        , <http://localhost:8983/fedora/rest/anno/3d1182b4-c2f6-49f9-a3be-eb8e05769c1f>
+        ;\n\tfcrepo:hasParent <http://localhost:8983/fedora/rest/> ;\n\tfedora:writable
+        \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> .\n\n<http://localhost:8983/fedora/rest/anno/fcr:export?format=jcr/xml>
         ns001:format <http://fedora.info/definitions/v4/repository#jcr/xml> .\n\n<http://localhost:8983/fedora/rest/anno>
         fedora:exportsAs <http://localhost:8983/fedora/rest/anno/fcr:export?format=jcr/xml>
         .\n\n<http://fedora.info/definitions/v4/repository#jcr/xml> rdfs:label \"jcr/xml\"^^<http://www.w3.org/2001/XMLSchema#string>
@@ -555,15 +172,15 @@ http_interactions:
         , <http://www.jcp.org/jcr/mix/1.0created> , fedora:resource , fedora:object
         , fedora:relations , <http://www.jcp.org/jcr/mix/1.0created> , <http://www.jcp.org/jcr/mix/1.0lastModified>
         , <http://www.jcp.org/jcr/mix/1.0referenceable> , fedora:DublinCoreDescribable
-        , fedora:resource , ldp:Container ;\n\tfcrepo:primaryType \"nt:folder\"^^<http://www.w3.org/2001/XMLSchema#string>
-        ;\n\tfcrepo:created \"2014-11-05T22:54:16.708Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
-        ;\n\tfcrepo:lastModified \"2014-11-07T02:21:10.226Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
-        ;\n\tfcrepo:mixinTypes \"fedora:resource\"^^<http://www.w3.org/2001/XMLSchema#string>
-        , \"fedora:object\"^^<http://www.w3.org/2001/XMLSchema#string> ;\n\tfcrepo:lastModifiedBy
-        \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string> ;\n\tfcrepo:uuid
-        \"6171e2b7-4692-4bc5-aa50-dd55f05a522a\"^^<http://www.w3.org/2001/XMLSchema#string>
+        , fedora:resource , ldp:Container ;\n\tfcrepo:lastModifiedBy \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfcrepo:uuid \"faf07389-2da3-444c-a85d-f0041874abc3\"^^<http://www.w3.org/2001/XMLSchema#string>
         ;\n\tfcrepo:createdBy \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfcrepo:primaryType \"nt:folder\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfcrepo:created \"2014-11-18T02:22:27.08Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\tfcrepo:mixinTypes \"fedora:resource\"^^<http://www.w3.org/2001/XMLSchema#string>
+        , \"fedora:object\"^^<http://www.w3.org/2001/XMLSchema#string> ;\n\tfcrepo:lastModified
+        \"2014-11-18T18:52:44.013Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
         .\n"
     http_version: 
-  recorded_at: Mon, 10 Nov 2014 18:47:11 GMT
+  recorded_at: Tue, 18 Nov 2014 19:23:43 GMT
 recorded_with: VCR 2.9.3
