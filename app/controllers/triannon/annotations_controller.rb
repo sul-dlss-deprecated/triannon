@@ -42,7 +42,7 @@ module Triannon
 
     # POST /annotations/annotations
     def create
-      @annotation = Annotation.new(annotation_params)
+      @annotation = Annotation.new(:data => request.body.read)
 
       if @annotation.save
         redirect_to @annotation, notice: 'Annotation was successfully created.'
@@ -72,11 +72,6 @@ module Triannon
         @annotation = Annotation.find(params[:id])
       end
 
-      # Only allow a trusted parameter "white list" through.
-      def annotation_params
-        params.require(:annotation).permit(:data)
-      end
-
       def default_format_jsonld
         if ((!request.accept || request.accept.empty?) && (!params[:format] || params[:format].empty?))
           request.format = "jsonld"
@@ -96,7 +91,7 @@ module Triannon
           end
         end
       end
-      
+
       # handle Triannon::ExternalReferenceError
       def ext_ref_error(exception)
         render plain: exception.message, status: 403
