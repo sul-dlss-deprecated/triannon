@@ -1,7 +1,6 @@
 require 'spec_helper'
 
-vcr_options = { :cassette_name => "controllers_annotations_index" }
-describe Triannon::AnnotationsController, type: :controller, :vcr => vcr_options do
+describe Triannon::AnnotationsController, :vcr, type: :controller do
 
   routes { Triannon::Engine.routes }
   let(:annotation) { Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json"), id: '123'}
@@ -27,10 +26,16 @@ describe Triannon::AnnotationsController, type: :controller, :vcr => vcr_options
   end
 
   context "#create" do
+    it 'creates a new annotation from the body of the request' do
+      ttl_data = Triannon.annotation_fixture("body-chars.ttl")
+      post :create, ttl_data
+      expect(response.status).to eq 302
+    end
+
     it "renders 403 if Triannon::ExternalReferenceError raised during LdpCreator.create" do
       err_msg = "some error during LdpCreator.create"
       allow(Triannon::LdpCreator).to receive(:create).and_raise(Triannon::ExternalReferenceError, err_msg)
-      post :create, :annotation => {:data => "this string will be ignored so it doesn't matter"}
+      post :create, "this string will be ignored so it doesn't matter"
       expect(response.status).to eq 403
       expect(response.body).to eql err_msg
     end
