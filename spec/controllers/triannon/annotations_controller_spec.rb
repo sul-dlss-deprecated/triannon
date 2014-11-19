@@ -27,7 +27,9 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
 
   context "#create" do
     it 'creates a new annotation from the body of the request' do
-
+      ttl_data = Triannon.annotation_fixture("body-chars.ttl")
+      post :create, ttl_data
+      expect(response.status).to eq 302
     end
 
     it "renders 403 if Triannon::ExternalReferenceError raised during LdpCreator.create" do
