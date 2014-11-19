@@ -34,8 +34,14 @@ $ rails g triannon:install
 
 Edit the `config/triannon.yml` file:
 
-* `ldp_url:` Points to the root annotations container in your LDP server
+* `ldp_url:` Points to the root annotations container on your LDP server
 * `triannon_base_url:` Used as the base url for all annotations hosted by your Triannon server.  Identifiers from the LDP server will be appended to this base-url.
+
+Generate the root annotations container on the LDP server
+
+```console
+$ rake triannon:create_root_container
+```
 
 ## Running the application in development
 
@@ -46,6 +52,12 @@ There is a bundled rake task for running the test app:
 $ rake jetty:download
 $ rake jetty:unzip
 $ rake engine_cart:generate # (first run only)
+
+# Configure config/triannon.yml as specified above
+$ vi config/triannon.yml
+
+# Generate root annotations container
+$ rake triannon:create_root_container
 
 # Run the test app
 $ rake triannon:server

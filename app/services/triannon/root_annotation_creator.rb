@@ -9,7 +9,7 @@ module Triannon
        conn = Faraday.new :url => Triannon.config[:ldp_url]
        resp = conn.head
        unless resp.status == 404 || resp.status == 410
-         Rails.logger.info "Root annotation resource already created."
+         puts "Root annotation resource already exists."
          return false
        end
 
@@ -23,10 +23,10 @@ module Triannon
        end
 
        if resp.status == 201
-         Rails.logger.info "Created root annotation container #{Triannon.config[:ldp_url]}"
+         puts "Created root annotation container #{Triannon.config[:ldp_url]}"
          return true
        else
-         Rails.logger.warn "Unable to create root annotation container #{Triannon.config[:ldp_url]}"
+         puts "Unable to create root annotation container #{Triannon.config[:ldp_url]}"
          return false
          # TODO raise an exception if we get here?
        end
