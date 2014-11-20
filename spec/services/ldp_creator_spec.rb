@@ -27,6 +27,31 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
       expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
     end
+    it 'IIIF anno has sc:painting motivation' do
+      iiif_anno = Triannon::Annotation.new data: '
+        {
+          "@context":"http://iiif.io/api/presentation/2/context.json",
+          "@type":"oa:Annotation",
+          "motivation":"sc:painting",
+          "resource":{
+            "@type":"cnt:ContentAsText",
+            "chars":"Here starts book one...",
+            "format":"text/plain",
+            "language":"en"
+          },
+          "on":"http://www.example.org/iiif/book1/canvas/p1#xywh=100,150,500,25"
+        }'
+      my_svc = Triannon::LdpCreator.new iiif_anno
+      base_pid = my_svc.create_base
+      resp = conn.get do |req|
+        req.url "#{base_pid}"
+        req.headers['Accept'] = 'application/x-turtle'
+      end
+      g = RDF::Graph.new.from_ttl(resp.body)
+      full_url = "#{Triannon.config[:ldp_url]}/#{base_pid}"
+      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.motivatedBy, RDF::IIIFPresentation.painting]).size).to eql 1
+    end
     it 'keeps multiple motivations if present' do
       my_anno = Triannon::Annotation.new data: '{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json",
@@ -140,7 +165,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
   end
 
   describe "#create_target_container" do
-    it 'calls #create_direct_container with hasBody' do
+    it 'calls #create_direct_container with hasTarget' do
       expect(svc).to receive(:create_direct_container).with(RDF::OpenAnnotation.hasTarget)
       svc.create_target_container
     end

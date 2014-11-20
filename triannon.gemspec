@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.add_dependency "rails", "~> 4.2.0.beta1"
   s.add_dependency "linkeddata"
   s.add_dependency "rdf-open_annotation"
+  s.add_dependency "rdf-iiif"
   s.add_dependency "rdf-ldp"
   s.add_dependency "rdf-fcrepo4"
   s.add_dependency "bootstrap-sass"
