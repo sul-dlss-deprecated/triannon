@@ -20,19 +20,25 @@ describe Triannon::Annotation, :vcr => vcr_options do
                         \"motivatedBy\": \"oa:bookmarking\",
                         \"hasTarget\": \"http://purl.stanford.edu/kq131cs7229\"
                       }"
-      @inline_context = File.read "lib/triannon/oa_context_20130208.json"
+      @oa_inline_context = File.read "lib/triannon/oa_context_20130208.json"
     end
     it "http://www.w3.org/ns/oa-context-20130208.json as url" do
       data_w_url = @json_b4_url + "http://www.w3.org/ns/oa-context-20130208.json" + @json_after_url
       anno = Triannon::Annotation.new data: data_w_url
       anno.send(:json_ld)
-      expect(anno.data).to include(@inline_context)
+      expect(anno.data).to include(@oa_inline_context)
     end
     it "http://www.w3.org/ns/oa.json as url" do
       data_w_url = @json_b4_url + "http://www.w3.org/ns/oa.jsonld" + @json_after_url
       anno = Triannon::Annotation.new data: data_w_url
       anno.send(:json_ld)
-      expect(anno.data).to include(@inline_context)
+      expect(anno.data).to include(@oa_inline_context)
+    end
+    it "http://iiif.io/api/presentation/2/context.json as url" do
+      data_w_url = @json_b4_url + "http://iiif.io/api/presentation/2/context.json" + @json_after_url
+      anno = Triannon::Annotation.new data: data_w_url
+      anno.send(:json_ld)
+      expect(anno.data).to include(File.read "lib/triannon/iiif_presentation_2_context.json")
     end
   end
 

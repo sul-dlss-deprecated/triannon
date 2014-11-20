@@ -1,5 +1,6 @@
 require 'linkeddata'
 require 'rdf/open_annotation'
+require 'rdf/iiif'
 require 'rdf/ldp'
 require 'rdf/fcrepo4'
 require 'rdf/triannon_vocab'
