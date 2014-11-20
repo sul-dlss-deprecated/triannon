@@ -426,6 +426,33 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
         expect(g.query([RDF::URI.new(body_pid), RDF::Content.chars, "I love this!"]).size).to eql 1
         expect(g.query([RDF::URI.new(body_pid), RDF::DC11.language, "en"]).size).to eql 1
       end
+      it 'IIIF context flavor' do
+        my_anno = Triannon::Annotation.new data: '{
+          "@context":"http://iiif.io/api/presentation/2/context.json",
+          "@type":"oa:Annotation",
+          "motivation":"oa:commenting",
+          "resource": {
+            "@type":"cnt:ContentAsText",
+            "chars":"I love this line!",
+            "format":"text/plain"
+          },
+          "on":"http://www.example.org/iiif/book1/canvas/p1#xywh=400,100,1000,80"
+        }'
+        my_svc = Triannon::LdpCreator.new my_anno
+        new_pid = my_svc.create_base
+        my_svc.create_body_container
+        body_uuids = my_svc.send(:create_resources_in_container, RDF::OpenAnnotation.hasBody)
+        body_pid = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuids[0]}"
+        resp = conn.get do |req|
+          req.url body_pid
+          req.headers['Accept'] = 'application/x-turtle'
+        end
+        g = RDF::Graph.new.from_ttl(resp.body)
+        expect(g.query([RDF::URI.new(body_pid), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
+        expect(g.query([RDF::URI.new(body_pid), RDF.type, RDF::DCMIType.Text]).size).to eql 0
+        expect(g.query([RDF::URI.new(body_pid), RDF::Content.chars, "I love this line!"]).size).to eql 1
+        expect(g.query([RDF::URI.new(body_pid), RDF::DC11.format, "text/plain"]).size).to eql 1
+      end
       it 'multiple resources' do
         my_anno = Triannon::Annotation.new data: '{
           "@context": "http://www.w3.org/ns/oa-context-20130208.json",
