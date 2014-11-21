@@ -1,7 +1,6 @@
 require 'spec_helper'
 
-vcr_options = { :cassette_name => "features_annotations" }
-describe "viewing an annotation", type: :feature, :vcr => vcr_options do
+describe "viewing an annotation", :vcr, type: :feature do
   context 'html' do
     before(:each) do
       annotation = create_annotation('body-chars.json')
@@ -35,18 +34,9 @@ describe "viewing an annotation", type: :feature, :vcr => vcr_options do
     end
 
     context "bodies" do
-      it "missing body" do
-        anno = create_annotation('bookmark.json')
-        allow(Triannon::Annotation).to receive(:find).with(anno.id).and_return(anno)
-        visit "/annotations/annotations/#{anno.id}.html"
-        expect(page).to have_content "no body for this annotation"
-      end
       it "single body chars" do
         expect(page).to have_content "I love this!"
       end
-#      it "multiple bodies" do
-#        skip "to be implemented"
-#      end
     end
 
     context "has motivation" do
