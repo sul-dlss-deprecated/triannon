@@ -1,7 +1,6 @@
 require 'spec_helper'
 
-vcr_options = { :cassette_name => "features_annotations" }
-describe "viewing an annotation", type: :feature, :vcr => vcr_options do
+describe "viewing an annotation", :vcr, type: :feature do
   context 'html' do
     before(:each) do
       annotation = create_annotation('body-chars.json')
@@ -9,44 +8,12 @@ describe "viewing an annotation", type: :feature, :vcr => vcr_options do
       visit "/annotations/annotations/#{annotation.id}.html"
     end
 
-    it "has a title" do
+    it "has a page title" do
       expect(page).to have_content "Annotation"
     end
 
     it "has the id/url" do
       expect(page).to have_content "http://example.org/annos/annotation/body-chars.json"
-    end
-
-    it "has the type" do
-      expect(page).to have_content "http://www.w3.org/ns/oa#Annotation"
-    end
-
-    context "target" do
-      it "single url" do
-        expect(page).to have_content "http://purl.stanford.edu/kq131cs7229"
-      end
-      it "mult urls" do
-        anno = create_annotation('mult-targets.json')
-        allow(Triannon::Annotation).to receive(:find).with(anno.id).and_return(anno)
-        visit "/annotations/annotations/#{anno.id}"
-        expect(page).to have_content "http://purl.stanford.edu/kq131cs7229"
-        expect(page).to have_content "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg"
-      end
-    end
-
-    context "bodies" do
-      it "missing body" do
-        anno = create_annotation('bookmark.json')
-        allow(Triannon::Annotation).to receive(:find).with(anno.id).and_return(anno)
-        visit "/annotations/annotations/#{anno.id}.html"
-        expect(page).to have_content "no body for this annotation"
-      end
-      it "single body chars" do
-        expect(page).to have_content "I love this!"
-      end
-#      it "multiple bodies" do
-#        skip "to be implemented"
-#      end
     end
 
     context "has motivation" do
@@ -60,6 +27,21 @@ describe "viewing an annotation", type: :feature, :vcr => vcr_options do
         expect(page).to have_content "http://www.w3.org/ns/oa#moderating"
         expect(page).to have_content "http://www.w3.org/ns/oa#tagging"
       end
+    end
+
+    it "turtle" do
+      expect(page).to have_content "Turtle"
+      expect(page).to have_content "a <http://www.w3.org/ns/oa#Annotation>"
+    end
+
+    it "jsonld OpenAnnotation context" do
+      expect(page).to have_content "OpenAnnotation context"
+      expect(page).to have_content "@context\": \"http://www.w3.org/ns/oa.jsonld\""
+    end
+
+    it "jsonld IIIF context" do
+      expect(page).to have_content "IIIF context"
+      expect(page).to have_content "@context\": \"http://iiif.io/api/presentation/2/context.json\""
     end
   end
 

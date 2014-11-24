@@ -43,47 +43,6 @@ module Triannon
       end
     end
 
-    def has_target
-      # FIXME:  target might be more than a string (examples 14-17)
-      if graph_exists?
-        q = self.class.anno_query.dup
-        q << [:s, RDF::OpenAnnotation.hasTarget, :target]
-        solution = graph.query q
-        if solution && solution.size > 0
-          targets = []
-          solution.each {|res|
-            targets << res.target.to_s
-          }
-          targets
-        # TODO:  raise exception if none?
-        end
-      end
-    end
-
-    def has_body
-      # FIXME:  body can be other things besides blank node with chars
-      bodies = []
-      if graph_exists?
-        q = self.class.anno_query.dup
-        q << [:s, RDF::OpenAnnotation.hasBody, :body]
-        # for chars content
-        # the following two lines are equivalent in identifying inline chars content
-        # q << [:body, RDF.type, RDF::Content.ContentAsText]
-        q << [:body, RDF::Content.chars, :chars]
-        # for non-chars content
-        # // non-embedded Text resource
-        #?body a dctypes:Text ;
-        #  dc:format "application/msword .
-        solution = graph.query q
-        if solution && solution.size > 0
-          solution.each {|res|
-            bodies << res.chars.to_s
-          }
-        end
-      end
-      bodies
-    end
-
     def motivated_by
       if graph_exists?
         q = self.class.anno_query.dup
@@ -106,6 +65,18 @@ module Triannon
 
     def graph= g
       @graph = g
+    end
+    
+    # @return json-ld representation of graph with OpenAnnotation context as a url
+    def jsonld_oa
+      inline_context = graph.dump(:jsonld, :context => "http://www.w3.org/ns/oa.jsonld")
+      inline_context.sub(/@context.*@graph/m, "@context\": \"http://www.w3.org/ns/oa.jsonld\",\n  \"@graph")
+    end
+    
+    # @return json-ld representation of graph with IIIF context as a url
+    def jsonld_iiif
+      inline_context = graph.dump(:jsonld, :context => "http://iiif.io/api/presentation/2/context.json")
+      inline_context.sub(/@context.*@graph/m, "@context\": \"http://iiif.io/api/presentation/2/context.json\",\n  \"@graph")
     end
 
     # query for a subject with type of RDF::OpenAnnotation.Annotation
@@ -180,7 +151,7 @@ private
     end
 
     def json_oa_context
-      # FIXME:  this is a terrible place to do this!!
+      # FIXME:  this is a terrible place/way to see if we are running in the testing app!!
       if Rails.root.to_s.match(/internal/) # testing via engine_cart
         @json_oa_context ||= File.read(Rails.root.join("..", "..", "lib", "triannon", "oa_context_20130208.json"))
       else
@@ -189,7 +160,7 @@ private
     end
 
     def json_iiif_context
-      # FIXME:  this is a terrible place to do this!!
+      # FIXME:  this is a terrible place/way to see if we are running in the testing app!!
       if Rails.root.to_s.match(/internal/) # testing via engine_cart
         @json_oa_context ||= File.read(Rails.root.join("..", "..", "lib", "triannon", "iiif_presentation_2_context.json"))
       else
