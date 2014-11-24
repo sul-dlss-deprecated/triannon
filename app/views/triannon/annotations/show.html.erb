@@ -16,13 +16,12 @@
 
 <strong>JSON-LD (OpenAnnotation context):</strong>
 <pre>
-<%= @annotation.graph.dump(:jsonld, :context => "http://www.w3.org/ns/oa.jsonld") %>
+<%= @annotation.jsonld_oa %>
 </pre>
-
 
 <strong>JSON-LD (IIIF context):</strong>
 <pre>
-<%= @annotation.graph.dump(:jsonld, :context => "http://iiif.io/api/presentation/2/context.json") %>
+<%= @annotation.jsonld_iiif %>
 </pre>
 
 <%= link_to "Back to List", annotations_path %>

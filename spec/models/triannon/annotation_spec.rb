@@ -41,6 +41,28 @@ describe Triannon::Annotation, :vcr => vcr_options do
       expect(anno.data).to include(File.read "lib/triannon/iiif_presentation_2_context.json")
     end
   end
+  
+  context '#jsonld_oa' do
+    let(:anno) { Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl") }
+    it 'has context as url' do
+      expect(anno.jsonld_oa).to match /"@context":\s*"http:\/\/www.w3.org\/ns\/oa.jsonld"/
+    end
+    it 'parses as graph' do
+      new_anno = Triannon::Annotation.new data: anno.jsonld_oa
+      expect(new_anno.graph.to_ttl).to eq anno.graph.to_ttl
+    end
+  end
+  
+  context '#jsonld_iiif' do
+    let(:anno) { Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl") }
+    it 'has context as url' do
+      expect(anno.jsonld_iiif).to match /"@context":\s*"http:\/\/iiif.io\/api\/presentation\/2\/context.json"/
+    end
+    it 'parses as graph' do
+      new_anno = Triannon::Annotation.new data: anno.jsonld_iiif
+      expect(new_anno.graph.to_ttl).to eq anno.graph.to_ttl
+    end
+  end
 
   context "#data_as_graph" do
     before(:each) do

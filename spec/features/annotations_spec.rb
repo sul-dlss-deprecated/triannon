@@ -28,6 +28,21 @@ describe "viewing an annotation", :vcr, type: :feature do
         expect(page).to have_content "http://www.w3.org/ns/oa#tagging"
       end
     end
+
+    it "turtle" do
+      expect(page).to have_content "Turtle"
+      expect(page).to have_content "a <http://www.w3.org/ns/oa#Annotation>"
+    end
+
+    it "jsonld OpenAnnotation context" do
+      expect(page).to have_content "OpenAnnotation context"
+      expect(page).to have_content "@context\": \"http://www.w3.org/ns/oa.jsonld\""
+    end
+
+    it "jsonld IIIF context" do
+      expect(page).to have_content "IIIF context"
+      expect(page).to have_content "@context\": \"http://iiif.io/api/presentation/2/context.json\""
+    end
   end
 
   def create_annotation f

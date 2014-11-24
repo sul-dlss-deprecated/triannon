@@ -66,6 +66,18 @@ module Triannon
     def graph= g
       @graph = g
     end
+    
+    # @return json-ld representation of graph with OpenAnnotation context as a url
+    def jsonld_oa
+      inline_context = graph.dump(:jsonld, :context => "http://www.w3.org/ns/oa.jsonld")
+      inline_context.sub(/@context.*@graph/m, "@context\": \"http://www.w3.org/ns/oa.jsonld\",\n  \"@graph")
+    end
+    
+    # @return json-ld representation of graph with IIIF context as a url
+    def jsonld_iiif
+      inline_context = graph.dump(:jsonld, :context => "http://iiif.io/api/presentation/2/context.json")
+      inline_context.sub(/@context.*@graph/m, "@context\": \"http://iiif.io/api/presentation/2/context.json\",\n  \"@graph")
+    end
 
     # query for a subject with type of RDF::OpenAnnotation.Annotation
     def self.anno_query
