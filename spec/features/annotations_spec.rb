@@ -8,35 +8,12 @@ describe "viewing an annotation", :vcr, type: :feature do
       visit "/annotations/annotations/#{annotation.id}.html"
     end
 
-    it "has a title" do
+    it "has a page title" do
       expect(page).to have_content "Annotation"
     end
 
     it "has the id/url" do
       expect(page).to have_content "http://example.org/annos/annotation/body-chars.json"
-    end
-
-    it "has the type" do
-      expect(page).to have_content "http://www.w3.org/ns/oa#Annotation"
-    end
-
-    context "target" do
-      it "single url" do
-        expect(page).to have_content "http://purl.stanford.edu/kq131cs7229"
-      end
-      it "mult urls" do
-        anno = create_annotation('mult-targets.json')
-        allow(Triannon::Annotation).to receive(:find).with(anno.id).and_return(anno)
-        visit "/annotations/annotations/#{anno.id}"
-        expect(page).to have_content "http://purl.stanford.edu/kq131cs7229"
-        expect(page).to have_content "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg"
-      end
-    end
-
-    context "bodies" do
-      it "single body chars" do
-        expect(page).to have_content "I love this!"
-      end
     end
 
     context "has motivation" do

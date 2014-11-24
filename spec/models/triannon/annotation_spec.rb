@@ -42,7 +42,7 @@ describe Triannon::Annotation, :vcr => vcr_options do
     end
   end
 
-  context "data_as_graph" do
+  context "#data_as_graph" do
     before(:each) do
       @json_ld_data = Triannon.annotation_fixture("bookmark.json")
     end
@@ -114,42 +114,6 @@ describe Triannon::Annotation, :vcr => vcr_options do
       anno = Triannon::Annotation.new data: Triannon.annotation_fixture("mult-targets.json")
       expect(anno.url).to eql("http://example.org/annos/annotation/mult-targets.json")
     end
-    context "has_target" do
-      it "single url" do
-        expect(@anno_ttl.has_target[0]).to eql("http://purl.stanford.edu/kq131cs7229")
-        expect(@anno_json.has_target).to include("http://purl.stanford.edu/kq131cs7229")
-      end
-      it "multiple urls" do
-        anno = Triannon::Annotation.new data: Triannon.annotation_fixture("mult-targets.json")
-        expect(anno.has_target.size).to eql 2
-        expect(anno.has_target).to include("http://purl.stanford.edu/kq131cs7229")
-        expect(anno.has_target).to include("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg")
-      end
-    end
-    context "has_body" do
-      it "empty array when there is no body" do
-        expect(@anno_json.has_body).not_to be_nil
-        expect(@anno_json.has_body.size).to eql 0
-      end
-      it "text from chars" do
-        expect(@anno_ttl.has_body.size).to eql 1
-        expect(@anno_ttl.has_body).to include("I love this!")
-        anno = Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.json")
-        expect(anno.has_body.size).to eql 1
-        expect(anno.has_body).to include("I love this!")
-        anno = Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars-plain.json")
-        expect(anno.has_body.size).to eql 1
-        expect(anno.has_body).to include("I love this!")
-        anno = Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars-html.json")
-        expect(anno.has_body.size).to eql 1
-        expect(anno.has_body).to include("<div xml:lang='en' xmlns='http://www.w3.org/1999/xhtml'>I love this!</div>")
-      end
-      it "mult targets" do
-        anno = Triannon::Annotation.new data: Triannon.annotation_fixture("mult-targets.json")
-        expect(anno.has_body.size).to eql 1
-        expect(anno.has_body).to include("I love these two things!")
-      end
-    end
     context "motivated_by" do
       it "single" do
         expect(@anno_ttl.motivated_by.size).to eql 1
@@ -190,7 +154,6 @@ describe Triannon::Annotation, :vcr => vcr_options do
   end
 
   context "#destroy" do
-
     it "calls LdpDestroyer.destroy with it's own id" do
       id = 'someid'
 

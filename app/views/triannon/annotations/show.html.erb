@@ -5,12 +5,9 @@
 </p>
 <p>
 <strong>Motivated By:</strong>
-<%= @annotation.motivated_by.map{|m| link_to(m, m)}.join(", ").html_safe %>
+<%= @annotation.motivated_by.map{|m| link_to(m, m)}.join(", ").html_safe if @annotation.motivated_by %>
 </p>
 <p>
-<strong>Type:</strong>
-<%= link_to @annotation.type, @annotation.type %>
-</p>
 
 <strong>Turtle:</strong>
 <pre>
