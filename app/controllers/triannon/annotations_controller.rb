@@ -42,8 +42,18 @@ module Triannon
 
     # POST /annotations/annotations
     def create
-      @annotation = Annotation.new(:data => request.body.read)
-
+      # FIXME: this is probably a bad way of allowing app form to be used as well as direct post requests
+      if params["annotation"]
+        # it's from app html form
+        params.require(:annotation).permit(:data)
+        if params["annotation"]["data"]
+          @annotation = Annotation.new({:data => params["annotation"]["data"]})
+        end
+      else
+        # it's a direct post request
+        @annotation = Annotation.new(:data => request.body.read)
+      end
+      
       if @annotation.save
         redirect_to @annotation, notice: 'Annotation was successfully created.'
       else
@@ -53,7 +63,7 @@ module Triannon
 
     # PATCH/PUT /annotations/annotations/1
     def update
-      if @annotation.update(annotation_params)
+      if @annotation.update(params)
         redirect_to @annotation, notice: 'Annotation was successfully updated.'
       else
         render :edit
@@ -71,7 +81,7 @@ module Triannon
       def set_annotation
         @annotation = Annotation.find(params[:id])
       end
-
+      
       def default_format_jsonld
         if ((!request.accept || request.accept.empty?) && (!params[:format] || params[:format].empty?))
           request.format = "jsonld"
