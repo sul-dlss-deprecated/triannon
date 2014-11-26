@@ -36,9 +36,10 @@ module Triannon
       @annotation = Annotation.new
     end
 
-    # GET /annotations/annotations/1/edit
-    def edit
-    end
+    # NOT YET IMPLEMENTED
+    # GET /annotations/annotations/1/edit    
+#    def edit
+#    end
 
     # POST /annotations/annotations
     def create
@@ -61,14 +62,15 @@ module Triannon
       end
     end
 
+    # NOT YET IMPLEMENTED
     # PATCH/PUT /annotations/annotations/1
-    def update
-      if @annotation.update(params)
-        redirect_to @annotation, notice: 'Annotation was successfully updated.'
-      else
-        render :edit
-      end
-    end
+#    def update
+#      if @annotation.update(params)
+#        redirect_to @annotation, notice: 'Annotation was successfully updated.'
+#      else
+#        render :edit
+#      end
+#    end
 
     # DELETE /annotations/annotations/1
     def destroy
