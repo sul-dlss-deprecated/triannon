@@ -44,23 +44,31 @@ describe Triannon::Annotation, :vcr => vcr_options do
   
   context '#jsonld_oa' do
     let(:anno) { Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl") }
+    let(:anno2) { Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json") }
     it 'has context as url' do
       expect(anno.jsonld_oa).to match /"@context":\s*"http:\/\/www.w3.org\/ns\/oa.jsonld"/
+      expect(anno2.jsonld_oa).to match /"@context":\s*"http:\/\/www.w3.org\/ns\/oa.jsonld"/
     end
     it 'parses as graph' do
       new_anno = Triannon::Annotation.new data: anno.jsonld_oa
       expect(new_anno.graph.to_ttl).to eq anno.graph.to_ttl
+      new_anno = Triannon::Annotation.new data: anno2.jsonld_oa
+      expect(new_anno.graph.to_ttl).to eq anno2.graph.to_ttl
     end
   end
   
   context '#jsonld_iiif' do
     let(:anno) { Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl") }
+    let(:anno2) { Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json") }
     it 'has context as url' do
       expect(anno.jsonld_iiif).to match /"@context":\s*"http:\/\/iiif.io\/api\/presentation\/2\/context.json"/
+      expect(anno2.jsonld_iiif).to match /"@context":\s*"http:\/\/iiif.io\/api\/presentation\/2\/context.json"/
     end
     it 'parses as graph' do
       new_anno = Triannon::Annotation.new data: anno.jsonld_iiif
       expect(new_anno.graph.to_ttl).to eq anno.graph.to_ttl
+      new_anno = Triannon::Annotation.new data: anno2.jsonld_iiif
+      expect(new_anno.graph.to_ttl).to eq anno2.graph.to_ttl
     end
   end
 

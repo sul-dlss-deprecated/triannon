@@ -70,13 +70,17 @@ module Triannon
     # @return json-ld representation of graph with OpenAnnotation context as a url
     def jsonld_oa
       inline_context = graph.dump(:jsonld, :context => "http://www.w3.org/ns/oa.jsonld")
-      inline_context.sub(/@context.*@graph/m, "@context\": \"http://www.w3.org/ns/oa.jsonld\",\n  \"@graph")
+      hash_from_json = JSON.parse(inline_context)
+      hash_from_json["@context"] = "http://www.w3.org/ns/oa.jsonld"
+      hash_from_json.to_json
     end
     
     # @return json-ld representation of graph with IIIF context as a url
     def jsonld_iiif
       inline_context = graph.dump(:jsonld, :context => "http://iiif.io/api/presentation/2/context.json")
-      inline_context.sub(/@context.*@graph/m, "@context\": \"http://iiif.io/api/presentation/2/context.json\",\n  \"@graph")
+      hash_from_json = JSON.parse(inline_context)
+      hash_from_json["@context"] = "http://iiif.io/api/presentation/2/context.json"
+      hash_from_json.to_json
     end
 
     # query for a subject with type of RDF::OpenAnnotation.Annotation
@@ -122,7 +126,7 @@ private
       if data
         data.strip!
         case data
-          when /\A\{.+\}\Z/m
+          when /\A\{.+\}\Z/m  # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
             g ||= RDF::Graph.new << JSON::LD::API.toRdf(json_ld) if json_ld
             self.data = g.dump(:ttl) if g
           when /\A<.+>\Z/m # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
@@ -138,7 +142,7 @@ private
       end
       g
     end
-
+    
     def json_ld
       if data.match(/"@context"\s*\:\s*"http\:\/\/www\.w3\.org\/ns\/oa-context-20130208\.json"/)
         data.sub!("\"http://www.w3.org/ns/oa-context-20130208.json\"", json_oa_context)
