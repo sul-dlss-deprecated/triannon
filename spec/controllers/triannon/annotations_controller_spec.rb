@@ -109,6 +109,15 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
           expect(@response.body).to match json_regex
           expect(@response.status).to eql(200)
         end
+        it 'returns OA context jsonld when context is missing in path' do
+          @request.accept = "application/ld+json"
+          get :show, id: bookmark_anno.id, jsonld_context: ''
+          expect(@response.body).to match("http://www.w3.org/ns/oa.jsonld")
+          expect(@response.body).to match(/"hasTarget":/)
+          expect(@response.content_type).to eql("application/ld+json")
+          expect(@response.body).to match json_regex
+          expect(@response.status).to eql(200)
+        end
         context 'pays attention to jsonld_context for all jsonld and json accept formats' do
           it_behaves_like 'jsonld_context respected', "iiif", "application/ld+json"
           it_behaves_like 'jsonld_context respected', "iiif", "application/json"
