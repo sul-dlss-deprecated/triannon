@@ -14,7 +14,16 @@ module Triannon
     # GET /annotations/annotations/1
     def show
       respond_to do |format|
-        format.jsonld { render :json => @annotation.graph.to_jsonld }
+        format.jsonld {
+          case params["jsonld_context"]
+            when "iiif", "IIIF"
+              render :json => @annotation.jsonld_iiif
+            when "oa", "OA"
+              render :json => @annotation.jsonld_oa
+            else
+              render :json => @annotation.graph.to_jsonld 
+          end 
+        }
         format.ttl {
           accept_return_type = mime_type_from_accept(["application/x-turtle", "text/turtle"])
           render :body => @annotation.graph.to_ttl, content_type: accept_return_type if accept_return_type }
