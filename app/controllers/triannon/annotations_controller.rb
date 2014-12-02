@@ -110,7 +110,7 @@ module Triannon
       end
       
       # render json_ld respecting requested context
-      # @param [String] req_context set to "iiif" or "oa".  Default is OA, though diff method is called to get it
+      # @param [String] req_context set to "iiif" or "oa".  Default is OA
       # @param [String] mime_type the mime type to be set in the Content-Type header of the HTTP response
       def render_jsonld_per_context (req_context, mime_type=nil)
         case req_context
@@ -128,9 +128,9 @@ module Triannon
             end
           else
             if mime_type
-              render :json => @annotation.graph.to_jsonld, content_type: mime_type
+              render :json => @annotation.jsonld_oa, content_type: mime_type
             else
-              render :json => @annotation.graph.to_jsonld
+              render :json => @annotation.jsonld_oa
             end
         end 
       end

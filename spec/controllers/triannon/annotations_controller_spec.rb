@@ -101,7 +101,13 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
           it_behaves_like 'jsonld_context respected', "OA"
         end
         it 'returns OA context jsonld when neither iiif or oa is in path' do
-          skip "test to be implemented"
+          @request.accept = "application/ld+json"
+          get :show, id: bookmark_anno.id, jsonld_context: 'foo'
+          expect(@response.body).to match("http://www.w3.org/ns/oa.jsonld")
+          expect(@response.body).to match(/"hasTarget":/)
+          expect(@response.content_type).to eql("application/ld+json")
+          expect(@response.body).to match json_regex
+          expect(@response.status).to eql(200)
         end
         context 'pays attention to jsonld_context for all jsonld and json accept formats' do
           it_behaves_like 'jsonld_context respected', "iiif", "application/ld+json"
