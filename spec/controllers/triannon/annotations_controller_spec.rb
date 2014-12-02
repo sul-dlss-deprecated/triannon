@@ -86,72 +86,61 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
           }
         end
       end
-      
-      context 'in path' do
-        context "iiif" do
-          it_behaves_like 'jsonld_context respected', "iiif"
-        end
-        context "IIIF" do
-          it_behaves_like 'jsonld_context respected', "IIIF"
-        end
-        context "oa" do
-          it_behaves_like 'jsonld_context respected', "oa"
-        end
-        context "OA" do
-          it_behaves_like 'jsonld_context respected', "OA"
-        end
-        it 'returns OA context jsonld when neither iiif or oa is in path' do
-          @request.accept = "application/ld+json"
-          get :show, id: bookmark_anno.id, jsonld_context: 'foo'
-          expect(@response.body).to match("http://www.w3.org/ns/oa.jsonld")
-          expect(@response.body).to match(/"hasTarget":/)
-          expect(@response.content_type).to eql("application/ld+json")
-          expect(@response.body).to match json_regex
-          expect(@response.status).to eql(200)
-        end
-        it 'returns OA context jsonld when context is missing in path' do
-          @request.accept = "application/ld+json"
-          get :show, id: bookmark_anno.id, jsonld_context: ''
-          expect(@response.body).to match("http://www.w3.org/ns/oa.jsonld")
-          expect(@response.body).to match(/"hasTarget":/)
-          expect(@response.content_type).to eql("application/ld+json")
-          expect(@response.body).to match json_regex
-          expect(@response.status).to eql(200)
-        end
-        context 'pays attention to jsonld_context for all jsonld and json accept formats' do
-          it_behaves_like 'jsonld_context respected', "iiif", "application/ld+json"
-          it_behaves_like 'jsonld_context respected', "iiif", "application/json"
-          it_behaves_like 'jsonld_context respected', "iiif", "text/x-json"
-          it_behaves_like 'jsonld_context respected', "iiif", "application/jsonrequest"
-          it_behaves_like 'jsonld_context respected', "oa", "application/ld+json"
-          it_behaves_like 'jsonld_context respected', "oa", "application/json"
-          it_behaves_like 'jsonld_context respected', "oa", "text/x-json"
-          it_behaves_like 'jsonld_context respected', "oa", "application/jsonrequest"
-        end
-        it 'ignores jsonld_context for formats other than jsonld and json' do
-          skip "test to be implemented"
-          it_behaves_like 'accept header determines media type', ["application/x-turtle", "application/rdf+xml", ""]
-        end
+    
+      context "iiif" do
+        it_behaves_like 'jsonld_context respected', "iiif"
       end
-      context 'as a user param' do
-        it 'iiif value returns IIIF context jsonld' do
-          skip "test to be implemented"
-        end
-        it 'IIIF value returns IIIF context jsonld' do
-          skip "test to be implemented"
-        end
-        it 'oa value returns OAI context jsonld' do
-          skip "test to be implemented"
-        end
-        it 'OA value returns OAI context jsonld' do
-          skip "test to be implemented"
-        end
-        it 'returns OA when neither iiif or oa is param value and format is jsonld' do
-          skip "test to be implemented"
-        end
-        it 'ignored when format is not json or jsonld' do
-          skip "test to be implemented"
-        end
+      context "IIIF" do
+        it_behaves_like 'jsonld_context respected', "IIIF"
+      end
+      context "oa" do
+        it_behaves_like 'jsonld_context respected', "oa"
+      end
+      context "OA" do
+        it_behaves_like 'jsonld_context respected', "OA"
+      end
+      it 'returns OA context jsonld when neither iiif or oa is in path' do
+        @request.accept = "application/ld+json"
+        get :show, id: bookmark_anno.id, jsonld_context: 'foo'
+        expect(@response.body).to match("http://www.w3.org/ns/oa.jsonld")
+        expect(@response.body).to match(/"hasTarget":/)
+        expect(@response.content_type).to eql("application/ld+json")
+        expect(@response.body).to match json_regex
+        expect(@response.status).to eql(200)
+      end
+      it 'returns OA context jsonld when context is missing in path' do
+        @request.accept = "application/ld+json"
+        get :show, id: bookmark_anno.id, jsonld_context: ''
+        expect(@response.body).to match("http://www.w3.org/ns/oa.jsonld")
+        expect(@response.body).to match(/"hasTarget":/)
+        expect(@response.content_type).to eql("application/ld+json")
+        expect(@response.body).to match json_regex
+        expect(@response.status).to eql(200)
+      end
+      context 'pays attention to jsonld_context for all jsonld and json accept formats' do
+        it_behaves_like 'jsonld_context respected', "iiif", "application/ld+json"
+        it_behaves_like 'jsonld_context respected', "iiif", "application/json"
+        it_behaves_like 'jsonld_context respected', "iiif", "text/x-json"
+        it_behaves_like 'jsonld_context respected', "iiif", "application/jsonrequest"
+        it_behaves_like 'jsonld_context respected', "iiif", ""
+        it_behaves_like 'jsonld_context respected', "oa", "application/ld+json"
+        it_behaves_like 'jsonld_context respected', "oa", "application/json"
+        it_behaves_like 'jsonld_context respected', "oa", "text/x-json"
+        it_behaves_like 'jsonld_context respected', "oa", "application/jsonrequest"
+        it_behaves_like 'jsonld_context respected', "oa", ""
+      end
+      it 'ignores jsonld_context for formats other than jsonld and json' do
+        ["application/x-turtle", "application/rdf+xml"].each { |mime_type|  
+          @request.accept = mime_type
+          [bookmark_anno, body_chars_anno].each { |anno|  
+            get :show, id: anno.id, jsonld_context: 'iiif'
+            expect(@response.body).not_to match("http://iiif.io/api/presentation/2/context.json")
+            expect(@response.body).not_to match(/"on":/)
+            expect(@response.body).not_to match json_regex
+            expect(@response.content_type).to eql(mime_type)
+            expect(@response.status).to eql(200)
+          }
+        }
       end
     end
     
