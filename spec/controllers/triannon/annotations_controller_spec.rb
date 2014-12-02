@@ -46,9 +46,12 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
   
   context '#show' do
     context 'jsonld_context param' do
-      shared_examples_for 'jsonld_context respected' do | jsonld_context |
+      shared_examples_for 'jsonld_context respected' do | jsonld_context, format |
         it 'calls correct method in Triannon::Annotation model' do
-          @request.accept = "application/ld+json"
+          if !format || format.length == 0
+            format = "application/ld+json"
+          end
+          @request.accept = format
           model = double()
           allow(Triannon::Annotation).to receive(:find).and_return(model)
           case jsonld_context
@@ -97,14 +100,22 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
         context "OA" do
           it_behaves_like 'jsonld_context respected', "OA"
         end
-        it 'pays attention to jsonld_context for all jsonld and json accept formats' do
-          skip "test to be implemented"
-        end
         it 'returns OA context jsonld when neither iiif or oa is in path' do
           skip "test to be implemented"
         end
+        context 'pays attention to jsonld_context for all jsonld and json accept formats' do
+          it_behaves_like 'jsonld_context respected', "iiif", "application/ld+json"
+          it_behaves_like 'jsonld_context respected', "iiif", "application/json"
+          it_behaves_like 'jsonld_context respected', "iiif", "text/x-json"
+          it_behaves_like 'jsonld_context respected', "iiif", "application/jsonrequest"
+          it_behaves_like 'jsonld_context respected', "oa", "application/ld+json"
+          it_behaves_like 'jsonld_context respected', "oa", "application/json"
+          it_behaves_like 'jsonld_context respected', "oa", "text/x-json"
+          it_behaves_like 'jsonld_context respected', "oa", "application/jsonrequest"
+        end
         it 'ignores jsonld_context for formats other than jsonld and json' do
           skip "test to be implemented"
+          it_behaves_like 'accept header determines media type', ["application/x-turtle", "application/rdf+xml", ""]
         end
       end
       context 'as a user param' do
