@@ -7,8 +7,8 @@ require "triannon/version"
 Gem::Specification.new do |s|
   s.name        = "triannon"
   s.version     = Triannon::VERSION
-  s.authors     = ["Chris Beer", "Naomi Dushay"]
-  s.email       = ["cabeer@stanford.edu", "ndushay@stanford.edu"]
+  s.authors     = ["Chris Beer", "Naomi Dushay", "Willy Mene"]
+  s.email       = ["cabeer@stanford.edu", "ndushay@stanford.edu", "wmene@stanford.edu"]
   s.summary     = "Rails engine for working with storage of OpenAnnotations stored in Fedora4"
   s.license     = "Apache 2"
 
