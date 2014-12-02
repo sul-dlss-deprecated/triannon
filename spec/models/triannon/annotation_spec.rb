@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-vcr_options = { :cassette_name => "models_triannon_annotation" }
-describe Triannon::Annotation, :vcr => vcr_options do
+#vcr_options = { :cassette_name => "models_triannon_annotation" }
+describe Triannon::Annotation, :vcr do
 
   it "doesn't do external lookup of json_ld context" , :vcr => {:record => :none} do
     anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
