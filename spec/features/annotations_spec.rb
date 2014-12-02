@@ -36,12 +36,12 @@ describe "viewing an annotation", :vcr, type: :feature do
 
     it "jsonld OpenAnnotation context" do
       expect(page).to have_content "OpenAnnotation context"
-      expect(page).to have_content "@context\": \"http://www.w3.org/ns/oa.jsonld\""
+      expect(page).to have_content "@context\":\"http://www.w3.org/ns/oa.jsonld\""
     end
 
     it "jsonld IIIF context" do
       expect(page).to have_content "IIIF context"
-      expect(page).to have_content "@context\": \"http://iiif.io/api/presentation/2/context.json\""
+      expect(page).to have_content "@context\":\"http://iiif.io/api/presentation/2/context.json\""
     end
   end
 
