@@ -17,4 +17,12 @@ gem 'pry-byebug', group: [:development, :test]
   if File.exists?(file)
     puts "Loading #{file} ..." if $DEBUG # `ruby -d` or `bundle -v`
     instance_eval File.read(file)
+  else
+    # we get here when we haven't yet generated the testing app via engine_cart
+
+    # as of rails v 4.2.0.rc1 (but perhaps not needed forever):
+    # somewhere in the triannon dependencies (2nd level or lower) is requiring sass;  the version from 
+    #  the triannon dependencies conflicts with the rails application's dependencies on sass
+    # magically, the following line fixes this problem.
+    gem 'sass-rails'
   end

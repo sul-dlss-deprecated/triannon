@@ -21,6 +21,7 @@ describe Triannon::RootAnnotationCreator, :vcr do
     after(:each) { delete_root }
 
     it "creates the root annotations container if it does not already exist" do
+      expect(STDOUT).to receive(:puts).with("Created root annotation container #{dummy_url}")
       expect(Triannon::RootAnnotationCreator.create).to eq true
 
       resp = conn.get do |req|
@@ -38,7 +39,9 @@ describe Triannon::RootAnnotationCreator, :vcr do
     end
 
     it "does not do anything if the root annotations container already exists" do
+      expect(STDOUT).to receive(:puts).with("Created root annotation container #{dummy_url}")
       expect(Triannon::RootAnnotationCreator.create).to eq true
+      expect(STDOUT).to receive(:puts).with("Root annotation resource already exists.")
       expect(Triannon::RootAnnotationCreator.create).to eq false
 
       resp = conn.get

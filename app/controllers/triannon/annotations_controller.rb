@@ -14,7 +14,7 @@ module Triannon
     # GET /annotations/annotations/1
     def show
       respond_to do |format|
-        format.jsonld { render :json => @annotation.graph.to_jsonld }
+        format.jsonld { render_jsonld_per_context (params[:jsonld_context]) }
         format.ttl {
           accept_return_type = mime_type_from_accept(["application/x-turtle", "text/turtle"])
           render :body => @annotation.graph.to_ttl, content_type: accept_return_type if accept_return_type }
@@ -23,7 +23,7 @@ module Triannon
           render :body => @annotation.graph.to_rdfxml, content_type: accept_return_type if accept_return_type }
         format.json {
           accept_return_type = mime_type_from_accept(["application/json", "text/x-json", "application/jsonrequest"])
-          render :json => @annotation.graph.to_jsonld, content_type: accept_return_type if accept_return_type }
+          render_jsonld_per_context(params[:jsonld_context], accept_return_type) }
         format.xml {
           accept_return_type = mime_type_from_accept(["application/xml", "text/xml", "application/x-xml"])
           render :xml => @annotation.graph.to_rdfxml, content_type: accept_return_type if accept_return_type }
@@ -36,9 +36,10 @@ module Triannon
       @annotation = Annotation.new
     end
 
-    # GET /annotations/annotations/1/edit
-    def edit
-    end
+    # NOT YET IMPLEMENTED
+    # GET /annotations/annotations/1/edit    
+#    def edit
+#    end
 
     # POST /annotations/annotations
     def create
@@ -61,14 +62,15 @@ module Triannon
       end
     end
 
+    # NOT YET IMPLEMENTED
     # PATCH/PUT /annotations/annotations/1
-    def update
-      if @annotation.update(params)
-        redirect_to @annotation, notice: 'Annotation was successfully updated.'
-      else
-        render :edit
-      end
-    end
+#    def update
+#      if @annotation.update(params)
+#        redirect_to @annotation, notice: 'Annotation was successfully updated.'
+#      else
+#        render :edit
+#      end
+#    end
 
     # DELETE /annotations/annotations/1
     def destroy
@@ -105,6 +107,32 @@ module Triannon
       # handle Triannon::ExternalReferenceError
       def ext_ref_error(exception)
         render plain: exception.message, status: 403
+      end
+      
+      # render json_ld respecting requested context
+      # @param [String] req_context set to "iiif" or "oa".  Default is OA
+      # @param [String] mime_type the mime type to be set in the Content-Type header of the HTTP response
+      def render_jsonld_per_context (req_context, mime_type=nil)
+        case req_context
+          when "iiif", "IIIF"
+            if mime_type
+              render :json => @annotation.jsonld_iiif, content_type: mime_type
+            else
+              render :json => @annotation.jsonld_iiif
+            end
+          when "oa", "OA"
+            if mime_type
+              render :json => @annotation.jsonld_oa, content_type: mime_type
+            else
+              render :json => @annotation.jsonld_oa
+            end
+          else
+            if mime_type
+              render :json => @annotation.jsonld_oa, content_type: mime_type
+            else
+              render :json => @annotation.jsonld_oa
+            end
+        end 
       end
   end
 end
