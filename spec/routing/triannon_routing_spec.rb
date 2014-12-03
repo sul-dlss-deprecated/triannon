@@ -41,6 +41,18 @@ describe Triannon::AnnotationsController, type: :routing do
       end
     end
     
+    context 'new action' do
+      it 'new iiif should not be available' do
+        expect(:get => "/annotations/iiif/new").to_not be_routable
+      end
+      it 'new oa should not be available' do
+        expect(:get => "/annotations/oa/new").to_not be_routable
+      end
+      it 'new (plain) should be properly routed' do
+        expect(:get => "/annotations/new").to route_to(:controller => "triannon/annotations", :action => "new")
+      end
+    end
+    
     context 'create action' do
       it 'create iiif should not be available' do
         expect(:post => "/annotations/iiif").to_not be_routable
