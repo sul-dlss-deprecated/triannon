@@ -21,7 +21,6 @@ Gem::Specification.new do |s|
   s.add_dependency "rdf-ldp"
   s.add_dependency "rdf-fcrepo4"
   s.add_dependency "bootstrap-sass"
-  s.add_dependency "sass", "~> 3.2"
   s.add_dependency "faraday"
 
   s.add_development_dependency "rspec", "~> 3.0"
