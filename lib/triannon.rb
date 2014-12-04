@@ -10,6 +10,7 @@ require 'faraday'
 module Triannon
   require "triannon/engine"
   require "triannon/error"
+  require "triannon/jsonld_context"
 
   class << self
     attr_accessor :config

@@ -73,11 +73,10 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
             get :show, id: anno.id, jsonld_context: jsonld_context
             case jsonld_context
               when "iiif", "IIIF"
-# FIXME:  these urls should be constants declared somewhere              
-                expect(@response.body).to match("http://iiif.io/api/presentation/2/context.json")
+                expect(@response.body).to match(Triannon::JsonldContext::IIIF_CONTEXT_URL)
                 expect(@response.body).to match(/"on":/)
               when "oa", "OA"
-                expect(@response.body).to match("http://www.w3.org/ns/oa.jsonld")
+                expect(@response.body).to match(Triannon::JsonldContext::OA_CONTEXT_URL)
                 expect(@response.body).to match(/"hasTarget":/)
             end
             expect(@response.content_type).to eql("application/ld+json")
@@ -102,7 +101,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       it 'returns OA context jsonld when neither iiif or oa is in path' do
         @request.accept = "application/ld+json"
         get :show, id: bookmark_anno.id, jsonld_context: 'foo'
-        expect(@response.body).to match("http://www.w3.org/ns/oa.jsonld")
+        expect(@response.body).to match(Triannon::JsonldContext::OA_CONTEXT_URL)
         expect(@response.body).to match(/"hasTarget":/)
         expect(@response.content_type).to eql("application/ld+json")
         expect(@response.body).to match json_regex
@@ -111,7 +110,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       it 'returns OA context jsonld when context is missing in path' do
         @request.accept = "application/ld+json"
         get :show, id: bookmark_anno.id, jsonld_context: ''
-        expect(@response.body).to match("http://www.w3.org/ns/oa.jsonld")
+        expect(@response.body).to match(Triannon::JsonldContext::OA_CONTEXT_URL)
         expect(@response.body).to match(/"hasTarget":/)
         expect(@response.content_type).to eql("application/ld+json")
         expect(@response.body).to match json_regex
@@ -134,7 +133,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
           @request.accept = mime_type
           [bookmark_anno, body_chars_anno].each { |anno|  
             get :show, id: anno.id, jsonld_context: 'iiif'
-            expect(@response.body).not_to match("http://iiif.io/api/presentation/2/context.json")
+            expect(@response.body).not_to match(Triannon::JsonldContext::IIIF_CONTEXT_URL)
             expect(@response.body).not_to match(/"on":/)
             expect(@response.body).not_to match json_regex
             expect(@response.content_type).to eql(mime_type)

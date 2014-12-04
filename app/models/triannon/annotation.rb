@@ -69,17 +69,17 @@ module Triannon
     
     # @return json-ld representation of graph with OpenAnnotation context as a url
     def jsonld_oa
-      inline_context = graph.dump(:jsonld, :context => "http://www.w3.org/ns/oa.jsonld")
+      inline_context = graph.dump(:jsonld, :context => Triannon::JsonldContext::OA_CONTEXT_URL)
       hash_from_json = JSON.parse(inline_context)
-      hash_from_json["@context"] = "http://www.w3.org/ns/oa.jsonld"
+      hash_from_json["@context"] = Triannon::JsonldContext::OA_CONTEXT_URL
       hash_from_json.to_json
     end
     
     # @return json-ld representation of graph with IIIF context as a url
     def jsonld_iiif
-      inline_context = graph.dump(:jsonld, :context => "http://iiif.io/api/presentation/2/context.json")
+      inline_context = graph.dump(:jsonld, :context => Triannon::JsonldContext::IIIF_CONTEXT_URL)
       hash_from_json = JSON.parse(inline_context)
-      hash_from_json["@context"] = "http://iiif.io/api/presentation/2/context.json"
+      hash_from_json["@context"] = Triannon::JsonldContext::IIIF_CONTEXT_URL
       hash_from_json.to_json
     end
 
@@ -145,31 +145,13 @@ private
     
     def json_ld
       if data.match(/"@context"\s*\:\s*"http\:\/\/www\.w3\.org\/ns\/oa-context-20130208\.json"/)
-        data.sub!("\"http://www.w3.org/ns/oa-context-20130208.json\"", json_oa_context)
+        data.sub!("\"http://www.w3.org/ns/oa-context-20130208.json\"", Triannon::JsonldContext.oa_context)
       elsif data.match(/"@context"\s*\:\s*"http\:\/\/www\.w3\.org\/ns\/oa\.jsonld"/)
-        data.sub!("\"http://www.w3.org/ns/oa.jsonld\"", json_oa_context)
+        data.sub!("\"http://www.w3.org/ns/oa.jsonld\"", Triannon::JsonldContext.oa_context)
       elsif data.match(/"@context"\s*\:\s*"http\:\/\/iiif\.io\/api\/presentation\/2\/context\.json"/)
-        data.sub!("\"http://iiif.io/api/presentation/2/context.json\"", json_iiif_context)
+        data.sub!("\"http://iiif.io/api/presentation/2/context.json\"", Triannon::JsonldContext.iiif_context)
       end
       @json_ld ||= JSON.parse(data) rescue nil
-    end
-
-    def json_oa_context
-      # FIXME:  this is a terrible place/way to see if we are running in the testing app!!
-      if Rails.root.to_s.match(/internal/) # testing via engine_cart
-        @json_oa_context ||= File.read(Rails.root.join("..", "..", "lib", "triannon", "oa_context_20130208.json"))
-      else
-        @json_oa_context ||= File.read(Rails.root.join("lib", "triannon", "oa_context_20130208.json"))
-      end
-    end
-
-    def json_iiif_context
-      # FIXME:  this is a terrible place/way to see if we are running in the testing app!!
-      if Rails.root.to_s.match(/internal/) # testing via engine_cart
-        @json_oa_context ||= File.read(Rails.root.join("..", "..", "lib", "triannon", "iiif_presentation_2_context.json"))
-      else
-        @json_oa_context ||= File.read(Rails.root.join("lib", "triannon", "iiif_presentation_2_context.json"))
-      end
     end
 
     def graph_exists?
