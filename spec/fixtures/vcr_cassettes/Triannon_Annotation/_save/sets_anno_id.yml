@@ -9,7 +9,8 @@ http_interactions:
         @prefix openannotation: <http://www.w3.org/ns/oa#> .
         @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
-        <> a openannotation:Annotation .
+        <http://example.org/annos/annotation/bookmark.json> a openannotation:Annotation;
+           openannotation:motivatedBy openannotation:bookmarking .
     headers:
       User-Agent:
       - Faraday v0.9.0
@@ -25,23 +26,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"1ff165122d0587e99e4d02e42ffda5e0a516ce69"'
+      - '"b8b393fde6cda58421bf31c4e59abab23e5b8855"'
       Last-Modified:
-      - Thu, 08 Jan 2015 00:08:58 GMT
+      - Thu, 08 Jan 2015 01:06:41 GMT
       Content-Length:
       - '75'
       Location:
-      - http://localhost:8983/fedora/rest/anno/e81c950f-5918-4564-b3cd-e5824a7ba175
+      - http://localhost:8983/fedora/rest/anno/84214cb0-f650-456d-acbb-6d41e70bbc77
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/e81c950f-5918-4564-b3cd-e5824a7ba175
+      string: http://localhost:8983/fedora/rest/anno/84214cb0-f650-456d-acbb-6d41e70bbc77
     http_version: 
-  recorded_at: Thu, 08 Jan 2015 00:08:58 GMT
+  recorded_at: Thu, 08 Jan 2015 01:06:41 GMT
 - request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno/e81c950f-5918-4564-b3cd-e5824a7ba175
+    uri: http://localhost:8983/fedora/rest/anno/84214cb0-f650-456d-acbb-6d41e70bbc77
     body:
       encoding: UTF-8
       string: |
@@ -51,7 +52,7 @@ http_interactions:
 
         <> a ldp:DirectContainer;
            ldp:hasMemberRelation openannotation:hasTarget;
-           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/e81c950f-5918-4564-b3cd-e5824a7ba175> .
+           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/84214cb0-f650-456d-acbb-6d41e70bbc77> .
     headers:
       User-Agent:
       - Faraday v0.9.0
@@ -69,23 +70,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"b8c34ea4be72f37b3447071dfc893c7f4784a778"'
+      - '"fd5410dc67d9af3bf6b6d284e22ab326459ba046"'
       Last-Modified:
-      - Thu, 08 Jan 2015 00:08:58 GMT
+      - Thu, 08 Jan 2015 01:06:41 GMT
       Content-Length:
       - '77'
       Location:
-      - http://localhost:8983/fedora/rest/anno/e81c950f-5918-4564-b3cd-e5824a7ba175/t
+      - http://localhost:8983/fedora/rest/anno/84214cb0-f650-456d-acbb-6d41e70bbc77/t
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/e81c950f-5918-4564-b3cd-e5824a7ba175/t
+      string: http://localhost:8983/fedora/rest/anno/84214cb0-f650-456d-acbb-6d41e70bbc77/t
     http_version: 
-  recorded_at: Thu, 08 Jan 2015 00:08:58 GMT
+  recorded_at: Thu, 08 Jan 2015 01:06:41 GMT
 - request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno/e81c950f-5918-4564-b3cd-e5824a7ba175/t
+    uri: http://localhost:8983/fedora/rest/anno/84214cb0-f650-456d-acbb-6d41e70bbc77/t
     body:
       encoding: UTF-8
       string: |
@@ -107,18 +108,18 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"43117226f133b437d9f7b78aebdab8e20ec30ecf"'
+      - '"490fe654effbbb3e136cd0fc786d6538daf4e51d"'
       Last-Modified:
-      - Thu, 08 Jan 2015 00:08:58 GMT
+      - Thu, 08 Jan 2015 01:06:41 GMT
       Content-Length:
       - '114'
       Location:
-      - http://localhost:8983/fedora/rest/anno/e81c950f-5918-4564-b3cd-e5824a7ba175/t/c99882c6-9886-4c29-8fa2-24fcf5bed6d0
+      - http://localhost:8983/fedora/rest/anno/84214cb0-f650-456d-acbb-6d41e70bbc77/t/b7e0656d-f86c-4de6-9adc-7f3d27bfb69c
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/e81c950f-5918-4564-b3cd-e5824a7ba175/t/c99882c6-9886-4c29-8fa2-24fcf5bed6d0
+      string: http://localhost:8983/fedora/rest/anno/84214cb0-f650-456d-acbb-6d41e70bbc77/t/b7e0656d-f86c-4de6-9adc-7f3d27bfb69c
     http_version: 
-  recorded_at: Thu, 08 Jan 2015 00:08:58 GMT
+  recorded_at: Thu, 08 Jan 2015 01:06:41 GMT
 recorded_with: VCR 2.9.3

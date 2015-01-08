@@ -56,7 +56,7 @@ module Triannon
       end
       
       if @annotation.save
-        redirect_to @annotation, notice: 'Annotation was successfully created.'
+        redirect_to @annotation, status: 201, notice: 'Annotation was successfully created.'
       else
         render :new
       end
@@ -75,7 +75,7 @@ module Triannon
     # DELETE /annotations/annotations/1
     def destroy
       @annotation.destroy
-      redirect_to annotations_url, notice: 'Annotation was successfully destroyed.'
+      redirect_to annotations_url, status: 204, notice: 'Annotation was successfully destroyed.'
     end
 
     private

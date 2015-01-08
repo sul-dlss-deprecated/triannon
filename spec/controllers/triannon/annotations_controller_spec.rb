@@ -9,12 +9,6 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
   # regex: \A and \Z and m are needed instead of ^$ due to \n in data)
   json_regex = /\A\{.+\}\Z/m
 
-
-  before(:each) do
-    allow(Triannon::Annotation).to receive(:find).with('123').and_return(bookmark_anno)
-    allow(Triannon::Annotation).to receive(:find).with('666').and_return(body_chars_anno)
-  end
-
   it "should have an index" do
     a1 = Triannon::Annotation.new :id => 'abc'
     a2 = Triannon::Annotation.new :id => 'dce'
@@ -26,13 +20,13 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
     it 'creates a new annotation from the body of the request' do
       ttl_data = Triannon.annotation_fixture("body-chars.ttl")
       post :create, ttl_data
-      expect(response.status).to eq 302
+      expect(response.status).to eq 201
     end
     
     it 'creates a new annotation from params from form' do
       ttl_data = Triannon.annotation_fixture("body-chars.ttl")
       post :create, :annotation => {:data => ttl_data}
-      expect(response.status).to eq 302
+      expect(response.status).to eq 201
     end
 
     it "renders 403 if Triannon::ExternalReferenceError raised during LdpCreator.create" do
@@ -45,6 +39,10 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
   end
   
   context '#show' do
+    before(:each) do
+      allow(Triannon::Annotation).to receive(:find).with('123').and_return(bookmark_anno)
+      allow(Triannon::Annotation).to receive(:find).with('666').and_return(body_chars_anno)
+    end
     context 'jsonld_context param' do
       shared_examples_for 'jsonld_context respected' do | jsonld_context, format |
         it 'calls correct method in Triannon::Annotation model' do
@@ -209,5 +207,15 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
     end # response format
     
   end # #show
+
+  context '#destroy' do
+    it "returns 204 status code for successful delete" do
+      anno = Triannon::Annotation.new({:data => Triannon.annotation_fixture("body-chars.ttl")})
+      anno_id = anno.save
+      my_anno = Triannon::Annotation.find(anno_id)
+      delete :destroy, :id => anno_id
+      expect(response.status).to eq 204
+    end
+  end
 
 end
