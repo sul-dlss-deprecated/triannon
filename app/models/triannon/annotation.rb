@@ -100,7 +100,7 @@ module Triannon
     def save
       # check if valid?
       graph
-      @key = Triannon::LdpCreator.create self
+      @id = Triannon::LdpCreator.create self
     end
 
     def destroy
@@ -111,6 +111,7 @@ module Triannon
       oa_graph = Triannon::LdpLoader.load key
       anno = Triannon::Annotation.new
       anno.graph = oa_graph
+      anno.id = key
       anno
     end
 

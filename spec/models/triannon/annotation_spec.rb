@@ -183,6 +183,23 @@ describe Triannon::Annotation, :vcr do
     end
   end
 
+  context '#save' do
+    it "sets anno id" do
+      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
+      anno_id = anno.save
+      expect(anno.id).to eq anno_id
+    end
+  end
+
+  context '*find' do
+    it "sets anno id" do
+      anno = Triannon::Annotation.new({:data => Triannon.annotation_fixture("body-chars.ttl")})
+      anno_id = anno.save
+      my_anno = Triannon::Annotation.find(anno_id)
+      expect(my_anno.id).to eq anno_id
+    end
+  end
+
   context "#destroy" do
     it "calls LdpDestroyer.destroy with it's own id" do
       id = 'someid'
