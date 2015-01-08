@@ -56,7 +56,7 @@ module Triannon
       end
       
       if @annotation.save
-        redirect_to @annotation, notice: 'Annotation was successfully created.'
+        redirect_to @annotation, status: 201, notice: 'Annotation was successfully created.'
       else
         render :new
       end
