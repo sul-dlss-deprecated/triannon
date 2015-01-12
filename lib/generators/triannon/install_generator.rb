@@ -3,7 +3,7 @@ require 'rails/generators'
 module Triannon
   class Install < Rails::Generators::Base
     def inject_Triannon_routes
-      route "mount Triannon::Engine, at: 'annotations'"
+      route "mount Triannon::Engine, at: ''"
     end
 
     def create_triannon_yml_file

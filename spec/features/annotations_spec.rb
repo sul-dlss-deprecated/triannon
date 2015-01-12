@@ -5,7 +5,7 @@ describe "viewing an annotation", :vcr, type: :feature do
     before(:each) do
       annotation = create_annotation('body-chars.json')
       allow(Triannon::Annotation).to receive(:find).and_return(annotation)
-      visit "/annotations/annotations/#{annotation.id}.html"
+      visit "/annotations/#{annotation.id}.html"
     end
 
     it "has a page title" do
@@ -23,7 +23,7 @@ describe "viewing an annotation", :vcr, type: :feature do
       it "multiple" do
         anno = create_annotation('mult-motivations.json')
         allow(Triannon::Annotation).to receive(:find).with(anno.id).and_return(anno)
-        visit "/annotations/annotations/#{anno.id}.html"
+        visit "/annotations/#{anno.id}.html"
         expect(page).to have_content "http://www.w3.org/ns/oa#moderating"
         expect(page).to have_content "http://www.w3.org/ns/oa#tagging"
       end

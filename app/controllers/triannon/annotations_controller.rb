@@ -6,12 +6,12 @@ module Triannon
     before_action :set_annotation, only: [:show, :edit, :update, :destroy]
     rescue_from Triannon::ExternalReferenceError, with: :ext_ref_error
 
-    # GET /annotations/annotations
+    # GET /annotations
     def index
       @annotations = Annotation.all
     end
 
-    # GET /annotations/annotations/1
+    # GET /annotations/1
     def show
       respond_to do |format|
         format.jsonld { render_jsonld_per_context (params[:jsonld_context]) }
@@ -31,17 +31,17 @@ module Triannon
       end
     end
 
-    # GET /annotations/annotations/new
+    # GET /annotations/new
     def new
       @annotation = Annotation.new
     end
 
     # NOT YET IMPLEMENTED
-    # GET /annotations/annotations/1/edit    
+    # GET /annotations/1/edit    
 #    def edit
 #    end
 
-    # POST /annotations/annotations
+    # POST /annotations
     def create
       # FIXME: this is probably a bad way of allowing app form to be used as well as direct post requests
       if params["annotation"]
@@ -63,7 +63,7 @@ module Triannon
     end
 
     # NOT YET IMPLEMENTED
-    # PATCH/PUT /annotations/annotations/1
+    # PATCH/PUT /annotations/1
 #    def update
 #      if @annotation.update(params)
 #        redirect_to @annotation, notice: 'Annotation was successfully updated.'
@@ -72,7 +72,7 @@ module Triannon
 #      end
 #    end
 
-    # DELETE /annotations/annotations/1
+    # DELETE /annotations/1
     def destroy
       @annotation.destroy
       redirect_to annotations_url, status: 204, notice: 'Annotation was successfully destroyed.'
