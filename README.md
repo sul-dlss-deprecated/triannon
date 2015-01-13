@@ -35,7 +35,7 @@ $ rails g triannon:install
 Edit the `config/triannon.yml` file:
 
 * `ldp_url:` Points to the root annotations container on your LDP server
-* `triannon_base_url:` Used as the base url for all annotations hosted by your Triannon server.  Identifiers from the LDP server will be appended to this base-url.
+* `triannon_base_url:` Used as the base url for all annotations hosted by your Triannon server.  Identifiers from the LDP server will be appended to this base-url.  Generally something like "https://your-triannon-rails-box/annotations", as "/annotations" is added to the path by the Triannon gem
 
 Generate the root annotations container on the LDP server
 
