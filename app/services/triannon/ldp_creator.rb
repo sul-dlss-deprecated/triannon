@@ -132,12 +132,15 @@ module Triannon
 
   protected
     def create_resource body, url = nil
-      response = conn.post do |req|
+      resp = conn.post do |req|
         req.url url if url
         req.headers['Content-Type'] = 'application/x-turtle'
         req.body = body
       end
-      new_url = response.headers['Location'] ? response.headers['Location'] : response.headers['location']
+      if resp.status != 200 && resp.status != 201
+        raise "Unable to create LDP resource in container #{url}: Response Status: #{resp.status}\nResponse Body: #{resp.body}\nAnnotation sent: #{body}"
+      end
+      new_url = resp.headers['Location'] ? resp.headers['Location'] : resp.headers['location']
       new_url.split('/').last if new_url
     end
 
@@ -151,13 +154,17 @@ module Triannon
       g << [null_rel_uri, RDF::LDP.hasMemberRelation, oa_vocab_term]
       g << [null_rel_uri, RDF::LDP.membershipResource, RDF::URI.new("#{@base_uri}/#{id}")]
 
-      response = conn.post do |req|
+      resp = conn.post do |req|
         req.url "#{id}"
         req.headers['Content-Type'] = 'application/x-turtle'
         # OA vocab relationships all of form "hasXXX"
         req.headers['Slug'] = oa_vocab_term.fragment.slice(3).downcase
         req.body = g.to_ttl
       end
+      if resp.status != 201
+        raise "Unable to create #{oa_vocab_term.fragment.sub('has', '')} LDP container for anno: Response Status: #{resp.status}\nResponse Body: #{resp.body}"
+      end
+      resp
     end
 
     # create the target/body resources inside the (already created) target/body container

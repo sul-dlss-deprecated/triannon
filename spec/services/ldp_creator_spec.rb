@@ -185,12 +185,12 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
     end
   end
 
-  describe '.create class method' do
-    it 'should call create_base' do
-      expect_any_instance_of(Triannon::LdpCreator).to receive(:create_base)
+  describe '*create' do
+    it 'calls create_base' do
+      expect_any_instance_of(Triannon::LdpCreator).to receive(:create_base).and_call_original
       Triannon::LdpCreator.create anno
     end
-    it 'should return the pid of the annotation container in fedora' do
+    it 'returns the pid of the annotation container in fedora' do
       id = Triannon::LdpCreator.create anno
       expect(id).to be_a String
       expect(id.size).to be > 10
@@ -202,7 +202,11 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       full_url = "#{Triannon.config[:ldp_url]}/#{id}"
       expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
     end
-    it 'should not create a body container if there are no bodies' do
+    it "raises an exception if the create does not succeed" do
+      allow_any_instance_of(Triannon::LdpCreator).to receive(:create_resource).and_raise("reason")
+      expect { Triannon::LdpCreator.create anno }.to raise_error
+    end
+    it 'does not create a body container if there are no bodies' do
       my_anno = Triannon::Annotation.new data: '{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json",
         "@type": "oa:Annotation",
@@ -211,7 +215,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       expect_any_instance_of(Triannon::LdpCreator).not_to receive(:create_body_container)
       Triannon::LdpCreator.create my_anno
     end
-    it 'should create a fedora resource for bodies ldp container at (id)/b' do
+    it 'creates a fedora resource for bodies ldp container at (id)/b' do
       pid = Triannon::LdpCreator.create anno
       container_url = "#{Triannon.config[:ldp_url]}/#{pid}/b"
       container_resp = conn.get do |req|
@@ -221,12 +225,12 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       g = RDF::Graph.new.from_ttl(container_resp.body)
       expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 1
     end
-    it 'should call create_body_container and create_body_resources if there are bodies' do
+    it 'calls create_body_container and create_body_resources if there are bodies' do
       expect_any_instance_of(Triannon::LdpCreator).to receive(:create_body_container).and_call_original
       expect_any_instance_of(Triannon::LdpCreator).to receive(:create_body_resources)
       Triannon::LdpCreator.create anno
     end
-    it 'should create a single body container with multiple resources if there are multiple bodies' do
+    it 'creates a single body container with multiple resources if there are multiple bodies' do
       my_anno = Triannon::Annotation.new data: '{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json",
         "@type": "oa:Annotation",
@@ -254,12 +258,12 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       g = RDF::Graph.new.from_ttl(container_resp.body)
       expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 2
     end
-    it 'should call create_target_container and create_target_resource' do
+    it 'calls create_target_container and create_target_resource' do
       expect_any_instance_of(Triannon::LdpCreator).to receive(:create_target_container).and_call_original
       expect_any_instance_of(Triannon::LdpCreator).to receive(:create_target_resources)
       Triannon::LdpCreator.create anno
     end
-    it 'should create a fedora resource for targets ldp container at (id)/t' do
+    it 'creates a fedora resource for targets ldp container at (id)/t' do
       pid = Triannon::LdpCreator.create anno
       container_url = "#{Triannon.config[:ldp_url]}/#{pid}/t"
       container_resp = conn.get do |req|
@@ -269,7 +273,7 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       g = RDF::Graph.new.from_ttl(container_resp.body)
       expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 1
     end
-    it 'should create a single target container with multiple resources if there are multiple targets' do
+    it 'creates a single target container with multiple resources if there are multiple targets' do
       my_anno = Triannon::Annotation.new data: '{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json",
         "@type": "oa:Annotation",
@@ -385,6 +389,16 @@ describe Triannon::LdpCreator, :vcr => vcr_options do
       g = RDF::Graph.new.from_ttl(resp.body)
       full_cont_url = "#{Triannon.config[:ldp_url]}/#{@new_pid}/b"
       expect(g.query([RDF::URI.new(full_cont_url), RDF::LDP.hasMemberRelation, RDF::OpenAnnotation.hasBody]).size).to eql 1
+    end
+    it "raises an exception if LDP store doesn't return a 200 or 201" do
+      resp = double()
+      allow(resp).to receive(:status).and_return(404)
+      allow(resp).to receive(:body)
+      my_conn = double()
+      allow(my_conn).to receive(:post).and_return(resp)
+      my_svc = Triannon::LdpCreator.new anno
+      allow(my_svc).to receive(:conn).and_return(my_conn)
+      expect { my_svc.send(:create_direct_container, RDF::OpenAnnotation.hasTarget) }.to raise_error(/Unable to create Target LDP container for anno: Response Status: 404/)
     end
   end
 

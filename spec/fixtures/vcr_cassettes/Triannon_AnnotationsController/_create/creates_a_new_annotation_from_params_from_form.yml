@@ -2,344 +2,6 @@
 http_interactions:
 - request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno/123995ca-b808-4ebe-8df4-0e407cd3bfb6
-    body:
-      encoding: UTF-8
-      string: |
-        @prefix ldp: <http://www.w3.org/ns/ldp#> .
-        @prefix openannotation: <http://www.w3.org/ns/oa#> .
-        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-
-        <> a ldp:DirectContainer;
-           ldp:hasMemberRelation openannotation:hasBody;
-           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/123995ca-b808-4ebe-8df4-0e407cd3bfb6> .
-    headers:
-      User-Agent:
-      - Faraday v0.9.0
-      Content-Type:
-      - application/x-turtle
-      Slug:
-      - b
-      Accept-Encoding:
-      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
-      Accept:
-      - "*/*"
-  response:
-    status:
-      code: 201
-      message: Created
-    headers:
-      Etag:
-      - '"6634bd492e58487145e68335ad64d49b6e9955cb"'
-      Last-Modified:
-      - Thu, 08 Jan 2015 00:08:30 GMT
-      Content-Length:
-      - '77'
-      Location:
-      - http://localhost:8983/fedora/rest/anno/123995ca-b808-4ebe-8df4-0e407cd3bfb6/b
-      Content-Type:
-      - text/plain
-    body:
-      encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/123995ca-b808-4ebe-8df4-0e407cd3bfb6/b
-    http_version: 
-  recorded_at: Thu, 08 Jan 2015 00:08:30 GMT
-- request:
-    method: post
-    uri: http://localhost:8983/fedora/rest/anno/123995ca-b808-4ebe-8df4-0e407cd3bfb6/b
-    body:
-      encoding: UTF-8
-      string: |
-        @prefix content: <http://www.w3.org/2011/content#> .
-        @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
-        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-        @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
-        <> a content:ContentAsText,
-             dcmitype:Text;
-           content:chars "I love this!" .
-    headers:
-      User-Agent:
-      - Faraday v0.9.0
-      Content-Type:
-      - application/x-turtle
-      Accept-Encoding:
-      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
-      Accept:
-      - "*/*"
-  response:
-    status:
-      code: 201
-      message: Created
-    headers:
-      Etag:
-      - '"363bfec32c8d46255f44acefb96d0ca38054a7f6"'
-      Last-Modified:
-      - Thu, 08 Jan 2015 00:08:30 GMT
-      Content-Length:
-      - '114'
-      Location:
-      - http://localhost:8983/fedora/rest/anno/123995ca-b808-4ebe-8df4-0e407cd3bfb6/b/f270633e-5ed1-47f9-bc63-2cf2525388d0
-      Content-Type:
-      - text/plain
-    body:
-      encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/123995ca-b808-4ebe-8df4-0e407cd3bfb6/b/f270633e-5ed1-47f9-bc63-2cf2525388d0
-    http_version: 
-  recorded_at: Thu, 08 Jan 2015 00:08:30 GMT
-- request:
-    method: post
-    uri: http://localhost:8983/fedora/rest/anno/123995ca-b808-4ebe-8df4-0e407cd3bfb6
-    body:
-      encoding: UTF-8
-      string: |
-        @prefix ldp: <http://www.w3.org/ns/ldp#> .
-        @prefix openannotation: <http://www.w3.org/ns/oa#> .
-        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-
-        <> a ldp:DirectContainer;
-           ldp:hasMemberRelation openannotation:hasTarget;
-           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/123995ca-b808-4ebe-8df4-0e407cd3bfb6> .
-    headers:
-      User-Agent:
-      - Faraday v0.9.0
-      Content-Type:
-      - application/x-turtle
-      Slug:
-      - t
-      Accept-Encoding:
-      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
-      Accept:
-      - "*/*"
-  response:
-    status:
-      code: 201
-      message: Created
-    headers:
-      Etag:
-      - '"1c2597130e3957c6ebfc01a9026d0cdb8cac76ea"'
-      Last-Modified:
-      - Thu, 08 Jan 2015 00:08:30 GMT
-      Content-Length:
-      - '77'
-      Location:
-      - http://localhost:8983/fedora/rest/anno/123995ca-b808-4ebe-8df4-0e407cd3bfb6/t
-      Content-Type:
-      - text/plain
-    body:
-      encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/123995ca-b808-4ebe-8df4-0e407cd3bfb6/t
-    http_version: 
-  recorded_at: Thu, 08 Jan 2015 00:08:30 GMT
-- request:
-    method: post
-    uri: http://localhost:8983/fedora/rest/anno/123995ca-b808-4ebe-8df4-0e407cd3bfb6/t
-    body:
-      encoding: UTF-8
-      string: |
-        @prefix triannon: <http://triannon.stanford.edu/ns/> .
-
-        <> triannon:externalReference <http://purl.stanford.edu/kq131cs7229> .
-    headers:
-      User-Agent:
-      - Faraday v0.9.0
-      Content-Type:
-      - application/x-turtle
-      Accept-Encoding:
-      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
-      Accept:
-      - "*/*"
-  response:
-    status:
-      code: 201
-      message: Created
-    headers:
-      Etag:
-      - '"091bd6d493a71534a37a7c63dd601f1ee7b952ca"'
-      Last-Modified:
-      - Thu, 08 Jan 2015 00:08:30 GMT
-      Content-Length:
-      - '114'
-      Location:
-      - http://localhost:8983/fedora/rest/anno/123995ca-b808-4ebe-8df4-0e407cd3bfb6/t/04dd2878-7b37-4c4a-9588-e69916fa2dda
-      Content-Type:
-      - text/plain
-    body:
-      encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/123995ca-b808-4ebe-8df4-0e407cd3bfb6/t/04dd2878-7b37-4c4a-9588-e69916fa2dda
-    http_version: 
-  recorded_at: Thu, 08 Jan 2015 00:08:30 GMT
-- request:
-    method: post
-    uri: http://localhost:8983/fedora/rest/anno/646555bd-0245-4b35-8e89-f1b18f7393a1
-    body:
-      encoding: UTF-8
-      string: |
-        @prefix ldp: <http://www.w3.org/ns/ldp#> .
-        @prefix openannotation: <http://www.w3.org/ns/oa#> .
-        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-
-        <> a ldp:DirectContainer;
-           ldp:hasMemberRelation openannotation:hasBody;
-           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/646555bd-0245-4b35-8e89-f1b18f7393a1> .
-    headers:
-      User-Agent:
-      - Faraday v0.9.0
-      Content-Type:
-      - application/x-turtle
-      Slug:
-      - b
-      Accept-Encoding:
-      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
-      Accept:
-      - "*/*"
-  response:
-    status:
-      code: 201
-      message: Created
-    headers:
-      Etag:
-      - '"44da4d64d513942caca09eb29c12ddeea2e20fad"'
-      Last-Modified:
-      - Fri, 23 Jan 2015 23:40:23 GMT
-      Content-Length:
-      - '77'
-      Location:
-      - http://localhost:8983/fedora/rest/anno/646555bd-0245-4b35-8e89-f1b18f7393a1/b
-      Content-Type:
-      - text/plain
-    body:
-      encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/646555bd-0245-4b35-8e89-f1b18f7393a1/b
-    http_version: 
-  recorded_at: Fri, 23 Jan 2015 23:40:23 GMT
-- request:
-    method: post
-    uri: http://localhost:8983/fedora/rest/anno/646555bd-0245-4b35-8e89-f1b18f7393a1/b
-    body:
-      encoding: UTF-8
-      string: |
-        @prefix content: <http://www.w3.org/2011/content#> .
-        @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
-        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-        @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
-        <> a content:ContentAsText,
-             dcmitype:Text;
-           content:chars "I love this!" .
-    headers:
-      User-Agent:
-      - Faraday v0.9.0
-      Content-Type:
-      - application/x-turtle
-      Accept-Encoding:
-      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
-      Accept:
-      - "*/*"
-  response:
-    status:
-      code: 201
-      message: Created
-    headers:
-      Etag:
-      - '"d0fd4a480811675889529f6b147bc49d0446362d"'
-      Last-Modified:
-      - Fri, 23 Jan 2015 23:40:23 GMT
-      Content-Length:
-      - '114'
-      Location:
-      - http://localhost:8983/fedora/rest/anno/646555bd-0245-4b35-8e89-f1b18f7393a1/b/1b40bcad-ef6c-49ef-91cc-d8643ee6f4fd
-      Content-Type:
-      - text/plain
-    body:
-      encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/646555bd-0245-4b35-8e89-f1b18f7393a1/b/1b40bcad-ef6c-49ef-91cc-d8643ee6f4fd
-    http_version: 
-  recorded_at: Fri, 23 Jan 2015 23:40:23 GMT
-- request:
-    method: post
-    uri: http://localhost:8983/fedora/rest/anno/646555bd-0245-4b35-8e89-f1b18f7393a1
-    body:
-      encoding: UTF-8
-      string: |
-        @prefix ldp: <http://www.w3.org/ns/ldp#> .
-        @prefix openannotation: <http://www.w3.org/ns/oa#> .
-        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-
-        <> a ldp:DirectContainer;
-           ldp:hasMemberRelation openannotation:hasTarget;
-           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/646555bd-0245-4b35-8e89-f1b18f7393a1> .
-    headers:
-      User-Agent:
-      - Faraday v0.9.0
-      Content-Type:
-      - application/x-turtle
-      Slug:
-      - t
-      Accept-Encoding:
-      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
-      Accept:
-      - "*/*"
-  response:
-    status:
-      code: 201
-      message: Created
-    headers:
-      Etag:
-      - '"a8ae3e7a98863aa5b4b7dfa37cbcb285c76dafd0"'
-      Last-Modified:
-      - Fri, 23 Jan 2015 23:40:23 GMT
-      Content-Length:
-      - '77'
-      Location:
-      - http://localhost:8983/fedora/rest/anno/646555bd-0245-4b35-8e89-f1b18f7393a1/t
-      Content-Type:
-      - text/plain
-    body:
-      encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/646555bd-0245-4b35-8e89-f1b18f7393a1/t
-    http_version: 
-  recorded_at: Fri, 23 Jan 2015 23:40:23 GMT
-- request:
-    method: post
-    uri: http://localhost:8983/fedora/rest/anno/646555bd-0245-4b35-8e89-f1b18f7393a1/t
-    body:
-      encoding: UTF-8
-      string: |
-        @prefix triannon: <http://triannon.stanford.edu/ns/> .
-
-        <> triannon:externalReference <http://purl.stanford.edu/kq131cs7229> .
-    headers:
-      User-Agent:
-      - Faraday v0.9.0
-      Content-Type:
-      - application/x-turtle
-      Accept-Encoding:
-      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
-      Accept:
-      - "*/*"
-  response:
-    status:
-      code: 201
-      message: Created
-    headers:
-      Etag:
-      - '"c8a5459d35e71bdcf5e37ae571435249089098a1"'
-      Last-Modified:
-      - Fri, 23 Jan 2015 23:40:23 GMT
-      Content-Length:
-      - '114'
-      Location:
-      - http://localhost:8983/fedora/rest/anno/646555bd-0245-4b35-8e89-f1b18f7393a1/t/41f8b0d6-3c16-4bf4-95f3-d4114aa006cc
-      Content-Type:
-      - text/plain
-    body:
-      encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/646555bd-0245-4b35-8e89-f1b18f7393a1/t/41f8b0d6-3c16-4bf4-95f3-d4114aa006cc
-    http_version: 
-  recorded_at: Fri, 23 Jan 2015 23:40:23 GMT
-- request:
-    method: post
     uri: http://localhost:8983/fedora/rest/anno
     body:
       encoding: UTF-8
@@ -364,23 +26,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"6e0b18c6b82e1bd339d26479f9be88862156ebfa"'
+      - '"5b4d97953101a615e728a5d9c56c55b3cd3390df"'
       Last-Modified:
-      - Fri, 23 Jan 2015 23:42:23 GMT
+      - Mon, 26 Jan 2015 21:52:34 GMT
       Content-Length:
       - '75'
       Location:
-      - http://localhost:8983/fedora/rest/anno/da2a6097-6959-44cb-8258-90cdf00edf15
+      - http://localhost:8983/fedora/rest/anno/c7c88b86-7436-49d6-ad7b-fa3609932c1a
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/da2a6097-6959-44cb-8258-90cdf00edf15
+      string: http://localhost:8983/fedora/rest/anno/c7c88b86-7436-49d6-ad7b-fa3609932c1a
     http_version: 
-  recorded_at: Fri, 23 Jan 2015 23:42:23 GMT
+  recorded_at: Mon, 26 Jan 2015 21:52:34 GMT
 - request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno/da2a6097-6959-44cb-8258-90cdf00edf15
+    uri: http://localhost:8983/fedora/rest/anno/c7c88b86-7436-49d6-ad7b-fa3609932c1a
     body:
       encoding: UTF-8
       string: |
@@ -390,7 +52,7 @@ http_interactions:
 
         <> a ldp:DirectContainer;
            ldp:hasMemberRelation openannotation:hasBody;
-           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/da2a6097-6959-44cb-8258-90cdf00edf15> .
+           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/c7c88b86-7436-49d6-ad7b-fa3609932c1a> .
     headers:
       User-Agent:
       - Faraday v0.9.0
@@ -408,23 +70,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"c7c2a0226566b26b716b602eb990bdaace2044b2"'
+      - '"9a1ae6d99501940b413f248ece5f05bcb05df735"'
       Last-Modified:
-      - Fri, 23 Jan 2015 23:42:23 GMT
+      - Mon, 26 Jan 2015 21:52:34 GMT
       Content-Length:
       - '77'
       Location:
-      - http://localhost:8983/fedora/rest/anno/da2a6097-6959-44cb-8258-90cdf00edf15/b
+      - http://localhost:8983/fedora/rest/anno/c7c88b86-7436-49d6-ad7b-fa3609932c1a/b
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/da2a6097-6959-44cb-8258-90cdf00edf15/b
+      string: http://localhost:8983/fedora/rest/anno/c7c88b86-7436-49d6-ad7b-fa3609932c1a/b
     http_version: 
-  recorded_at: Fri, 23 Jan 2015 23:42:23 GMT
+  recorded_at: Mon, 26 Jan 2015 21:52:34 GMT
 - request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno/da2a6097-6959-44cb-8258-90cdf00edf15/b
+    uri: http://localhost:8983/fedora/rest/anno/c7c88b86-7436-49d6-ad7b-fa3609932c1a/b
     body:
       encoding: UTF-8
       string: |
@@ -451,23 +113,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"8823e57ab9dc66d9e333f0398dc87df6f2b545f5"'
+      - '"38c96a15811a5459b8fb7857c36913afdfcec480"'
       Last-Modified:
-      - Fri, 23 Jan 2015 23:42:23 GMT
+      - Mon, 26 Jan 2015 21:52:34 GMT
       Content-Length:
       - '114'
       Location:
-      - http://localhost:8983/fedora/rest/anno/da2a6097-6959-44cb-8258-90cdf00edf15/b/fe8761c9-3eb0-441e-8e6f-e5c1b1e7117b
+      - http://localhost:8983/fedora/rest/anno/c7c88b86-7436-49d6-ad7b-fa3609932c1a/b/963daf02-7a29-4357-a87a-0210945e5b34
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/da2a6097-6959-44cb-8258-90cdf00edf15/b/fe8761c9-3eb0-441e-8e6f-e5c1b1e7117b
+      string: http://localhost:8983/fedora/rest/anno/c7c88b86-7436-49d6-ad7b-fa3609932c1a/b/963daf02-7a29-4357-a87a-0210945e5b34
     http_version: 
-  recorded_at: Fri, 23 Jan 2015 23:42:23 GMT
+  recorded_at: Mon, 26 Jan 2015 21:52:34 GMT
 - request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno/da2a6097-6959-44cb-8258-90cdf00edf15
+    uri: http://localhost:8983/fedora/rest/anno/c7c88b86-7436-49d6-ad7b-fa3609932c1a
     body:
       encoding: UTF-8
       string: |
@@ -477,7 +139,7 @@ http_interactions:
 
         <> a ldp:DirectContainer;
            ldp:hasMemberRelation openannotation:hasTarget;
-           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/da2a6097-6959-44cb-8258-90cdf00edf15> .
+           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/c7c88b86-7436-49d6-ad7b-fa3609932c1a> .
     headers:
       User-Agent:
       - Faraday v0.9.0
@@ -495,23 +157,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"abec90a7c3663e26abbe30ad70b7d12f0572aa64"'
+      - '"0ce8f9f37dbc2c6947f1758d403367fec1b88dd3"'
       Last-Modified:
-      - Fri, 23 Jan 2015 23:42:23 GMT
+      - Mon, 26 Jan 2015 21:52:34 GMT
       Content-Length:
       - '77'
       Location:
-      - http://localhost:8983/fedora/rest/anno/da2a6097-6959-44cb-8258-90cdf00edf15/t
+      - http://localhost:8983/fedora/rest/anno/c7c88b86-7436-49d6-ad7b-fa3609932c1a/t
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/da2a6097-6959-44cb-8258-90cdf00edf15/t
+      string: http://localhost:8983/fedora/rest/anno/c7c88b86-7436-49d6-ad7b-fa3609932c1a/t
     http_version: 
-  recorded_at: Fri, 23 Jan 2015 23:42:23 GMT
+  recorded_at: Mon, 26 Jan 2015 21:52:34 GMT
 - request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno/da2a6097-6959-44cb-8258-90cdf00edf15/t
+    uri: http://localhost:8983/fedora/rest/anno/c7c88b86-7436-49d6-ad7b-fa3609932c1a/t
     body:
       encoding: UTF-8
       string: |
@@ -533,18 +195,18 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"65f85a134aa8ce304f115e4c487673390c635e1e"'
+      - '"7de275707a8339defc681892c4eb0a6e6a20c9b1"'
       Last-Modified:
-      - Fri, 23 Jan 2015 23:42:23 GMT
+      - Mon, 26 Jan 2015 21:52:34 GMT
       Content-Length:
       - '114'
       Location:
-      - http://localhost:8983/fedora/rest/anno/da2a6097-6959-44cb-8258-90cdf00edf15/t/84f4b98f-75e9-4505-a969-8f7ecee69afa
+      - http://localhost:8983/fedora/rest/anno/c7c88b86-7436-49d6-ad7b-fa3609932c1a/t/4b82eb98-abad-4b6b-babd-71bafafafacf
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/da2a6097-6959-44cb-8258-90cdf00edf15/t/84f4b98f-75e9-4505-a969-8f7ecee69afa
+      string: http://localhost:8983/fedora/rest/anno/c7c88b86-7436-49d6-ad7b-fa3609932c1a/t/4b82eb98-abad-4b6b-babd-71bafafafacf
     http_version: 
-  recorded_at: Fri, 23 Jan 2015 23:42:23 GMT
+  recorded_at: Mon, 26 Jan 2015 21:52:34 GMT
 recorded_with: VCR 2.9.3
