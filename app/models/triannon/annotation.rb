@@ -1,6 +1,10 @@
 module Triannon
   class Annotation
     include ActiveModel::Model
+    
+    define_model_callbacks :save, :destroy
+    after_save :solr_save
+    after_destroy :solr_delete
 
     attr_accessor :id, :data
 
@@ -98,13 +102,17 @@ module Triannon
     end
 
     def save
-      # check if valid?
-      graph
-      @id = Triannon::LdpCreator.create self
+      _run_save_callbacks do
+        # check if valid?
+        graph
+        @id = Triannon::LdpCreator.create self
+      end
     end
 
     def destroy
-      Triannon::LdpDestroyer.destroy @id
+      _run_destroy_callbacks do
+        Triannon::LdpDestroyer.destroy @id
+      end
     end
 
     def self.find(key)
@@ -119,6 +127,17 @@ module Triannon
       Triannon::LdpLoader.find_all
     end
 
+protected
+
+    # TODO: WRITE_COMMENTS_AND_TESTS_FOR_THIS_METHOD
+    def solr_save
+      puts "TO DO: send add to Solr (after save)"
+    end
+
+    # TODO: WRITE_COMMENTS_AND_TESTS_FOR_THIS_METHOD
+    def solr_delete
+      puts "TO DO: send delete to Solr (after destroy)"
+    end
 
 private
 

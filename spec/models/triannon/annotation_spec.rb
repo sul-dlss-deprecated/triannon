@@ -189,6 +189,26 @@ describe Triannon::Annotation, :vcr do
       anno_id = anno.save
       expect(anno.id).to eq anno_id
     end
+    it "calls solr_save method after successful save to LDP Store" do
+      # test to make sure callback logic implemented properly in model
+      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
+      expect(anno).to receive(:solr_save)
+      anno.save
+    end
+    it "doesn't call solr_save method after unsuccessful save to LDP Store - nil returned" do
+      # test to make sure callback logic implemented properly in model
+      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
+      allow(anno).to receive(:save).and_return(nil) # or it might raise an exception
+      expect(anno).not_to receive(:solr_save)
+      anno.save
+    end
+    it "doesn't call solr_save method after exception for LDP store create" do
+      # test to make sure callback logic implemented properly in model
+      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
+      allow(anno).to receive(:create).and_raise(RuntimeError)
+      expect(anno).not_to receive(:solr_save)
+      expect{anno.save}.to raise_error
+    end
   end
 
   context '*find' do
@@ -200,13 +220,52 @@ describe Triannon::Annotation, :vcr do
     end
   end
 
-  context "#destroy" do
-    it "calls LdpDestroyer.destroy with it's own id" do
-      id = 'someid'
+  context '*anno_query' do
+    it "should find a solution when graph has RDF.type OA::Annotation" do
+      my_url = "http://fakeurl.org/id"
+      g = RDF::Graph.new.from_ttl("<#{my_url}> a <http://www.w3.org/ns/oa#Annotation> .")
+      solutions = g.query Triannon::Annotation.anno_query
+      expect(solutions.size).to eq 1
+      expect(solutions.first.s.to_s).to eq my_url
+    end
+    it "should not find a solution when graph has no RDF.type OA::Annotation" do
+      g = RDF::Graph.new.from_ttl("<http://anywehre.com> a <http://foo.org/thing> .")
+      solutions = g.query Triannon::Annotation.anno_query
+      expect(solutions.size).to eq 0
+    end
+    it "doesn't find solution when graph is empty" do
+      solutions = RDF::Graph.new.query Triannon::Annotation.anno_query
+      expect(solutions.size).to eq 0
+    end
+  end
 
-      expect(Triannon::LdpDestroyer).to receive(:destroy).with(id)
+  context "#destroy" do
+    it "calls LdpDestroyer.destroy with its own id" do
+      id = 'someid'
       a = Triannon::Annotation.new :id => id
+      expect(Triannon::LdpDestroyer).to receive(:destroy).with(id)
       a.destroy
+    end
+    it "calls solr_delete method after successful destroy in LDP store" do
+      # test to make sure callback logic implemented properly in model
+      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
+      anno.save
+      expect(anno).to receive(:solr_delete)
+      anno.destroy
+    end
+    it "doesn't call solr_save method after unsuccessful save to LDP Store - nil returned" do
+      # test to make sure callback logic implemented properly in model
+      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
+      allow(anno).to receive(:destroy).and_return(nil) # or it might raise an exception
+      expect(anno).not_to receive(:solr_save)
+      anno.destroy
+    end
+    it "doesn't call solr_delete method after exception for LDP store destroy" do
+      # test to make sure callback logic implemented properly in model
+      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
+      allow(anno).to receive(:destroy).and_raise(RuntimeError)
+      expect(anno).not_to receive(:solr_delete)
+      expect{anno.destroy}.to raise_error
     end
   end
 
