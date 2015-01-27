@@ -18,6 +18,7 @@ module Triannon
       res.first.s
     end
 
+    # @return [Array<String>] the uris of each LDP body resource
     def body_uris
       q = Triannon::Graph.anno_query.dup
       q << [:s, RDF::OpenAnnotation.hasBody, :body_uri]
@@ -29,6 +30,7 @@ module Triannon
       result
     end
 
+    # @return [Array<String>] the uris of each LDP target resource
     def target_uris
       q = Triannon::Graph.anno_query.dup
       q << [:s, RDF::OpenAnnotation.hasTarget, :target_uri]
