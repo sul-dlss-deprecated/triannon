@@ -54,7 +54,15 @@ describe Triannon::LdpLoader do
       expect(loader.ldp_annotation).to receive(:load_statements_into_graph)
       loader.load_anno_container
     end
-    it "no triple in the graph should have the (ldp store) body uri as a subject (before #load_bodies is called)" do
+    it "graph triples include annotatedAt triple from stored anno object" do
+      loader = Triannon::LdpLoader.new 'somekey'
+      prov_ttl = File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_base_prov.ttl')
+      allow(loader).to receive(:get_ttl).with("somekey").and_return(prov_ttl)
+      loader.load_anno_container
+      result = loader.ldp_annotation.graph.query [nil, RDF::OpenAnnotation.annotatedAt, nil]
+      expect(result.size).to eq 1
+    end
+    it "no triple in the graph has the (ldp store) body uri as a subject (before #load_bodies is called)" do
       loader = Triannon::LdpLoader.new 'somekey'
       allow(loader).to receive(:get_ttl).with("somekey").and_return(anno_ttl)
       loader.load_anno_container
@@ -62,7 +70,7 @@ describe Triannon::LdpLoader do
       result = loader.ldp_annotation.graph.query [body_uri, nil, nil]
       expect(result.size).to eq 0
     end
-    it "no triple in the graph should have the (ldp store) target uri as a subject (before #load_targets is called)" do
+    it "no triple in the graph has the (ldp store) target uri as a subject (before #load_targets is called)" do
       loader = Triannon::LdpLoader.new 'somekey'
       allow(loader).to receive(:get_ttl).with("somekey").and_return(anno_ttl)
       loader.load_anno_container
@@ -193,7 +201,7 @@ describe Triannon::LdpLoader do
   end
 
   describe '#get_ttl' do
-    it "retrives data via HTTP over LdpLoader.conn when given an id" do
+    it "retrieves data via HTTP over LdpLoader.conn when given an id" do
       # TODO brittle since it stubs the whole http interaction
       resp = double()
       allow(resp).to receive(:body)

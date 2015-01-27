@@ -24,8 +24,9 @@ module Triannon
           @id = stmnt.subject.to_s.split('/').last
           @root_uri = RDF::URI.new(Triannon.config[:triannon_base_url] + "/#{@id}")
           @oa_graph << [@root_uri, RDF.type, RDF::OpenAnnotation.Annotation]
-
         elsif stmnt.predicate == RDF::OpenAnnotation.motivatedBy
+          @oa_graph << [@root_uri, stmnt.predicate, stmnt.object]
+        elsif stmnt.predicate == RDF::OpenAnnotation.annotatedAt
           @oa_graph << [@root_uri, stmnt.predicate, stmnt.object]
         end
       end

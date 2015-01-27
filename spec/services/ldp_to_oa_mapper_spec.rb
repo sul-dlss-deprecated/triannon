@@ -37,7 +37,7 @@ describe Triannon::LdpToOaMapper do
   end
 
   describe "#extract_base" do
-    let(:mapper) { Triannon::LdpToOaMapper.new ldp_anno  }
+    let(:mapper) { Triannon::LdpToOaMapper.new ldp_anno }
 
     it "extracts the id from the root subject" do
       mapper.extract_base
@@ -46,8 +46,8 @@ describe Triannon::LdpToOaMapper do
 
     it "builds the base identifier from the Config.open_annotation.base_uri and @id" do
       mapper.extract_base
-      resp = mapper.oa_graph.query [nil,RDF.type, RDF::OpenAnnotation.Annotation ]
-      expect(resp.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/deb27887-1241-4ccc-a09c-439293d73fbb"
+      soln = mapper.oa_graph.query [nil, RDF.type, RDF::OpenAnnotation.Annotation]
+      expect(soln.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/deb27887-1241-4ccc-a09c-439293d73fbb"
     end
 
     it "checks the RDF.type to be RDF::OpenAnnotation.Annotation" do
@@ -56,10 +56,20 @@ describe Triannon::LdpToOaMapper do
 
     it "extracts the motivations" do
       mapper.extract_base
-
-      res = mapper.oa_graph.query [nil, RDF::OpenAnnotation.motivatedBy, nil]
-      expect(res.count).to eq 1
-      expect(res.first.object).to eq RDF::OpenAnnotation.commenting
+      soln = mapper.oa_graph.query [nil, RDF::OpenAnnotation.motivatedBy, nil]
+      expect(soln.count).to eq 1
+      expect(soln.first.object).to eq RDF::OpenAnnotation.commenting
+    end
+    
+    it "extracts annotatedAt" do
+      prov_base_ttl = File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_base_prov.ttl')
+      my_ldp_anno = Triannon::AnnotationLdp.new
+      my_ldp_anno.load_statements_into_graph RDF::Graph.new.from_ttl(prov_base_ttl).statements
+      my_mapper = Triannon::LdpToOaMapper.new my_ldp_anno
+      my_mapper.extract_base
+      soln = my_mapper.oa_graph.query [nil, RDF::OpenAnnotation.annotatedAt, nil]
+      expect(soln.count).to eq 1
+      expect(soln.first.object.to_s).to eq "2015-01-07T18:01:21Z"
     end
   end
 
