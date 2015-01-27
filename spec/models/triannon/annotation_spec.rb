@@ -220,25 +220,6 @@ describe Triannon::Annotation, :vcr do
     end
   end
 
-  context '*anno_query' do
-    it "should find a solution when graph has RDF.type OA::Annotation" do
-      my_url = "http://fakeurl.org/id"
-      g = RDF::Graph.new.from_ttl("<#{my_url}> a <http://www.w3.org/ns/oa#Annotation> .")
-      solutions = g.query Triannon::Annotation.anno_query
-      expect(solutions.size).to eq 1
-      expect(solutions.first.s.to_s).to eq my_url
-    end
-    it "should not find a solution when graph has no RDF.type OA::Annotation" do
-      g = RDF::Graph.new.from_ttl("<http://anywehre.com> a <http://foo.org/thing> .")
-      solutions = g.query Triannon::Annotation.anno_query
-      expect(solutions.size).to eq 0
-    end
-    it "doesn't find solution when graph is empty" do
-      solutions = RDF::Graph.new.query Triannon::Annotation.anno_query
-      expect(solutions.size).to eq 0
-    end
-  end
-
   context "#destroy" do
     it "calls LdpDestroyer.destroy with its own id" do
       id = 'someid'

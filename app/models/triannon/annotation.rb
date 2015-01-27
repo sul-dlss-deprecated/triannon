@@ -26,14 +26,6 @@ module Triannon
       a
     end
 
-    # query for a subject with type of RDF::OpenAnnotation.Annotation
-    def self.anno_query
-      @anno_query ||= begin
-        q = RDF::Query.new
-        q << [:s, RDF.type, RDF::URI("http://www.w3.org/ns/oa#Annotation")]
-      end
-    end
-
     def self.find(key)
       oa_graph = Triannon::LdpLoader.load key
       anno = Triannon::Annotation.new
@@ -91,9 +83,10 @@ module Triannon
     end
 
     # @return [String] the id of this annotation as a url
+    # TODO:  re-usable as part of Triannon::Graph class?
     def url
       if graph_exists?
-        solution = graph.query self.class.anno_query
+        solution = graph.query Triannon::Graph.anno_query
         if solution && solution.size == 1
           solution.first.s.to_s
         # TODO:  raise exception if no URL?
@@ -118,9 +111,10 @@ module Triannon
     end
 
     # @return [Array] of uris expressing the OA motivated_by values
+    # TODO:  re-usable as part of Triannon::Graph class?
     def motivated_by
       if graph_exists?
-        q = self.class.anno_query.dup
+        q = Triannon::Graph.anno_query.dup
         q << [:s, RDF::OpenAnnotation.motivatedBy, :motivated_by]
         solution = graph.query q
         if solution && solution.size > 0

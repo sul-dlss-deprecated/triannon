@@ -30,20 +30,6 @@ module Triannon
       end
     end
 
-    # given an RDF::Resource (an RDF::Node or RDF::URI), look for all the statements with that object
-    #  as the subject, and recurse through the graph to find all descendant statements pertaining to the subject
-    # @param subject the RDF object to be used as the subject in the graph query.  Should be an RDF::Node or RDF::URI
-    # @param [RDF::Graph] graph
-    # @return [Array[RDF::Statement]] all the triples with the given subject
-    def self.subject_statements(subject, graph)
-      result = []
-      graph.query([subject, nil, nil]).each { |stmt|
-        result << stmt
-        subject_statements(stmt.object, graph).each { |s| result << s }
-      }
-      result.uniq
-    end
-
     attr_accessor :id
 
     # @param [Triannon::Annotation] anno a Triannon::Annotation object
@@ -64,44 +50,9 @@ module Triannon
       @anno.graph.each { |s|
         g << s
       }
-
-      # don't include the hasBody statements and any other statements associated with them
-      bodies_stmts = g.query([nil, RDF::OpenAnnotation.hasBody, nil])
-      bodies_stmts.each { |has_body_stmt|
-        g.delete has_body_stmt
-        body_obj = has_body_stmt.object
-        Triannon::LdpCreator.subject_statements(body_obj, g).each { |s|
-          g.delete s
-        }
-      }
-
-      # don't include the hasTarget statements and any other statements associated with them
-      targets_stmts = g.query([nil, RDF::OpenAnnotation.hasTarget, nil])
-      targets_stmts.each { |has_target_stmt|
-        g.delete has_target_stmt
-        target_obj = has_target_stmt.object
-        Triannon::LdpCreator.subject_statements(target_obj, g).each { |s|
-          g.delete s
-        }
-      }
-
-      # transform an outer blank node into a null relative URI
-      anno_stmts = g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation])
-      anno_rdf_obj = anno_stmts.first.subject
-      if anno_rdf_obj.is_a?(RDF::Node)
-        # we need to use the null relative URI representation of blank nodes to write to LDP
-        anno_subject = RDF::URI.new
-      else # it's already a URI
-        anno_subject = anno_rdf_obj
-      end
-      Triannon::LdpCreator.subject_statements(anno_rdf_obj, g).each { |s|
-        if s.subject == anno_rdf_obj && anno_subject != anno_rdf_obj
-          g << RDF::Statement({:subject => anno_subject,
-                               :predicate => s.predicate,
-                               :object => s.object})
-          g.delete s
-        end
-      }
+      g = Triannon::Graph.new(g)
+      g.remove_non_base_statements
+      g.make_null_relative_uri_out_of_blank_node
 
       @id = create_resource g.to_ttl
     end
@@ -200,7 +151,7 @@ module Triannon
         # add statements with predicate_obj as the subject
         orig_hash_uri_objs = [] # the orig URI objects from [targetObject, OA.hasSource/.default/.item, (uri)] statements
         hash_uri_counter = 1
-        Triannon::LdpCreator.subject_statements(predicate_obj, @anno.graph).each { |s|
+        Triannon::Graph.subject_statements(predicate_obj, @anno.graph).each { |s|
           if s.subject == predicate_obj
             # deal with any external URI references which may occur in: 
             #  OA.hasSource (from SpecificResource), OA.default or OA.item (from Choice, Composite, List)
@@ -236,7 +187,7 @@ module Triannon
                                                       :predicate => RDF::Triannon.externalReference,
                                                       :object => RDF::URI.new(orig_hash_uri_obj.to_s)})
                 # and all of the orig URL's addl props
-                Triannon::LdpCreator.subject_statements(orig_hash_uri_obj, @anno.graph).each { |ss|
+                Triannon::Graph.subject_statements(orig_hash_uri_obj, @anno.graph).each { |ss|
                   if ss.subject == orig_hash_uri_obj
                     graph_for_resource << RDF::Statement({:subject => new_hash_uri_obj,
                                                           :predicate => ss.predicate,
@@ -261,7 +212,7 @@ module Triannon
         # make sure the graph we will write contains no extraneous statements about URIs
         #  now represented as hash URIs
         orig_hash_uri_objs.each { |uri_node| 
-          Triannon::LdpCreator.subject_statements(uri_node, graph_for_resource).each { |s|  
+          Triannon::Graph.subject_statements(uri_node, graph_for_resource).each { |s|  
             graph_for_resource.delete(s)
           }
         }
