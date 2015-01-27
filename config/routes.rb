@@ -10,6 +10,9 @@ Triannon::Engine.routes.draw do
                             id !~ /^new$/ && id !~ /^iiif$/ && id !~ /^oa$/ 
                         }
 
+  # enable PUT but not PATCH
+  put '/annotations/:id(.:format)', to: 'annotations#update'
+
   resources :annotations, :except => [:update, :edit, :show]
 
   # allow jsonld context in path (only allow iiif or oa as values)

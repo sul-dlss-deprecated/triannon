@@ -104,12 +104,9 @@ describe Triannon::AnnotationsController, type: :routing do
   end
 
   context 'http PUT' do
-    it '(plain) should not be available' do
-      expect(:put => "/annotations/666").to_not be_routable
+    it '(plain) routes to #update in annotations controller' do
+      expect(:put => "/annotations/666").to route_to(:controller => "triannon/annotations", :action => "update", :id => "666")
     end
-#    it '(plain) routes to #update in annotations controller' do
-#      expect(:put => "/annotations/666").to route_to(:controller => "triannon/annotations", :action => "update", :id => "666")
-#    end
     it 'iiif should not be available' do
       expect(:put => "/annotations/iiif/666").to_not be_routable
     end

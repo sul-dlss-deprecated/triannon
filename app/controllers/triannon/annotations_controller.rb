@@ -109,15 +109,16 @@ module Triannon
       end
     end
 
-    # NOT YET IMPLEMENTED
     # PATCH/PUT /annotations/1
-#    def update
-#      if @annotation.update(params)
-#        redirect_to @annotation, notice: 'Annotation was successfully updated.'
-#      else
-#        render :edit
-#      end
-#    end
+    #  note that PATCH is NOT implemented or allowed via routes
+    def update
+      # TODO: finish implementing the plumbing, then write tests for this. See https://github.com/sul-dlss/triannon/issues/13
+      if @annotation.update(params)
+        redirect_to @annotation, notice: 'Annotation was successfully updated.'
+      else
+        render :edit
+      end
+    end
 
     # DELETE /annotations/1
     def destroy
