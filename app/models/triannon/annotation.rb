@@ -44,13 +44,13 @@ module Triannon
       _run_save_callbacks do
         # check if valid?
         graph
-        @id = Triannon::LdpCreator.create self
+        @id = Triannon::LdpWriter.create_anno self
       end
     end
 
     def destroy
       _run_destroy_callbacks do
-        Triannon::LdpDestroyer.destroy @id
+        Triannon::LdpWriter.delete_anno @id
       end
     end
 

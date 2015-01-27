@@ -220,10 +220,10 @@ describe Triannon::Annotation, :vcr do
   end
 
   context "#destroy" do
-    it "calls LdpDestroyer.destroy with its own id" do
+    it "calls LdpWriter.delete_anno with its own id" do
       id = 'someid'
       a = Triannon::Annotation.new :id => id
-      expect(Triannon::LdpDestroyer).to receive(:destroy).with(id)
+      expect(Triannon::LdpWriter).to receive(:delete_anno).with(id)
       a.destroy
     end
     it "calls solr_delete method after successful destroy in LDP store" do
