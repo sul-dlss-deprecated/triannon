@@ -77,6 +77,34 @@ module Triannon
       @id = create_resource g.to_ttl
     end
 
+    # update the base container RDF statements that pertain to the Annotation content (not the LDP or storage layer triples)
+    def update_base_statements
+      # TODO: write tests for this. Also see https://github.com/sul-dlss/triannon/issues/13
+
+      # I need the anno id to stay the same
+      # I need the body and target container ids to stay the same
+      # I would like to revise only the RDF statements in the base container that pertain to OA base container info
+      # so i remove all the old statements for OA stuff
+      # and add all new statements for OA stuff
+      # and do a PUT to LDP store
+      
+      
+      if @anno.graph.query([nil, RDF::Triannon.externalReference, nil]).count > 0
+        raise Triannon::ExternalReferenceError, "Incoming annotations may not have http://triannon.stanford.edu/ns/externalReference as a predicate."
+      end
+      
+      # we need to work with a copy of the graph so we don't change @anno.graph
+      g = RDF::Graph.new
+      @anno.graph.each { |s|
+        g << s
+      }
+      g = Triannon::Graph.new(g)
+      g.remove_non_base_statements
+      
+      # need to keep LDP statements (and fedora statements???)
+      replace_rdf_statements(@key, g)
+    end
+
     # creates the LDP container for any and all bodies for this annotation
     def create_body_container
       create_direct_container RDF::OpenAnnotation.hasBody
@@ -266,6 +294,54 @@ module Triannon
         end
       }
       resource_ids
+    end
+
+    # replace the target/body resources inside the target/body container
+    # @param [RDF::URI] predicate either RDF::OpenAnnotation.hasTarget or RDF::OpenAnnotation.hasBody
+    def replace_resources_in_container(predicate, anno_id)
+      old_anno_loader = Triannon::LdpLoader.new anno_id
+      old_anno_loader.load_anno_container
+
+      case predicate
+        when RDF::OpenAnnotation.hasBody
+          old_resource_uris = old_anno_loader.ldp_annotation.body_uris
+          parent_path = 'b'
+        when RDF::OpenAnnotation.hasTarget
+          old_resource_uris = old_anno_loader.ldp_annotation.target_uris
+          parent_path = 't'
+      end
+    
+      # remove old resources
+      removed_resources = delete_containers old_resource_uris
+    
+      new_resources = @anno.graph.query([nil, predicate, nil]).size > 0
+      if new_resources
+        if !removed_resources
+          # ensure container exists
+          resp = conn.get do |req|
+            req.url "#{anno_id}/#{parent_path}"
+          end
+          if resp.status != 200
+            create_direct_container predicate
+          end
+        end
+        # write new ones
+        create_resources_in_container(predicate)
+      end
+    end
+    
+    # update the object by removing all non-LDP, non-storage layer rdf statements from the object,
+    # then adding all the rdf statements in the new_graph
+    # @param [String] container_id the id of the LDP container in which rdf statements will be updated
+    # @param [RDF::Graph] new_graph contains all the RDF statements to be added to this object
+    def replace_rdf_statements(container_id, new_graph)
+      # TODO: write this. See https://github.com/sul-dlss/triannon/issues/13
+    
+      # FIXME: can this be done with a simple create_resource? or will that barf because resource already exists?
+      # FIXME: do we have to send in the id as a slug??
+      # remove all non-fedora, non-LDP statements from graph
+      # add all statements in new_graph
+      # write updated object
     end
 
     def conn

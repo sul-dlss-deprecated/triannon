@@ -1214,4 +1214,65 @@ describe Triannon::LdpWriter, :vcr do
     end
   end # create_resources_in_container
 
+  context '#replace_resources_in_container' do
+    let(:no_body_anno) {Triannon::Annotation.new data: '
+      <> a <http://www.w3.org/ns/oa#Annotation>;
+        <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq131cs7229>;
+        <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#bookmarking> .'
+    }
+    context 'deletes all the old resources' do
+      it 'when no new resources' do
+        anno_id = Triannon::LdpWriter.create_anno anno
+        ldr = Triannon::LdpLoader.new anno_id
+        ldr.load_anno_container
+        expect(ldr.ldp_annotation.body_uris.size).to eql 1
+        old_body_uris = ldr.ldp_annotation.body_uris
+
+        ldpw = Triannon::LdpWriter.new(no_body_anno, anno_id)
+        ldpw.send(:replace_resources_in_container, RDF::OpenAnnotation.hasBody, anno_id)
+       
+        old_body_uris.each { |uri|
+          resp = conn.get { |req| req.url uri }
+          expect(resp.status).to eql 410
+        }
+      end
+      it 'when new resources' do
+        anno_id = Triannon::LdpWriter.create_anno anno
+        ldr = Triannon::LdpLoader.new anno_id
+        ldr.load_anno_container
+        old_body_uris = ldr.ldp_annotation.body_uris
+  
+        ldpw = Triannon::LdpWriter.new(anno, anno_id)
+        ldpw.send(:replace_resources_in_container, RDF::OpenAnnotation.hasBody, anno_id)
+        old_body_uris.each { |uri|
+          resp = conn.get { |req| req.url uri }
+          expect(resp.status).to eql 410
+        }
+      end
+      it 'works smoothly when no old resources' do
+        # see "creates the /b or /t container if it doesn't exist"
+      end
+    end
+    it "creates the /b or /t container if it doesn't exist" do
+      anno_id = Triannon::LdpWriter.create_anno no_body_anno
+      resp = conn.get { |req| req.url "#{anno_id}/b" }
+      expect(resp.status).to eql 404
+      
+      ldpw = Triannon::LdpWriter.new(anno, anno_id)
+      ldpw.send(:replace_resources_in_container, RDF::OpenAnnotation.hasBody, anno_id)
+      resp = conn.get { |req| req.url "#{anno_id}/b" }
+      expect(resp.status).to eql 200
+      expect(resp.body).to match /hasMemberRelation.*hasBody/
+    end
+    it 'calls create_resources_in_container when there are new resources' do
+      ldpw = Triannon::LdpWriter.new anno
+      expect(ldpw).to receive(:create_resources_in_container).with(RDF::OpenAnnotation.hasBody)
+      ldpw.send(:replace_resources_in_container, RDF::OpenAnnotation.hasBody, nil)
+    end
+    it "doesn't call create_resources_in_container when there are no new resources" do
+      ldpw = Triannon::LdpWriter.new no_body_anno
+      expect(ldpw).not_to receive(:create_resources_in_container).with(RDF::OpenAnnotation.hasBody)
+      ldpw.send(:replace_resources_in_container, RDF::OpenAnnotation.hasBody, nil)
+    end
+  end
 end
