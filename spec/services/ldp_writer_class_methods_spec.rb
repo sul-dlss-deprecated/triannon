@@ -20,7 +20,7 @@ describe Triannon::LdpWriter, :vcr do
         expect_any_instance_of(Triannon::LdpWriter).to receive(:create_base).and_call_original
         Triannon::LdpWriter.create_anno anno
       end
-      it 'returns the pid of the annotation container in fedora' do
+      it 'returns the pid of the annotation container in LDP store' do
         id = Triannon::LdpWriter.create_anno anno
         expect(id).to be_a String
         expect(id.size).to be > 10
@@ -41,7 +41,7 @@ describe Triannon::LdpWriter, :vcr do
         expect_any_instance_of(Triannon::LdpWriter).not_to receive(:create_body_container)
         Triannon::LdpWriter.create_anno my_anno
       end
-      it 'creates a fedora resource for bodies ldp container at (id)/b' do
+      it 'creates a LDP resource for bodies ldp container at (id)/b' do
         pid = Triannon::LdpWriter.create_anno anno
         container_url = "#{Triannon.config[:ldp_url]}/#{pid}/b"
         container_resp = conn.get do |req|
@@ -89,7 +89,7 @@ describe Triannon::LdpWriter, :vcr do
         expect_any_instance_of(Triannon::LdpWriter).to receive(:create_target_resources)
         Triannon::LdpWriter.create_anno anno
       end
-      it 'creates a fedora resource for targets ldp container at (id)/t' do
+      it 'creates a LDP resource for targets ldp container at (id)/t' do
         pid = Triannon::LdpWriter.create_anno anno
         container_url = "#{Triannon.config[:ldp_url]}/#{pid}/t"
         container_resp = conn.get do |req|

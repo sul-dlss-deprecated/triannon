@@ -325,7 +325,7 @@ describe Triannon::LdpWriter, :vcr do
     end
 
     it "raises an exception if the delete does not succeed" do
-      expect { Triannon::LdpWriter.new(anno).delete_containers(['junkpid']) }.to raise_error(/Unable to delete Annotation: junkpid/)
+      expect { Triannon::LdpWriter.new(anno).delete_containers(['junkpid']) }.to raise_error(/Unable to delete LDP container: junkpid/)
     end
   end # delete_containers
 

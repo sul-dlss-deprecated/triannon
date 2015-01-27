@@ -105,7 +105,7 @@ module Triannon
         ldp_id = uri.to_s.split(@base_uri + '/').last
         resp = conn.delete { |req| req.url ldp_id }
         if resp.status != 204
-          raise "Unable to delete Annotation: #{ldp_id}\nResponse Status: #{resp.status}\nResponse Body: #{resp.body}"
+          raise "Unable to delete LDP container: #{ldp_id}\nResponse Status: #{resp.status}\nResponse Body: #{resp.body}"
         end
         something_deleted = true
       }
