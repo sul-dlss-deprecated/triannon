@@ -1,0 +1,147 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: http://localhost:8983/fedora/rest/anno
+    body:
+      encoding: UTF-8
+      string: |
+        @prefix foaf: <http://xmlns.com/foaf/0.1/> .
+        @prefix openannotation: <http://www.w3.org/ns/oa#> .
+        @prefix prov: <http://www.w3.org/ns/prov#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+        @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+        <> a openannotation:Annotation;
+           openannotation:annotatedAt "2014-09-03T17:16:13Z"^^xsd:dateTimeStamp;
+           openannotation:annotatedBy <mailto:azaroth42@gmail.com>;
+           openannotation:motivatedBy openannotation:commenting;
+           openannotation:serializedAt "2014-09-03T17:16:13Z"^^xsd:dateTimeStamp;
+           openannotation:serializedBy [
+             a prov:SoftwareAgent;
+             foaf:name "Annotation Factory"
+           ] .
+
+        <mailto:azaroth42@gmail.com> a foaf:Person;
+           foaf:name "Rob Sanderson" .
+    headers:
+      User-Agent:
+      - Faraday v0.9.0
+      Content-Type:
+      - application/x-turtle
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - '"4a8b9029aed06f93caf2a9803a841fcb1e014da6"'
+      Last-Modified:
+      - Tue, 27 Jan 2015 07:59:07 GMT
+      Content-Length:
+      - '75'
+      Location:
+      - http://localhost:8983/fedora/rest/anno/3dea38b1-0073-42e5-b78b-1f44363625b5
+      Content-Type:
+      - text/plain
+    body:
+      encoding: UTF-8
+      string: http://localhost:8983/fedora/rest/anno/3dea38b1-0073-42e5-b78b-1f44363625b5
+    http_version: 
+  recorded_at: Tue, 27 Jan 2015 07:59:07 GMT
+- request:
+    method: get
+    uri: http://localhost:8983/fedora/rest/anno/3dea38b1-0073-42e5-b78b-1f44363625b5
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.0
+      Accept:
+      - application/x-turtle
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Etag:
+      - '"4a8b9029aed06f93caf2a9803a841fcb1e014da6"'
+      Last-Modified:
+      - Tue, 27 Jan 2015 07:59:07 GMT
+      Link:
+      - <http://www.w3.org/ns/ldp#DirectContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      Accept-Patch:
+      - application/sparql-update
+      Accept-Post:
+      - text/turtle,text/rdf+n3,application/n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      Allow:
+      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
+      Vary:
+      - Accept, Range, Accept-Encoding, Accept-Language
+      Content-Length:
+      - '4622'
+      Content-Type:
+      - application/x-turtle
+    body:
+      encoding: UTF-8
+      string: "@prefix premis: <http://www.loc.gov/premis/rdf/v1#> .\n@prefix fedorarelsext:
+        <http://fedora.info/definitions/v4/rels-ext#> .\n@prefix nt: <http://www.jcp.org/jcr/nt/1.0>
+        .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n@prefix content:
+        <http://www.w3.org/2011/content#> .\n@prefix xsi: <http://www.w3.org/2001/XMLSchema-instance>
+        .\n@prefix mode: <http://www.modeshape.org/1.0> .\n@prefix openannotation:
+        <http://www.w3.org/ns/oa#> .\n@prefix xml: <http://www.w3.org/XML/1998/namespace>
+        .\n@prefix fcrepo: <http://fedora.info/definitions/v4/repository#> .\n@prefix
+        fedoraconfig: <http://fedora.info/definitions/v4/config#> .\n@prefix mix:
+        <http://www.jcp.org/jcr/mix/1.0> .\n@prefix prov: <http://www.w3.org/ns/prov#>
+        .\n@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n@prefix image: <http://www.modeshape.org/images/1.0>
+        .\n@prefix sv: <http://www.jcp.org/jcr/sv/1.0> .\n@prefix test: <info:fedora/test/>
+        .\n@prefix dcmitype: <http://purl.org/dc/dcmitype/> .\n@prefix triannon: <http://triannon.stanford.edu/ns/>
+        .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n@prefix fedora:
+        <http://fedora.info/definitions/v4/rest-api#> .\n@prefix ldp: <http://www.w3.org/ns/ldp#>
+        .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix dc: <http://purl.org/dc/elements/1.1/>
+        .\n\n\n<http://localhost:8983/fedora/rest/anno/3dea38b1-0073-42e5-b78b-1f44363625b5>
+        ldp:membershipResource <http://localhost:8983/fedora/rest/anno/3dea38b1-0073-42e5-b78b-1f44363625b5>
+        ;\n\tldp:hasMemberRelation ldp:member ;\n\ta ldp:Container , ldp:DirectContainer
+        , ldp:RDFSource ;\n\tfcrepo:hasParent <http://localhost:8983/fedora/rest/anno>
+        .\n\n<http://localhost:8983/fedora/rest/.well-known/genid/5e658eb0-91da-4fae-9758-cbb7f543d583>
+        a <http://www.jcp.org/jcr/nt/1.0unstructured> , <http://www.jcp.org/jcr/nt/1.0base>
+        , fedora:blanknode , prov:SoftwareAgent , <http://www.jcp.org/jcr/mix/1.0referenceable>
+        ;\n\tfcrepo:uuid \"d5ee3d7f-4415-47e8-ba64-d5084ed1933a\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfcrepo:primaryType \"nt:unstructured\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfcrepo:mixinTypes \"fedora:blanknode\"^^<http://www.w3.org/2001/XMLSchema#string>
+        , \"prov:SoftwareAgent\"^^<http://www.w3.org/2001/XMLSchema#string> ;\n\tfoaf:name
+        \"Annotation Factory\"^^<http://www.w3.org/2001/XMLSchema#string> .\n\n<http://localhost:8983/fedora/rest/anno/3dea38b1-0073-42e5-b78b-1f44363625b5>
+        fedora:writable \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> .\n\n<http://localhost:8983/fedora/rest/anno/3dea38b1-0073-42e5-b78b-1f44363625b5/fcr:export?format=jcr/xml>
+        dc:format <http://fedora.info/definitions/v4/repository#jcr/xml> .\n\n<http://localhost:8983/fedora/rest/anno/3dea38b1-0073-42e5-b78b-1f44363625b5>
+        fedora:exportsAs <http://localhost:8983/fedora/rest/anno/3dea38b1-0073-42e5-b78b-1f44363625b5/fcr:export?format=jcr/xml>
+        .\n\n<http://fedora.info/definitions/v4/repository#jcr/xml> rdfs:label \"jcr/xml\"^^<http://www.w3.org/2001/XMLSchema#string>
+        .\n\n<http://localhost:8983/fedora/rest/anno/3dea38b1-0073-42e5-b78b-1f44363625b5>
+        a <http://www.jcp.org/jcr/nt/1.0folder> , <http://www.jcp.org/jcr/nt/1.0hierarchyNode>
+        , <http://www.jcp.org/jcr/nt/1.0base> , <http://www.jcp.org/jcr/mix/1.0created>
+        , openannotation:Annotation , fedora:resource , fedora:object , fedora:relations
+        , <http://www.jcp.org/jcr/mix/1.0created> , <http://www.jcp.org/jcr/mix/1.0lastModified>
+        , <http://www.jcp.org/jcr/mix/1.0referenceable> , fedora:DublinCoreDescribable
+        , fedora:resource , ldp:Container ;\n\tfcrepo:lastModifiedBy \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfcrepo:uuid \"55277723-d772-44e8-b6f6-55147ece6168\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfcrepo:createdBy \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfcrepo:created \"2015-01-27T07:59:07.858Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\tfcrepo:primaryType \"nt:folder\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\topenannotation:serializedAt \"2014-09-03T17:16:13Z\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfcrepo:lastModified \"2015-01-27T07:59:07.858Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\tfcrepo:mixinTypes \"openannotation:Annotation\"^^<http://www.w3.org/2001/XMLSchema#string>
+        , \"fedora:resource\"^^<http://www.w3.org/2001/XMLSchema#string> , \"fedora:object\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\topenannotation:serializedBy <http://localhost:8983/fedora/rest/.well-known/genid/5e658eb0-91da-4fae-9758-cbb7f543d583>
+        ;\n\topenannotation:annotatedBy <mailto:azaroth42@gmail.com> ;\n\topenannotation:motivatedBy
+        openannotation:commenting ;\n\topenannotation:annotatedAt \"2014-09-03T17:16:13Z\"^^<http://www.w3.org/2001/XMLSchema#string>
+        .\n"
+    http_version: 
+  recorded_at: Tue, 27 Jan 2015 07:59:07 GMT
+recorded_with: VCR 2.9.3

@@ -14,12 +14,13 @@ module Triannon
     end
 
     def base_uri
-      res = graph.query anno_query
+      res = graph.query Triannon::Graph.anno_query
       res.first.s
     end
 
+    # @return [Array<String>] the uris of each LDP body resource
     def body_uris
-      q = anno_query
+      q = Triannon::Graph.anno_query.dup
       q << [:s, RDF::OpenAnnotation.hasBody, :body_uri]
       solns = graph.query q
       result = []
@@ -29,8 +30,9 @@ module Triannon
       result
     end
 
+    # @return [Array<String>] the uris of each LDP target resource
     def target_uris
-      q = anno_query
+      q = Triannon::Graph.anno_query.dup
       q << [:s, RDF::OpenAnnotation.hasTarget, :target_uri]
       solns = graph.query q
       result = []
@@ -44,12 +46,6 @@ module Triannon
     # @param [Array<RDF::Statement>] statements an array of RDF statements to be loaded into the graph
     def load_statements_into_graph statements
       graph.insert(statements) if statements && statements.size > 0
-    end
-
-private
-    def anno_query
-      q = RDF::Query.new
-      q << [:s, RDF.type, RDF::OpenAnnotation.Annotation]
     end
 
   end

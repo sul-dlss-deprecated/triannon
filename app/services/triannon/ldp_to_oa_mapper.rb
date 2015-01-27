@@ -63,7 +63,7 @@ module Triannon
         external_uri = solns.first.object
         @oa_graph << [subject_obj, predicate, external_uri]
         
-        Triannon::LdpCreator.subject_statements(uri_obj, @ldp_anno_graph).each { |stmt|
+        Triannon::Graph.subject_statements(uri_obj, @ldp_anno_graph).each { |stmt|
           if stmt.subject == uri_obj && stmt.predicate != RDF::Triannon.externalReference
             @oa_graph << [external_uri, stmt.predicate, stmt.object]
           else
@@ -89,7 +89,7 @@ module Triannon
         blank_node = RDF::Node.new
         @oa_graph << [subject_obj, predicate, blank_node]
         
-        Triannon::LdpCreator.subject_statements(uri_obj, @ldp_anno_graph).each { |stmt|
+        Triannon::Graph.subject_statements(uri_obj, @ldp_anno_graph).each { |stmt|
           if stmt.subject == uri_obj
             @oa_graph << [blank_node, stmt.predicate, stmt.object]
           else
@@ -118,7 +118,7 @@ module Triannon
         source_obj = nil
         selector_obj = nil
         selector_blank_node = nil
-        specific_res_stmts = Triannon::LdpCreator.subject_statements(uri_obj, @ldp_anno_graph)
+        specific_res_stmts = Triannon::Graph.subject_statements(uri_obj, @ldp_anno_graph)
         specific_res_stmts.each { |stmt|
           if stmt.predicate == RDF::OpenAnnotation.hasSource
             # expecting a hash URI
@@ -170,7 +170,7 @@ module Triannon
         
         default_obj = nil
         item_objs = []
-        choice_stmts = Triannon::LdpCreator.subject_statements(uri_obj, @ldp_anno_graph)
+        choice_stmts = Triannon::Graph.subject_statements(uri_obj, @ldp_anno_graph)
         choice_stmts.each { |stmt|
           if stmt.predicate == RDF::OpenAnnotation.default
             default_obj = stmt.object

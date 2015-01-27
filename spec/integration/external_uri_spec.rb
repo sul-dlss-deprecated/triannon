@@ -1,7 +1,6 @@
 require 'spec_helper'
 
-vcr_options = {:re_record_interval => 45.days}  # TODO will make shorter once we have jetty running fedora4
-describe "integration tests for annos with external URIs", :vcr => vcr_options do
+describe "integration tests for annos with external URIs", :vcr do
 
   it 'target has external URI' do
     target_uri = "http://purl.stanford.edu/kq131cs7229"

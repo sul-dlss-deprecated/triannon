@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-#vcr_options = { :cassette_name => "models_triannon_annotation" }
 describe Triannon::Annotation, :vcr do
 
   it "doesn't do external lookup of json_ld context" , :vcr => {:record => :none} do
@@ -189,6 +188,26 @@ describe Triannon::Annotation, :vcr do
       anno_id = anno.save
       expect(anno.id).to eq anno_id
     end
+    it "calls solr_save method after successful save to LDP Store" do
+      # test to make sure callback logic implemented properly in model
+      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
+      expect(anno).to receive(:solr_save)
+      anno.save
+    end
+    it "doesn't call solr_save method after unsuccessful save to LDP Store - nil returned" do
+      # test to make sure callback logic implemented properly in model
+      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
+      allow(anno).to receive(:save).and_return(nil) # or it might raise an exception
+      expect(anno).not_to receive(:solr_save)
+      anno.save
+    end
+    it "doesn't call solr_save method after exception for LDP store create" do
+      # test to make sure callback logic implemented properly in model
+      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
+      allow(anno).to receive(:create).and_raise(RuntimeError)
+      expect(anno).not_to receive(:solr_save)
+      expect{anno.save}.to raise_error
+    end
   end
 
   context '*find' do
@@ -201,12 +220,32 @@ describe Triannon::Annotation, :vcr do
   end
 
   context "#destroy" do
-    it "calls LdpDestroyer.destroy with it's own id" do
+    it "calls LdpWriter.delete_anno with its own id" do
       id = 'someid'
-
-      expect(Triannon::LdpDestroyer).to receive(:destroy).with(id)
       a = Triannon::Annotation.new :id => id
+      expect(Triannon::LdpWriter).to receive(:delete_anno).with(id)
       a.destroy
+    end
+    it "calls solr_delete method after successful destroy in LDP store" do
+      # test to make sure callback logic implemented properly in model
+      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
+      anno.save
+      expect(anno).to receive(:solr_delete)
+      anno.destroy
+    end
+    it "doesn't call solr_save method after unsuccessful save to LDP Store - nil returned" do
+      # test to make sure callback logic implemented properly in model
+      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
+      allow(anno).to receive(:destroy).and_return(nil) # or it might raise an exception
+      expect(anno).not_to receive(:solr_save)
+      anno.destroy
+    end
+    it "doesn't call solr_delete method after exception for LDP store destroy" do
+      # test to make sure callback logic implemented properly in model
+      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
+      allow(anno).to receive(:destroy).and_raise(RuntimeError)
+      expect(anno).not_to receive(:solr_delete)
+      expect{anno.destroy}.to raise_error
     end
   end
 

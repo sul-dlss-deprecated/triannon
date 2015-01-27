@@ -29,9 +29,9 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       expect(response.status).to eq 201
     end
 
-    it "renders 403 if Triannon::ExternalReferenceError raised during LdpCreator.create" do
-      err_msg = "some error during LdpCreator.create"
-      allow(Triannon::LdpCreator).to receive(:create).and_raise(Triannon::ExternalReferenceError, err_msg)
+    it "renders 403 if Triannon::ExternalReferenceError raised during LdpWriter.create_anno" do
+      err_msg = "some error during LdpWriter.create_anno"
+      allow(Triannon::LdpWriter).to receive(:create_anno).and_raise(Triannon::ExternalReferenceError, err_msg)
       post :create, "this string will be ignored so it doesn't matter"
       expect(response.status).to eq 403
       expect(response.body).to eql err_msg
