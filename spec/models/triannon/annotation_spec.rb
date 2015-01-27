@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-#vcr_options = { :cassette_name => "models_triannon_annotation" }
 describe Triannon::Annotation, :vcr do
 
   it "doesn't do external lookup of json_ld context" , :vcr => {:record => :none} do
