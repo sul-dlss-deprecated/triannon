@@ -1,0 +1,58 @@
+@prefix nt: <http://www.jcp.org/jcr/nt/1.0> .
+@prefix openannotation: <http://www.w3.org/ns/oa#> .
+@prefix ns001: <http://purl.org/dc/elements/1.1/> .
+@prefix fcrepo: <http://fedora.info/definitions/v4/repository#> .
+@prefix test: <info:fedora/test/> .
+@prefix xs: <http://www.w3.org/2001/XMLSchema> .
+@prefix mode: <http://www.modeshape.org/1.0> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sv: <http://www.jcp.org/jcr/sv/1.0> .
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix fedoraconfig: <http://fedora.info/definitions/v4/config#> .
+@prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+@prefix image: <http://www.modeshape.org/images/1.0> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix fedorarelsext: <http://fedora.info/definitions/v4/rels-ext#> .
+@prefix mix: <http://www.jcp.org/jcr/mix/1.0> .
+@prefix premis: <http://www.loc.gov/premis/rdf/v1#> .
+@prefix content: <http://www.w3.org/2011/content#> .
+@prefix triannon: <http://triannon.stanford.edu/ns/> .
+@prefix xsi: <http://www.w3.org/2001/XMLSchema-instance> .
+@prefix fedora: <http://fedora.info/definitions/v4/rest-api#> .
+@prefix ldp: <http://www.w3.org/ns/ldp#> .
+
+
+<http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/814b0225-bd48-4de9-a724-a72a9fa86c18> ldp:membershipResource <http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/814b0225-bd48-4de9-a724-a72a9fa86c18> ;
+	ldp:hasMemberRelation ldp:member ;
+	a ldp:Container , ldp:DirectContainer , ldp:RDFSource ;
+	ldp:member <http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/814b0225-bd48-4de9-a724-a72a9fa86c18/b> , <http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/814b0225-bd48-4de9-a724-a72a9fa86c18/t> ;
+	openannotation:hasBody <http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/814b0225-bd48-4de9-a724-a72a9fa86c18/b/baea1676-ee23-448a-9c3b-53dd14b95903> ;
+	openannotation:hasTarget <http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/814b0225-bd48-4de9-a724-a72a9fa86c18/t/65d8bb4f-2073-4819-82d6-d9ed9873980f> ;
+	ldp:contains <http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/814b0225-bd48-4de9-a724-a72a9fa86c18/b> , <http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/814b0225-bd48-4de9-a724-a72a9fa86c18/t> ;
+	fcrepo:hasParent <http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno> .
+
+<http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/814b0225-bd48-4de9-a724-a72a9fa86c18/b> ldp:membershipResource <http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/814b0225-bd48-4de9-a724-a72a9fa86c18> .
+
+<http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/814b0225-bd48-4de9-a724-a72a9fa86c18/t> ldp:membershipResource <http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/814b0225-bd48-4de9-a724-a72a9fa86c18> .
+
+<http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/814b0225-bd48-4de9-a724-a72a9fa86c18> fedora:writable "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+
+<http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/814b0225-bd48-4de9-a724-a72a9fa86c18/fcr:export?format=jcr/xml> ns001:format <http://fedora.info/definitions/v4/repository#jcr/xml> .
+
+<http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/814b0225-bd48-4de9-a724-a72a9fa86c18> fedora:exportsAs <http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/814b0225-bd48-4de9-a724-a72a9fa86c18/fcr:export?format=jcr/xml> .
+
+<http://fedora.info/definitions/v4/repository#jcr/xml> rdfs:label "jcr/xml"^^<http://www.w3.org/2001/XMLSchema#string> .
+
+<http://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/814b0225-bd48-4de9-a724-a72a9fa86c18> a <http://www.jcp.org/jcr/nt/1.0folder> , <http://www.jcp.org/jcr/nt/1.0hierarchyNode> , <http://www.jcp.org/jcr/nt/1.0base> , <http://www.jcp.org/jcr/mix/1.0created> , fedora:resource , fedora:object , openannotation:Annotation , fedora:relations , <http://www.jcp.org/jcr/mix/1.0created> , <http://www.jcp.org/jcr/mix/1.0lastModified> , <http://www.jcp.org/jcr/mix/1.0referenceable> , fedora:DublinCoreDescribable , fedora:resource , ldp:Container ;
+	fcrepo:primaryType "nt:folder"^^<http://www.w3.org/2001/XMLSchema#string> ;
+	openannotation:motivatedBy openannotation:tagging ;
+	fcrepo:created "2015-01-08T02:01:22.09Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+	fcrepo:lastModified "2015-01-08T02:01:22.319Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+	fcrepo:mixinTypes "fedora:resource"^^<http://www.w3.org/2001/XMLSchema#string> , "fedora:object"^^<http://www.w3.org/2001/XMLSchema#string> , "openannotation:Annotation"^^<http://www.w3.org/2001/XMLSchema#string> ;
+	fcrepo:lastModifiedBy "bypassAdmin"^^<http://www.w3.org/2001/XMLSchema#string> ;
+	fcrepo:uuid "34e10a32-22b0-4b85-aadd-12d86d44736e"^^<http://www.w3.org/2001/XMLSchema#string> ;
+	fcrepo:createdBy "bypassAdmin"^^<http://www.w3.org/2001/XMLSchema#string> ;
+	openannotation:annotatedAt "2015-01-07T18:01:21Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
