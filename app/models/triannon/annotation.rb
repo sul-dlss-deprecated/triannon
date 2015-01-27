@@ -18,49 +18,52 @@ module Triannon
     #   https://github.com/uq-eresearch/lorestore/blob/3e9aa1c69aafd3692c69aa39c64bfdc32b757892/src/main/resources/OAConstraintsSPARQL.json
 
 
+    # Class Methods ----------------------------------------------------------------
+  
+    def self.create(attrs = {})
+      a = Triannon::Annotation.new attrs
+      a.save
+      a
+    end
+
+    # query for a subject with type of RDF::OpenAnnotation.Annotation
+    def self.anno_query
+      @anno_query ||= begin
+        q = RDF::Query.new
+        q << [:s, RDF.type, RDF::URI("http://www.w3.org/ns/oa#Annotation")]
+      end
+    end
+
+    def self.find(key)
+      oa_graph = Triannon::LdpLoader.load key
+      anno = Triannon::Annotation.new
+      anno.graph = oa_graph
+      anno.id = key
+      anno
+    end
+
+    def self.all
+      Triannon::LdpLoader.find_all
+    end
+
+    # Instance Methods ----------------------------------------------------------------
+
+    def save
+      _run_save_callbacks do
+        # check if valid?
+        graph
+        @id = Triannon::LdpCreator.create self
+      end
+    end
+
+    def destroy
+      _run_destroy_callbacks do
+        Triannon::LdpDestroyer.destroy @id
+      end
+    end
+
     def persisted?
       self.id.present?
-    end
-
-    def url
-      if graph_exists?
-        solution = graph.query self.class.anno_query
-        if solution && solution.size == 1
-          solution.first.s.to_s
-        # TODO:  raise exception if no URL?
-        end
-      end
-    end
-
-    # FIXME:  this should be part of validation:  RDF.type should be RDF::OpenAnnotation.Annotation
-    def type
-      if graph_exists?
-        q = RDF::Query.new
-        q << [:s, RDF::OpenAnnotation.hasTarget, nil] # must have a target
-        q << [:s, RDF.type, :type]
-        solution = graph.query q
-        solution.distinct!
-        if solution && solution.size == 1
-          solution.first.type.to_s
-        # TODO:  raise exception if no type?
-        end
-      end
-    end
-
-    def motivated_by
-      if graph_exists?
-        q = self.class.anno_query.dup
-        q << [:s, RDF::OpenAnnotation.motivatedBy, :motivated_by]
-        solution = graph.query q
-        if solution && solution.size > 0
-          motivations = []
-          solution.each {|res|
-            motivations << res.motivated_by.to_s
-          }
-          motivations
-        # TODO:  raise exception if none?
-        end
-      end
     end
 
     def graph
@@ -87,56 +90,116 @@ module Triannon
       hash_from_json.to_json
     end
 
-    # query for a subject with type of RDF::OpenAnnotation.Annotation
-    def self.anno_query
-      @anno_query ||= begin
+    # @return [String] the id of this annotation as a url
+    def url
+      if graph_exists?
+        solution = graph.query self.class.anno_query
+        if solution && solution.size == 1
+          solution.first.s.to_s
+        # TODO:  raise exception if no URL?
+        end
+      end
+    end
+
+    # FIXME:  this should be part of validation:  RDF.type should be RDF::OpenAnnotation.Annotation
+    # @return [String] should always be a string representation of RDF::OpenAnnotation.Annotation
+    def type
+      if graph_exists?
         q = RDF::Query.new
-        q << [:s, RDF.type, RDF::URI("http://www.w3.org/ns/oa#Annotation")]
+        q << [:s, RDF::OpenAnnotation.hasTarget, nil] # must have a target
+        q << [:s, RDF.type, :type]
+        solution = graph.query q
+        solution.distinct!
+        if solution && solution.size == 1
+          solution.first.type.to_s
+        # TODO:  raise exception if no type?
+        end
       end
     end
 
-    def self.create(attrs = {})
-      a = Triannon::Annotation.new attrs
-      a.save
-      a
-    end
-
-    def save
-      _run_save_callbacks do
-        # check if valid?
-        graph
-        @id = Triannon::LdpCreator.create self
+    # @return [Array] of uris expressing the OA motivated_by values
+    def motivated_by
+      if graph_exists?
+        q = self.class.anno_query.dup
+        q << [:s, RDF::OpenAnnotation.motivatedBy, :motivated_by]
+        solution = graph.query q
+        if solution && solution.size > 0
+          motivations = []
+          solution.each {|res|
+            motivations << res.motivated_by.to_s
+          }
+          motivations
+        # TODO:  raise exception if none?
+        end
       end
-    end
-
-    def destroy
-      _run_destroy_callbacks do
-        Triannon::LdpDestroyer.destroy @id
-      end
-    end
-
-    def self.find(key)
-      oa_graph = Triannon::LdpLoader.load key
-      anno = Triannon::Annotation.new
-      anno.graph = oa_graph
-      anno.id = key
-      anno
-    end
-
-    def self.all
-      Triannon::LdpLoader.find_all
     end
 
 protected
 
     # TODO: WRITE_COMMENTS_AND_TESTS_FOR_THIS_METHOD
     def solr_save
-      puts "TO DO: send add to Solr (after save)"
+#      puts "TO DO: send add to Solr (after save)"
+#      pp solr_hash
     end
 
     # TODO: WRITE_COMMENTS_AND_TESTS_FOR_THIS_METHOD
     def solr_delete
-      puts "TO DO: send delete to Solr (after destroy)"
+#      puts "TO DO: send delete to Solr (after destroy)"
+    end
+    
+    # TODO: WRITE_COMMENTS_AND_TESTS_FOR_THIS_METHOD
+    # TODO:  re-usable as part of Triannon::Graph class?
+    # 
+    # @return [Hash] a hash to be written to Solr, populated appropriately
+    def solr_hash
+      doc_hash = {}
+      tid = url.sub(Triannon.config[:ldp_url], "")
+      tid.sub(/^\//, "")
+      doc_hash[:id] = tid
+      doc_hash[:motivation] = motivated_by.map { |m| m.sub(RDF::OpenAnnotation.to_s, "") }
+      # date field format: 1995-12-31T23:59:59Z; or w fractional seconds: 1995-12-31T23:59:59.999Z
+#      doc_hash[:annotated_at] =
+#      doc_hash[:annotated_by_stem]
+      doc_hash[:target_url] = predicate_urls RDF::OpenAnnotation.hasTarget
+      doc_hash[:target_type] = ['external_URI'] if doc_hash[:target_url].size > 0
+      doc_hash[:body_url] = predicate_urls RDF::OpenAnnotation.hasBody
+      doc_hash[:body_type] = []
+      doc_hash[:body_type] << 'external_URI' if doc_hash[:body_url].size > 0
+      doc_hash[:body_chars_exact] = body_chars
+      doc_hash[:body_type] << 'content_as_text' if doc_hash[:body_chars_exact].size > 0
+      doc_hash[:body_type] << 'no_body' if doc_hash[:body_type].size == 0
+      doc_hash[:anno_jsonld] = jsonld_oa
+      doc_hash
+    end
+    
+    # TODO: WRITE_COMMENTS_AND_TESTS_FOR_THIS_METHOD
+    # TODO:  re-usable as part of Triannon::Graph class?
+    # @param [RDF::URI] predicate either RDF::OpenAnnotation.hasTarget or RDF::OpenAnnotation.hasBody
+    # @return [Array<String>] urls for the predicate, as an Array of Strings
+    def predicate_urls(predicate)
+      predicate_solns = graph.query([nil, predicate, nil])
+      urls = []
+      predicate_solns.each { |predicate_stmt |
+        predicate_obj = predicate_stmt.object
+        urls << predicate_obj.to_str if predicate_obj.is_a?(RDF::URI)
+      }
+      urls
+    end
+    
+    # TODO: WRITE_COMMENTS_AND_TESTS_FOR_THIS_METHOD
+    # TODO:  re-usable as part of Triannon::Graph class?
+    # @return [Array<String>] body chars as Strings, in an Array (one element for each contentAsText body)
+    def body_chars
+      result = []
+      q = RDF::Query.new
+      q << [nil, RDF::OpenAnnotation.hasBody, :body]
+      q << [:body, RDF.type, RDF::Content.ContentAsText]
+      q << [:body, RDF::Content.chars, :body_chars]
+      solns = graph.query q
+      solns.each { |soln| 
+        result << soln.body_chars.value.strip
+      }
+      result
     end
 
 private
