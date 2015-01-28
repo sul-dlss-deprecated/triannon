@@ -2,6 +2,169 @@ require 'spec_helper'
 
 describe Triannon::Graph do
   
+  let(:g1) {Triannon::Graph.new RDF::Graph.new.from_ttl Triannon.annotation_fixture("body-chars.ttl")}
+  let(:g2) {Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("bookmark.json")}
+  let(:g3) {Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("mult-targets.json")}
+  
+  context 'jsonld flavors' do
+    context '#jsonld_oa' do
+      it 'has context as url' do
+        expect(g1.jsonld_oa).to match /"@context":\s*"http:\/\/www.w3.org\/ns\/oa.jsonld"/
+        expect(g2.jsonld_oa).to match /"@context":\s*"http:\/\/www.w3.org\/ns\/oa.jsonld"/
+      end
+      it 'parses as graph' do
+        new_g = Triannon::Graph.new RDF::Graph.new.from_jsonld g1.jsonld_oa
+        expect(new_g.to_ttl).to eq g1.to_ttl
+        new_g = Triannon::Graph.new RDF::Graph.new.from_jsonld g2.jsonld_oa
+        expect(new_g.to_ttl).to eq g2.to_ttl
+      end
+    end
+    context '#jsonld_iiif' do
+      it 'has context as url' do
+        expect(g1.jsonld_iiif).to match /"@context":\s*"http:\/\/iiif.io\/api\/presentation\/2\/context.json"/
+        expect(g2.jsonld_iiif).to match /"@context":\s*"http:\/\/iiif.io\/api\/presentation\/2\/context.json"/
+      end
+      it 'parses as graph' do
+        new_g = Triannon::Graph.new RDF::Graph.new.from_jsonld g1.jsonld_iiif
+        expect(new_g.to_ttl).to eq g1.to_ttl
+        new_g = Triannon::Graph.new RDF::Graph.new.from_jsonld g2.jsonld_iiif
+        expect(new_g.to_ttl).to eq g2.to_ttl
+      end
+    end
+  end
+
+  context "canned queries" do
+    it "id_as_url" do
+      expect(g1.id_as_url).to eql("http://example.org/annos/annotation/body-chars.ttl")
+      expect(g2.id_as_url).to eql("http://example.org/annos/annotation/bookmark.json")
+      expect(g3.id_as_url).to eql("http://example.org/annos/annotation/mult-targets.json")
+    end
+    context "motivated_by" do
+      it "single" do
+        expect(g1.motivated_by).to eq ["http://www.w3.org/ns/oa#commenting"]
+        expect(g2.motivated_by).to eq ["http://www.w3.org/ns/oa#bookmarking"]
+        expect(g3.motivated_by).to eq ["http://www.w3.org/ns/oa#commenting"]
+      end
+      it "multiple" do
+        g = Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("mult-motivations.json")
+        gm = g.motivated_by
+        expect(gm.size).to eql 2
+        expect(gm).to include("http://www.w3.org/ns/oa#moderating")
+        expect(gm).to include("http://www.w3.org/ns/oa#tagging")
+      end
+    end
+    context '#predicate_urls' do
+      it "single" do
+        expect(g2.predicate_urls(RDF::OpenAnnotation.hasTarget)).to eq ["http://purl.stanford.edu/kq131cs7229"]
+      end
+      it "multiple" do
+        g = Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("mult-targets.json")
+        gu = g.predicate_urls(RDF::OpenAnnotation.hasTarget)
+        expect(gu.size).to eql 2
+        expect(gu).to include("http://purl.stanford.edu/kq131cs7229")
+        expect(gu).to include("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg")
+      end
+      it "none" do
+        expect(g2.predicate_urls(RDF::OpenAnnotation.hasBody)).to eq []
+      end
+      it "not a url" do
+        g = Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("body-chars.json")
+        expect(g.predicate_urls(RDF::OpenAnnotation.hasBody)).to eq []
+      end
+    end
+    context '#body_chars' do
+      it "single" do
+        expect(g1.body_chars).to eq ["I love this!"]
+      end
+      it "multiple" do
+        g = Triannon::Graph.new RDF::Graph.new.from_jsonld '
+        {
+          "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+          "@type": "oa:Annotation", 
+          "motivatedBy": [
+            "oa:tagging"
+          ], 
+          "hasBody": [
+            {
+              "@type": [
+                "cnt:ContentAsText"
+              ], 
+              "chars": "I love this!"
+            }, 
+            {
+              "@type": [
+                "cnt:ContentAsText"
+              ], 
+              "chars": "me too"
+            }
+          ],
+          "hasTarget": "http://purl.stanford.edu/kq131cs7229"
+        }'
+        gbc = g.body_chars
+        expect(gbc.size).to eql 2
+        expect(gbc).to include "I love this!"
+        expect(gbc).to include "me too"
+      end
+      it "multiple bodies, but only one has chars" do
+        g = Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("mult-bodies.json")
+        expect(g.body_chars).to eq ["I love this!"]
+      end
+      it "whitespace retained at beginning or ending" do
+        g = Triannon::Graph.new RDF::Graph.new.from_jsonld '
+        {
+          "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+          "@type": "oa:Annotation", 
+          "motivatedBy": [
+            "oa:tagging"
+          ], 
+          "hasBody": [
+            {
+              "@type": [
+                "cnt:ContentAsText"
+              ], 
+              "chars": "  la  "
+            }
+          ],
+          "hasTarget": "http://purl.stanford.edu/kq131cs7229"
+        }'
+        expect(g.body_chars).to eq ["  la  "]
+      end
+      it "chars is empty string" do
+        g = Triannon::Graph.new RDF::Graph.new.from_jsonld '
+        {
+          "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+          "@type": "oa:Annotation", 
+          "motivatedBy": [
+            "oa:tagging"
+          ], 
+          "hasBody": [
+            {
+              "@type": [
+                "cnt:ContentAsText"
+              ], 
+              "chars": ""
+            }
+          ],
+          "hasTarget": "http://purl.stanford.edu/kq131cs7229"
+        }'
+        expect(g.body_chars).to eq [""]
+      end
+      it "body is a url" do
+        g = Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("body-pdf.json")
+        expect(g.body_chars).to eq []
+      end
+    end
+    context '#annotated_at' do
+      it "String if present" do
+        g = Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("provenance.json")
+        expect(g.annotated_at).to eq "2014-09-03T17:16:13Z"
+      end
+      it "nil if absent" do
+        expect(g1.annotated_at).to be nil
+      end
+    end
+  end # canned queries
+
   context '#remove_non_base_statements' do
     it 'calls #remove_has_target_statements' do
       g = Triannon::Graph.new(RDF::Graph.new)

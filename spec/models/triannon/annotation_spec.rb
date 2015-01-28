@@ -1,12 +1,12 @@
 require 'spec_helper'
 
 describe Triannon::Annotation, :vcr do
+  let(:bookmark_anno) {Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")}
 
   it "doesn't do external lookup of json_ld context" , :vcr => {:record => :none} do
-    anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
     # NOTE:  VCR would throw an error if this does an external lookup
     # https://www.relishapp.com/vcr/vcr/v/2-9-3/docs/record-modes/none
-    expect(anno.graph).to be_a_kind_of RDF::Graph
+    expect(bookmark_anno.graph).to be_a_kind_of Triannon::Graph
   end
 
   context 'json_ld replaces context url with inline context' do
@@ -41,45 +41,32 @@ describe Triannon::Annotation, :vcr do
     end
   end
   
-  context '#jsonld_oa' do
-    let(:anno) { Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl") }
-    let(:anno2) { Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json") }
-    it 'has context as url' do
-      expect(anno.jsonld_oa).to match /"@context":\s*"http:\/\/www.w3.org\/ns\/oa.jsonld"/
-      expect(anno2.jsonld_oa).to match /"@context":\s*"http:\/\/www.w3.org\/ns\/oa.jsonld"/
-    end
-    it 'parses as graph' do
-      new_anno = Triannon::Annotation.new data: anno.jsonld_oa
-      expect(new_anno.graph.to_ttl).to eq anno.graph.to_ttl
-      new_anno = Triannon::Annotation.new data: anno2.jsonld_oa
-      expect(new_anno.graph.to_ttl).to eq anno2.graph.to_ttl
-    end
-  end
-  
-  context '#jsonld_iiif' do
-    let(:anno) { Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl") }
-    let(:anno2) { Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json") }
-    it 'has context as url' do
-      expect(anno.jsonld_iiif).to match /"@context":\s*"http:\/\/iiif.io\/api\/presentation\/2\/context.json"/
-      expect(anno2.jsonld_iiif).to match /"@context":\s*"http:\/\/iiif.io\/api\/presentation\/2\/context.json"/
-    end
-    it 'parses as graph' do
-      new_anno = Triannon::Annotation.new data: anno.jsonld_iiif
-      expect(new_anno.graph.to_ttl).to eq anno.graph.to_ttl
-      new_anno = Triannon::Annotation.new data: anno2.jsonld_iiif
-      expect(new_anno.graph.to_ttl).to eq anno2.graph.to_ttl
-    end
+  it "#jsonld_oa calls Triannon::Graph #jsonld_oa" do
+    expect(bookmark_anno.graph).to be_a Triannon::Graph
+    expect(bookmark_anno.graph).to receive(:jsonld_oa)
+    bookmark_anno.jsonld_oa
   end
 
+  it "#jsonld_iiif calls Triannon::Graph #jsonld_iiif" do
+    expect(bookmark_anno.graph).to be_a Triannon::Graph
+    expect(bookmark_anno.graph).to receive(:jsonld_iiif)
+    bookmark_anno.jsonld_iiif
+  end
+
+  it "#graph is a Triannon::Graph" do
+    anno = Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl")
+    expect(anno.graph).to be_a Triannon::Graph
+  end
+  
   context "#data_as_graph" do
-    before(:each) do
-      @json_ld_data = Triannon.annotation_fixture("bookmark.json")
-    end
     context "json-ld data" do
+      before(:each) do
+        @json_ld_data = Triannon.annotation_fixture("bookmark.json")
+      end
       it "populates graph from json-ld" do
         expect(@json_ld_data).to match(/\A\{.+\}\Z/m) # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
         anno = Triannon::Annotation.new data: @json_ld_data
-        expect(anno.graph).to be_a_kind_of RDF::Graph
+        expect(anno.graph).to be_a_kind_of Triannon::Graph
         expect(anno.graph.count).to be > 1
       end
       it "is rejected if first and last non whitespace characters aren't { and }" do
@@ -101,7 +88,7 @@ describe Triannon::Annotation, :vcr do
       it "populates graph from ttl" do
         expect(@ttl_data).to match(/\.\Z/)  # (Note:  \Z is needed instead of $ due to \n in data)
         anno = Triannon::Annotation.new data: @ttl_data
-        expect(anno.graph).to be_a_kind_of RDF::Graph
+        expect(anno.graph).to be_a_kind_of Triannon::Graph
         expect(anno.graph.count).to be > 1
       end
       it "is rejected if it doesn't end in period" do
@@ -116,7 +103,7 @@ describe Triannon::Annotation, :vcr do
       it "populates graph from rdfxml" do
         expect(@rdfxml_data).to match(/\A<.+>\Z/m) # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
         anno = Triannon::Annotation.new data: @rdfxml_data
-        expect(anno.graph).to be_a_kind_of RDF::Graph
+        expect(anno.graph).to be_a_kind_of Triannon::Graph
         expect(anno.graph.count).to be > 1
       end
       it "is rejected if first and last non whitespace characters aren't < and >" do
@@ -127,39 +114,26 @@ describe Triannon::Annotation, :vcr do
   end # data_as_graph
 
   context "parsing graph" do
-    before(:each) do
-      @anno_json = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
-      @anno_ttl = Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl")
-    end
-    it "type is oa:Annotation" do
-      expect(@anno_ttl.type).to eql("http://www.w3.org/ns/oa#Annotation")
-      expect(@anno_json.type).to eql("http://www.w3.org/ns/oa#Annotation")
-      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("mult-targets.json")
-      expect(anno.type).to eql("http://www.w3.org/ns/oa#Annotation")
-    end
-    it "url" do
-      expect(@anno_json.url).to eql("http://example.org/annos/annotation/bookmark.json")
-      expect(@anno_ttl.url).to eql("http://example.org/annos/annotation/body-chars.ttl")
-      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("mult-targets.json")
-      expect(anno.url).to eql("http://example.org/annos/annotation/mult-targets.json")
-    end
-    context "motivated_by" do
-      it "single" do
-        expect(@anno_ttl.motivated_by.size).to eql 1
-        expect(@anno_ttl.motivated_by[0]).to eql("http://www.w3.org/ns/oa#commenting")
-        expect(@anno_json.motivated_by.size).to eql 1
-        expect(@anno_json.motivated_by).to include("http://www.w3.org/ns/oa#bookmarking")
+    context '#id_as_url' do
+      it "calls Triannon::Graph #id_as_url" do
+        expect(bookmark_anno.graph).to be_a Triannon::Graph
+        expect(bookmark_anno.graph).to receive(:id_as_url)
+        bookmark_anno.id_as_url
       end
-      it "multiple" do
-        anno = Triannon::Annotation.new data: Triannon.annotation_fixture("mult-motivations.json")
-        expect(anno.motivated_by.size).to eql 2
-        expect(anno.motivated_by).to include("http://www.w3.org/ns/oa#moderating")
-        expect(anno.motivated_by).to include("http://www.w3.org/ns/oa#tagging")
+      it "returns nil if there is no graph" do
+        anno = Triannon::Annotation.new
+        expect(anno.id_as_url).to eq nil
       end
-      it "mult targets" do
-        anno = Triannon::Annotation.new data: Triannon.annotation_fixture("mult-targets.json")
-        expect(anno.motivated_by.size).to eql 1
-        expect(anno.motivated_by).to include("http://www.w3.org/ns/oa#commenting")
+    end
+    context '#motivated_by' do
+      it "calls Triannon::Graph #motivated_by" do
+        expect(bookmark_anno.graph).to be_a Triannon::Graph
+        expect(bookmark_anno.graph).to receive(:motivated_by)
+        bookmark_anno.motivated_by
+      end
+      it "returns nil if there is no graph" do
+        anno = Triannon::Annotation.new
+        expect(anno.motivated_by).to eq nil
       end
     end
   end # parsing graph
@@ -173,8 +147,7 @@ describe Triannon::Annotation, :vcr do
       expect(results[0]).to be_an_instance_of Triannon::Annotation
       expect(results[0].id).to be_an_instance_of String
       # result only contains populated id attribute
-      expect(results[0].url).to eql nil
-      expect(results[0].type).to eql nil
+      expect(results[0].id_as_url).to eql nil
     end
     it "calls LdpLoader.find_all" do
       expect_any_instance_of(Triannon::LdpLoader).to receive(:find_all)
