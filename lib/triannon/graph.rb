@@ -48,8 +48,47 @@ module Triannon
       hash_from_json.to_json
     end
 
+    # NOTE: NEVER get here before anno is stored
+    # the graph should have an assigned url for the @id of the root;  it shouldn't be a blank node
+    # @return [Hash] a hash to be written to Solr, populated appropriately
+    def solr_hash
+      doc_hash = {}
+      # chars in Solr/Lucene query syntax are a big pain in Solr id fields, so we only use
+      # the uuid portion of the Triannon anno id, not the full url
+      tid = id_as_url.sub(Triannon.config[:ldp_url], "")
+      doc_hash[:id] = tid.sub(/^\//, "")
 
-    # Canned Queries ----------------------------------------------------------------
+      # use short strings for motivation field
+      doc_hash[:motivation] = motivated_by.map { |m| m.sub(RDF::OpenAnnotation.to_s, "") }
+
+      # date field format: 1995-12-31T23:59:59Z; or w fractional seconds: 1995-12-31T23:59:59.999Z
+      if annotated_at
+        begin
+          dt = Time.parse(annotated_at)
+          doc_hash[:annotated_at] = dt.iso8601 if dt
+        rescue ArgumentError
+          # ignore invalid datestamps
+        end
+      end
+#      doc_hash[:annotated_by_stem] # not yet implemented
+
+      doc_hash[:target_url] = predicate_urls RDF::OpenAnnotation.hasTarget
+      # TODO: recognize more target types
+      doc_hash[:target_type] = ['external_URI'] if doc_hash[:target_url].size > 0
+
+      doc_hash[:body_url] = predicate_urls RDF::OpenAnnotation.hasBody
+      doc_hash[:body_type] = []
+      doc_hash[:body_type] << 'external_URI' if doc_hash[:body_url].size > 0
+      doc_hash[:body_chars_exact] = body_chars.map {|bc| bc.strip}
+      doc_hash[:body_type] << 'content_as_text' if doc_hash[:body_chars_exact].size > 0
+      doc_hash[:body_type] << 'no_body' if doc_hash[:body_type].size == 0
+
+      doc_hash[:anno_jsonld] = jsonld_oa
+      doc_hash
+    end
+    
+
+    # Canned Query methods ----------------------------------------------------------------
   
     # @return [String] the id of this annotation as a url string
     def id_as_url
@@ -62,17 +101,17 @@ module Triannon
 
     # @return [Array<String>] Array of urls expressing the OA motivated_by values
     def motivated_by
+      motivations = []
       q = self.class.anno_query.dup
       q << [:s, RDF::OpenAnnotation.motivatedBy, :motivated_by]
       solution = @graph.query q
       if solution && solution.size > 0
-        motivations = []
         solution.each {|res|
           motivations << res.motivated_by.to_s
         }
-        motivations
-      # TODO:  raise exception if none?
       end
+      # TODO:  raise exception if none? (validation)
+      motivations
     end
 
     # @param [RDF::URI] predicate either RDF::OpenAnnotation.hasTarget or RDF::OpenAnnotation.hasBody
@@ -82,7 +121,7 @@ module Triannon
       predicate_solns = @graph.query [nil, predicate, nil]
       predicate_solns.each { |predicate_stmt |
         predicate_obj = predicate_stmt.object
-        urls << predicate_obj.to_str if predicate_obj.is_a?(RDF::URI)
+        urls << predicate_obj.to_str.strip if predicate_obj.is_a?(RDF::URI)
       }
       urls
     end

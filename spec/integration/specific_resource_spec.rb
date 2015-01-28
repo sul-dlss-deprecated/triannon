@@ -46,7 +46,10 @@ describe "integration tests for SpecificResource", :vcr do
     expect(sel_contents_solns).to include [selector_blank_node, RDF::DC.conformsTo, RDF::URI(conforms_to_url)]
     expect(sel_contents_solns).to include [selector_blank_node, RDF.value, frag_value]
 
+    sw = write_anno.send(:solr_writer)
+    allow(sw).to receive(:add)
     id = write_anno.save
+
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql g.size
@@ -113,7 +116,10 @@ describe "integration tests for SpecificResource", :vcr do
     expect(sel_contents_solns).to include [selector_blank_node, RDF::DC.conformsTo, RDF::URI(conforms_to_url)]
     expect(sel_contents_solns).to include [selector_blank_node, RDF.value, frag_value]
 
+    sw = write_anno.send(:solr_writer)
+    allow(sw).to receive(:add)
     id = write_anno.save
+
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql g.size
@@ -187,7 +193,10 @@ describe "integration tests for SpecificResource", :vcr do
     expect(end_obj.to_s).to eql "66"
     expect(end_obj.datatype).to eql RDF::XSD.nonNegativeInteger
 
+    sw = write_anno.send(:solr_writer)
+    allow(sw).to receive(:add)
     id = write_anno.save
+
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql g.size
@@ -270,7 +279,10 @@ describe "integration tests for SpecificResource", :vcr do
     expect(end_obj.to_s).to eql "66"
     expect(end_obj.datatype).to eql RDF::XSD.nonNegativeInteger
 
+    sw = write_anno.send(:solr_writer)
+    allow(sw).to receive(:add)
     id = write_anno.save
+
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql g.size
@@ -350,7 +362,10 @@ describe "integration tests for SpecificResource", :vcr do
     expect(sel_contents_solns).to include [selector_blank_node, RDF::OpenAnnotation.prefix, RDF::Literal.new(prefix_str)]
     expect(sel_contents_solns).to include [selector_blank_node, RDF::OpenAnnotation.suffix, RDF::Literal.new(suffix_str)]
 
+    sw = write_anno.send(:solr_writer)
+    allow(sw).to receive(:add)
     id = write_anno.save
+
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql g.size
@@ -420,7 +435,10 @@ describe "integration tests for SpecificResource", :vcr do
     expect(sel_contents_solns).to include [selector_blank_node, RDF::OpenAnnotation.prefix, RDF::Literal.new(prefix_str)]
     expect(sel_contents_solns).to include [selector_blank_node, RDF::OpenAnnotation.suffix, RDF::Literal.new(suffix_str)]
 
+    sw = write_anno.send(:solr_writer)
+    allow(sw).to receive(:add)
     id = write_anno.save
+
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql g.size
@@ -494,7 +512,10 @@ describe "integration tests for SpecificResource", :vcr do
     expect(sel_contents_solns).to include [selector_blank_node, RDF::DC.conformsTo, RDF::URI(conforms_to_url)]
     expect(sel_contents_solns).to include [selector_blank_node, RDF.value, frag_value]
 
+    sw = write_anno.send(:solr_writer)
+    allow(sw).to receive(:add)
     id = write_anno.save
+
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql g.size

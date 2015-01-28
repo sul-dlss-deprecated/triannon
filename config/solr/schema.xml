@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema name="Triannon" version="1.5">
+  <uniqueKey>id</uniqueKey>
+  <solrQueryParser defaultOperator="AND"/>
+  
+  <fields>
+    <!-- _version_ for SolrCloud -->
+    <field name="_version_" type="long" indexed="true" stored="true" multiValued="false"/> 
+    
+    <field name="id" type="string" stored="true" indexed="true" multiValued="false" required="true"/>
+    <field name="timestamp" type="date" stored="true" indexed="true" multiValued="false" default="NOW"/>
+
+    <field name="motivation" type="string" stored="true" indexed="true" multiValued="true"/>
+    <!-- date field format: 1995-12-31T23:59:59Z; or w fractional seconds: 1995-12-31T23:59:59.999Z -->
+    <field name="annotated_at" type="date" stored="true" indexed="true" multiValued="false"/>
+    <!-- trie field for range queries and faceting -->
+    <field name="annotated_at_tdate" type="tdate" stored="false" indexed="true" multiValued="false"/>
+    <field name="annotated_by_unstem" type="text_ws_lc" stored="false" indexed="true" multiValued="true"/>
+    <field name="annotated_by_stem" type="text_en" stored="true" indexed="true" multiValued="true"/>
+    <field name="target_url" type="url" stored="true" indexed="true" multiValued="true"/>
+    <field name="target_type" type="string" stored="true" indexed="true" multiValued="true"/>
+    <field name="body_url" type="url" stored="true" indexed="true" multiValued="true"/>
+    <field name="body_type" type="string" stored="true" indexed="true" multiValued="true"/>
+    <field name="body_chars_exact" type="alphaSort" stored="true" indexed="true" multiValued="true"/>
+    <field name="body_chars_unstem" type="text_ws_lc" stored="false" indexed="true" multiValued="true"/>
+    <field name="body_chars_stem" type="text_en" stored="false" indexed="true" multiValued="true"/>
+	
+    <field name="anno_jsonld" type="string" stored="true" indexed="false" multiValued="false"/>
+  </fields>
+
+  
+  <!-- unstemmed search fields -->
+  <copyField source="annotated_by_stem" dest="annotated_by_unstem" />
+  <copyField source="body_chars_exact" dest="body_chars_unstem" />
+  <copyField source="body_chars_exact" dest="body_chars_stem" />
+  <copyField source="annotated_at" dest="annotated_at_tdate" />
+ 
+
+  <types>
+    <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
+    <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true"/>    
+    <fieldType name="rand" class="solr.RandomSortField" omitNorms="true"/>
+    
+    <!-- Default numeric field types.  -->
+    <fieldType name="int" class="solr.TrieIntField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="float" class="solr.TrieFloatField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="double" class="solr.TrieDoubleField" precisionStep="0" positionIncrementGap="0"/>
+    
+    <!-- trie numeric field types for faster range queries -->
+    <fieldType name="tint" class="solr.TrieIntField" precisionStep="8" positionIncrementGap="0"/>
+    <fieldType name="tfloat" class="solr.TrieFloatField" precisionStep="8" positionIncrementGap="0"/>
+    <fieldType name="tlong" class="solr.TrieLongField" precisionStep="8" positionIncrementGap="0"/>
+    <fieldType name="tdouble" class="solr.TrieDoubleField" precisionStep="8" positionIncrementGap="0"/>
+    
+    <!-- date field format: 1995-12-31T23:59:59Z; or w fractional seconds: 1995-12-31T23:59:59.999Z -->
+    <fieldType name="date" class="solr.TrieDateField" precisionStep="0" positionIncrementGap="0"/>
+    <!-- A Trie based date field for faster date range queries and date faceting. -->
+    <fieldType name="tdate" class="solr.TrieDateField" precisionStep="6" positionIncrementGap="0"/>
+        
+    <!-- A text field that only splits on whitespace and case folding for exact matching of words -->
+    <fieldType name="text_ws_lc" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.ICUFoldingFilterFactory"/>
+      </analyzer>
+    </fieldType>
+        
+    <!-- single token analyzed text, for sorting.  Punctuation is significant. -->
+    <fieldtype name="alphaSort" class="solr.TextField" sortMissingLast="true" omitNorms="true">
+      <analyzer>
+  		<charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\s+" replacement=" "/>
+        <tokenizer class="solr.KeywordTokenizerFactory" />
+        <filter class="solr.ICUFoldingFilterFactory"/>
+        <filter class="solr.TrimFilterFactory" />
+      </analyzer>
+    </fieldtype>
+
+    <!-- A text field with defaults appropriate for English -->
+    <fieldType name="text_en" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+        <tokenizer class="solr.ICUTokenizerFactory"/>
+        <filter class="solr.ICUFoldingFilterFactory"/>
+        <filter class="solr.EnglishPossessiveFilterFactory"/>
+        <filter class="solr.EnglishMinimalStemFilterFactory"/>
+      </analyzer>
+    </fieldType>
+        
+    <!-- for urls - ignore http:// and https:// prefixes and trailing slash -->
+    <fieldType name="url" class="solr.TextField" positionIncrementGap="100">
+      <analyzer>
+		<charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^\s*https?\:\/\/" replacement=""/>
+		<charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\/\s*$" replacement=""/>
+        <tokenizer class="solr.KeywordTokenizerFactory" />
+        <filter class="solr.ICUFoldingFilterFactory"/>
+        <filter class="solr.TrimFilterFactory" />
+      </analyzer>
+    </fieldType>
+        
+  </types>
+  
+</schema>

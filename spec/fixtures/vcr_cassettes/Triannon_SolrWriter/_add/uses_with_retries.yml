@@ -1,0 +1,28 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: http://localhost:8983/solr/triannon/update?wt=ruby
+    body:
+      encoding: UTF-8
+      string: <?xml version="1.0" encoding="UTF-8"?><add commitWithin="500"><doc><field
+        name="id">666</field></doc></add>
+    headers:
+      Content-Type:
+      - text/xml
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - text/plain;charset=UTF-8
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |
+        {'responseHeader'=>{'status'=>0,'QTime'=>2}}
+    http_version: 
+  recorded_at: Fri, 30 Jan 2015 19:37:53 GMT
+recorded_with: VCR 2.9.3

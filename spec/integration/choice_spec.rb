@@ -65,7 +65,10 @@ describe "integration tests for Choice", :vcr do
     expect(item_node_subject_solns).to include [item_blank_node, RDF::DC11.language, "fr"]
     expect(item_node_subject_solns).to include [item_blank_node, RDF::Content.chars, item_chars]
 
+    sw = write_anno.send(:solr_writer)
+    allow(sw).to receive(:add)
     id = write_anno.save
+
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql g.size
@@ -156,7 +159,10 @@ describe "integration tests for Choice", :vcr do
      expect(item_solns).to include [item_uri_obj, RDF.type, RDF::DCMIType.Text]
      expect(item_solns).to include [item_uri_obj, RDF::DC11.format, body_item_format]
 
+     sw = write_anno.send(:solr_writer)
+     allow(sw).to receive(:add)
      id = write_anno.save
+
      anno = Triannon::Annotation.find id
      h = anno.graph
      expect(h.size).to eql g.size
@@ -230,7 +236,10 @@ describe "integration tests for Choice", :vcr do
 
      expect(g.query([item_blank_node, nil, nil]).count).to eq 0
 
+     sw = write_anno.send(:solr_writer)
+     allow(sw).to receive(:add)
      id = write_anno.save
+
      anno = Triannon::Annotation.find id
      h = anno.graph
      expect(h.size).to eql g.size
@@ -316,7 +325,10 @@ describe "integration tests for Choice", :vcr do
      expect(item2_subject_solns.count).to eq 1
      expect(item2_subject_solns).to include [item2_blank_node, RDF.type, RDF::DCMIType.Image]
 
+     sw = write_anno.send(:solr_writer)
+     allow(sw).to receive(:add)
      id = write_anno.save
+
      anno = Triannon::Annotation.find id
      h = anno.graph
      expect(h.size).to eql g.size

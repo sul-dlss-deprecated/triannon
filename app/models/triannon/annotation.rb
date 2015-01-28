@@ -92,41 +92,14 @@ module Triannon
 
 protected
 
-    # TODO: WRITE_COMMENTS_AND_TESTS_FOR_THIS_METHOD
+    # Add annotation to Solr as a Solr document
     def solr_save
-#      puts "TO DO: send add to Solr (after save)"
-#      pp solr_hash
+      solr_writer.add(graph.solr_hash)
     end
 
-    # TODO: WRITE_COMMENTS_AND_TESTS_FOR_THIS_METHOD
+    # Delete annotation from Solr
     def solr_delete
-#      puts "TO DO: send delete to Solr (after destroy)"
-    end
-    
-    # TODO: WRITE_COMMENTS_AND_TESTS_FOR_THIS_METHOD
-    # TODO:  re-usable as part of Triannon::Graph class?
-    # 
-    # @return [Hash] a hash to be written to Solr, populated appropriately
-    def solr_hash
-      doc_hash = {}
-      tid = url.sub(Triannon.config[:ldp_url], "")
-      tid.sub(/^\//, "")
-      doc_hash[:id] = tid
-      # use short strings for motivation field
-      doc_hash[:motivation] = motivated_by.map { |m| m.sub(RDF::OpenAnnotation.to_s, "") }
-      # date field format: 1995-12-31T23:59:59Z; or w fractional seconds: 1995-12-31T23:59:59.999Z
-#      doc_hash[:annotated_at] =
-#      doc_hash[:annotated_by_stem]
-      doc_hash[:target_url] = graph.predicate_urls RDF::OpenAnnotation.hasTarget
-      doc_hash[:target_type] = ['external_URI'] if doc_hash[:target_url].size > 0
-      doc_hash[:body_url] = graph.predicate_urls RDF::OpenAnnotation.hasBody
-      doc_hash[:body_type] = []
-      doc_hash[:body_type] << 'external_URI' if doc_hash[:body_url].size > 0
-      doc_hash[:body_chars_exact] = graph.body_chars
-      doc_hash[:body_type] << 'content_as_text' if doc_hash[:body_chars_exact].size > 0
-      doc_hash[:body_type] << 'no_body' if doc_hash[:body_type].size == 0
-      doc_hash[:anno_jsonld] = jsonld_oa
-      doc_hash
+      solr_writer.delete(id)
     end
     
 private
@@ -166,6 +139,10 @@ private
 
     def graph_exists?
       graph && graph.size > 0
+    end
+
+    def solr_writer
+      @sw ||= Triannon::SolrWriter.new
     end
 
   end

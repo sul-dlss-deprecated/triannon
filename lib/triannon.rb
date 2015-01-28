@@ -5,7 +5,9 @@ require 'rdf/ldp'
 require 'rdf/fcrepo4'
 require 'rdf/triannon_vocab'
 require 'bootstrap-sass'
-require 'faraday'
+require 'faraday' # for writing to LDP store
+require 'rsolr'
+require 'retries' # for writing to Solr
 
 module Triannon
   require "triannon/engine"

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "integration tests for annos with no body", :vcr do
+describe "integration tests for no body", :vcr do
 
   it 'bookmark' do
     write_anno = Triannon::Annotation.new data: '{
@@ -15,7 +15,10 @@ describe "integration tests for annos with no body", :vcr do
     expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.bookmarking]).size).to eql 1
     expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI("http://purl.stanford.edu/kq131cs7229")]).size).to eql 1
 
+    sw = write_anno.send(:solr_writer)
+    allow(sw).to receive(:add)
     id = write_anno.save
+
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql 3
