@@ -35,6 +35,7 @@ $ rails g triannon:install
 Edit the `config/triannon.yml` file:
 
 * `ldp_url:` Points to the root annotations container on your LDP server
+* `solr_url:` Points to the baseurl of Solr instance configured for Triannon
 * `triannon_base_url:` Used as the base url for all annotations hosted by your Triannon server.  Identifiers from the LDP server will be appended to this base-url.  Generally something like "https://your-triannon-rails-box/annotations", as "/annotations" is added to the path by the Triannon gem
 
 Generate the root annotations container on the LDP server
@@ -45,20 +46,39 @@ $ rake triannon:create_root_container
 
 ## Running the application in development
 
-There is a bundled rake task for running the test app:
+There is a bundled rake task for running the test app, but there is some one-time set up.
 
+### One time setup
+
+##### Set up a local instance of Fedora4
 ```console
-# One time setup: run the following 3 commands
 $ rake jetty:download
 $ rake jetty:unzip
+```
+##### Set up a Triannon flavored Solr
+```console
+$ cp config/solr/solr.xml jetty/solr
+$ cp config/solr/triannon-core jetty/solr
+```
+
+##### Set up a runnable Rails app that uses triannon gem
+```console
 $ rake engine_cart:generate # (first run only)
+```
 
-# Configure config/triannon.yml as specified above
-$ vi config/triannon.yml
+##### Configure spec/internal/config/triannon.yml as specified above
+```console
+$ vi spec/internal/config/triannon.yml
+```
 
-# Generate root annotations container
+##### Generate root annotations container
+```console
 $ rake triannon:create_root_container
+```
 
 # Run the test app
+```console
+$ rake jetty:start
 $ rake triannon:server
+$ rake jetty:stop # at some point
 ```
