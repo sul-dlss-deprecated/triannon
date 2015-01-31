@@ -94,7 +94,8 @@ protected
 
     # Add annotation to Solr as a Solr document
     def solr_save
-      solr_writer.add(graph.solr_hash)
+      # pass in id we got from LDP Store
+      solr_writer.add(graph.solr_hash(id))
     end
 
     # Delete annotation from Solr

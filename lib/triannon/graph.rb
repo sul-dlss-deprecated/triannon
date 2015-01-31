@@ -22,8 +22,9 @@ module Triannon
     # @return [RDF::Query] query for a subject :s with type of RDF::OpenAnnotation.Annotation
     def self.anno_query
       q = RDF::Query.new
-      q << [:s, RDF.type, RDF::URI("http://www.w3.org/ns/oa#Annotation")]
+      q << [:s, RDF.type, RDF::OpenAnnotation.Annotation]
     end
+    
     
 # Instance Methods ----------------------------------------------------------------
 
@@ -50,13 +51,15 @@ module Triannon
 
     # NOTE: NEVER get here before anno is stored
     # the graph should have an assigned url for the @id of the root;  it shouldn't be a blank node
+    # @param [String] the Triannon id for this anno. Defaults to nil, in which case id_as_url will be used.
     # @return [Hash] a hash to be written to Solr, populated appropriately
-    def solr_hash
+    def solr_hash(triannon_id=nil)
       doc_hash = {}
       # chars in Solr/Lucene query syntax are a big pain in Solr id fields, so we only use
       # the uuid portion of the Triannon anno id, not the full url
-      tid = id_as_url.sub(Triannon.config[:ldp_url], "")
-      doc_hash[:id] = tid.sub(/^\//, "")
+      triannon_id ||= id_as_url
+      solr_id = triannon_id.sub(Triannon.config[:ldp_url], "")
+      doc_hash[:id] = solr_id.sub(/^\//, "")
 
       # use short strings for motivation field
       doc_hash[:motivation] = motivated_by.map { |m| m.sub(RDF::OpenAnnotation.to_s, "") }
@@ -185,10 +188,9 @@ module Triannon
     # transform an outer blank node into a null relative URI
     def make_null_relative_uri_out_of_blank_node
       anno_stmts = @graph.query([nil, RDF.type, RDF::OpenAnnotation.Annotation])
-      # FIXME: should actually look for subject with type of RDF::OpenAnnotation.Annotation
       anno_rdf_obj = anno_stmts.first.subject
       if anno_rdf_obj.is_a?(RDF::Node)
-        # we need to use the null relative URI representation of blank nodes to write to LDP
+        # use null relative URI representation of blank node
         anno_subject = RDF::URI.new
       else # it's already a URI
         anno_subject = anno_rdf_obj

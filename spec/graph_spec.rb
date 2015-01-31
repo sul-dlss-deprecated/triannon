@@ -72,9 +72,14 @@ describe Triannon::Graph, :vcr do
       it "slash part of base_url" do
         # see 'only the uuid, not the full url'
       end
-      it "calls id_as_url" do
+      it "calls id_as_url if there is no param value passed in" do
         expect(tg).to receive(:id_as_url).and_call_original
         tg.solr_hash
+      end
+      it "uses param value if present" do
+        expect(tg).not_to receive(:id_as_url)
+        sh = tg.solr_hash("use-me")
+        expect(sh[:id]).to eq "use-me"
       end
     end
     

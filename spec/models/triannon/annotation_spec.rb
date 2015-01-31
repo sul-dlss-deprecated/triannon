@@ -191,9 +191,9 @@ describe Triannon::Annotation, :vcr do
 
   context '#solr_save' do
     let(:solr_writer) { bookmark_anno.send(:solr_writer) }
-    it "calls graph.solr_hash" do
+    it "calls graph.solr_hash with id" do
       allow(solr_writer).to receive(:add)
-      expect(bookmark_anno.graph).to receive(:solr_hash).and_return({:id => 'test'})
+      expect(bookmark_anno.graph).to receive(:solr_hash).with(bookmark_anno.id).and_return({:id => 'test'})
       bookmark_anno.send(:solr_save)
     end
     it "calls SolrWriter.add with solr_hash" do
