@@ -1,0 +1,51 @@
+require 'spec_helper'
+
+describe "integration tests for Solr", :vcr do
+
+  let(:rsolr_client) {RSolr.connect(:url => Triannon.config[:solr_url])}
+  let(:write_anno) { Triannon::Annotation.new data: 
+    "@prefix content: <http://www.w3.org/2011/content#> .
+    @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+    @prefix openannotation: <http://www.w3.org/ns/oa#> .
+    @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+    <> a openannotation:Annotation;
+       openannotation:hasBody [
+         a content:ContentAsText,
+           dcmitype:Text;
+         content:chars \"solr integration test\"
+       ];
+       openannotation:hasTarget <http://example.com/solr-integration-test>;
+       openannotation:motivatedBy openannotation:commenting ."
+  }
+
+  it 'writes to Solr' do
+    write_solr_hash = write_anno.graph.solr_hash
+    expect(write_solr_hash.size).to be > 6
+    anno_id = write_anno.save
+    sleep(2) # give solr time to commit
+    response = rsolr_client.get 'doc', :params => {:id => anno_id}
+    expect(response["response"]["numFound"]).to eq 1
+    solr_doc = response["response"]["docs"].first
+    expect(solr_doc["id"]).to eq anno_id
+    expect(Time.parse(solr_doc["timestamp"])).to be_a Time
+    # all fields in orig solr_hash are stored fields and will be in solr response
+    write_solr_hash.each_pair { |k,v|
+      expect(solr_doc[k.to_s]).to eq v unless k = :id || v = nil
+    }
+  end
+  
+  it 'deletes from Solr' do
+    anno_id = write_anno.save
+    sleep(2) # give solr time to commit
+    # ensure write succeeded
+    response = rsolr_client.get 'doc', :params => {:id => anno_id}
+    expect(response["response"]["numFound"]).to eq 1
+
+    write_anno.destroy
+    sleep(2)
+    response = rsolr_client.get 'doc', :params => {:id => anno_id}
+    expect(response["response"]["numFound"]).to eq 0
+  end
+end

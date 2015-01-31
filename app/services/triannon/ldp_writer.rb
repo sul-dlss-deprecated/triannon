@@ -128,7 +128,7 @@ module Triannon
         req.body = ttl
       end
       if resp.status != 200 && resp.status != 201
-        raise "Unable to create LDP resource in container #{url}: Response Status: #{resp.status}\nResponse Body: #{resp.body}\nAnnotation sent: #{body}"
+        raise "Unable to create LDP resource in container #{parent_path}: Response Status: #{resp.status}\nResponse Body: #{resp.body}\nAnnotation sent: #{body}"
       end
       new_url = resp.headers['Location'] ? resp.headers['Location'] : resp.headers['location']
       new_url.split('/').last if new_url

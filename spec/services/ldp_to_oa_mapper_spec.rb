@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Triannon::LdpToOaMapper do
+describe Triannon::LdpToOaMapper, :vcr do
   let(:anno_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_base.ttl') }
   let(:base_stmts) { RDF::Graph.new.from_ttl(anno_ttl).statements }
   let(:body_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_body.ttl') }

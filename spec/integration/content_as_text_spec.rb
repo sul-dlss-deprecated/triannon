@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "integration tests for annos with content as text", :vcr do
+describe "integration tests for content as text", :vcr do
 
   it 'body is blank node with content as text' do
     body_text = "I love this!"
@@ -33,7 +33,10 @@ describe "integration tests for annos with content as text", :vcr do
     expect(g.query([body_node, RDF.type, RDF::DCMIType.Text]).size).to eql 1
     expect(g.query([body_node, RDF::Content.chars, RDF::Literal.new(body_text)]).size).to eql 1
 
+    sw = write_anno.send(:solr_writer)
+    allow(sw).to receive(:add)
     id = write_anno.save
+
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql 7
@@ -87,7 +90,10 @@ describe "integration tests for annos with content as text", :vcr do
     expect(g.query([body_node, RDF::DC11.language, RDF::Literal.new(body_lang)]).size).to eql 1
     expect(g.query([body_node, RDF::Content.chars, RDF::Literal.new(body_text)]).size).to eql 1
 
+    sw = write_anno.send(:solr_writer)
+    allow(sw).to receive(:add)
     id = write_anno.save
+
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql 9
@@ -146,7 +152,10 @@ describe "integration tests for annos with content as text", :vcr do
     expect(g.query([body_node2, RDF.type, RDF::DCMIType.Text]).size).to eql 1
     expect(g.query([body_node2, RDF::Content.chars, RDF::Literal.new(body_text2)]).size).to eql 1
 
+    sw = write_anno.send(:solr_writer)
+    allow(sw).to receive(:add)
     id = write_anno.save
+
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql 11

@@ -59,143 +59,50 @@ module Triannon
     end
 
     def graph
-      @graph ||= data_to_graph
+      @graph ||= begin
+        g = data_to_graph
+        Triannon::Graph.new g if g.kind_of? RDF::Graph
+      end
     end
 
+    # @param [RDF::Graph]
     def graph= g
-      @graph = g
+      @graph = Triannon::Graph.new g if g.kind_of? RDF::Graph
     end
     
-    # @return json-ld representation of graph with OpenAnnotation context as a url
+    # @return json-ld representation of anno with OpenAnnotation context as a url
     def jsonld_oa
-      inline_context = graph.dump(:jsonld, :context => Triannon::JsonldContext::OA_CONTEXT_URL)
-      hash_from_json = JSON.parse(inline_context)
-      hash_from_json["@context"] = Triannon::JsonldContext::OA_CONTEXT_URL
-      hash_from_json.to_json
+      graph.jsonld_oa
     end
     
-    # @return json-ld representation of graph with IIIF context as a url
+    # @return json-ld representation of anno with IIIF context as a url
     def jsonld_iiif
-      inline_context = graph.dump(:jsonld, :context => Triannon::JsonldContext::IIIF_CONTEXT_URL)
-      hash_from_json = JSON.parse(inline_context)
-      hash_from_json["@context"] = Triannon::JsonldContext::IIIF_CONTEXT_URL
-      hash_from_json.to_json
+      graph.jsonld_iiif
     end
 
-    # @return [String] the id of this annotation as a url
-    # TODO:  re-usable as part of Triannon::Graph class?
-    def url
-      if graph_exists?
-        solution = graph.query Triannon::Graph.anno_query
-        if solution && solution.size == 1
-          solution.first.s.to_s
-        # TODO:  raise exception if no URL?
-        end
-      end
+    # @return [String] the id of this annotation as a url or nil if no graph
+    def id_as_url
+      graph.id_as_url if graph_exists?
     end
 
-    # FIXME:  this should be part of validation:  RDF.type should be RDF::OpenAnnotation.Annotation
-    # @return [String] should always be a string representation of RDF::OpenAnnotation.Annotation
-    def type
-      if graph_exists?
-        q = RDF::Query.new
-        q << [:s, RDF::OpenAnnotation.hasTarget, nil] # must have a target
-        q << [:s, RDF.type, :type]
-        solution = graph.query q
-        solution.distinct!
-        if solution && solution.size == 1
-          solution.first.type.to_s
-        # TODO:  raise exception if no type?
-        end
-      end
-    end
-
-    # @return [Array] of uris expressing the OA motivated_by values
-    # TODO:  re-usable as part of Triannon::Graph class?
+    # @return [Array<String>] of urls expressing the OA motivated_by values or nil if no graph
     def motivated_by
-      if graph_exists?
-        q = Triannon::Graph.anno_query.dup
-        q << [:s, RDF::OpenAnnotation.motivatedBy, :motivated_by]
-        solution = graph.query q
-        if solution && solution.size > 0
-          motivations = []
-          solution.each {|res|
-            motivations << res.motivated_by.to_s
-          }
-          motivations
-        # TODO:  raise exception if none?
-        end
-      end
+      graph.motivated_by if graph_exists?
     end
 
 protected
 
-    # TODO: WRITE_COMMENTS_AND_TESTS_FOR_THIS_METHOD
+    # Add annotation to Solr as a Solr document
     def solr_save
-#      puts "TO DO: send add to Solr (after save)"
-#      pp solr_hash
+      # pass in id we got from LDP Store
+      solr_writer.add(graph.solr_hash(id))
     end
 
-    # TODO: WRITE_COMMENTS_AND_TESTS_FOR_THIS_METHOD
+    # Delete annotation from Solr
     def solr_delete
-#      puts "TO DO: send delete to Solr (after destroy)"
+      solr_writer.delete(id)
     end
     
-    # TODO: WRITE_COMMENTS_AND_TESTS_FOR_THIS_METHOD
-    # TODO:  re-usable as part of Triannon::Graph class?
-    # 
-    # @return [Hash] a hash to be written to Solr, populated appropriately
-    def solr_hash
-      doc_hash = {}
-      tid = url.sub(Triannon.config[:ldp_url], "")
-      tid.sub(/^\//, "")
-      doc_hash[:id] = tid
-      doc_hash[:motivation] = motivated_by.map { |m| m.sub(RDF::OpenAnnotation.to_s, "") }
-      # date field format: 1995-12-31T23:59:59Z; or w fractional seconds: 1995-12-31T23:59:59.999Z
-#      doc_hash[:annotated_at] =
-#      doc_hash[:annotated_by_stem]
-      doc_hash[:target_url] = predicate_urls RDF::OpenAnnotation.hasTarget
-      doc_hash[:target_type] = ['external_URI'] if doc_hash[:target_url].size > 0
-      doc_hash[:body_url] = predicate_urls RDF::OpenAnnotation.hasBody
-      doc_hash[:body_type] = []
-      doc_hash[:body_type] << 'external_URI' if doc_hash[:body_url].size > 0
-      doc_hash[:body_chars_exact] = body_chars
-      doc_hash[:body_type] << 'content_as_text' if doc_hash[:body_chars_exact].size > 0
-      doc_hash[:body_type] << 'no_body' if doc_hash[:body_type].size == 0
-      doc_hash[:anno_jsonld] = jsonld_oa
-      doc_hash
-    end
-    
-    # TODO: WRITE_COMMENTS_AND_TESTS_FOR_THIS_METHOD
-    # TODO:  re-usable as part of Triannon::Graph class?
-    # @param [RDF::URI] predicate either RDF::OpenAnnotation.hasTarget or RDF::OpenAnnotation.hasBody
-    # @return [Array<String>] urls for the predicate, as an Array of Strings
-    def predicate_urls(predicate)
-      predicate_solns = graph.query([nil, predicate, nil])
-      urls = []
-      predicate_solns.each { |predicate_stmt |
-        predicate_obj = predicate_stmt.object
-        urls << predicate_obj.to_str if predicate_obj.is_a?(RDF::URI)
-      }
-      urls
-    end
-    
-    # TODO: WRITE_COMMENTS_AND_TESTS_FOR_THIS_METHOD
-    # TODO:  re-usable as part of Triannon::Graph class?
-    # @return [Array<String>] body chars as Strings, in an Array (one element for each contentAsText body)
-    def body_chars
-      result = []
-      q = RDF::Query.new
-      q << [nil, RDF::OpenAnnotation.hasBody, :body]
-      q << [:body, RDF.type, RDF::Content.ContentAsText]
-      q << [:body, RDF::Content.chars, :body_chars]
-      solns = graph.query q
-      solns.each { |soln| 
-        result << soln.body_chars.value.strip
-      }
-      result
-    end
-
 private
 
     # loads RDF::Graph from data attribute.  If data is in json-ld, converts it to turtle.
@@ -233,6 +140,10 @@ private
 
     def graph_exists?
       graph && graph.size > 0
+    end
+
+    def solr_writer
+      @sw ||= Triannon::SolrWriter.new
     end
 
   end

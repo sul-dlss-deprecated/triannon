@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Triannon::LdpLoader do
+describe Triannon::LdpLoader, :vcr do
 
   let(:anno_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_base.ttl') }
   let(:body_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_body.ttl') }

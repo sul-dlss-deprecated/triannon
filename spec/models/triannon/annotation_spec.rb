@@ -1,12 +1,12 @@
 require 'spec_helper'
 
 describe Triannon::Annotation, :vcr do
+  let(:bookmark_anno) {Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")}
 
   it "doesn't do external lookup of json_ld context" , :vcr => {:record => :none} do
-    anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
     # NOTE:  VCR would throw an error if this does an external lookup
     # https://www.relishapp.com/vcr/vcr/v/2-9-3/docs/record-modes/none
-    expect(anno.graph).to be_a_kind_of RDF::Graph
+    expect(bookmark_anno.graph).to be_a_kind_of Triannon::Graph
   end
 
   context 'json_ld replaces context url with inline context' do
@@ -41,45 +41,31 @@ describe Triannon::Annotation, :vcr do
     end
   end
   
-  context '#jsonld_oa' do
-    let(:anno) { Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl") }
-    let(:anno2) { Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json") }
-    it 'has context as url' do
-      expect(anno.jsonld_oa).to match /"@context":\s*"http:\/\/www.w3.org\/ns\/oa.jsonld"/
-      expect(anno2.jsonld_oa).to match /"@context":\s*"http:\/\/www.w3.org\/ns\/oa.jsonld"/
-    end
-    it 'parses as graph' do
-      new_anno = Triannon::Annotation.new data: anno.jsonld_oa
-      expect(new_anno.graph.to_ttl).to eq anno.graph.to_ttl
-      new_anno = Triannon::Annotation.new data: anno2.jsonld_oa
-      expect(new_anno.graph.to_ttl).to eq anno2.graph.to_ttl
-    end
-  end
-  
-  context '#jsonld_iiif' do
-    let(:anno) { Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl") }
-    let(:anno2) { Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json") }
-    it 'has context as url' do
-      expect(anno.jsonld_iiif).to match /"@context":\s*"http:\/\/iiif.io\/api\/presentation\/2\/context.json"/
-      expect(anno2.jsonld_iiif).to match /"@context":\s*"http:\/\/iiif.io\/api\/presentation\/2\/context.json"/
-    end
-    it 'parses as graph' do
-      new_anno = Triannon::Annotation.new data: anno.jsonld_iiif
-      expect(new_anno.graph.to_ttl).to eq anno.graph.to_ttl
-      new_anno = Triannon::Annotation.new data: anno2.jsonld_iiif
-      expect(new_anno.graph.to_ttl).to eq anno2.graph.to_ttl
-    end
+  it "#jsonld_oa calls Triannon::Graph #jsonld_oa" do
+    expect(bookmark_anno.graph).to be_a Triannon::Graph
+    expect(bookmark_anno.graph).to receive(:jsonld_oa)
+    bookmark_anno.jsonld_oa
   end
 
+  it "#jsonld_iiif calls Triannon::Graph #jsonld_iiif" do
+    expect(bookmark_anno.graph).to be_a Triannon::Graph
+    expect(bookmark_anno.graph).to receive(:jsonld_iiif)
+    bookmark_anno.jsonld_iiif
+  end
+
+  it "#graph is a Triannon::Graph" do
+    expect(bookmark_anno.graph).to be_a Triannon::Graph
+  end
+  
   context "#data_as_graph" do
-    before(:each) do
-      @json_ld_data = Triannon.annotation_fixture("bookmark.json")
-    end
     context "json-ld data" do
+      before(:each) do
+        @json_ld_data = Triannon.annotation_fixture("bookmark.json")
+      end
       it "populates graph from json-ld" do
         expect(@json_ld_data).to match(/\A\{.+\}\Z/m) # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
         anno = Triannon::Annotation.new data: @json_ld_data
-        expect(anno.graph).to be_a_kind_of RDF::Graph
+        expect(anno.graph).to be_a_kind_of Triannon::Graph
         expect(anno.graph.count).to be > 1
       end
       it "is rejected if first and last non whitespace characters aren't { and }" do
@@ -101,7 +87,7 @@ describe Triannon::Annotation, :vcr do
       it "populates graph from ttl" do
         expect(@ttl_data).to match(/\.\Z/)  # (Note:  \Z is needed instead of $ due to \n in data)
         anno = Triannon::Annotation.new data: @ttl_data
-        expect(anno.graph).to be_a_kind_of RDF::Graph
+        expect(anno.graph).to be_a_kind_of Triannon::Graph
         expect(anno.graph.count).to be > 1
       end
       it "is rejected if it doesn't end in period" do
@@ -116,7 +102,7 @@ describe Triannon::Annotation, :vcr do
       it "populates graph from rdfxml" do
         expect(@rdfxml_data).to match(/\A<.+>\Z/m) # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
         anno = Triannon::Annotation.new data: @rdfxml_data
-        expect(anno.graph).to be_a_kind_of RDF::Graph
+        expect(anno.graph).to be_a_kind_of Triannon::Graph
         expect(anno.graph.count).to be > 1
       end
       it "is rejected if first and last non whitespace characters aren't < and >" do
@@ -127,86 +113,108 @@ describe Triannon::Annotation, :vcr do
   end # data_as_graph
 
   context "parsing graph" do
-    before(:each) do
-      @anno_json = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
-      @anno_ttl = Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl")
-    end
-    it "type is oa:Annotation" do
-      expect(@anno_ttl.type).to eql("http://www.w3.org/ns/oa#Annotation")
-      expect(@anno_json.type).to eql("http://www.w3.org/ns/oa#Annotation")
-      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("mult-targets.json")
-      expect(anno.type).to eql("http://www.w3.org/ns/oa#Annotation")
-    end
-    it "url" do
-      expect(@anno_json.url).to eql("http://example.org/annos/annotation/bookmark.json")
-      expect(@anno_ttl.url).to eql("http://example.org/annos/annotation/body-chars.ttl")
-      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("mult-targets.json")
-      expect(anno.url).to eql("http://example.org/annos/annotation/mult-targets.json")
-    end
-    context "motivated_by" do
-      it "single" do
-        expect(@anno_ttl.motivated_by.size).to eql 1
-        expect(@anno_ttl.motivated_by[0]).to eql("http://www.w3.org/ns/oa#commenting")
-        expect(@anno_json.motivated_by.size).to eql 1
-        expect(@anno_json.motivated_by).to include("http://www.w3.org/ns/oa#bookmarking")
+    context '#id_as_url' do
+      it "calls Triannon::Graph #id_as_url" do
+        expect(bookmark_anno.graph).to be_a Triannon::Graph
+        expect(bookmark_anno.graph).to receive(:id_as_url)
+        bookmark_anno.id_as_url
       end
-      it "multiple" do
-        anno = Triannon::Annotation.new data: Triannon.annotation_fixture("mult-motivations.json")
-        expect(anno.motivated_by.size).to eql 2
-        expect(anno.motivated_by).to include("http://www.w3.org/ns/oa#moderating")
-        expect(anno.motivated_by).to include("http://www.w3.org/ns/oa#tagging")
+      it "returns nil if there is no graph" do
+        anno = Triannon::Annotation.new
+        expect(anno.id_as_url).to eq nil
       end
-      it "mult targets" do
-        anno = Triannon::Annotation.new data: Triannon.annotation_fixture("mult-targets.json")
-        expect(anno.motivated_by.size).to eql 1
-        expect(anno.motivated_by).to include("http://www.w3.org/ns/oa#commenting")
+    end
+    context '#motivated_by' do
+      it "calls Triannon::Graph #motivated_by" do
+        expect(bookmark_anno.graph).to be_a Triannon::Graph
+        expect(bookmark_anno.graph).to receive(:motivated_by)
+        bookmark_anno.motivated_by
+      end
+      it "returns nil if there is no graph" do
+        anno = Triannon::Annotation.new
+        expect(anno.motivated_by).to eq nil
       end
     end
   end # parsing graph
 
-  context ".all" do
-    it "returns an array of all Annotation identifiers in the repository" do
-      root_anno_ttl = File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_root_anno_container.ttl')
-      allow_any_instance_of(Triannon::LdpLoader).to receive(:get_ttl).and_return(root_anno_ttl)
-      results = Triannon::Annotation.all
-      expect(results).to be_an_instance_of Array
-      expect(results[0]).to be_an_instance_of Triannon::Annotation
-      expect(results[0].id).to be_an_instance_of String
-      # result only contains populated id attribute
-      expect(results[0].url).to eql nil
-      expect(results[0].type).to eql nil
-    end
-    it "calls LdpLoader.find_all" do
-      expect_any_instance_of(Triannon::LdpLoader).to receive(:find_all)
-      Triannon::Annotation.all
-    end
-  end
-
   context '#save' do
     it "sets anno id" do
-      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
-      anno_id = anno.save
-      expect(anno.id).to eq anno_id
+      anno_id = bookmark_anno.save
+      expect(bookmark_anno.id).to eq anno_id
     end
     it "calls solr_save method after successful save to LDP Store" do
       # test to make sure callback logic implemented properly in model
-      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
-      expect(anno).to receive(:solr_save)
-      anno.save
+      expect(bookmark_anno).to receive(:solr_save)
+      bookmark_anno.save
     end
     it "doesn't call solr_save method after unsuccessful save to LDP Store - nil returned" do
       # test to make sure callback logic implemented properly in model
-      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
-      allow(anno).to receive(:save).and_return(nil) # or it might raise an exception
-      expect(anno).not_to receive(:solr_save)
-      anno.save
+      allow(bookmark_anno).to receive(:save).and_return(nil) # or it might raise an exception
+      expect(bookmark_anno).not_to receive(:solr_save)
+      bookmark_anno.save
     end
     it "doesn't call solr_save method after exception for LDP store create" do
       # test to make sure callback logic implemented properly in model
-      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
-      allow(anno).to receive(:create).and_raise(RuntimeError)
-      expect(anno).not_to receive(:solr_save)
-      expect{anno.save}.to raise_error
+      allow(bookmark_anno).to receive(:create).and_raise(RuntimeError)
+      expect(bookmark_anno).not_to receive(:solr_save)
+      expect{bookmark_anno.save}.to raise_error
+    end
+  end
+
+  context "#destroy" do
+    it "calls LdpWriter.delete_anno with its own id" do
+      id = 'someid'
+      a = Triannon::Annotation.new :id => id
+      allow(a.send(:solr_writer)).to receive(:delete)
+      expect(Triannon::LdpWriter).to receive(:delete_anno).with(id)
+      a.destroy
+    end
+    it "calls solr_delete method after successful destroy in LDP store" do
+      # test to make sure callback logic implemented properly in model
+      bookmark_anno.save
+      expect(bookmark_anno).to receive(:solr_delete)
+      bookmark_anno.destroy
+    end
+    it "doesn't call solr_save method after unsuccessful save to LDP Store - nil returned" do
+      # test to make sure callback logic implemented properly in model
+      allow(bookmark_anno).to receive(:destroy).and_return(nil) # or it might raise an exception
+      expect(bookmark_anno).not_to receive(:solr_save)
+      bookmark_anno.destroy
+    end
+    it "doesn't call solr_delete method after exception for LDP store destroy" do
+      # test to make sure callback logic implemented properly in model
+      allow(bookmark_anno).to receive(:destroy).and_raise(RuntimeError)
+      expect(bookmark_anno).not_to receive(:solr_delete)
+      expect{bookmark_anno.destroy}.to raise_error
+    end
+  end
+
+  context '#solr_save' do
+    let(:solr_writer) { bookmark_anno.send(:solr_writer) }
+    it "calls graph.solr_hash with id" do
+      allow(solr_writer).to receive(:add)
+      expect(bookmark_anno.graph).to receive(:solr_hash).with(bookmark_anno.id).and_return({:id => 'test'})
+      bookmark_anno.send(:solr_save)
+    end
+    it "calls SolrWriter.add with solr_hash" do
+      expect(solr_writer).to receive(:add).with(bookmark_anno.graph.solr_hash)
+      bookmark_anno.send(:solr_save)
+    end
+    it "raises exception when Solr add is not successful" do
+      allow(solr_writer).to receive(:add).and_raise(RuntimeError)
+      expect { bookmark_anno.send(:solr_save) }.to raise_error
+    end
+  end
+  
+  context '#solr_delete' do
+    let(:solr_writer) { bookmark_anno.send(:solr_writer) }
+    it "calls SolrWriter.delete with id" do
+      expect(solr_writer).to receive(:delete).with(bookmark_anno.id)
+      bookmark_anno.send(:solr_delete)
+    end
+    it "raises exception when Solr delete is not successful" do
+      allow(solr_writer).to receive(:delete).and_raise(RuntimeError)
+      expect { bookmark_anno.send(:solr_delete) }.to raise_error
     end
   end
 
@@ -219,33 +227,20 @@ describe Triannon::Annotation, :vcr do
     end
   end
 
-  context "#destroy" do
-    it "calls LdpWriter.delete_anno with its own id" do
-      id = 'someid'
-      a = Triannon::Annotation.new :id => id
-      expect(Triannon::LdpWriter).to receive(:delete_anno).with(id)
-      a.destroy
+  context "*all" do
+    it "returns an array of all Annotation identifiers in the repository" do
+      root_anno_ttl = File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_root_anno_container.ttl')
+      allow_any_instance_of(Triannon::LdpLoader).to receive(:get_ttl).and_return(root_anno_ttl)
+      results = Triannon::Annotation.all
+      expect(results).to be_an_instance_of Array
+      expect(results[0]).to be_an_instance_of Triannon::Annotation
+      expect(results[0].id).to be_an_instance_of String
+      # result only contains populated id attribute
+      expect(results[0].id_as_url).to eql nil
     end
-    it "calls solr_delete method after successful destroy in LDP store" do
-      # test to make sure callback logic implemented properly in model
-      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
-      anno.save
-      expect(anno).to receive(:solr_delete)
-      anno.destroy
-    end
-    it "doesn't call solr_save method after unsuccessful save to LDP Store - nil returned" do
-      # test to make sure callback logic implemented properly in model
-      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
-      allow(anno).to receive(:destroy).and_return(nil) # or it might raise an exception
-      expect(anno).not_to receive(:solr_save)
-      anno.destroy
-    end
-    it "doesn't call solr_delete method after exception for LDP store destroy" do
-      # test to make sure callback logic implemented properly in model
-      anno = Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")
-      allow(anno).to receive(:destroy).and_raise(RuntimeError)
-      expect(anno).not_to receive(:solr_delete)
-      expect{anno.destroy}.to raise_error
+    it "calls LdpLoader.find_all" do
+      expect_any_instance_of(Triannon::LdpLoader).to receive(:find_all)
+      Triannon::Annotation.all
     end
   end
 

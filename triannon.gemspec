@@ -21,7 +21,9 @@ Gem::Specification.new do |s|
   s.add_dependency "rdf-ldp"
   s.add_dependency "rdf-fcrepo4"
   s.add_dependency "bootstrap-sass"
-  s.add_dependency "faraday"
+  s.add_dependency "faraday" # for writing to LDP store
+  s.add_dependency "rsolr"
+  s.add_dependency "retries" # for writing to Solr
 
   s.add_development_dependency "rspec", "~> 3.0"
   s.add_development_dependency "rspec-rails", "~> 3.0"

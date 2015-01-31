@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "integration tests for annos with external URIs", :vcr do
+describe "integration tests for external URIs", :vcr do
 
   it 'target has external URI' do
     target_uri = "http://purl.stanford.edu/kq131cs7229"
@@ -19,7 +19,10 @@ describe "integration tests for annos with external URIs", :vcr do
      expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.bookmarking]).size).to eql 1
      expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
      
+     sw = write_anno.send(:solr_writer)
+     allow(sw).to receive(:add)
      id = write_anno.save
+     
      anno = Triannon::Annotation.find id
      h = anno.graph
      expect(h.size).to eql 3
@@ -49,6 +52,8 @@ describe "integration tests for annos with external URIs", :vcr do
      expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri1)]).size).to eql 1
      expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri2)]).size).to eql 1
      
+     sw = write_anno.send(:solr_writer)
+     allow(sw).to receive(:add)
      id = write_anno.save
      
      anno = Triannon::Annotation.find id
@@ -81,7 +86,10 @@ describe "integration tests for annos with external URIs", :vcr do
     expect(g.query([nil, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri)]).size).to eql 1
     expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
 
+    sw = write_anno.send(:solr_writer)
+    allow(sw).to receive(:add)
     id = write_anno.save
+
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql 4
@@ -115,7 +123,10 @@ describe "integration tests for annos with external URIs", :vcr do
     expect(g.query([nil, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri2)]).size).to eql 1
     expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
 
+    sw = write_anno.send(:solr_writer)
+    allow(sw).to receive(:add)
     id = write_anno.save
+
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql 5
@@ -155,7 +166,10 @@ describe "integration tests for annos with external URIs", :vcr do
     expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
     expect(g.query([nil, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri)]).size).to eql 1
 
+    sw = write_anno.send(:solr_writer)
+    allow(sw).to receive(:add)
     id = write_anno.save
+
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql 6
@@ -191,7 +205,10 @@ describe "integration tests for annos with external URIs", :vcr do
     expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
     expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
 
+    sw = write_anno.send(:solr_writer)
+    allow(sw).to receive(:add)
     id = write_anno.save
+
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql 5
@@ -231,7 +248,10 @@ describe "integration tests for annos with external URIs", :vcr do
     expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
     expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
 
+    sw = write_anno.send(:solr_writer)
+    allow(sw).to receive(:add)
     id = write_anno.save
+
     anno = Triannon::Annotation.find id
     h = anno.graph
     expect(h.size).to eql 6
