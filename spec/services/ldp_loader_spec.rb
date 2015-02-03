@@ -8,10 +8,10 @@ describe Triannon::LdpLoader, :vcr do
   let(:root_anno_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_root_anno_container.ttl') }
 
   describe '*load' do
-    it "returns a graph of an OpenAnnotation without LDP or FCrepo triples" do
+    it "returns a Triannon::Graph of an OpenAnnotation without LDP or FCrepo triples" do
       allow_any_instance_of(Triannon::LdpLoader).to receive(:get_ttl).and_return(anno_ttl, body_ttl, target_ttl)
       result = Triannon::LdpLoader.load('somekey')
-      expect(result).to be_an_instance_of(RDF::Graph)
+      expect(result).to be_an_instance_of(Triannon::Graph)
       root_node_solns = result.query [nil, RDF.type, RDF::OpenAnnotation.Annotation]
       expect(root_node_solns.count).to eql 1
       root_node = root_node_solns.first.subject
