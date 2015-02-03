@@ -2,8 +2,23 @@ require 'spec_helper'
 
 describe Triannon::Graph, :vcr do
   
-  let(:g1) {Triannon::Graph.new RDF::Graph.new.from_ttl Triannon.annotation_fixture("body-chars.ttl")}
-  let(:g2) {Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("bookmark.json")}
+  let(:g1) { Triannon::Graph.new RDF::Graph.new.from_ttl("
+    <http://my.identifiers.com/oa_comment> a <http://www.w3.org/ns/oa#Annotation>;
+       <http://www.w3.org/ns/oa#hasBody> [
+         a <http://www.w3.org/2011/content#ContentAsText>,
+           <http://purl.org/dc/dcmitype/Text>;
+         <http://www.w3.org/2011/content#chars> \"I love this!\"
+       ];
+       <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq131cs7229>;
+       <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#commenting> . ") }
+  let(:g2) { Triannon::Graph.new RDF::Graph.new.from_jsonld(
+    '{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@id": "http://my.identifiers.com/oa_bookmark",
+        "@type": "oa:Annotation", 
+        "motivatedBy": "oa:bookmarking", 
+        "hasTarget": "http://purl.stanford.edu/kq131cs7229"
+      }' ) }
   let(:g3) {Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("mult-targets.json")}
   
   context 'jsonld flavors' do
@@ -48,7 +63,7 @@ describe Triannon::Graph, :vcr do
        <http://www.w3.org/ns/oa#hasTarget> <http://searchworks.stanford.edu/view/666>;
        <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#tagging> ." }
     let(:tg_solr_hash) { 
-      config = { :ldp_url => base_url }
+      config = { :triannon_base_url => base_url }
       allow(Triannon).to receive(:config).and_return(config)
       tg.solr_hash 
     }
@@ -61,7 +76,7 @@ describe Triannon::Graph, :vcr do
         expect(tg_solr_hash[:id]).to eq uuid
       end
       it "slash not part of base_url" do
-        config = { :ldp_url =>  "https://triannon-dev.stanford.edu/annotations" }
+        config = { :triannon_base_url =>  "https://triannon-dev.stanford.edu/annotations" }
         allow(Triannon).to receive(:config).and_return(config)
         my_tg = Triannon::Graph.new RDF::Graph.new.from_ttl "
          <#{base_url}/#{uuid}> a <http://www.w3.org/ns/oa#Annotation>;
@@ -72,14 +87,9 @@ describe Triannon::Graph, :vcr do
       it "slash part of base_url" do
         # see 'only the uuid, not the full url'
       end
-      it "calls id_as_url if there is no param value passed in" do
+      it "calls id_as_url" do
         expect(tg).to receive(:id_as_url).and_call_original
         tg.solr_hash
-      end
-      it "uses param value if present" do
-        expect(tg).not_to receive(:id_as_url)
-        sh = tg.solr_hash("use-me")
-        expect(sh[:id]).to eq "use-me"
       end
     end
     
@@ -240,13 +250,17 @@ describe Triannon::Graph, :vcr do
         my_tg = Triannon::Graph.new RDF::Graph.new.from_ttl Triannon.annotation_fixture("body-chars.ttl")
         expect(my_tg.solr_hash[:anno_jsonld]).to match Triannon::JsonldContext::OA_CONTEXT_URL
       end
+      it "has non-empty id value for outer node" do
+        expect(tg_solr_hash[:anno_jsonld]).not_to match "@id\":\"\""
+        expect(tg_solr_hash[:anno_jsonld]).to match "@id\":\".+\""
+      end
     end
   end # solr_hash
 
   context "canned query methods" do
     it "#id_as_url" do
-      expect(g1.id_as_url).to eql("http://example.org/annos/annotation/body-chars.ttl")
-      expect(g2.id_as_url).to eql("http://example.org/annos/annotation/bookmark.json")
+      expect(g1.id_as_url).to eql("http://my.identifiers.com/oa_comment")
+      expect(g2.id_as_url).to eql("http://my.identifiers.com/oa_bookmark")
       expect(g3.id_as_url).to eql("http://example.org/annos/annotation/mult-targets.json")
     end
     context "#motivated_by" do
