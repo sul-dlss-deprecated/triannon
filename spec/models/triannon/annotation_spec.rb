@@ -201,14 +201,29 @@ describe Triannon::Annotation, :vcr do
   end
 
   context '#solr_save' do
+    let(:my_bookmark_anno) {
+      id = bookmark_anno.save
+      Triannon::Annotation.find id
+    }
     let(:solr_writer) { bookmark_anno.send(:solr_writer) }
-    it "calls graph.solr_hash with id" do
+    it "calls Triannon::LdpLoader.load" do
       allow(solr_writer).to receive(:add)
-      expect(bookmark_anno.graph).to receive(:solr_hash).with(bookmark_anno.id).and_return({:id => 'test'})
+      expect(Triannon::LdpLoader).to receive(:load).with(my_bookmark_anno.id).and_call_original
+      bookmark_anno.send(:solr_save)
+    end
+    it "calls solr_hash on triannon graph returned from LdpLoader" do
+      tg = double("triannon_graph")
+      allow(Triannon::LdpLoader).to receive(:load).with(my_bookmark_anno.id).and_return(tg)
+      allow(solr_writer).to receive(:add)
+      expect(tg).to receive(:solr_hash)
       bookmark_anno.send(:solr_save)
     end
     it "calls SolrWriter.add with solr_hash" do
-      expect(solr_writer).to receive(:add).with(bookmark_anno.graph.solr_hash)
+      tg = double("triannon_graph")
+      allow(Triannon::LdpLoader).to receive(:load).with(my_bookmark_anno.id).and_return(tg)
+      fake_solr_hash = {:id => 'test'}
+      allow(tg).to receive(:solr_hash).and_return(fake_solr_hash)
+      expect(solr_writer).to receive(:add).with(fake_solr_hash)
       bookmark_anno.send(:solr_save)
     end
     it "raises exception when Solr add is not successful" do

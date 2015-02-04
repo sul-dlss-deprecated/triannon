@@ -99,8 +99,10 @@ protected
 
     # Add annotation to Solr as a Solr document
     def solr_save
-      # pass in id we got from LDP Store
-      solr_writer.add(graph.solr_hash(id))
+      # to be certain we are in sync, and to get the anno id within the graph, reload 
+      # the graph from Trianon storage
+      graph_from_storage = Triannon::LdpLoader.load id
+      solr_writer.add(graph_from_storage.solr_hash)
     end
 
     # Delete annotation from Solr
