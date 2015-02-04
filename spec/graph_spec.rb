@@ -440,8 +440,9 @@ describe Triannon::Graph, :vcr do
       g.remove_predicate_and_its_object_statements(RDF::OpenAnnotation.hasTarget)
     end
     it 'removes each predicate statement' do
-      g = Triannon::Graph.new(RDF::Graph.new.from_jsonld('{
+      rg = RDF::Graph.new.from_jsonld '{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@id": "http://some.id.org/666",
         "@type": "oa:Annotation",
         "motivatedBy": "oa:commenting",
         "hasTarget": [
@@ -451,18 +452,20 @@ describe Triannon::Graph, :vcr do
             "@type": "oa:SemanticTag"
           }
         ]
-      }'))
-      pred_stmts = g.query([nil, RDF::OpenAnnotation.hasTarget, nil])
-      
-      pred_stmts.each { |s| 
-        expect_any_instance_of(RDF::Graph).to receive(:delete).with(s)
+      }'  
+      tg = Triannon::Graph.new rg
+      pred_stmts = tg.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+
+      pred_stmts.each { |stmt| 
+        expect(rg).to receive(:delete).with(stmt)
       }
       allow(Triannon::Graph).to receive(:subject_statements).and_return([])
-      g.remove_predicate_and_its_object_statements(RDF::OpenAnnotation.hasTarget)
+      tg.remove_predicate_and_its_object_statements(RDF::OpenAnnotation.hasTarget)
     end
     it "removes each statement about the predicate statement's object" do
-      g = Triannon::Graph.new(RDF::Graph.new.from_jsonld('{
+      rg = RDF::Graph.new.from_jsonld '{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@id": "http://some.id.org/666",
         "@type": "oa:Annotation",
         "motivatedBy": "oa:commenting",
         "hasTarget": {
@@ -473,18 +476,19 @@ describe Triannon::Graph, :vcr do
             "conformsTo": "http://www.w3.org/TR/media-frags/"
           }
         }
-      }'))
-      expect(g.size).to eql 8
-      pred_stmts = g.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+      }'
+      tg = Triannon::Graph.new rg
+      expect(tg.size).to eql 8
+      pred_stmts = tg.query([nil, RDF::OpenAnnotation.hasTarget, nil])
       pred_obj = pred_stmts.first.object
-      sub_stmts = Triannon::Graph.subject_statements(pred_obj, g)
+      sub_stmts = Triannon::Graph.subject_statements(pred_obj, tg)
       expect(sub_stmts.size).to eql 5
       sub_stmts.each { |s|  
-        expect_any_instance_of(RDF::Graph).to receive(:delete).with(s).and_call_original
+        expect(rg).to receive(:delete).with(s).and_call_original
       }
-      allow_any_instance_of(RDF::Graph).to receive(:delete).with(pred_stmts.first).and_call_original
-      g.remove_predicate_and_its_object_statements(RDF::OpenAnnotation.hasTarget)
-      expect(g.size).to eql 2
+      allow(rg).to receive(:delete).with(pred_stmts.first).and_call_original
+      tg.remove_predicate_and_its_object_statements(RDF::OpenAnnotation.hasTarget)
+      expect(tg.size).to eql 2
     end
   end
   
