@@ -14,38 +14,48 @@ describe "integration tests for Solr", :vcr do
        openannotation:hasBody [
          a content:ContentAsText,
            dcmitype:Text;
-         content:chars \"solr integration test\"
+         content:chars \"Solr integration test\"
        ];
        openannotation:hasTarget <http://example.com/solr-integration-test>;
        openannotation:motivatedBy openannotation:commenting ."
   }
 
-  it 'writes to Solr' do
-    write_solr_hash = write_anno.graph.solr_hash
-    expect(write_solr_hash.size).to be > 6
-    anno_id = write_anno.save
-    sleep(2) # give solr time to commit
-    response = rsolr_client.get 'doc', :params => {:id => anno_id}
-    expect(response["response"]["numFound"]).to eq 1
-    solr_doc = response["response"]["docs"].first
-    expect(solr_doc["id"]).to eq anno_id
-    expect(Time.parse(solr_doc["timestamp"])).to be_a Time
-    # all fields in orig solr_hash are stored fields and will be in solr response
-    write_solr_hash.each_pair { |k,v|
-      expect(solr_doc[k.to_s]).to eq v unless k = :id || v = nil
-    }
+  context 'writes to Solr' do
+    it "all fields in Solr doc" do
+      write_solr_hash = write_anno.graph.solr_hash
+      expect(write_solr_hash.size).to be > 6
+      anno_id = write_anno.save
+      sleep(1) # give solr time to commit
+      solr_resp = rsolr_client.get 'doc', :params => {:id => anno_id}
+      expect(solr_resp["response"]["numFound"]).to eq 1
+      solr_doc = solr_resp["response"]["docs"].first
+      expect(solr_doc["id"]).to eq anno_id
+      expect(Time.parse(solr_doc["timestamp"])).to be_a Time
+      # all fields in orig solr_hash are stored fields and will be in solr response
+      write_solr_hash.each_pair { |k,v|
+        expect(solr_doc[k.to_s]).to eq v unless k = :id || v = nil
+      }
+    end
+    it "has non-empty id value for outer node of anno_jsonld" do
+      anno_id = write_anno.save
+      sleep(1) # give solr time to commit
+      solr_resp = rsolr_client.get 'doc', :params => {:id => anno_id}
+      solr_doc = solr_resp["response"]["docs"].first
+      expect(solr_doc["anno_jsonld"]).not_to match "@id\":\"\""
+      expect(solr_doc["anno_jsonld"]).to match "@id\":\".+\""
+    end
   end
   
   it 'deletes from Solr' do
     anno_id = write_anno.save
-    sleep(2) # give solr time to commit
+    sleep(1) # give solr time to commit
     # ensure write succeeded
-    response = rsolr_client.get 'doc', :params => {:id => anno_id}
-    expect(response["response"]["numFound"]).to eq 1
+    solr_resp = rsolr_client.get 'doc', :params => {:id => anno_id}
+    expect(solr_resp["response"]["numFound"]).to eq 1
 
     write_anno.destroy
-    sleep(2)
-    response = rsolr_client.get 'doc', :params => {:id => anno_id}
-    expect(response["response"]["numFound"]).to eq 0
+    sleep(1) # give solr time to commit
+    solr_resp = rsolr_client.get 'doc', :params => {:id => anno_id}
+    expect(solr_resp["response"]["numFound"]).to eq 0
   end
 end

@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
 
   s.files = Dir["{app,config,db,lib}/**/*", "Rakefile", "README.md"]
 
-  s.add_dependency "rails", "~> 4.2.0.rc1"
+  s.add_dependency "rails", "~> 4.2.0"
   s.add_dependency "linkeddata"
   s.add_dependency "rdf-open_annotation"
   s.add_dependency "rdf-iiif"
@@ -25,8 +25,8 @@ Gem::Specification.new do |s|
   s.add_dependency "rsolr"
   s.add_dependency "retries" # for writing to Solr
 
-  s.add_development_dependency "rspec", "~> 3.0"
-  s.add_development_dependency "rspec-rails", "~> 3.0"
+  s.add_development_dependency "rspec", "~> 3.1.0" # bug with graph_spec #remove_predicate_and_its_object_statements for 3.2.0
+  s.add_development_dependency "rspec-rails", "~> 3.1.0" # bug with graph_spec #remove_predicate_and_its_object_statements for 3.2.0
   s.add_development_dependency "engine_cart", "~> 0.4"
   s.add_development_dependency "jettywrapper"
   s.add_development_dependency "capybara"

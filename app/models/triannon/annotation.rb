@@ -26,11 +26,12 @@ module Triannon
       a
     end
 
-    def self.find(key)
-      oa_graph = Triannon::LdpLoader.load key
+    # @param [String] id the unique id of the annotation.  Can include base_uri prefix or omit it.
+    def self.find(id)
+      oa_graph = Triannon::LdpLoader.load id
       anno = Triannon::Annotation.new
       anno.graph = oa_graph
-      anno.id = key
+      anno.id = id
       anno
     end
 
@@ -65,9 +66,13 @@ module Triannon
       end
     end
 
-    # @param [RDF::Graph]
+    # @param either a Triannon::Graph or RDF::Graph object
     def graph= g
-      @graph = Triannon::Graph.new g if g.kind_of? RDF::Graph
+      if g.is_a? Triannon::Graph
+        @graph = g
+      elsif g.kind_of? RDF::Graph
+        @graph = Triannon::Graph.new g
+      end
     end
     
     # @return json-ld representation of anno with OpenAnnotation context as a url
@@ -94,8 +99,10 @@ protected
 
     # Add annotation to Solr as a Solr document
     def solr_save
-      # pass in id we got from LDP Store
-      solr_writer.add(graph.solr_hash(id))
+      # to be certain we are in sync, and to get the anno id within the graph, reload 
+      # the graph from Trianon storage
+      graph_from_storage = Triannon::LdpLoader.load id
+      solr_writer.add(graph_from_storage.solr_hash)
     end
 
     # Delete annotation from Solr

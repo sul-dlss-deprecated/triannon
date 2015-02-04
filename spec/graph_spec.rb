@@ -2,8 +2,23 @@ require 'spec_helper'
 
 describe Triannon::Graph, :vcr do
   
-  let(:g1) {Triannon::Graph.new RDF::Graph.new.from_ttl Triannon.annotation_fixture("body-chars.ttl")}
-  let(:g2) {Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("bookmark.json")}
+  let(:g1) { Triannon::Graph.new RDF::Graph.new.from_ttl("
+    <http://my.identifiers.com/oa_comment> a <http://www.w3.org/ns/oa#Annotation>;
+       <http://www.w3.org/ns/oa#hasBody> [
+         a <http://www.w3.org/2011/content#ContentAsText>,
+           <http://purl.org/dc/dcmitype/Text>;
+         <http://www.w3.org/2011/content#chars> \"I love this!\"
+       ];
+       <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq131cs7229>;
+       <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#commenting> . ") }
+  let(:g2) { Triannon::Graph.new RDF::Graph.new.from_jsonld(
+    '{
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@id": "http://my.identifiers.com/oa_bookmark",
+        "@type": "oa:Annotation", 
+        "motivatedBy": "oa:bookmarking", 
+        "hasTarget": "http://purl.stanford.edu/kq131cs7229"
+      }' ) }
   let(:g3) {Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("mult-targets.json")}
   
   context 'jsonld flavors' do
@@ -48,7 +63,7 @@ describe Triannon::Graph, :vcr do
        <http://www.w3.org/ns/oa#hasTarget> <http://searchworks.stanford.edu/view/666>;
        <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#tagging> ." }
     let(:tg_solr_hash) { 
-      config = { :ldp_url => base_url }
+      config = { :triannon_base_url => base_url }
       allow(Triannon).to receive(:config).and_return(config)
       tg.solr_hash 
     }
@@ -61,7 +76,7 @@ describe Triannon::Graph, :vcr do
         expect(tg_solr_hash[:id]).to eq uuid
       end
       it "slash not part of base_url" do
-        config = { :ldp_url =>  "https://triannon-dev.stanford.edu/annotations" }
+        config = { :triannon_base_url =>  "https://triannon-dev.stanford.edu/annotations" }
         allow(Triannon).to receive(:config).and_return(config)
         my_tg = Triannon::Graph.new RDF::Graph.new.from_ttl "
          <#{base_url}/#{uuid}> a <http://www.w3.org/ns/oa#Annotation>;
@@ -72,14 +87,9 @@ describe Triannon::Graph, :vcr do
       it "slash part of base_url" do
         # see 'only the uuid, not the full url'
       end
-      it "calls id_as_url if there is no param value passed in" do
+      it "calls id_as_url" do
         expect(tg).to receive(:id_as_url).and_call_original
         tg.solr_hash
-      end
-      it "uses param value if present" do
-        expect(tg).not_to receive(:id_as_url)
-        sh = tg.solr_hash("use-me")
-        expect(sh[:id]).to eq "use-me"
       end
     end
     
@@ -240,13 +250,17 @@ describe Triannon::Graph, :vcr do
         my_tg = Triannon::Graph.new RDF::Graph.new.from_ttl Triannon.annotation_fixture("body-chars.ttl")
         expect(my_tg.solr_hash[:anno_jsonld]).to match Triannon::JsonldContext::OA_CONTEXT_URL
       end
+      it "has non-empty id value for outer node" do
+        expect(tg_solr_hash[:anno_jsonld]).not_to match "@id\":\"\""
+        expect(tg_solr_hash[:anno_jsonld]).to match "@id\":\".+\""
+      end
     end
   end # solr_hash
 
   context "canned query methods" do
     it "#id_as_url" do
-      expect(g1.id_as_url).to eql("http://example.org/annos/annotation/body-chars.ttl")
-      expect(g2.id_as_url).to eql("http://example.org/annos/annotation/bookmark.json")
+      expect(g1.id_as_url).to eql("http://my.identifiers.com/oa_comment")
+      expect(g2.id_as_url).to eql("http://my.identifiers.com/oa_bookmark")
       expect(g3.id_as_url).to eql("http://example.org/annos/annotation/mult-targets.json")
     end
     context "#motivated_by" do
@@ -426,8 +440,9 @@ describe Triannon::Graph, :vcr do
       g.remove_predicate_and_its_object_statements(RDF::OpenAnnotation.hasTarget)
     end
     it 'removes each predicate statement' do
-      g = Triannon::Graph.new(RDF::Graph.new.from_jsonld('{
+      rg = RDF::Graph.new.from_jsonld '{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@id": "http://some.id.org/666",
         "@type": "oa:Annotation",
         "motivatedBy": "oa:commenting",
         "hasTarget": [
@@ -437,18 +452,20 @@ describe Triannon::Graph, :vcr do
             "@type": "oa:SemanticTag"
           }
         ]
-      }'))
-      pred_stmts = g.query([nil, RDF::OpenAnnotation.hasTarget, nil])
-      
-      pred_stmts.each { |s| 
-        expect_any_instance_of(RDF::Graph).to receive(:delete).with(s)
+      }'  
+      tg = Triannon::Graph.new rg
+      pred_stmts = tg.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+
+      pred_stmts.each { |stmt| 
+        expect(rg).to receive(:delete).with(stmt)
       }
       allow(Triannon::Graph).to receive(:subject_statements).and_return([])
-      g.remove_predicate_and_its_object_statements(RDF::OpenAnnotation.hasTarget)
+      tg.remove_predicate_and_its_object_statements(RDF::OpenAnnotation.hasTarget)
     end
     it "removes each statement about the predicate statement's object" do
-      g = Triannon::Graph.new(RDF::Graph.new.from_jsonld('{
+      rg = RDF::Graph.new.from_jsonld '{
         "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+        "@id": "http://some.id.org/666",
         "@type": "oa:Annotation",
         "motivatedBy": "oa:commenting",
         "hasTarget": {
@@ -459,18 +476,19 @@ describe Triannon::Graph, :vcr do
             "conformsTo": "http://www.w3.org/TR/media-frags/"
           }
         }
-      }'))
-      expect(g.size).to eql 8
-      pred_stmts = g.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+      }'
+      tg = Triannon::Graph.new rg
+      expect(tg.size).to eql 8
+      pred_stmts = tg.query([nil, RDF::OpenAnnotation.hasTarget, nil])
       pred_obj = pred_stmts.first.object
-      sub_stmts = Triannon::Graph.subject_statements(pred_obj, g)
+      sub_stmts = Triannon::Graph.subject_statements(pred_obj, tg)
       expect(sub_stmts.size).to eql 5
       sub_stmts.each { |s|  
-        expect_any_instance_of(RDF::Graph).to receive(:delete).with(s).and_call_original
+        expect(rg).to receive(:delete).with(s).and_call_original
       }
-      allow_any_instance_of(RDF::Graph).to receive(:delete).with(pred_stmts.first).and_call_original
-      g.remove_predicate_and_its_object_statements(RDF::OpenAnnotation.hasTarget)
-      expect(g.size).to eql 2
+      allow(rg).to receive(:delete).with(pred_stmts.first).and_call_original
+      tg.remove_predicate_and_its_object_statements(RDF::OpenAnnotation.hasTarget)
+      expect(tg.size).to eql 2
     end
   end
   

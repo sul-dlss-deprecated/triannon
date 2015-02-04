@@ -4,8 +4,10 @@ module Triannon
   # Loads an existing Annotation from the LDP server
   class LdpLoader
 
-    def self.load key
-      l = Triannon::LdpLoader.new key
+
+    # @param [String] id the unique id of the annotation.  Can include base_uri prefix or omit it.
+    def self.load id
+      l = Triannon::LdpLoader.new id
       l.load_anno_container
       l.load_bodies
       l.load_targets
@@ -21,15 +23,16 @@ module Triannon
 
     attr_accessor :ldp_annotation
 
-    def initialize key = nil
-      @key = key
+    # @param [String] id the unique id of the annotation.  Can include base_uri prefix or omit it.
+    def initialize id = nil
+      @id = id
       @base_uri = Triannon.config[:ldp_url]
       @ldp_annotation = Triannon::AnnotationLdp.new
     end
 
     # load annotation container object into @ldp_annotation's (our Triannon::AnnotationLdp object) graph
     def load_anno_container
-      load_object_into_annotation_graph(@key)
+      load_object_into_annotation_graph(@id)
     end
 
     # load body objects into @ldp_annotation's (our Triannon::AnnotationLdp object) graph

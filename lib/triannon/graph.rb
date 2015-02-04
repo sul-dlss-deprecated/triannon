@@ -49,17 +49,15 @@ module Triannon
       hash_from_json.to_json
     end
 
-    # NOTE: NEVER get here before anno is stored
-    # the graph should have an assigned url for the @id of the root;  it shouldn't be a blank node
-    # @param [String] the Triannon id for this anno. Defaults to nil, in which case id_as_url will be used.
+    # DO NOT CALL before anno is stored.
+    # The graph should have an assigned url for the @id of the root;  it shouldn't be a blank node
     # @return [Hash] a hash to be written to Solr, populated appropriately
-    def solr_hash(triannon_id=nil)
+    def solr_hash
       doc_hash = {}
       # chars in Solr/Lucene query syntax are a big pain in Solr id fields, so we only use
       # the uuid portion of the Triannon anno id, not the full url
-      triannon_id ||= id_as_url
-      solr_id = triannon_id.sub(Triannon.config[:ldp_url], "")
-      doc_hash[:id] = solr_id.sub(/^\//, "")
+      solr_id = id_as_url.sub(Triannon.config[:triannon_base_url], "")
+      doc_hash[:id] = solr_id.sub(/^\//, "") # remove first char slash if it is there
 
       # use short strings for motivation field
       doc_hash[:motivation] = motivated_by.map { |m| m.sub(RDF::OpenAnnotation.to_s, "") }

@@ -15,14 +15,22 @@ module Triannon
     def initialize ldp_anno
       @ldp_anno = ldp_anno
       @ldp_anno_graph = ldp_anno.stripped_graph
-      @oa_graph = RDF::Graph.new
+      g = RDF::Graph.new
+      @oa_graph = Triannon::Graph.new g
     end
 
     def extract_base
+      root_subject_solns = @ldp_anno_graph.query Triannon::Graph.anno_query
+      if root_subject_solns.count == 1
+        @id = root_subject_solns[0].s.to_s.split('/').last
+        base_url = Triannon.config[:triannon_base_url]
+        base_url.strip!
+        base_url.chop! if base_url[-1] == '/'
+        @root_uri = RDF::URI.new(base_url + "/#{@id}")
+      end
+      
       @ldp_anno_graph.each_statement do |stmnt|
         if stmnt.predicate == RDF.type && stmnt.object == RDF::OpenAnnotation.Annotation
-          @id = stmnt.subject.to_s.split('/').last
-          @root_uri = RDF::URI.new(Triannon.config[:triannon_base_url] + "/#{@id}")
           @oa_graph << [@root_uri, RDF.type, RDF::OpenAnnotation.Annotation]
         elsif stmnt.predicate == RDF::OpenAnnotation.motivatedBy
           @oa_graph << [@root_uri, stmnt.predicate, stmnt.object]

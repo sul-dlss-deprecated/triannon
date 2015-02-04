@@ -14,11 +14,12 @@ describe Triannon::LdpToOaMapper, :vcr do
   }
 
   describe ".ldp_to_oa" do
-    it "maps an AnnotationLdp to an OA RDF::Graph" do
+    it "maps an AnnotationLdp to an Triannon::Graph" do
       ldp_anno.load_statements_into_graph body_stmts
       ldp_anno.load_statements_into_graph target_stmts
       oa_graph = Triannon::LdpToOaMapper.ldp_to_oa ldp_anno
 
+      expect(oa_graph).to be_a Triannon::Graph
       resp = oa_graph.query [nil, RDF.type, RDF::OpenAnnotation.Annotation ]
       expect(resp.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/deb27887-1241-4ccc-a09c-439293d73fbb"
     end
@@ -44,10 +45,23 @@ describe Triannon::LdpToOaMapper, :vcr do
       expect(mapper.id).to eq 'deb27887-1241-4ccc-a09c-439293d73fbb'
     end
 
-    it "builds the base identifier from the Config.open_annotation.base_uri and @id" do
+    it "builds the base identifier from the triannon.yml triannon_base_url and @id" do
       mapper.extract_base
       soln = mapper.oa_graph.query [nil, RDF.type, RDF::OpenAnnotation.Annotation]
       expect(soln.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/deb27887-1241-4ccc-a09c-439293d73fbb"
+    end
+
+    it "base identifier doesn't have double slash before id if triannon_base_url ends in slash" do
+      orig_val = Triannon.config[:triannon_base_url]
+      Triannon.config[:triannon_base_url] = "http://mine.com/annotations/"  # with trailing slash
+      mapper.extract_base
+      soln = mapper.oa_graph.query [nil, RDF.type, RDF::OpenAnnotation.Annotation]
+      expect(soln.first.subject.to_s).to match "http://mine.com/annotations/deb27887-1241-4ccc-a09c-439293d73fbb"
+      Triannon.config[:triannon_base_url] = "http://mine.com/annotations"  # without trailing slash
+      mapper.extract_base
+      soln = mapper.oa_graph.query [nil, RDF.type, RDF::OpenAnnotation.Annotation]
+      expect(soln.first.subject.to_s).to match "http://mine.com/annotations/deb27887-1241-4ccc-a09c-439293d73fbb"
+      Triannon.config[:triannon_base_url] = orig_val
     end
 
     it "checks the RDF.type to be RDF::OpenAnnotation.Annotation" do
@@ -71,7 +85,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       expect(soln.count).to eq 1
       expect(soln.first.object.to_s).to eq "2015-01-07T18:01:21Z"
     end
-  end
+  end #extract_base
 
   describe "#extract_bodies" do
     it "calls #map_external_ref when body is an external ref" do
@@ -139,7 +153,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       expect(mapper).to receive(:map_choice)
       mapper.extract_bodies
     end
-  end
+  end #extract_bodies
 
   describe "#extract_targets" do
     it "calls #map_external_ref when target is an external ref" do
@@ -195,7 +209,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       expect(mapper).to receive(:map_choice)
       mapper.extract_targets
     end
-  end
+  end #extract_targets
   
   describe '#map_external_ref' do
     let(:target_url) { "http://purl.stanford.edu/kq131cs7229" }
@@ -344,7 +358,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       expect(mapper.oa_graph.query([target_obj, RDF::OpenAnnotation.hasBody, RDF::URI.new(body_ext_url)]).size).to eql 1
       expect(mapper.oa_graph.size).to eql orig_size + 1
     end
-  end # #map_external_ref
+  end #map_external_ref
 
   describe '#map_content_as_text' do
     it "adds de-skolemized blank node with type ContentAsText to @oa_graph" do
@@ -468,7 +482,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       expect(mapper.oa_graph.query([target_obj, RDF::OpenAnnotation.hasBody, nil]).size).to eql 1
       expect(mapper.oa_graph.size).to eql orig_size + 4
     end
-  end # #map_content_as_text
+  end #map_content_as_text
 
   describe '#map_specific_resource' do
     it "simple source" do
@@ -735,7 +749,7 @@ describe Triannon::LdpToOaMapper, :vcr do
     it "doesn't change @oa_graph if the object doesn't have type SpecificResource" do
       # see 'returns false if it doesn't change oa_graph'
     end
-  end
+  end #map_specific_resource
   
   describe '#map_choice' do
     let(:stored_body_obj_url) { "#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23" }
@@ -978,6 +992,6 @@ describe Triannon::LdpToOaMapper, :vcr do
     it "doesn't change @oa_graph if the object doesn't have type Choice" do
       # see 'returns false if it doesn't change oa_graph'
     end
-  end # #map_choice
+  end #map_choice
   
 end
