@@ -57,6 +57,17 @@ describe Triannon::Annotation, :vcr do
     expect(bookmark_anno.graph).to be_a Triannon::Graph
   end
   
+  context '#graph=' do
+    it "works with Triannon::Graph as param" do
+      bookmark_anno.graph = Triannon::Graph.new RDF::Graph.new
+      expect(bookmark_anno.graph).to be_a Triannon::Graph
+    end
+    it "works with RDF::Graph as param" do
+      bookmark_anno.graph = RDF::Graph.new
+      expect(bookmark_anno.graph).to be_a Triannon::Graph
+    end
+  end
+  
   context "#data_as_graph" do
     context "json-ld data" do
       before(:each) do
