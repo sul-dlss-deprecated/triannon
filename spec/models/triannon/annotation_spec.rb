@@ -226,7 +226,17 @@ describe Triannon::Annotation, :vcr do
       expect(solr_writer).to receive(:add).with(fake_solr_hash)
       bookmark_anno.send(:solr_save)
     end
+    it "does not call SolrWriter.add when solr_hash is empty" do
+      tg = double("triannon_graph")
+      allow(Triannon::LdpLoader).to receive(:load).with(my_bookmark_anno.id).and_return(tg)
+      allow(tg).to receive(:solr_hash).and_return({})
+      expect(solr_writer).not_to receive(:add)
+      bookmark_anno.send(:solr_save)
+    end
     it "raises exception when Solr add is not successful" do
+      tg = double("triannon_graph")
+      allow(Triannon::LdpLoader).to receive(:load).with(my_bookmark_anno.id).and_return(tg)
+      allow(tg).to receive(:solr_hash).and_return({:id => 'test'})
       allow(solr_writer).to receive(:add).and_raise(RuntimeError)
       expect { bookmark_anno.send(:solr_save) }.to raise_error
     end
@@ -235,10 +245,12 @@ describe Triannon::Annotation, :vcr do
   context '#solr_delete' do
     let(:solr_writer) { bookmark_anno.send(:solr_writer) }
     it "calls SolrWriter.delete with id" do
+      allow(bookmark_anno).to receive(:id).and_return("666")
       expect(solr_writer).to receive(:delete).with(bookmark_anno.id)
       bookmark_anno.send(:solr_delete)
     end
     it "raises exception when Solr delete is not successful" do
+      allow(bookmark_anno).to receive(:id).and_return("666")
       allow(solr_writer).to receive(:delete).and_raise(RuntimeError)
       expect { bookmark_anno.send(:solr_delete) }.to raise_error
     end
