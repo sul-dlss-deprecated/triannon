@@ -102,12 +102,13 @@ protected
       # to be certain we are in sync, and to get the anno id within the graph, reload 
       # the graph from Trianon storage
       graph_from_storage = Triannon::LdpLoader.load id
-      solr_writer.add(graph_from_storage.solr_hash)
+      solr_hash = graph_from_storage.solr_hash
+      solr_writer.add(solr_hash) if solr_hash && solr_hash.size > 0
     end
 
     # Delete annotation from Solr
     def solr_delete
-      solr_writer.delete(id)
+      solr_writer.delete(id) if id
     end
     
 private
