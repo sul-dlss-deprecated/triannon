@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.authors     = ["Chris Beer", "Naomi Dushay", "Willy Mene"]
   s.email       = ["cabeer@stanford.edu", "ndushay@stanford.edu", "wmene@stanford.edu"]
   s.summary     = "Rails engine for working with OpenAnnotations stored in Fedora4"
-  s.license     = "Apache 2"
+  s.license     = "Apache-2.0"
 
   s.files = Dir["{app,config,db,lib}/**/*", "Rakefile", "README.md"]
 
