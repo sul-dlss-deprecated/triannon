@@ -69,6 +69,12 @@ namespace :triannon do
   desc 'run test rails console w triannon but no jetty'
   task :console => :console_no_jetty
 
+
+  desc "set up triannon solr in test jetty"
+  task :solr_jetty_setup do
+    `cp -r config/solr/triannon-core jetty/solr`
+    `cp config/solr/solr.xml jetty/solr`
+  end
 end
 
 

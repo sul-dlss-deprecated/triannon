@@ -57,8 +57,7 @@ $ rake jetty:unzip
 ```
 ##### Set up a Triannon flavored Solr
 ```console
-$ cp config/solr/solr.xml jetty/solr
-$ cp config/solr/triannon-core jetty/solr
+rake triannon:solr_jetty_setup
 ```
 
 ##### Set up a runnable Rails app that uses triannon gem
