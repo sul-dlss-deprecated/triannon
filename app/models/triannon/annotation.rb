@@ -113,31 +113,52 @@ protected
     
 private
 
-    # loads RDF::Graph from data attribute.  If data is in json-ld, converts it to turtle.
+    # loads RDF::Graph from data attribute.  If data is in json-ld or rdfxml, converts it to turtle.
     def data_to_graph
       if data
         data.strip!
-        case data
-          when /\A\{.+\}\Z/m  # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
-            # need to do this to avoid external lookup of jsonld context
-            g ||= RDF::Graph.new << JSON::LD::API.toRdf(json_ld) if json_ld
-            g = nil if g.size == 0
-            self.data = g.dump(:ttl) if g
-          when /\A<.+>\Z/m # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
-            g = RDF::Graph.new
-            g.from_rdfxml(data)
-            g = nil if g.size == 0
-            self.data = g.dump(:ttl) if g
-          when /\.\Z/ #  (Note:  \Z is needed instead of $ due to \n in data)
-            # turtle ends in period
-            g = RDF::Graph.new
-            g.from_ttl(data)
-            g = nil if g.size == 0
-        end
+          case data
+            # \A and \Z and m are needed instead of ^$ due to \n in data
+            when /\A\{.+\}\Z/m
+              g = jsonld_to_graph
+            when /\A<.+>\Z/m
+              g = rdfxml_to_graph
+            when /\.\Z/ # turtle ends in period
+              g = ttl_to_graph
+          end
       end
       g
     end
     
+    # create and load an RDF::Graph object from turtle in data attrib
+    # @return [RDF::Graph] populated RDF::Graph object, or nil
+    def ttl_to_graph
+      g = RDF::Graph.new.from_ttl(data)
+      g = nil if g.size == 0
+      g
+    end
+
+    # create and load an RDF::Graph object from jsonld in data attrib
+    # SIDE EFFECT: converts data to turtle for LdpWriter
+    # @return [RDF::Graph] populated RDF::Graph object, or nil
+    def jsonld_to_graph
+      # need to do this to avoid external lookup of jsonld context
+      g ||= RDF::Graph.new << JSON::LD::API.toRdf(json_ld) if json_ld
+      g = nil if g.size == 0
+      self.data = g.dump(:ttl) if g  # LdpWriter expects ttl
+      g
+    end
+
+    # create and load an RDF::Graph object from rdfxml in data attrib
+    # SIDE EFFECT: converts data to turtle for LdpWriter
+    # @return [RDF::Graph] populated RDF::Graph object, or nil
+    def rdfxml_to_graph
+      g = RDF::Graph.new.from_rdfxml(data)
+      g = nil if g.size == 0
+      self.data = g.dump(:ttl) if g  # LdpWriter expects ttl
+      g
+    end
+
     # avoid external lookup of jsonld context by putting it inline
     # @return [Hash] the parsed json after the context is put inline
     def json_ld
