@@ -6,7 +6,7 @@ module Triannon
     after_save :solr_save
     after_destroy :solr_delete
 
-    attr_accessor :id, :data
+    attr_accessor :id, :data, :expected_content_type
 
     validates_each :data do |record, attr, value|
       record.errors.add attr, 'less than 30 chars' if value.to_s.length < 30
@@ -45,7 +45,7 @@ module Triannon
       _run_save_callbacks do
         # check if valid?
         graph
-        @id = Triannon::LdpWriter.create_anno self
+        @id = Triannon::LdpWriter.create_anno self if graph
       end
     end
 
@@ -117,15 +117,30 @@ private
     def data_to_graph
       if data
         data.strip!
+        if expected_content_type
+          case Mime::Type.lookup(expected_content_type).symbol
+            when :jsonld, :json
+              g = jsonld_to_graph
+            when :ttl
+              g = ttl_to_graph
+            when :rdfxml, :xml
+              g = rdfxml_to_graph
+            else
+              g = nil
+          end
+        else # infer the content type from the content itself
           case data
             # \A and \Z and m are needed instead of ^$ due to \n in data
-            when /\A\{.+\}\Z/m
+            when /\A\{.+\}\Z/m  
               g = jsonld_to_graph
             when /\A<.+>\Z/m
               g = rdfxml_to_graph
             when /\.\Z/ # turtle ends in period
               g = ttl_to_graph
+            else
+              g = nil
           end
+        end
       end
       g
     end
@@ -134,7 +149,7 @@ private
     # @return [RDF::Graph] populated RDF::Graph object, or nil
     def ttl_to_graph
       g = RDF::Graph.new.from_ttl(data)
-      g = nil if g.size == 0
+      g = nil if g && g.size == 0
       g
     end
 
@@ -144,7 +159,7 @@ private
     def jsonld_to_graph
       # need to do this to avoid external lookup of jsonld context
       g ||= RDF::Graph.new << JSON::LD::API.toRdf(json_ld) if json_ld
-      g = nil if g.size == 0
+      g = nil if g && g.size == 0
       self.data = g.dump(:ttl) if g  # LdpWriter expects ttl
       g
     end
@@ -154,7 +169,7 @@ private
     # @return [RDF::Graph] populated RDF::Graph object, or nil
     def rdfxml_to_graph
       g = RDF::Graph.new.from_rdfxml(data)
-      g = nil if g.size == 0
+      g = nil if g && g.size == 0
       self.data = g.dump(:ttl) if g  # LdpWriter expects ttl
       g
     end

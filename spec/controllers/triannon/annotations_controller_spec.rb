@@ -17,14 +17,13 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
   end
 
   context "#create" do
+    let (:ttl_data) {Triannon.annotation_fixture("body-chars.ttl")}
     it 'creates a new annotation from the body of the request' do
-      ttl_data = Triannon.annotation_fixture("body-chars.ttl")
       post :create, ttl_data
       expect(response.status).to eq 201
     end
     
     it 'creates a new annotation from params from form' do
-      ttl_data = Triannon.annotation_fixture("body-chars.ttl")
       post :create, :annotation => {:data => ttl_data}
       expect(response.status).to eq 201
     end
@@ -32,11 +31,151 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
     it "renders 403 if Triannon::ExternalReferenceError raised during LdpWriter.create_anno" do
       err_msg = "some error during LdpWriter.create_anno"
       allow(Triannon::LdpWriter).to receive(:create_anno).and_raise(Triannon::ExternalReferenceError, err_msg)
-      post :create, "this string will be ignored so it doesn't matter"
+      post :create, ttl_data
       expect(response.status).to eq 403
       expect(response.body).to eql err_msg
     end
-  end
+
+    context 'HTTP Content-Type header' do
+
+      shared_examples_for 'header matches data' do | header_mimetype, data, from_xxx_method_sym |
+        it "#{header_mimetype} specified and provided" do
+          gg = RDF::Graph.new
+          gg.send(from_xxx_method_sym, data)
+          allow(RDF::Graph).to receive(:new).and_return(gg)
+          expect_any_instance_of(RDF::Graph).to receive(from_xxx_method_sym).at_least(:once).and_return(gg)
+          request.headers["Content-Type"] = header_mimetype
+          post :create, data
+          expect(response.status).to eq 201
+        end
+      end
+      shared_examples_for 'header does NOT match data' do | header_mimetype, data, from_xxx_method_sym |
+        it "#{header_mimetype} specified and NOT provided" do
+          gg = RDF::Graph.new
+          allow(RDF::Graph).to receive(:new) {gg}
+          expect_any_instance_of(RDF::Graph).to receive(from_xxx_method_sym).at_least(:once)
+          allow_any_instance_of(Triannon::Annotation).to receive(:solr_save) # avoid spec error
+          request.headers["Content-Type"] = header_mimetype
+          post :create, data
+          expect(response.status).to eq 400
+        end
+      end
+
+      # turtle
+      %w{application/x-turtle text/turtle}.each { |mtype|
+        it_behaves_like 'header matches data', mtype, Triannon.annotation_fixture("body-chars.ttl"), :from_ttl
+      }
+      it_behaves_like 'header does NOT match data', 'application/x-turtle', Triannon.annotation_fixture("body-chars.json"), :from_ttl
+
+      # rdfxml
+      %w{application/rdf+xml text/rdf+xml text/rdf}.each { |mtype|
+        it_behaves_like 'header matches data', mtype, Triannon.annotation_fixture("body-chars.rdf"), :from_rdfxml
+      }
+      it_behaves_like 'header does NOT match data', 'application/rdf+xml', Triannon.annotation_fixture("body-chars.json"), :from_rdfxml
+      # xml specified (but is rdf xml)
+      %w{application/xml text/xml application/x-xml}.each { |mtype|
+        it_behaves_like 'header matches data', mtype, Triannon.annotation_fixture("body-chars.rdf"), :from_rdfxml
+      }
+
+      # json - must be tested differently due to using inline context substitution for jsonld
+      let(:jsonld_data) { Triannon.annotation_fixture("body-chars.json") }
+      it "jsonld specified and matches data" do
+        g = RDF::Graph.new.from_jsonld jsonld_data
+        allow(RDF::Graph).to receive(:new).and_return(g)
+        expect(JSON::LD::API).to receive(:toRdf).and_return(g)
+        request.headers["Content-Type"] = "application/ld+json"
+        post :create, jsonld_data
+        expect(response.status).to eq 201
+      end
+      it "jsonld specified and NOT provided" do
+        expect_any_instance_of(Triannon::Annotation).to receive(:jsonld_to_graph).at_least(:once)
+        allow_any_instance_of(Triannon::Annotation).to receive(:solr_save) # avoid spec error
+        request.headers["Content-Type"] = "application/ld+json"
+        post :create, ttl_data
+        expect(response.status).to eq 400
+      end
+      # I couldn't get the three tests below to run cleanly in a loop
+      it "application/json specified for jsonld" do
+        gg = RDF::Graph.new.from_jsonld(jsonld_data)
+        allow(RDF::Graph).to receive(:new).and_return(gg)
+        expect(JSON::LD::API).to receive(:toRdf).and_return(gg)
+        request.headers["Content-Type"] = "application/json"
+        post :create, jsonld_data
+        expect(response.status).to eq 201
+      end
+      it "text/x-json specified for jsonld" do
+        gg = RDF::Graph.new.from_jsonld(jsonld_data)
+        allow(RDF::Graph).to receive(:new).and_return(gg)
+        expect(JSON::LD::API).to receive(:toRdf).and_return(gg)
+        request.headers["Content-Type"] = "text/x-json"
+        post :create, jsonld_data
+        expect(response.status).to eq 201
+      end
+      it "application/jsonrequest specified for jsonld" do
+        gg = RDF::Graph.new.from_jsonld(jsonld_data)
+        allow(RDF::Graph).to receive(:new).and_return(gg)
+        expect(JSON::LD::API).to receive(:toRdf).and_return(gg)
+        request.headers["Content-Type"] = "application/jsonrequest"
+        post :create, jsonld_data
+        expect(response.status).to eq 201
+      end
+      it "unknown format gives 400" do
+        request.headers["Content-Type"] = "application/foo"
+        post :create, jsonld_data
+        expect(response.status).to eq 400
+      end
+      it "unspecified Content-Type - tries to infer it" do
+        gg = RDF::Graph.new.from_jsonld(jsonld_data)
+        allow(RDF::Graph).to receive(:new).and_return(gg)
+        expect_any_instance_of(Triannon::Annotation).to receive(:jsonld_to_graph).and_return(gg)
+        request.headers["Content-Type"] = nil
+        post :create, jsonld_data
+        expect(response.status).to eq 201
+      end
+=begin
+      context 'jsonld content' do
+        context 'included in header' do
+          it "honors oa generic uri" do
+            # creates anno properly
+            fail "test to be implemented"
+          end
+          it "honors oa dated uri" do
+            # creates anno properly
+            fail "test to be implemented"
+          end
+          it "honors iiif uri" do
+            # creates anno properly
+            fail "test to be implemented"
+          end
+          it "ignores unrecognized uri (looks inline)" do
+            fail "test to be implemented"
+          end
+        end # included in header
+        context "NOT included in header" do
+          it "oa generic uri inline" do
+            # creates anno properly
+            fail "test to be implemented"
+          end
+          it "oa dated uri inline" do
+            # creates anno properly
+            fail "test to be implemented"
+          end
+          it "iiif uri inline" do
+            # creates anno properly
+            fail "test to be implemented"
+          end
+          it "assumes oa context when none specified inline" do
+            # creates anno properly
+            fail "test to be implemented"
+          end
+          it "raises 400 error when none specified inline and it doesn't parse for oa" do
+            fail "test to be implemented"
+          end
+        end # NOT included in header
+      end # jsonld context
+=end      
+    end # HTTP Content-Type header
+  end # #create
   
   context '#show' do
     before(:each) do

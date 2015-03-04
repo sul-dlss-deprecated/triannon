@@ -54,13 +54,14 @@ module Triannon
         end
       else
         # it's a direct post request
-        @annotation = Annotation.new(:data => request.body.read)
+        content_type = request.headers["Content-Type"]
+        @annotation = Annotation.new({:data => request.body.read, :expected_content_type => content_type})
       end
       
       if @annotation.save
         redirect_to @annotation, status: 201, notice: 'Annotation was successfully created.'
       else
-        render :new
+        render :new, status: 400
       end
     end
 
