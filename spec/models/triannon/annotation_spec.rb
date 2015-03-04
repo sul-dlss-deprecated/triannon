@@ -120,6 +120,13 @@ describe Triannon::Annotation, :vcr do
         anno = Triannon::Annotation.new data: "xxx " + @rdfxml_data
         expect(anno.graph).to be_nil
       end
+      it "converts data to turtle" do
+        anno = Triannon::Annotation.new data: @rdfxml_data
+        c = anno.graph.count
+        g = RDF::Graph.new
+        g.from_ttl(anno.data)
+        expect(g.count).to eql c
+      end
     end
   end # data_as_graph
 
