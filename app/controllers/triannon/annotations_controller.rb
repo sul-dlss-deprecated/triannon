@@ -44,7 +44,9 @@ module Triannon
     # POST /annotations
     def create
       # FIXME: this is probably a bad way of allowing app form to be used as well as direct post requests
-      if params["annotation"]
+      # see https://github.com/sul-dlss/triannon/issues/90 -- prob just want to fix the form to do a POST
+      #  note that need to check for empty? if HTTP Header Content-Type is json (but not jsonld).
+      if params["annotation"] && !params["annotation"].empty?
         # it's from app html form
         params.require(:annotation).permit(:data)
         if params["annotation"]["data"]
