@@ -119,12 +119,15 @@ private
         data.strip!
         case data
           when /\A\{.+\}\Z/m  # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
+            # need to do this to avoid external lookup of jsonld context
             g ||= RDF::Graph.new << JSON::LD::API.toRdf(json_ld) if json_ld
+            g = nil if g.size == 0
             self.data = g.dump(:ttl) if g
           when /\A<.+>\Z/m # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
             g = RDF::Graph.new
             g.from_rdfxml(data)
             g = nil if g.size == 0
+            self.data = g.dump(:ttl) if g
           when /\.\Z/ #  (Note:  \Z is needed instead of $ due to \n in data)
             # turtle ends in period
             g = RDF::Graph.new
@@ -135,6 +138,8 @@ private
       g
     end
     
+    # avoid external lookup of jsonld context by putting it inline
+    # @return [Hash] the parsed json after the context is put inline
     def json_ld
       if data.match(/"@context"\s*\:\s*"http\:\/\/www\.w3\.org\/ns\/oa-context-20130208\.json"/)
         data.sub!("\"http://www.w3.org/ns/oa-context-20130208.json\"", Triannon::JsonldContext.oa_context)
