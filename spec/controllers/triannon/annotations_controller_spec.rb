@@ -35,9 +35,8 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       expect(response.status).to eq 403
       expect(response.body).to eql err_msg
     end
-
+    
     context 'HTTP Content-Type header' do
-
       shared_examples_for 'header matches data' do | header_mimetype, data, from_xxx_method_sym |
         it "#{header_mimetype} specified and provided" do
           gg = RDF::Graph.new
@@ -124,7 +123,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
         post :create, jsonld_data
         expect(response.status).to eq 400
       end
-      it "unspecified Content-Type - tries to infer it" do
+      it "unspecified Content-Type - tries to infer it jsonld" do
         gg = RDF::Graph.new.from_jsonld(jsonld_data)
         allow(RDF::Graph).to receive(:new).and_return(gg)
         expect_any_instance_of(Triannon::Annotation).to receive(:jsonld_to_graph).and_return(gg)
@@ -132,8 +131,16 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
         post :create, jsonld_data
         expect(response.status).to eq 201
       end
+      it "unspecified Content-Type - tries to infer it ttl" do
+        gg = RDF::Graph.new.from_ttl(ttl_data)
+        allow(RDF::Graph).to receive(:new).and_return(gg)
+        expect_any_instance_of(Triannon::Annotation).to receive(:ttl_to_graph).and_return(gg)
+        request.headers["Content-Type"] = nil
+        post :create, ttl_data
+        expect(response.status).to eq 201
+      end
+      context 'jsonld context' do
 =begin
-      context 'jsonld content' do
         context 'included in header' do
           it "honors oa generic uri" do
             # creates anno properly
@@ -151,30 +158,111 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
             fail "test to be implemented"
           end
         end # included in header
+=end
         context "NOT included in header" do
-          it "oa generic uri inline" do
-            # creates anno properly
-            fail "test to be implemented"
+          shared_examples_for 'creates anno successfully' do | test_data |
+            it "" do
+              request.headers["Content-Type"] = "application/ld+json"
+              request.headers["Accept"] = "application/ld+json"
+              post :create, test_data
+              expect(response.status).to eq 201
+              expect(response.body).to match "I love this"
+            end
           end
-          it "oa dated uri inline" do
-            # creates anno properly
-            fail "test to be implemented"
+          context "oa generic uri inline" do
+            it_behaves_like "creates anno successfully", Triannon.annotation_fixture("body-chars-generic-context.json")
           end
-          it "iiif uri inline" do
-            # creates anno properly
-            fail "test to be implemented"
+          context "oa dated uri inline" do
+            it_behaves_like "creates anno successfully", Triannon.annotation_fixture("body-chars.json")
           end
-          it "assumes oa context when none specified inline" do
-            # creates anno properly
-            fail "test to be implemented"
+          context "iiif uri inline" do
+            it_behaves_like "creates anno successfully", Triannon.annotation_fixture("body-chars-plain-iiif.json")
           end
-          it "raises 400 error when none specified inline and it doesn't parse for oa" do
-            fail "test to be implemented"
+          it "raises 400 error when no context specified inline" do
+            request.headers["Content-Type"] = "application/ld+json"
+            post :create, Triannon.annotation_fixture("body-chars-no-context.json")
+            expect(response.status).to eq 400
           end
         end # NOT included in header
       end # jsonld context
-=end      
     end # HTTP Content-Type header
+
+    context "response format" do
+      shared_examples_for 'Accept header determines media type' do | mime_types, regex |
+        mime_types.each { |mtype|
+          it "#{mtype}" do
+            request.accept = mtype
+            request.headers["Content-Type"] = "application/ld+json"
+            post :create, Triannon.annotation_fixture("body-chars.json")
+            expect(response.content_type).to eql(mtype)
+            expect(response.body).to match(regex)
+            expect(response.body).to match "I love this"
+            expect(response.status).to eql(201)
+          end
+        }
+      end
+      context "turtle" do
+        # regex:  \Z is needed instead of $ due to \n in data)
+        it_behaves_like 'Accept header determines media type', ["text/turtle", "application/x-turtle"], /\.\Z/
+      end
+      context "rdfxml" do
+        # regex: \A and \Z and m are needed instead of ^$ due to \n in data)
+        it_behaves_like 'Accept header determines media type', ["application/rdf+xml", "text/rdf+xml", "text/rdf", "application/xml", "text/xml", "application/x-xml"], /\A<.+>\Z/m
+      end
+      context "json" do
+        it_behaves_like 'Accept header determines media type', ["application/ld+json", "application/json", "text/x-json", "application/jsonrequest"], json_regex
+      end
+      it "empty string gets json-ld" do
+        request.accept = ""
+        request.headers["Content-Type"] = "application/ld+json"
+        post :create, Triannon.annotation_fixture("body-chars.json")
+        expect(response.content_type).to eql("application/ld+json")
+        expect(response.body).to match json_regex
+        expect(response.body).to match "I love this"
+        expect(response.status).to eql(201)
+      end
+      it "nil gets json-ld" do
+        request.accept = nil
+        request.headers["Content-Type"] = "application/ld+json"
+        post :create, Triannon.annotation_fixture("body-chars.json")
+        expect(response.content_type).to eql("application/ld+json")
+        expect(response.body).to match json_regex
+        expect(response.body).to match "I love this"
+        expect(response.status).to eql(201)
+      end
+      it "*/* gets json-ld" do
+        request.accept = "*/*"
+        request.headers["Content-Type"] = "application/ld+json"
+        post :create, Triannon.annotation_fixture("body-chars.json")
+        expect(response.content_type).to eql("application/ld+json")
+        expect(response.body).to match json_regex
+        expect(response.body).to match "I love this"
+        expect(response.status).to eql(201)
+      end
+      it "html uses view" do
+        request.accept = "text/html"
+        request.headers["Content-Type"] = "application/ld+json"
+        post :create, Triannon.annotation_fixture("body-chars.json")
+        expect(response.content_type).to eql("text/html")
+        expect(response.status).to eql(201)
+        expect(response).to render_template(:show)
+#        expect(response.body).to match "I love this"  # TODO:  need to address github issue #113  and get it to show anno in html for query
+      end
+      context 'multiple formats' do
+        # rails will use them in order listed in the http accept header value.
+        # also, "note that if browser is sending */* along with other values then Rails totally bails out and just returns Mime::HTML"
+        #   http://blog.bigbinary.com/2010/11/23/mime-type-resolution-in-rails.html
+        it 'uses first known format' do
+          request.accept = "application/ld+json, text/x-json, application/json"
+          request.headers["Content-Type"] = "application/ld+json"
+          post :create, Triannon.annotation_fixture("body-chars.json")
+          expect(response.content_type).to eql("application/ld+json")
+          expect(response.body).to match json_regex
+          expect(response.status).to eql(201)
+        end
+      end
+    end # response format
+
   end # #create
   
   context '#show' do
@@ -288,6 +376,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
             get :show, id: bookmark_anno.id
             expect(@response.content_type).to eql(mtype)
             expect(@response.body).to match(regex)
+            expect(response.body).to match "kq131cs7229"
             expect(@response.status).to eql(200)
           end
         }
