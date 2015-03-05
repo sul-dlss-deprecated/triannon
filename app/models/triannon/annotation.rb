@@ -6,7 +6,7 @@ module Triannon
     after_save :solr_save
     after_destroy :solr_delete
 
-    attr_accessor :id, :data
+    attr_accessor :id, :data, :expected_content_type
 
     validates_each :data do |record, attr, value|
       record.errors.add attr, 'less than 30 chars' if value.to_s.length < 30
@@ -45,7 +45,7 @@ module Triannon
       _run_save_callbacks do
         # check if valid?
         graph
-        @id = Triannon::LdpWriter.create_anno self
+        @id = Triannon::LdpWriter.create_anno self if graph && graph.size > 2
       end
     end
 
@@ -113,31 +113,67 @@ protected
     
 private
 
-    # loads RDF::Graph from data attribute.  If data is in json-ld, converts it to turtle.
+    # loads RDF::Graph from data attribute.  If data is in json-ld or rdfxml, converts it to turtle.
     def data_to_graph
       if data
         data.strip!
-        case data
-          when /\A\{.+\}\Z/m  # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
-            # need to do this to avoid external lookup of jsonld context
-            g ||= RDF::Graph.new << JSON::LD::API.toRdf(json_ld) if json_ld
-            g = nil if g.size == 0
-            self.data = g.dump(:ttl) if g
-          when /\A<.+>\Z/m # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
-            g = RDF::Graph.new
-            g.from_rdfxml(data)
-            g = nil if g.size == 0
-            self.data = g.dump(:ttl) if g
-          when /\.\Z/ #  (Note:  \Z is needed instead of $ due to \n in data)
-            # turtle ends in period
-            g = RDF::Graph.new
-            g.from_ttl(data)
-            g = nil if g.size == 0
+        if expected_content_type
+          case Mime::Type.lookup(expected_content_type).symbol
+            when :jsonld, :json
+              g = jsonld_to_graph
+            when :ttl
+              g = ttl_to_graph
+            when :rdfxml, :xml
+              g = rdfxml_to_graph
+            else
+              g = nil
+          end
+        else # infer the content type from the content itself
+          case data
+            # \A and \Z and m are needed instead of ^$ due to \n in data
+            when /\A\{.+\}\Z/m  
+              g = jsonld_to_graph
+            when /\A<.+>\Z/m
+              g = rdfxml_to_graph
+            when /\.\Z/ # turtle ends in period
+              g = ttl_to_graph
+            else
+              g = nil
+          end
         end
       end
       g
     end
     
+    # create and load an RDF::Graph object from turtle in data attrib
+    # @return [RDF::Graph] populated RDF::Graph object, or nil
+    def ttl_to_graph
+      g = RDF::Graph.new.from_ttl(data)
+      g = nil if g && g.size == 0
+      g
+    end
+
+    # create and load an RDF::Graph object from jsonld in data attrib
+    # SIDE EFFECT: converts data to turtle for LdpWriter
+    # @return [RDF::Graph] populated RDF::Graph object, or nil
+    def jsonld_to_graph
+      # need to do this to avoid external lookup of jsonld context
+      g ||= RDF::Graph.new << JSON::LD::API.toRdf(json_ld) if json_ld
+      g = nil if g && g.size == 0
+      self.data = g.dump(:ttl) if g  # LdpWriter expects ttl
+      g
+    end
+
+    # create and load an RDF::Graph object from rdfxml in data attrib
+    # SIDE EFFECT: converts data to turtle for LdpWriter
+    # @return [RDF::Graph] populated RDF::Graph object, or nil
+    def rdfxml_to_graph
+      g = RDF::Graph.new.from_rdfxml(data)
+      g = nil if g && g.size == 0
+      self.data = g.dump(:ttl) if g  # LdpWriter expects ttl
+      g
+    end
+
     # avoid external lookup of jsonld context by putting it inline
     # @return [Hash] the parsed json after the context is put inline
     def json_ld

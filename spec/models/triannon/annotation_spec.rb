@@ -69,10 +69,20 @@ describe Triannon::Annotation, :vcr do
   end
   
   context "#data_as_graph" do
+    before(:each) do
+      @json_ld_data = Triannon.annotation_fixture("bookmark.json")
+    end
+    it "does Mime::Type.lookup if expected_content_type" do
+      anno = Triannon::Annotation.new({data: @json_ld_data, expected_content_type: "application/ld+json"})
+      expect(Mime::Type).to receive(:lookup).with("application/ld+json").and_call_original
+      expect(anno.graph).to be_a_kind_of Triannon::Graph
+    end
+    it "does NOT do Mime::Type.lookup if no expected_content_type" do
+      anno = Triannon::Annotation.new data: @json_ld_data
+      expect(Mime::Type).not_to receive(:lookup)
+      expect(anno.graph).to be_a_kind_of Triannon::Graph
+    end
     context "json-ld data" do
-      before(:each) do
-        @json_ld_data = Triannon.annotation_fixture("bookmark.json")
-      end
       it "populates graph from json-ld" do
         expect(@json_ld_data).to match(/\A\{.+\}\Z/m) # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
         anno = Triannon::Annotation.new data: @json_ld_data
@@ -176,6 +186,14 @@ describe Triannon::Annotation, :vcr do
       allow(bookmark_anno).to receive(:create).and_raise(RuntimeError)
       expect(bookmark_anno).not_to receive(:solr_save)
       expect{bookmark_anno.save}.to raise_error
+    end
+    it "returns false if graph is nil" do
+      allow(bookmark_anno).to receive(:graph).and_return(nil)
+      expect(bookmark_anno.save).to be_falsey
+    end
+    it "returns false if graph size is 0" do
+      allow(bookmark_anno).to receive(:graph).and_return(RDF::Graph.new)
+      expect(bookmark_anno.save).to be_falsey
     end
   end
 
