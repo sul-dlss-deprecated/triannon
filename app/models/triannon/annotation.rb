@@ -45,7 +45,7 @@ module Triannon
       _run_save_callbacks do
         # check if valid?
         graph
-        @id = Triannon::LdpWriter.create_anno self if graph
+        @id = Triannon::LdpWriter.create_anno self if graph && graph.size > 2
       end
     end
 
