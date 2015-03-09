@@ -132,15 +132,15 @@ private
       end
     end
 
-
     # find first mime type from request.accept that matches return mime type
     def mime_type_from_accept(return_mime_types)
       @mime_type_from_accept ||= begin
         if request.accept && request.accept.is_a?(String)
-          accepted_formats = request.accept.split(',')
-          accepted_formats.each { |accepted_format|
-            if return_mime_types.include? accepted_format
-              return accepted_format
+          accept_mime_types = request.accept.split(',')
+          accept_mime_types.each { |mime_type|
+            mime_str = mime_type.split("; profile=").first.strip
+            if return_mime_types.include? mime_str
+              return mime_str
             end
           }
         end
@@ -153,7 +153,7 @@ private
     end
     
     # render json_ld respecting requested context
-    # @param [String] req_context set to "iiif" or "oa".  Default is OA
+    # @param [String] req_context set to "iiif" or "oa".  Default is oa
     # @param [String] mime_type the mime type to be set in the Content-Type header of the HTTP response
     def render_jsonld_per_context (req_context, mime_type=nil)
       case req_context
@@ -175,7 +175,7 @@ private
           else
             render :json => @annotation.jsonld_oa
           end
-      end 
+      end
     end
 
   end # class AnnotationsController
