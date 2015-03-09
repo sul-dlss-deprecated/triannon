@@ -35,9 +35,9 @@ module Triannon
     
     # @return json-ld representation of graph with OpenAnnotation context as a url
     def jsonld_oa
-      inline_context = @graph.dump(:jsonld, :context => Triannon::JsonldContext::OA_CONTEXT_URL)
+      inline_context = @graph.dump(:jsonld, :context => Triannon::JsonldContext::OA_DATED_CONTEXT_URL)
       hash_from_json = JSON.parse(inline_context)
-      hash_from_json["@context"] = Triannon::JsonldContext::OA_CONTEXT_URL
+      hash_from_json["@context"] = Triannon::JsonldContext::OA_DATED_CONTEXT_URL
       hash_from_json.to_json
     end
     

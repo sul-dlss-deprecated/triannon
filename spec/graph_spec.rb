@@ -24,8 +24,8 @@ describe Triannon::Graph, :vcr do
   context 'jsonld flavors' do
     context '#jsonld_oa' do
       it 'has context as url' do
-        expect(g1.jsonld_oa).to match /"@context":\s*"http:\/\/www.w3.org\/ns\/oa.jsonld"/
-        expect(g2.jsonld_oa).to match /"@context":\s*"http:\/\/www.w3.org\/ns\/oa.jsonld"/
+        expect(g1.jsonld_oa).to match /"@context":\s*"http:\/\/www.w3.org\/ns\/oa-context-20130208.json"/
+        expect(g2.jsonld_oa).to match /"@context":\s*"http:\/\/www.w3.org\/ns\/oa-context-20130208.json"/
       end
       it 'parses as graph' do
         new_g = Triannon::Graph.new RDF::Graph.new.from_jsonld g1.jsonld_oa
@@ -245,10 +245,10 @@ describe Triannon::Graph, :vcr do
       end
       it "has OA context" do
         my_tg = Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("body-chars-plain-iiif.json")
-        expect(my_tg.solr_hash[:anno_jsonld]).to match Triannon::JsonldContext::OA_CONTEXT_URL
+        expect(my_tg.solr_hash[:anno_jsonld]).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
         expect(my_tg.solr_hash[:anno_jsonld]).not_to match Triannon::JsonldContext::IIIF_CONTEXT_URL
         my_tg = Triannon::Graph.new RDF::Graph.new.from_ttl Triannon.annotation_fixture("body-chars.ttl")
-        expect(my_tg.solr_hash[:anno_jsonld]).to match Triannon::JsonldContext::OA_CONTEXT_URL
+        expect(my_tg.solr_hash[:anno_jsonld]).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
       end
       it "has non-empty id value for outer node" do
         expect(tg_solr_hash[:anno_jsonld]).not_to match "@id\":\"\""

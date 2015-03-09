@@ -14,7 +14,14 @@ module Triannon
     # GET /annotations/1
     def show
       respond_to do |format|
-        format.jsonld { render_jsonld_per_context (params[:jsonld_context]) }
+        format.jsonld {
+          context_url = context_url_from_accept
+          if context_url && context_url == Triannon::JsonldContext::IIIF_CONTEXT_URL
+            render_jsonld_per_context("iiif", "application/ld+json")
+          else
+            render_jsonld_per_context(params[:jsonld_context], "application/ld+json")
+          end
+        }
         format.ttl {
           accept_return_type = mime_type_from_accept(["application/x-turtle", "text/turtle"])
           render :body => @annotation.graph.to_ttl, content_type: accept_return_type if accept_return_type }
@@ -23,7 +30,13 @@ module Triannon
           render :body => @annotation.graph.to_rdfxml, content_type: accept_return_type if accept_return_type }
         format.json {
           accept_return_type = mime_type_from_accept(["application/json", "text/x-json", "application/jsonrequest"])
-          render_jsonld_per_context(params[:jsonld_context], accept_return_type) }
+          context_url = context_url_from_accept
+          if context_url && context_url == Triannon::JsonldContext::IIIF_CONTEXT_URL
+            render_jsonld_per_context("iiif", accept_return_type)
+          else
+            render_jsonld_per_context(params[:jsonld_context], accept_return_type)
+          end
+        }
         format.xml {
           accept_return_type = mime_type_from_accept(["application/xml", "text/xml", "application/x-xml"])
           render :xml => @annotation.graph.to_rdfxml, content_type: accept_return_type if accept_return_type }
@@ -59,7 +72,7 @@ module Triannon
       end
       
       if @annotation.save
-        request.format = "jsonld" if !request.accept || request.accept.size == 0
+        default_format_jsonld
         respond_to do |format|
           format.jsonld {
             render :json => @annotation.jsonld_oa, status: 201, content_type: "application/ld+json", notice: "Annotation #{@annotation.id} was successfully created." }
