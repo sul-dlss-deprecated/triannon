@@ -3,7 +3,7 @@ require_dependency "triannon/application_controller"
 module Triannon
   class AnnotationsController < ApplicationController
     before_action :default_format_jsonld, only: [:show]
-    before_action :set_annotation, only: [:show, :edit, :update, :destroy]
+    before_action :set_annotation, only: [:show, :update, :destroy]
     rescue_from Triannon::ExternalReferenceError, with: :ext_ref_error
 
     # GET /annotations
