@@ -99,16 +99,39 @@ module Triannon
     end
     
 private
-    # Use callbacks to share common setup or constraints between actions.
+
     def set_annotation
       @annotation = Annotation.find(params[:id])
     end
     
+    # set format to jsonld if it isn't already set
     def default_format_jsonld
       if ((!request.accept || request.accept.empty?) && (!params[:format] || params[:format].empty?))
         request.format = "jsonld"
       end
     end
+
+    # parse the Accept header for the value of profile if it is a request for jsonld or json 
+    # @return [String] url for jsonld @context or nil if missing or non-jsonld/json format
+    def context_url_from_accept
+      if request.format == "jsonld" || request.format == "json"
+        accept_str = request.accept
+        if accept_str && accept_str.split("profile=") && accept_str.split("profile=").last
+          profile_str = accept_str.split("profile=").last.strip 
+          profile_str = profile_str[1, profile_str.size] if profile_str.start_with?('"')
+          profile_str = profile_str[0, profile_str.size-1] if profile_str.end_with?('"')
+          case profile_str
+            when Triannon::JsonldContext::OA_DATED_CONTEXT_URL, 
+              Triannon::JsonldContext::OA_CONTEXT_URL,
+              Triannon::JsonldContext::IIIF_CONTEXT_URL
+              profile_str
+            else
+              nil
+          end
+        end
+      end
+    end
+
 
     # find first mime type from request.accept that matches return mime type
     def mime_type_from_accept(return_mime_types)

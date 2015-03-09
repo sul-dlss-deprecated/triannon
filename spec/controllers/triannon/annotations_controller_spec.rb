@@ -446,4 +446,47 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
     end
   end
 
+  context '#context_url_from_accept' do
+    context 'jsonld' do
+      it 'oa dated' do
+        request.accept = 'application/ld+json; profile="http://www.w3.org/ns/oa-context-20130208.json"'
+        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+      end
+      it 'oa generic' do
+        request.accept = 'application/ld+json; profile="http://www.w3.org/ns/oa.jsonld"'
+        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::OA_CONTEXT_URL
+      end
+      it 'iiif' do
+        request.accept = 'application/ld+json; profile="http://iiif.io/api/presentation/2/context.json"'
+        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::IIIF_CONTEXT_URL
+      end
+    end
+    context 'json, accept profile' do
+      it 'oa dated' do
+        request.accept = 'application/json; profile="http://www.w3.org/ns/oa-context-20130208.json"'
+        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+      end
+      it 'oa generic' do
+        request.accept = 'text/x-json; profile="http://www.w3.org/ns/oa.jsonld"'
+        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::OA_CONTEXT_URL
+      end
+      it 'iiif' do
+        request.accept = 'application/jsonrequest; profile="http://iiif.io/api/presentation/2/context.json"'
+        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::IIIF_CONTEXT_URL
+      end
+    end
+    it 'non-jsonld format gives nil' do
+      request.accept = 'application/x-turtle; profile="http://www.w3.org/ns/oa.jsonld"'
+      expect(controller.send(:context_url_from_accept)).to eq nil
+    end
+    it 'no profile specified gives nil' do
+      request.accept = 'application/ld+json'
+      expect(controller.send(:context_url_from_accept)).to eq nil
+    end
+    it "missing quotes around profile value works" do
+      request.accept = 'application/ld+json; profile=http://www.w3.org/ns/oa-context-20130208.json'
+      expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+    end
+  end
+
 end
