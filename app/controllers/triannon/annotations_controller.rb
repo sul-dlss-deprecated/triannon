@@ -15,7 +15,7 @@ module Triannon
     def show
       respond_to do |format|
         format.jsonld {
-          context_url = context_url_from_accept
+          context_url = context_url_from_accept ? context_url_from_accept : context_url_from_link
           if context_url && context_url == Triannon::JsonldContext::IIIF_CONTEXT_URL
             render_jsonld_per_context("iiif", "application/ld+json")
           else
@@ -30,7 +30,7 @@ module Triannon
           render :body => @annotation.graph.to_rdfxml, content_type: accept_return_type if accept_return_type }
         format.json {
           accept_return_type = mime_type_from_accept(["application/json", "text/x-json", "application/jsonrequest"])
-          context_url = context_url_from_accept
+          context_url = context_url_from_link ? context_url_from_link : context_url_from_accept
           if context_url && context_url == Triannon::JsonldContext::IIIF_CONTEXT_URL
             render_jsonld_per_context("iiif", accept_return_type)
           else
@@ -72,7 +72,7 @@ module Triannon
       end
       
       if @annotation.save
-        default_format_jsonld
+        default_format_jsonld # NOTE: this must be here and not in before_filter or we get Missing template errors
         respond_to do |format|
           format.jsonld {
             render :json => @annotation.jsonld_oa, status: 201, content_type: "application/ld+json", notice: "Annotation #{@annotation.id} was successfully created." }
@@ -124,27 +124,6 @@ private
       end
     end
 
-    # parse the Accept header for the value of profile if it is a request for jsonld or json 
-    # @return [String] url for jsonld @context or nil if missing or non-jsonld/json format
-    def context_url_from_accept
-      if request.format == "jsonld" || request.format == "json"
-        accept_str = request.accept
-        if accept_str && accept_str.split("profile=") && accept_str.split("profile=").last
-          profile_str = accept_str.split("profile=").last.strip 
-          profile_str = profile_str[1, profile_str.size] if profile_str.start_with?('"')
-          profile_str = profile_str[0, profile_str.size-1] if profile_str.end_with?('"')
-          case profile_str
-            when Triannon::JsonldContext::OA_DATED_CONTEXT_URL, 
-              Triannon::JsonldContext::OA_CONTEXT_URL,
-              Triannon::JsonldContext::IIIF_CONTEXT_URL
-              profile_str
-            else
-              nil
-          end
-        end
-      end
-    end
-
     # find first mime type from request.accept that matches return mime type
     def mime_type_from_accept(return_mime_types)
       @mime_type_from_accept ||= begin
@@ -156,6 +135,49 @@ private
               return mime_str
             end
           }
+        end
+      end
+    end
+
+    # parse the Accept HTTP header for the value of profile if it is a request for jsonld or json
+    # e.g. Accept: application/ld+json; profile="http://www.w3.org/ns/oa-context-20130208.json"
+    # @return [String] url for jsonld @context or nil if missing or non-jsonld/json format
+    def context_url_from_accept
+      if request.format == "jsonld" || request.format == "json"
+        accept_str = request.accept
+        if accept_str && accept_str.split("profile=") && accept_str.split("profile=").last
+          context_url = accept_str.split("profile=").last.strip
+          context_url = context_url[1, context_url.size] if context_url.start_with?('"')
+          context_url = context_url[0, context_url.size-1] if context_url.end_with?('"')
+          case context_url
+            when Triannon::JsonldContext::OA_DATED_CONTEXT_URL, 
+              Triannon::JsonldContext::OA_CONTEXT_URL,
+              Triannon::JsonldContext::IIIF_CONTEXT_URL
+              context_url
+            else
+              nil
+          end
+        end
+      end
+    end
+
+    # parse the Accept HTTP Link for the value of rel if it is a request for jsonld or json
+    # e.g. Link: http://www.w3.org/ns/oa.json; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"
+    # note that the "type" part is optional
+    # @return [String] url for jsonld @context or nil if missing or non-jsonld/json format
+    def context_url_from_link
+      if request.format == "jsonld" || request.format == "json"
+        link_str = request.headers["Link"]
+        if link_str && link_str.split("; rel=") && link_str.split("; rel=").first
+          context_url = link_str.split("; rel=").first.strip
+          case context_url
+            when Triannon::JsonldContext::OA_DATED_CONTEXT_URL,
+              Triannon::JsonldContext::OA_CONTEXT_URL,
+              Triannon::JsonldContext::IIIF_CONTEXT_URL
+              context_url
+            else
+              nil
+          end
         end
       end
     end
