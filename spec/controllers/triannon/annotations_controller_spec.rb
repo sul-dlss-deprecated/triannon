@@ -179,6 +179,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
             expect(response.body).to match(regex)
             expect(response.body).to match "I love this"
             expect(response.status).to eql(201)
+            expect(flash[:notice]).to match "Annotation .* was successfully created."
           end
         }
       end
@@ -201,6 +202,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
         expect(response.body).to match json_regex
         expect(response.body).to match "I love this"
         expect(response.status).to eql(201)
+        expect(flash[:notice]).to match "Annotation .* was successfully created."
       end
       it "nil gets json-ld" do
         request.accept = nil
@@ -210,6 +212,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
         expect(response.body).to match json_regex
         expect(response.body).to match "I love this"
         expect(response.status).to eql(201)
+        expect(flash[:notice]).to match "Annotation .* was successfully created."
       end
       it "*/* gets json-ld" do
         request.accept = "*/*"
@@ -219,15 +222,16 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
         expect(response.body).to match json_regex
         expect(response.body).to match "I love this"
         expect(response.status).to eql(201)
+        expect(flash[:notice]).to match "Annotation .* was successfully created."
       end
       it "html uses view" do
         request.accept = "text/html"
         request.headers["Content-Type"] = "application/ld+json"
         post :create, Triannon.annotation_fixture("body-chars.json")
         expect(response.content_type).to eql("text/html")
-        expect(response.status).to eql(201)
-        expect(response).to render_template(:show)
-#        expect(response.body).to match "I love this"  # TODO:  need to address github issue #113  and get it to show anno in html for query
+        expect(response.status).to eql(302) # it's a redirect
+        expect(response.body).to match "redirected"
+        expect(flash[:notice]).to match "Annotation .* was successfully created."
       end
       context 'multiple formats' do
         # rails will use them in order listed in the http accept header value.
@@ -240,6 +244,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
           expect(response.content_type).to eql("application/ld+json")
           expect(response.body).to match json_regex
           expect(response.status).to eql(201)
+          expect(flash[:notice]).to match "Annotation .* was successfully created."
         end
       end
 
