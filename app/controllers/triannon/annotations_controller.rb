@@ -74,34 +74,35 @@ module Triannon
       
       if @annotation.save
         default_format_jsonld # NOTE: this must be here and not in before_filter or we get Missing template errors
+        flash[:notice] = "Annotation #{@annotation.id} was successfully created."
         respond_to do |format|
           format.jsonld {
             context_url = context_url_from_link ? context_url_from_link : context_url_from_accept
             if context_url && context_url == Triannon::JsonldContext::IIIF_CONTEXT_URL
-              render :json => @annotation.jsonld_iiif, status: 201, content_type: "application/ld+json", notice: "Annotation #{@annotation.id} was successfully created."
+              render :json => @annotation.jsonld_iiif, status: 201, content_type: "application/ld+json"
             else
-              render :json => @annotation.jsonld_oa, status: 201, content_type: "application/ld+json", notice: "Annotation #{@annotation.id} was successfully created."
+              render :json => @annotation.jsonld_oa, status: 201, content_type: "application/ld+json"
             end
           }
           format.ttl {
             accept_return_type = mime_type_from_accept(["application/x-turtle", "text/turtle"])
-            render :body => @annotation.graph.to_ttl, status: 201, notice: "Annotation #{@annotation.id} was successfully created.", content_type: accept_return_type if accept_return_type }
+            render :body => @annotation.graph.to_ttl, status: 201, content_type: accept_return_type if accept_return_type }
           format.rdfxml {
             accept_return_type = mime_type_from_accept(["application/rdf+xml", "text/rdf+xml", "text/rdf"])
-            render :body => @annotation.graph.to_rdfxml, status: 201, notice: "Annotation #{@annotation.id} was successfully created.", content_type: accept_return_type if accept_return_type }
+            render :body => @annotation.graph.to_rdfxml, status: 201, content_type: accept_return_type if accept_return_type }
           format.json {
             accept_return_type = mime_type_from_accept(["application/json", "text/x-json", "application/jsonrequest"])
             context_url = context_url_from_link ? context_url_from_link : context_url_from_accept
             if context_url && context_url == Triannon::JsonldContext::IIIF_CONTEXT_URL
-              render :json => @annotation.jsonld_iiif, status: 201, notice: "Annotation #{@annotation.id} was successfully created.", content_type: accept_return_type if accept_return_type
+              render :json => @annotation.jsonld_iiif, status: 201, content_type: accept_return_type if accept_return_type
             else
-              render :json => @annotation.jsonld_oa, status: 201, notice: "Annotation #{@annotation.id} was successfully created.", content_type: accept_return_type if accept_return_type
+              render :json => @annotation.jsonld_oa, status: 201, content_type: accept_return_type if accept_return_type
             end
           }
           format.xml {
             accept_return_type = mime_type_from_accept(["application/xml", "text/xml", "application/x-xml"])
-            render :body => @annotation.graph.to_rdfxml, status: 201, notice: "Annotation #{@annotation.id} was successfully created.", content_type: accept_return_type if accept_return_type }
-          format.html { render :show, location: @annotation, status: 201, content_type: "text/html", notice: "Annotation #{@annotation.id} was successfully created." }
+            render :body => @annotation.graph.to_rdfxml, status: 201, content_type: accept_return_type if accept_return_type }
+          format.html { redirect_to @annotation }
         end
       else
         render :new, status: 400
