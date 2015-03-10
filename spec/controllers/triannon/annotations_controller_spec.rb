@@ -140,25 +140,6 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
         expect(response.status).to eq 201
       end
       context 'jsonld context' do
-=begin
-        context 'included in header' do
-          it "honors oa generic uri" do
-            # creates anno properly
-            fail "test to be implemented"
-          end
-          it "honors oa dated uri" do
-            # creates anno properly
-            fail "test to be implemented"
-          end
-          it "honors iiif uri" do
-            # creates anno properly
-            fail "test to be implemented"
-          end
-          it "ignores unrecognized uri (looks inline)" do
-            fail "test to be implemented"
-          end
-        end # included in header
-=end
         context "NOT included in header" do
           shared_examples_for 'creates anno successfully' do | test_data |
             it "" do
@@ -261,6 +242,178 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
           expect(response.status).to eql(201)
         end
       end
+
+      context 'jsonld context' do
+        context 'Accept header profile specifies context URL' do
+          shared_examples_for 'creates anno successfully' do | mime_type, context_url, result_url |
+            it "" do
+              request.accept = "#{mime_type}; profile=\"#{context_url}\""
+              post :create, Triannon.annotation_fixture("bookmark.json")
+              expect(response.status).to eq 201
+              expect(response.content_type).to eql(mime_type)
+              expect(response.body).to match json_regex
+              expect(response.body).to match "kq131cs7229"
+              if result_url
+                expect(response.body).to match result_url
+              else
+                expect(response.body).to match context_url
+              end
+            end
+          end
+          context 'jsonld' do
+            context 'oa dated' do
+              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+            end
+            context 'oa generic' do
+              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::OA_CONTEXT_URL, Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+            end
+            context 'iiif' do
+              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::IIIF_CONTEXT_URL
+            end
+            it "missing context returns oa dated" do
+              request.accept = "application/ld+json"
+              post :create, Triannon.annotation_fixture("bookmark.json")
+              expect(response.status).to eq 201
+              expect(response.content_type).to eql("application/ld+json")
+              expect(response.body).to match json_regex
+              expect(response.body).to match "kq131cs7229"
+              expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+            end
+            it "unrecognized context returns oa dated" do
+              request.accept = "application/ld+json; profile=\"http://not.a.real.doctor.com/\""
+              post :create, Triannon.annotation_fixture("bookmark.json")
+              expect(response.status).to eq 201
+              expect(response.content_type).to eql("application/ld+json")
+              expect(response.body).to match json_regex
+              expect(response.body).to match "kq131cs7229"
+              expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+            end
+          end
+          context 'json (be nice and pay attention to profile)' do
+            context 'oa dated' do
+              it_behaves_like 'creates anno successfully', "application/json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+            end
+            context 'oa generic' do
+              it_behaves_like 'creates anno successfully', "text/x-json", Triannon::JsonldContext::OA_CONTEXT_URL, Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+            end
+            context 'iiif' do
+              it_behaves_like 'creates anno successfully', "application/jsonrequest", Triannon::JsonldContext::IIIF_CONTEXT_URL
+            end
+            it "missing context returns oa dated" do
+              request.accept = "application/json"
+              post :create, Triannon.annotation_fixture("bookmark.json")
+              expect(response.status).to eq 201
+              expect(response.content_type).to eql("application/json")
+              expect(response.body).to match json_regex
+              expect(response.body).to match "kq131cs7229"
+              expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+            end
+          end
+          it "context specified for non-json returns non-json" do
+            request.accept = "application/x-turtle; profile=\"#{Triannon::JsonldContext::IIIF_CONTEXT_URL}\""
+            post :create, Triannon.annotation_fixture("body-chars.ttl")
+            expect(response.status).to eq 201
+            expect(response.content_type).to eql("application/x-turtle")
+            expect(response.body).to match /\.\Z/  # \Z is needed instead of $ due to \n in data)
+            expect(response.body).to match "kq131cs7229"
+            expect(response.body).not_to match Triannon::JsonldContext::IIIF_CONTEXT_URL
+          end
+        end
+        context 'Link header specifies context URL' do
+          shared_examples_for 'creates anno successfully' do | mime_type, context_url, result_url |
+            it "link type specified" do
+              request.accept = "#{mime_type}"
+              request.headers["Link"] = "#{context_url}; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\""
+              post :create, Triannon.annotation_fixture("bookmark.json")
+              expect(response.status).to eq 201
+              expect(response.content_type).to eql(mime_type)
+              expect(response.body).to match json_regex
+              expect(response.body).to match "kq131cs7229"
+              if result_url
+                expect(response.body).to match result_url
+              else
+                expect(response.body).to match context_url
+              end
+            end
+            it "link type not specified" do
+              request.accept = "#{mime_type}"
+              request.headers["Link"] = "#{context_url}; rel=\"http://www.w3.org/ns/json-ld#context\""
+              post :create, Triannon.annotation_fixture("bookmark.json")
+              expect(response.status).to eq 201
+              expect(response.content_type).to eql(mime_type)
+              expect(response.body).to match json_regex
+              expect(response.body).to match "kq131cs7229"
+              if result_url
+                expect(response.body).to match result_url
+              else
+                expect(response.body).to match context_url
+              end
+            end
+          end
+          context 'json' do
+            context 'oa dated' do
+              it_behaves_like 'creates anno successfully', "application/json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+            end
+            context 'oa generic' do
+              it_behaves_like 'creates anno successfully', "text/x-json", Triannon::JsonldContext::OA_CONTEXT_URL, Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+            end
+            context 'iiif' do
+              it_behaves_like 'creates anno successfully', "application/jsonrequest", Triannon::JsonldContext::IIIF_CONTEXT_URL
+            end
+            context "unrecognized context returns oa dated" do
+              it_behaves_like 'creates anno successfully', "application/jsonrequest", "http://context.unknown.org", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+            end
+            context "missing context returns oa dated" do
+              it_behaves_like 'creates anno successfully', "text/x-json", "", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+            end
+            it "no link header returns oa dated" do
+              request.accept = "application/json"
+              post :create, Triannon.annotation_fixture("bookmark.json")
+              expect(response.status).to eq 201
+              expect(response.content_type).to eql("application/json")
+              expect(response.body).to match json_regex
+              expect(response.body).to match "kq131cs7229"
+              expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+            end
+          end
+          context 'jsonld (be nice and pay attention to link)' do
+            context 'oa dated' do
+              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+            end
+            context 'oa generic' do
+              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::OA_CONTEXT_URL, Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+            end
+            context 'iiif' do
+              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::IIIF_CONTEXT_URL
+            end
+            context "unrecognized context returns oa dated" do
+              it_behaves_like 'creates anno successfully', "application/ld+json", "http://context.unknown.org", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+            end
+            context "missing context returns oa dated" do
+              it_behaves_like 'creates anno successfully', "application/ld+json", "", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+            end
+            it "no link header returns oa dated" do
+              request.accept = "application/ld+json"
+              post :create, Triannon.annotation_fixture("bookmark.json")
+              expect(response.status).to eq 201
+              expect(response.content_type).to eql("application/ld+json")
+              expect(response.body).to match json_regex
+              expect(response.body).to match "kq131cs7229"
+              expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+            end
+          end
+          it "context specified for non-json returns non-json" do
+            request.accept = "application/x-turtle"
+            request.headers["Link"] = "#{Triannon::JsonldContext::IIIF_CONTEXT_URL}; rel=\"http://www.w3.org/ns/json-ld#context\""
+            post :create, Triannon.annotation_fixture("body-chars.ttl")
+            expect(response.status).to eq 201
+            expect(response.content_type).to eql("application/x-turtle")
+            expect(response.body).to match /\.\Z/  # \Z is needed instead of $ due to \n in data)
+            expect(response.body).to match "kq131cs7229"
+            expect(response.body).not_to match Triannon::JsonldContext::IIIF_CONTEXT_URL
+          end
+        end
+      end # jsonld context
     end # response format
 
   end # #create
@@ -276,7 +429,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
           if !format || format.length == 0
             format = "application/ld+json"
           end
-          @request.accept = format
+          request.accept = format
           model = double()
           allow(Triannon::Annotation).to receive(:find).and_return(model)
           case jsonld_context
@@ -293,20 +446,20 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
           end
         end
         it "response has correct context" do
-          @request.accept = "application/ld+json"
+          request.accept = "application/ld+json"
           [bookmark_anno, body_chars_anno].each { |anno|  
             get :show, id: anno.id, jsonld_context: jsonld_context
             case jsonld_context
               when "iiif", "IIIF"
-                expect(@response.body).to match(Triannon::JsonldContext::IIIF_CONTEXT_URL)
-                expect(@response.body).to match(/"on":/)
+                expect(response.body).to match(Triannon::JsonldContext::IIIF_CONTEXT_URL)
+                expect(response.body).to match(/"on":/)
               when "oa", "OA"
-                expect(@response.body).to match(Triannon::JsonldContext::OA_CONTEXT_URL)
-                expect(@response.body).to match(/"hasTarget":/)
+                expect(response.body).to match(Triannon::JsonldContext::OA_DATED_CONTEXT_URL)
+                expect(response.body).to match(/"hasTarget":/)
             end
-            expect(@response.content_type).to eql("application/ld+json")
-            expect(@response.body).to match json_regex
-            expect(@response.status).to eql(200)
+            expect(response.content_type).to eql("application/ld+json")
+            expect(response.body).to match json_regex
+            expect(response.status).to eql(200)
           }
         end
       end
@@ -324,22 +477,22 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
         it_behaves_like 'jsonld_context respected', "OA"
       end
       it 'returns OA context jsonld when neither iiif or oa is in path' do
-        @request.accept = "application/ld+json"
+        request.accept = "application/ld+json"
         get :show, id: bookmark_anno.id, jsonld_context: 'foo'
-        expect(@response.body).to match(Triannon::JsonldContext::OA_CONTEXT_URL)
-        expect(@response.body).to match(/"hasTarget":/)
-        expect(@response.content_type).to eql("application/ld+json")
-        expect(@response.body).to match json_regex
-        expect(@response.status).to eql(200)
+        expect(response.body).to match(Triannon::JsonldContext::OA_DATED_CONTEXT_URL)
+        expect(response.body).to match(/"hasTarget":/)
+        expect(response.content_type).to eql("application/ld+json")
+        expect(response.body).to match json_regex
+        expect(response.status).to eql(200)
       end
       it 'returns OA context jsonld when context is missing in path' do
-        @request.accept = "application/ld+json"
+        request.accept = "application/ld+json"
         get :show, id: bookmark_anno.id, jsonld_context: ''
-        expect(@response.body).to match(Triannon::JsonldContext::OA_CONTEXT_URL)
-        expect(@response.body).to match(/"hasTarget":/)
-        expect(@response.content_type).to eql("application/ld+json")
-        expect(@response.body).to match json_regex
-        expect(@response.status).to eql(200)
+        expect(response.body).to match(Triannon::JsonldContext::OA_DATED_CONTEXT_URL)
+        expect(response.body).to match(/"hasTarget":/)
+        expect(response.content_type).to eql("application/ld+json")
+        expect(response.body).to match json_regex
+        expect(response.status).to eql(200)
       end
       context 'pays attention to jsonld_context for all jsonld and json accept formats' do
         it_behaves_like 'jsonld_context respected', "iiif", "application/ld+json"
@@ -355,14 +508,14 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       end
       it 'ignores jsonld_context for formats other than jsonld and json' do
         ["application/x-turtle", "application/rdf+xml"].each { |mime_type|  
-          @request.accept = mime_type
+          request.accept = mime_type
           [bookmark_anno, body_chars_anno].each { |anno|  
             get :show, id: anno.id, jsonld_context: 'iiif'
-            expect(@response.body).not_to match(Triannon::JsonldContext::IIIF_CONTEXT_URL)
-            expect(@response.body).not_to match(/"on":/)
-            expect(@response.body).not_to match json_regex
-            expect(@response.content_type).to eql(mime_type)
-            expect(@response.status).to eql(200)
+            expect(response.body).not_to match(Triannon::JsonldContext::IIIF_CONTEXT_URL)
+            expect(response.body).not_to match(/"on":/)
+            expect(response.body).not_to match json_regex
+            expect(response.content_type).to eql(mime_type)
+            expect(response.status).to eql(200)
           }
         }
       end
@@ -372,12 +525,12 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       shared_examples_for 'accept header determines media type' do | mime_types, regex |
         mime_types.each { |mtype|
           it "#{mtype}" do
-            @request.accept = mtype
+            request.accept = mtype
             get :show, id: bookmark_anno.id
-            expect(@response.content_type).to eql(mtype)
-            expect(@response.body).to match(regex)
+            expect(response.content_type).to eql mtype
+            expect(response.body).to match regex
             expect(response.body).to match "kq131cs7229"
-            expect(@response.status).to eql(200)
+            expect(response.status).to eq 200
           end
         }
       end
@@ -393,28 +546,28 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
         it_behaves_like 'accept header determines media type', ["application/ld+json", "application/json", "text/x-json", "application/jsonrequest"], json_regex
       end
       it "empty string gets json-ld" do
-        @request.accept = ""
+        request.accept = ""
         get :show, id: bookmark_anno.id, format: nil
-        expect(@response.content_type).to eql("application/ld+json")
-        expect(@response.body).to match json_regex
-        expect(@response.status).to eql(200)
+        expect(response.content_type).to eql("application/ld+json")
+        expect(response.body).to match json_regex
+        expect(response.status).to eql(200)
       end
       it "nil gets json-ld" do
-        @request.accept = nil
+        request.accept = nil
         get :show, id: bookmark_anno.id, format: nil
-        expect(@response.content_type).to eql("application/ld+json")
-        expect(@response.body).to match json_regex
-        expect(@response.status).to eql(200)
+        expect(response.content_type).to eql("application/ld+json")
+        expect(response.body).to match json_regex
+        expect(response.status).to eql(200)
       end
       it "*/* gets json-ld" do
-        @request.accept = "*/*"
+        request.accept = "*/*"
         get :show, id: bookmark_anno.id, format: nil
-        expect(@response.content_type).to eql("application/ld+json")
-        expect(@response.body).to match json_regex
-        expect(@response.status).to eql(200)
+        expect(response.content_type).to eql("application/ld+json")
+        expect(response.body).to match json_regex
+        expect(response.status).to eql(200)
       end
       it "html uses view" do
-        @request.accept = "text/html"
+        request.accept = "text/html"
         get :show, id: bookmark_anno.id
         expect(response.content_type).to eql("text/html")
         expect(response.status).to eql(200)
@@ -425,15 +578,187 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
         # also, "note that if browser is sending */* along with other values then Rails totally bails out and just returns Mime::HTML"
         #   http://blog.bigbinary.com/2010/11/23/mime-type-resolution-in-rails.html
         it 'uses first known format' do
-          @request.accept = "application/ld+json, text/x-json, application/json"
+          request.accept = "application/ld+json, text/x-json, application/json"
           get :show, id: bookmark_anno.id
-          expect(@response.content_type).to eql("application/ld+json")
-          expect(@response.body).to match json_regex
-          expect(@response.status).to eql(200)
+          expect(response.content_type).to eql("application/ld+json")
+          expect(response.body).to match json_regex
+          expect(response.status).to eql(200)
         end
       end
     end # response format
     
+    context 'jsonld context' do
+      context 'Accept header profile specifies context URL' do
+        shared_examples_for 'creates anno successfully' do | mime_type, context_url, result_url |
+          it "" do
+            request.accept = "#{mime_type}; profile=\"#{context_url}\""
+            get :show, id: bookmark_anno.id
+            expect(response.status).to eq 200
+            expect(response.content_type).to eql(mime_type)
+            expect(response.body).to match json_regex
+            expect(response.body).to match "kq131cs7229"
+            if result_url
+              expect(response.body).to match result_url
+            else
+              expect(response.body).to match context_url
+            end
+          end
+        end
+        context 'jsonld' do
+          context 'oa dated' do
+            it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+          end
+          context 'oa generic' do
+            it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::OA_CONTEXT_URL, Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+          end
+          context 'iiif' do
+            it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::IIIF_CONTEXT_URL
+          end
+          it "missing context returns oa dated" do
+            request.accept = "application/ld+json"
+            get :show, id: bookmark_anno.id
+            expect(response.status).to eq 200
+            expect(response.content_type).to eql("application/ld+json")
+            expect(response.body).to match json_regex
+            expect(response.body).to match "kq131cs7229"
+            expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+          end
+          it "unrecognized context returns oa dated" do
+            request.accept = "application/ld+json; profile=\"http://not.a.real.doctor.com/\""
+            get :show, id: bookmark_anno.id
+            expect(response.status).to eq 200
+            expect(response.content_type).to eql("application/ld+json")
+            expect(response.body).to match json_regex
+            expect(response.body).to match "kq131cs7229"
+            expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+          end
+        end
+        context 'json (be nice and pay attention to profile)' do
+          context 'oa dated' do
+            it_behaves_like 'creates anno successfully', "application/json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+          end
+          context 'oa generic' do
+            it_behaves_like 'creates anno successfully', "text/x-json", Triannon::JsonldContext::OA_CONTEXT_URL, Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+          end
+          context 'iiif' do
+            it_behaves_like 'creates anno successfully', "application/jsonrequest", Triannon::JsonldContext::IIIF_CONTEXT_URL
+          end
+          it "missing context returns oa dated" do
+            request.accept = "application/json"
+            get :show, id: bookmark_anno.id
+            expect(response.status).to eq 200
+            expect(response.content_type).to eql("application/json")
+            expect(response.body).to match json_regex
+            expect(response.body).to match "kq131cs7229"
+            expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+          end
+        end
+        it "context specified for non-json returns non-json" do
+          request.accept = "application/x-turtle; profile=\"#{Triannon::JsonldContext::IIIF_CONTEXT_URL}\""
+          get :show, id: bookmark_anno.id
+          expect(response.status).to eq 200
+          expect(response.content_type).to eql("application/x-turtle")
+          expect(response.body).to match /\.\Z/  # \Z is needed instead of $ due to \n in data)
+          expect(response.body).to match "kq131cs7229"
+          expect(response.body).not_to match Triannon::JsonldContext::IIIF_CONTEXT_URL
+        end
+      end
+      context 'Link header specifies context URL' do
+        shared_examples_for 'creates anno successfully' do | mime_type, context_url, result_url |
+          it "link type specified" do
+            request.accept = "#{mime_type}"
+            request.headers["Link"] = "#{context_url}; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\""
+            get :show, id: bookmark_anno.id
+            expect(response.status).to eq 200
+            expect(response.content_type).to eql(mime_type)
+            expect(response.body).to match json_regex
+            expect(response.body).to match "kq131cs7229"
+            if result_url
+              expect(response.body).to match result_url
+            else
+              expect(response.body).to match context_url
+            end
+          end
+          it "link type not specified" do
+            request.accept = "#{mime_type}"
+            request.headers["Link"] = "#{context_url}; rel=\"http://www.w3.org/ns/json-ld#context\""
+            get :show, id: bookmark_anno.id
+            expect(response.status).to eq 200
+            expect(response.content_type).to eql(mime_type)
+            expect(response.body).to match json_regex
+            expect(response.body).to match "kq131cs7229"
+            if result_url
+              expect(response.body).to match result_url
+            else
+              expect(response.body).to match context_url
+            end
+          end
+        end
+        context 'json' do
+          context 'oa dated' do
+            it_behaves_like 'creates anno successfully', "application/json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+          end
+          context 'oa generic' do
+            it_behaves_like 'creates anno successfully', "text/x-json", Triannon::JsonldContext::OA_CONTEXT_URL, Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+          end
+          context 'iiif' do
+            it_behaves_like 'creates anno successfully', "application/jsonrequest", Triannon::JsonldContext::IIIF_CONTEXT_URL
+          end
+          context "unrecognized context returns oa dated" do
+            it_behaves_like 'creates anno successfully', "application/jsonrequest", "http://context.unknown.org", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+          end
+          context "missing context returns oa dated" do
+            it_behaves_like 'creates anno successfully', "text/x-json", "", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+          end
+          it "no link header returns oa dated" do
+            request.accept = "application/json"
+            get :show, id: bookmark_anno.id
+            expect(response.status).to eq 200
+            expect(response.content_type).to eql("application/json")
+            expect(response.body).to match json_regex
+            expect(response.body).to match "kq131cs7229"
+            expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+          end
+        end
+        context 'jsonld (be nice and pay attention to link)' do
+          context 'oa dated' do
+            it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+          end
+          context 'oa generic' do
+            it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::OA_CONTEXT_URL, Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+          end
+          context 'iiif' do
+            it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::IIIF_CONTEXT_URL
+          end
+          context "unrecognized context returns oa dated" do
+            it_behaves_like 'creates anno successfully', "application/ld+json", "http://context.unknown.org", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+          end
+          context "missing context returns oa dated" do
+            it_behaves_like 'creates anno successfully', "application/ld+json", "", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+          end
+          it "no link header returns oa dated" do
+            request.accept = "application/ld+json"
+            get :show, id: bookmark_anno.id
+            expect(response.status).to eq 200
+            expect(response.content_type).to eql("application/ld+json")
+            expect(response.body).to match json_regex
+            expect(response.body).to match "kq131cs7229"
+            expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+          end
+        end
+        it "context specified for non-json returns non-json" do
+          request.accept = "application/x-turtle"
+          request.headers["Link"] = "#{Triannon::JsonldContext::IIIF_CONTEXT_URL}; rel=\"http://www.w3.org/ns/json-ld#context\""
+          get :show, id: bookmark_anno.id
+          expect(response.status).to eq 200
+          expect(response.content_type).to eql("application/x-turtle")
+          expect(response.body).to match /\.\Z/  # \Z is needed instead of $ due to \n in data)
+          expect(response.body).to match "kq131cs7229"
+          expect(response.body).not_to match Triannon::JsonldContext::IIIF_CONTEXT_URL
+        end
+      end
+    end
+
   end # #show
 
   context '#destroy' do
@@ -446,4 +771,156 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
     end
   end
 
+  context '#mime_type_from_accept' do
+    let(:jsonld_mimetype) {"application/ld+json"}
+    let(:json_mimetype) {"text/x-json"}
+    let(:ttl_mimetype) {"application/x-turtle"}
+    it "jsonld with profile specified" do
+      request.accept = "#{jsonld_mimetype}; profile=\"http://www.w3.org/ns/oa.jsonld\""
+      expect(controller.send(:mime_type_from_accept, jsonld_mimetype)).to eq jsonld_mimetype
+    end
+    it "jsonld without profile specified" do
+      request.accept = jsonld_mimetype
+      expect(controller.send(:mime_type_from_accept, jsonld_mimetype)).to eq jsonld_mimetype
+    end
+    it 'json with profile specified' do
+      request.accept = "#{json_mimetype}; profile=\"http://www.w3.org/ns/oa.jsonld\""
+      expect(controller.send(:mime_type_from_accept, ["application/json", "text/x-json", "application/jsonrequest"])).to eq json_mimetype
+    end
+    it 'non-jsonld with profile specified' do
+      request.accept = "#{ttl_mimetype}; profile=\"http://www.w3.org/ns/oa.jsonld\""
+      expect(controller.send(:mime_type_from_accept, ["application/x-turtle", "text/turtle"])).to eq ttl_mimetype
+    end
+    it 'non-jsonld without profile' do
+      request.accept = ttl_mimetype
+      expect(controller.send(:mime_type_from_accept, ["application/x-turtle", "text/turtle"])).to eq ttl_mimetype
+    end
+    context 'multiple formats specified' do
+      it 'with jsonld with profile' do
+        request.accept = "#{jsonld_mimetype}; profile=\"http://www.w3.org/ns/oa.jsonld\", #{json_mimetype}, application/json"
+        expect(controller.send(:mime_type_from_accept, jsonld_mimetype)).to eq jsonld_mimetype
+      end
+      it 'with json with profile' do
+        request.accept = "#{json_mimetype}; profile=\"http://www.w3.org/ns/oa.jsonld\", #{json_mimetype}, application/json"
+        expect(controller.send(:mime_type_from_accept, ["application/json", "text/x-json", "application/jsonrequest"])).to eq json_mimetype
+      end
+      it 'wth non-jsonld with profile' do
+        request.accept = "#{ttl_mimetype}; profile=\"http://www.w3.org/ns/oa.jsonld\", text/html"
+        expect(controller.send(:mime_type_from_accept, ["application/x-turtle", "text/turtle"])).to eq ttl_mimetype
+      end
+      it 'without profile' do
+        request.accept = "#{jsonld_mimetype}, text/x-json, application/json"
+        expect(controller.send(:mime_type_from_accept, jsonld_mimetype)).to eq jsonld_mimetype
+      end
+    end
+  end # mime_type_from_accept
+
+  context '#context_url_from_accept' do
+    context 'jsonld' do
+      it 'oa dated' do
+        request.accept = 'application/ld+json; profile="http://www.w3.org/ns/oa-context-20130208.json"'
+        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+      end
+      it 'oa generic' do
+        request.accept = 'application/ld+json; profile="http://www.w3.org/ns/oa.jsonld"'
+        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::OA_CONTEXT_URL
+      end
+      it 'iiif' do
+        request.accept = 'application/ld+json; profile="http://iiif.io/api/presentation/2/context.json"'
+        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::IIIF_CONTEXT_URL
+      end
+    end
+    context 'json, accept profile' do
+      it 'oa dated' do
+        request.accept = 'application/json; profile="http://www.w3.org/ns/oa-context-20130208.json"'
+        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+      end
+      it 'oa generic' do
+        request.accept = 'text/x-json; profile="http://www.w3.org/ns/oa.jsonld"'
+        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::OA_CONTEXT_URL
+      end
+      it 'iiif' do
+        request.accept = 'application/jsonrequest; profile="http://iiif.io/api/presentation/2/context.json"'
+        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::IIIF_CONTEXT_URL
+      end
+    end
+    it 'non-jsonld format gives nil' do
+      request.accept = 'application/x-turtle; profile="http://www.w3.org/ns/oa.jsonld"'
+      expect(controller.send(:context_url_from_accept)).to eq nil
+    end
+    it 'no profile specified gives nil' do
+      request.accept = 'application/ld+json'
+      expect(controller.send(:context_url_from_accept)).to eq nil
+    end
+    it "missing quotes around profile value works" do
+      request.accept = 'application/ld+json; profile=http://www.w3.org/ns/oa-context-20130208.json'
+      expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+    end
+    it "unrecognized context_url gives nil" do
+      request.accept = 'application/ld+json; profile=http://unknown.context.org'
+      expect(controller.send(:context_url_from_accept)).to eq nil
+    end
+  end # context_url_from_accept
+
+  context '#context_url_from_link' do
+    shared_examples_for "parses successfully" do | mime_type, context_url|
+      it "link type specified" do
+        request.accept = mime_type
+        request.headers["Link"] = "#{context_url}; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\""
+        expect(controller.send(:context_url_from_link)).to eq context_url
+      end
+      it "link type not specified" do
+        request.accept = mime_type
+        request.headers["Link"] = "#{context_url}; rel=\"http://www.w3.org/ns/json-ld#context\""
+        expect(controller.send(:context_url_from_link)).to eq context_url
+      end
+    end
+    context 'json' do
+      context 'oa dated' do
+        it_behaves_like "parses successfully", "application/json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+        it_behaves_like "parses successfully", "text/x-json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+        it_behaves_like "parses successfully", "application/jsonrequest", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+      end
+      context 'oa generic' do
+        it_behaves_like "parses successfully", "application/json", Triannon::JsonldContext::OA_CONTEXT_URL
+        it_behaves_like "parses successfully", "text/x-json", Triannon::JsonldContext::OA_CONTEXT_URL
+        it_behaves_like "parses successfully", "application/jsonrequest", Triannon::JsonldContext::OA_CONTEXT_URL
+      end
+      context 'iiif' do
+        it_behaves_like "parses successfully", "application/json", Triannon::JsonldContext::IIIF_CONTEXT_URL
+        it_behaves_like "parses successfully", "text/x-json", Triannon::JsonldContext::IIIF_CONTEXT_URL
+        it_behaves_like "parses successfully", "application/jsonrequest", Triannon::JsonldContext::IIIF_CONTEXT_URL
+      end
+      it 'unrecognized context_url specified gives nil' do
+        request.accept = 'application/ld+json'
+        request.headers["Link"] = "http://context.unknown.org; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\""
+        expect(controller.send(:context_url_from_link)).to eq nil
+      end
+      it 'no context_url specified gives nil' do
+        request.accept = 'application/ld+json'
+        request.headers["Link"] = "rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\""
+        expect(controller.send(:context_url_from_link)).to eq nil
+      end
+      it 'no Link header gives nil' do
+        request.accept = 'application/ld+json'
+        expect(controller.send(:context_url_from_link)).to eq nil
+      end
+    end
+    context 'jsonld, accept link' do
+      context 'oa dated' do
+        it_behaves_like "parses successfully", "application/ld+json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+      end
+      context 'oa generic' do
+        it_behaves_like "parses successfully", "application/ld+json", Triannon::JsonldContext::OA_CONTEXT_URL
+      end
+      context 'iiif' do
+        it_behaves_like "parses successfully", "application/ld+json", Triannon::JsonldContext::IIIF_CONTEXT_URL
+      end
+    end
+    it 'non-json format gives nil' do
+      request.accept = 'application/x-turtle'
+      request.headers["Link"] = "#{Triannon::JsonldContext::OA_CONTEXT_URL}; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\""
+      expect(controller.send(:context_url_from_link)).to eq nil
+    end
+  end # context_url_from_accept
 end

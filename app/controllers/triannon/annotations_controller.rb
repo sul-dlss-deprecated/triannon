@@ -3,7 +3,7 @@ require_dependency "triannon/application_controller"
 module Triannon
   class AnnotationsController < ApplicationController
     before_action :default_format_jsonld, only: [:show]
-    before_action :set_annotation, only: [:show, :edit, :update, :destroy]
+    before_action :set_annotation, only: [:show, :update, :destroy]
     rescue_from Triannon::ExternalReferenceError, with: :ext_ref_error
 
     # GET /annotations
@@ -13,8 +13,16 @@ module Triannon
 
     # GET /annotations/1
     def show
+      # TODO:  json.set! "@context", Triannon::JsonldContext::OA_DATED_CONTEXT_URL - would this work?
       respond_to do |format|
-        format.jsonld { render_jsonld_per_context (params[:jsonld_context]) }
+        format.jsonld {
+          context_url = context_url_from_accept ? context_url_from_accept : context_url_from_link
+          if context_url && context_url == Triannon::JsonldContext::IIIF_CONTEXT_URL
+            render_jsonld_per_context("iiif", "application/ld+json")
+          else
+            render_jsonld_per_context(params[:jsonld_context], "application/ld+json")
+          end
+        }
         format.ttl {
           accept_return_type = mime_type_from_accept(["application/x-turtle", "text/turtle"])
           render :body => @annotation.graph.to_ttl, content_type: accept_return_type if accept_return_type }
@@ -23,7 +31,13 @@ module Triannon
           render :body => @annotation.graph.to_rdfxml, content_type: accept_return_type if accept_return_type }
         format.json {
           accept_return_type = mime_type_from_accept(["application/json", "text/x-json", "application/jsonrequest"])
-          render_jsonld_per_context(params[:jsonld_context], accept_return_type) }
+          context_url = context_url_from_link ? context_url_from_link : context_url_from_accept
+          if context_url && context_url == Triannon::JsonldContext::IIIF_CONTEXT_URL
+            render_jsonld_per_context("iiif", accept_return_type)
+          else
+            render_jsonld_per_context(params[:jsonld_context], accept_return_type)
+          end
+        }
         format.xml {
           accept_return_type = mime_type_from_accept(["application/xml", "text/xml", "application/x-xml"])
           render :xml => @annotation.graph.to_rdfxml, content_type: accept_return_type if accept_return_type }
@@ -59,10 +73,16 @@ module Triannon
       end
       
       if @annotation.save
-        request.format = "jsonld" if !request.accept || request.accept.size == 0
+        default_format_jsonld # NOTE: this must be here and not in before_filter or we get Missing template errors
         respond_to do |format|
           format.jsonld {
-            render :json => @annotation.jsonld_oa, status: 201, content_type: "application/ld+json", notice: "Annotation #{@annotation.id} was successfully created." }
+            context_url = context_url_from_link ? context_url_from_link : context_url_from_accept
+            if context_url && context_url == Triannon::JsonldContext::IIIF_CONTEXT_URL
+              render :json => @annotation.jsonld_iiif, status: 201, content_type: "application/ld+json", notice: "Annotation #{@annotation.id} was successfully created."
+            else
+              render :json => @annotation.jsonld_oa, status: 201, content_type: "application/ld+json", notice: "Annotation #{@annotation.id} was successfully created."
+            end
+          }
           format.ttl {
             accept_return_type = mime_type_from_accept(["application/x-turtle", "text/turtle"])
             render :body => @annotation.graph.to_ttl, status: 201, notice: "Annotation #{@annotation.id} was successfully created.", content_type: accept_return_type if accept_return_type }
@@ -71,7 +91,13 @@ module Triannon
             render :body => @annotation.graph.to_rdfxml, status: 201, notice: "Annotation #{@annotation.id} was successfully created.", content_type: accept_return_type if accept_return_type }
           format.json {
             accept_return_type = mime_type_from_accept(["application/json", "text/x-json", "application/jsonrequest"])
-            render :json => @annotation.jsonld_oa, status: 201, notice: "Annotation #{@annotation.id} was successfully created.", content_type: accept_return_type if accept_return_type }
+            context_url = context_url_from_link ? context_url_from_link : context_url_from_accept
+            if context_url && context_url == Triannon::JsonldContext::IIIF_CONTEXT_URL
+              render :json => @annotation.jsonld_iiif, status: 201, notice: "Annotation #{@annotation.id} was successfully created.", content_type: accept_return_type if accept_return_type
+            else
+              render :json => @annotation.jsonld_oa, status: 201, notice: "Annotation #{@annotation.id} was successfully created.", content_type: accept_return_type if accept_return_type
+            end
+          }
           format.xml {
             accept_return_type = mime_type_from_accept(["application/xml", "text/xml", "application/x-xml"])
             render :body => @annotation.graph.to_rdfxml, status: 201, notice: "Annotation #{@annotation.id} was successfully created.", content_type: accept_return_type if accept_return_type }
@@ -99,11 +125,12 @@ module Triannon
     end
     
 private
-    # Use callbacks to share common setup or constraints between actions.
+
     def set_annotation
       @annotation = Annotation.find(params[:id])
     end
     
+    # set format to jsonld if it isn't already set
     def default_format_jsonld
       if ((!request.accept || request.accept.empty?) && (!params[:format] || params[:format].empty?))
         request.format = "jsonld"
@@ -114,12 +141,56 @@ private
     def mime_type_from_accept(return_mime_types)
       @mime_type_from_accept ||= begin
         if request.accept && request.accept.is_a?(String)
-          accepted_formats = request.accept.split(',')
-          accepted_formats.each { |accepted_format|
-            if return_mime_types.include? accepted_format
-              return accepted_format
+          accept_mime_types = request.accept.split(',')
+          accept_mime_types.each { |mime_type|
+            mime_str = mime_type.split("; profile=").first.strip
+            if return_mime_types.include? mime_str
+              return mime_str
             end
           }
+        end
+      end
+    end
+
+    # parse the Accept HTTP header for the value of profile if it is a request for jsonld or json
+    # e.g. Accept: application/ld+json; profile="http://www.w3.org/ns/oa-context-20130208.json"
+    # @return [String] url for jsonld @context or nil if missing or non-jsonld/json format
+    def context_url_from_accept
+      if request.format == "jsonld" || request.format == "json"
+        accept_str = request.accept
+        if accept_str && accept_str.split("profile=") && accept_str.split("profile=").last
+          context_url = accept_str.split("profile=").last.strip
+          context_url = context_url[1, context_url.size] if context_url.start_with?('"')
+          context_url = context_url[0, context_url.size-1] if context_url.end_with?('"')
+          case context_url
+            when Triannon::JsonldContext::OA_DATED_CONTEXT_URL, 
+              Triannon::JsonldContext::OA_CONTEXT_URL,
+              Triannon::JsonldContext::IIIF_CONTEXT_URL
+              context_url
+            else
+              nil
+          end
+        end
+      end
+    end
+
+    # parse the Accept HTTP Link for the value of rel if it is a request for jsonld or json
+    # e.g. Link: http://www.w3.org/ns/oa.json; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"
+    # note that the "type" part is optional
+    # @return [String] url for jsonld @context or nil if missing or non-jsonld/json format
+    def context_url_from_link
+      if request.format == "jsonld" || request.format == "json"
+        link_str = request.headers["Link"]
+        if link_str && link_str.split("; rel=") && link_str.split("; rel=").first
+          context_url = link_str.split("; rel=").first.strip
+          case context_url
+            when Triannon::JsonldContext::OA_DATED_CONTEXT_URL,
+              Triannon::JsonldContext::OA_CONTEXT_URL,
+              Triannon::JsonldContext::IIIF_CONTEXT_URL
+              context_url
+            else
+              nil
+          end
         end
       end
     end
@@ -130,7 +201,7 @@ private
     end
     
     # render json_ld respecting requested context
-    # @param [String] req_context set to "iiif" or "oa".  Default is OA
+    # @param [String] req_context set to "iiif" or "oa".  Default is oa
     # @param [String] mime_type the mime type to be set in the Content-Type header of the HTTP response
     def render_jsonld_per_context (req_context, mime_type=nil)
       case req_context
@@ -152,7 +223,7 @@ private
           else
             render :json => @annotation.jsonld_oa
           end
-      end 
+      end
     end
 
   end # class AnnotationsController
