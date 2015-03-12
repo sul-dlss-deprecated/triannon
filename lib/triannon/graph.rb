@@ -94,12 +94,13 @@ module Triannon
 
     # Canned Query methods ----------------------------------------------------------------
   
-    # @return [String] the id of this annotation as a url string
+    # @return [String] the id of this annotation as a url string, or nil if it is a Node
     def id_as_url
       solution = @graph.query self.class.anno_query
       if solution && solution.size == 1
-        solution.first.s.to_s
-      # TODO:  raise exception if not a URI or missing?
+        rdf_resource = solution.first.s
+        rdf_resource.to_s if rdf_resource.is_a?(RDF::URI)
+        # TODO:  raise exception if not a URI?
       end
     end
 

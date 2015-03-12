@@ -244,7 +244,20 @@ describe Triannon::Graph, :vcr do
         expect(my_tg.solr_hash[:anno_jsonld]).to eq my_tg.jsonld_oa
       end
       it "has OA context" do
-        my_tg = Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("body-chars-plain-iiif.json")
+        my_tg = Triannon::Graph.new RDF::Graph.new.from_jsonld '
+          {
+              "@context":"http://iiif.io/api/presentation/2/context.json",
+              "@id": "http://my.cool.anno/id",
+              "@type":"oa:Annotation",
+              "motivation":"oa:commenting",
+              "resource": {
+                "@type":"cnt:ContentAsText",
+                "chars":"I love this!",
+                "format":"text/plain",
+                "language":"en"
+              },
+              "on":"http://purl.stanford.edu/kq131cs7229"
+          }'
         expect(my_tg.solr_hash[:anno_jsonld]).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
         expect(my_tg.solr_hash[:anno_jsonld]).not_to match Triannon::JsonldContext::IIIF_CONTEXT_URL
         my_tg = Triannon::Graph.new RDF::Graph.new.from_ttl Triannon.annotation_fixture("body-chars.ttl")

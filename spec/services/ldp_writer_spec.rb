@@ -136,9 +136,16 @@ describe Triannon::LdpWriter, :vcr do
          <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#bookmarking> .
 
       <http://our.fcrepo.org/anno/body_container> <http://triannon.stanford.edu/ns/externalReference> <http://anno.body.org> .'
-
       my_ldpw = Triannon::LdpWriter.new my_anno
       expect{my_ldpw.create_base}.to raise_error(Triannon::ExternalReferenceError, "Incoming annotations may not have http://triannon.stanford.edu/ns/externalReference as a predicate.")
+    end
+    it "raises Triannon::ExternalReferenceError if incoming anno graph has id for outer node" do
+      my_anno = Triannon::Annotation.new data: '
+      <http://some.org/id> a <http://www.w3.org/ns/oa#Annotation>;
+         <http://www.w3.org/ns/oa#hasTarget> <http://cool.resource.org>;
+         <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#bookmarking> .'
+      my_ldpw = Triannon::LdpWriter.new my_anno
+      expect{my_ldpw.create_base}.to raise_error(Triannon::ExternalReferenceError, "Incoming new annotations may not have an existing id (yet).")
     end
   end # create_base
 

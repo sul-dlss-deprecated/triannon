@@ -12,9 +12,9 @@ Run tests:
 $ rake
 ```
 
-## Installation
+## Installation into Rails app
 
-Add this line to your gemfile
+Add this line to your Rails app gemfile
 
 ```ruby
 gem 'triannon'
@@ -38,7 +38,7 @@ Edit the `config/triannon.yml` file:
 * `solr_url:` Points to the baseurl of Solr instance configured for Triannon
 * `triannon_base_url:` Used as the base url for all annotations hosted by your Triannon server.  Identifiers from the LDP server will be appended to this base-url.  Generally something like "https://your-triannon-rails-box/annotations", as "/annotations" is added to the path by the Triannon gem
 
-Generate the root annotations container on the LDP server
+Generate the root annotations container on your LDP server
 
 ```console
 $ rake triannon:create_root_container
@@ -123,15 +123,24 @@ rake triannon:solr_jetty_setup
 $ rake engine_cart:generate # (first run only)
 ```
 
-##### Configure spec/internal/config/triannon.yml as specified above
+#### Start jetty
 ```console
-$ vi spec/internal/config/triannon.yml
+$ rake jetty:start
 ```
 
 ##### Generate root annotations container
 ```console
+$ cd spec/internal
 $ rake triannon:create_root_container
+$ cd ../..
 ```
+
+##### Configure spec/internal/config/triannon.yml as specified above
+You might not need to change the file.
+```console
+$ vi spec/internal/config/triannon.yml
+```
+
 
 # Run the test app
 ```console
