@@ -58,6 +58,10 @@ module Triannon
         raise Triannon::ExternalReferenceError, "Incoming annotations may not have http://triannon.stanford.edu/ns/externalReference as a predicate."
       end
       
+      if @anno.graph.id_as_url && @anno.graph.id_as_url.size > 0
+        raise Triannon::ExternalReferenceError, "Incoming new annotations may not have an existing id (yet)."
+      end
+
       # TODO:  special case if the Annotation object already has an id -- 
       #  see https://github.com/sul-dlss/triannon/issues/84
       

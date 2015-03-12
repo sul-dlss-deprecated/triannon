@@ -36,6 +36,15 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       expect(response.body).to eql err_msg
     end
     
+    it "renders 403 if incoming anno has existing id" do
+      post :create,
+      '<http://some.org/id> a <http://www.w3.org/ns/oa#Annotation>;
+         <http://www.w3.org/ns/oa#hasTarget> <http://cool.resource.org>;
+         <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#bookmarking> .'
+      expect(response.status).to eq 403
+      expect(response.body).to eql "Incoming new annotations may not have an existing id (yet)."
+    end
+
     context 'HTTP Content-Type header' do
       shared_examples_for 'header matches data' do | header_mimetype, data, from_xxx_method_sym |
         it "#{header_mimetype} specified and provided" do
@@ -77,7 +86,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       }
 
       # json - must be tested differently due to using inline context substitution for jsonld
-      let(:jsonld_data) { Triannon.annotation_fixture("body-chars.json") }
+      let(:jsonld_data) { Triannon.annotation_fixture("body-chars-no-id.json") }
       it "jsonld specified and matches data" do
         g = RDF::Graph.new.from_jsonld jsonld_data
         allow(RDF::Graph).to receive(:new).and_return(g)
@@ -154,7 +163,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
             it_behaves_like "creates anno successfully", Triannon.annotation_fixture("body-chars-generic-context.json")
           end
           context "oa dated uri inline" do
-            it_behaves_like "creates anno successfully", Triannon.annotation_fixture("body-chars.json")
+            it_behaves_like "creates anno successfully", Triannon.annotation_fixture("body-chars-no-id.json")
           end
           context "iiif uri inline" do
             it_behaves_like "creates anno successfully", Triannon.annotation_fixture("body-chars-plain-iiif.json")
@@ -174,7 +183,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
           it "#{mtype}" do
             request.accept = mtype
             request.headers["Content-Type"] = "application/ld+json"
-            post :create, Triannon.annotation_fixture("body-chars.json")
+            post :create, Triannon.annotation_fixture("body-chars-no-id.json")
             expect(response.content_type).to eql(mtype)
             expect(response.body).to match(regex)
             expect(response.body).to match "I love this"
@@ -197,7 +206,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       it "empty string gets json-ld" do
         request.accept = ""
         request.headers["Content-Type"] = "application/ld+json"
-        post :create, Triannon.annotation_fixture("body-chars.json")
+        post :create, Triannon.annotation_fixture("body-chars-no-id.json")
         expect(response.content_type).to eql("application/ld+json")
         expect(response.body).to match json_regex
         expect(response.body).to match "I love this"
@@ -207,7 +216,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       it "nil gets json-ld" do
         request.accept = nil
         request.headers["Content-Type"] = "application/ld+json"
-        post :create, Triannon.annotation_fixture("body-chars.json")
+        post :create, Triannon.annotation_fixture("body-chars-no-id.json")
         expect(response.content_type).to eql("application/ld+json")
         expect(response.body).to match json_regex
         expect(response.body).to match "I love this"
@@ -217,7 +226,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       it "*/* gets json-ld" do
         request.accept = "*/*"
         request.headers["Content-Type"] = "application/ld+json"
-        post :create, Triannon.annotation_fixture("body-chars.json")
+        post :create, Triannon.annotation_fixture("body-chars-no-id.json")
         expect(response.content_type).to eql("application/ld+json")
         expect(response.body).to match json_regex
         expect(response.body).to match "I love this"
@@ -227,7 +236,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       it "html uses view" do
         request.accept = "text/html"
         request.headers["Content-Type"] = "application/ld+json"
-        post :create, Triannon.annotation_fixture("body-chars.json")
+        post :create, Triannon.annotation_fixture("body-chars-no-id.json")
         expect(response.content_type).to eql("text/html")
         expect(response.status).to eql(302) # it's a redirect
         expect(response.body).to match "redirected"
@@ -240,7 +249,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
         it 'uses first known format' do
           request.accept = "application/ld+json, text/x-json, application/json"
           request.headers["Content-Type"] = "application/ld+json"
-          post :create, Triannon.annotation_fixture("body-chars.json")
+          post :create, Triannon.annotation_fixture("body-chars-no-id.json")
           expect(response.content_type).to eql("application/ld+json")
           expect(response.body).to match json_regex
           expect(response.status).to eql(201)

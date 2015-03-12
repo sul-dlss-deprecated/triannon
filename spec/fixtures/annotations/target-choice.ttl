@@ -3,9 +3,7 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
- [
-    a openannotation:Annotation;
-
+ <http://example.org/annos/annotation/target-choice.json> a openannotation:Annotation;
     openannotation:hasBody <http://dbpedia.org/resource/Otto_Ege>;
     openannotation:hasTarget [
       a openannotation:Choice;
@@ -13,11 +11,10 @@
       openannotation:item <http://images.com/large>;
       openannotation:item <http://images.com/huge>
     ];
-    openannotation:motivatedBy openannotation:commenting
- ] .
+    openannotation:motivatedBy openannotation:commenting .
 
- <http://images.com/small> a dcmitype:Image .
+<http://images.com/small> a dcmitype:Image .
 
- <http://images.com/large> a dcmitype:Image .
+<http://images.com/large> a dcmitype:Image .
 
- <http://images.com/huge> a dcmitype:Image .
+<http://images.com/huge> a dcmitype:Image .
