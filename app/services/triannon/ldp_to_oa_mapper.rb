@@ -64,8 +64,8 @@ module Triannon
     # @param [RDF::URI] uri_obj the object that may have RDF::Triannon.externalReference
     # @param [RDF::URI] predicate the predicate for [subject_obj, predicate, (ext_url)] statement
     # to be added to @oa_graph, e.g. RDF::OpenAnnotation.hasTarget
-    # @param [RDF::URI] the subject object to get the predicate statement; defaults to @root_uri
-    # @returns [Boolean] true if it adds statements to @oa_graph, false otherwise
+    # @param [RDF::URI] subject_obj the subject object to get the predicate statement; defaults to @root_uri
+    # @return [Boolean] true if it adds statements to @oa_graph, false otherwise
     def map_external_ref uri_obj, predicate, subject_obj = @root_uri
       solns = @ldp_anno_graph.query [uri_obj, RDF::Triannon.externalReference, nil]
       if solns.count > 0
@@ -90,8 +90,8 @@ module Triannon
     # @param [RDF::URI] uri_obj the object that may type RDF::Content.ContentAsText
     # @param [RDF::URI] predicate the predicate for [subject_obj, predicate, (ext_url)] statement
     # to be added to @oa_graph, e.g. RDF::OpenAnnotation.hasTarget
-    # @param [RDF::URI] the subject object to get the predicate statement; defaults to @root_uri
-    # @returns [Boolean] true if it adds statements to @oa_graph, false otherwise
+    # @param [RDF::URI] subject_obj the subject object to get the predicate statement; defaults to @root_uri
+    # @return [Boolean] true if it adds statements to @oa_graph, false otherwise
     def map_content_as_text uri_obj, predicate, subject_obj = @root_uri
       solns = @ldp_anno_graph.query [uri_obj, RDF.type, RDF::Content.ContentAsText]
       if solns.count > 0
@@ -117,7 +117,7 @@ module Triannon
     # @param [RDF::URI] uri_obj the object that may have type RDF::OpenAnnotation.SpecificResource
     # @param [RDF::URI] predicate the predicate for [@root_uri, predicate, (sel_res)] statement
     # to be added to @oa_graph, e.g. RDF::OpenAnnotation.hasTarget
-    # @returns [Boolean] true if it adds statements to @oa_graph, false otherwise
+    # @return [Boolean] true if it adds statements to @oa_graph, false otherwise
     def map_specific_resource uri_obj, predicate
       solns = @ldp_anno_graph.query [uri_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]
       if solns.count > 0
@@ -170,7 +170,7 @@ module Triannon
     # @param [RDF::URI] uri_obj the object that may have type RDF::OpenAnnotation.Choice
     # @param [RDF::URI] predicate the predicate for [@root_uri, predicate, (choice)] statement
     # to be added to @oa_graph, e.g. RDF::OpenAnnotation.hasTarget
-    # @returns [Boolean] true if it adds statements to @oa_graph, false otherwise
+    # @return [Boolean] true if it adds statements to @oa_graph, false otherwise
     def map_choice uri_obj, predicate
       solns = @ldp_anno_graph.query [uri_obj, RDF.type, RDF::OpenAnnotation.Choice]
       if solns.count > 0

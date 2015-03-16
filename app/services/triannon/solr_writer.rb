@@ -32,7 +32,7 @@ module Triannon
     
     # Delete the document from Solr, retrying if an error occurs.
     # See https://github.com/ooyala/retries for info on with_retries.
-    # @param [String] the id of the solr document to be deleted
+    # @param [String] id the id of the solr document to be deleted
     def delete(id)
       handler = Proc.new do |exception, attempt_cnt, total_delay|
         @logger.debug "#{exception.inspect} on Solr delete attempt #{attempt_cnt} for #{id}"

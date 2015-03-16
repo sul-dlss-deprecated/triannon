@@ -69,7 +69,7 @@ module Triannon
       end
     end
 
-    # @param either a Triannon::Graph or RDF::Graph object
+    # @param g either a Triannon::Graph or RDF::Graph object
     def graph= g
       if g.is_a? Triannon::Graph
         @graph = g

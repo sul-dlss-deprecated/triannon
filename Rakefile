@@ -9,16 +9,6 @@ ZIP_URL = "https://github.com/sul-dlss/hydra-jetty/archive/fedora-4/edge.zip"
 require 'active_support/benchmarkable'
 require 'jettywrapper'
 
-require 'rdoc/task'
-
-RDoc::Task.new(:rdoc) do |rdoc|
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title    = 'Triannon'
-  rdoc.options << '--line-numbers'
-  rdoc.rdoc_files.include('README.rdoc')
-  rdoc.rdoc_files.include('lib/**/*.rb')
-end
-
 require 'engine_cart/rake_task'
 desc 'run the triannon specs'
 task :ci => ['engine_cart:generate', 'jetty:clean'] do
@@ -85,5 +75,45 @@ require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec)
 
 task :default => :ci
+
+
+desc "Generate RDoc with YARD"
+task :doc => ['doc:generate']
+
+namespace :doc do
+  begin
+    require 'yard'
+    require 'yard/rake/yardoc_task'
+
+    YARD::Rake::YardocTask.new(:generate) do |yt|
+      yt.files   =  Dir.glob(File.join('app', '**', '*.rb')) +
+                    Dir.glob(File.join('lib', '*.rb')) +
+                    Dir.glob(File.join('lib', '**', '*.rb'))
+
+      yt.options = ['--output-dir', 'rdoc', '--readme', 'README.md', '--files', 'LICENSE',
+                    '--protected', '--private', '--title', 'Triannon', '--exclude', 'triannon_vocab']
+    end
+  rescue LoadError
+    desc "Generate RDoc with YARD"
+    task :generate do
+      abort "Please install the YARD gem to generate rdoc."
+    end
+  end
+
+  desc "Remove generated documenation"
+  task :clean do
+    rm_r 'rdoc' if File.exists?('rdoc')
+  end
+end
+
+require 'rdoc/task'
+
+RDoc::Task.new(:rdoc) do |rdoc|
+  rdoc.rdoc_dir = 'rdoc'
+  rdoc.title    = 'Triannon'
+  rdoc.options << '--line-numbers'
+  rdoc.rdoc_files.include('README.rdoc')
+  rdoc.rdoc_files.include('lib/**/*.rb')
+end
 
 Bundler::GemHelper.install_tasks
