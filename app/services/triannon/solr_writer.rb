@@ -11,7 +11,7 @@ module Triannon
     
     # Add the document to Solr, retrying if an error occurs.
     # See https://github.com/ooyala/retries for info on with_retries.
-    # @param [Hash] doc a Hash representation of the solr document to be added
+    # @param [Hash] doc a Hash representation of the Solr document to be added
     def add(doc)
       id = doc[:id]
 
@@ -32,7 +32,7 @@ module Triannon
     
     # Delete the document from Solr, retrying if an error occurs.
     # See https://github.com/ooyala/retries for info on with_retries.
-    # @param [String] id the id of the solr document to be deleted
+    # @param [String] id the id of the Solr document to be deleted
     def delete(id)
       handler = Proc.new do |exception, attempt_cnt, total_delay|
         @logger.debug "#{exception.inspect} on Solr delete attempt #{attempt_cnt} for #{id}"
