@@ -1,6 +1,6 @@
 module Triannon
   class SolrSearcher
-    
+
     # convert RSolr::Response object into an array of RDF::Graph objects,
     #   where each graph object contains a single annotation returned in the response docs
     # @param [Hash] rsolr_response an RSolr response to a query.  It's actually an
@@ -9,7 +9,7 @@ module Triannon
     def self.anno_graphs_array(rsolr_response)
       result = []
       # TODO: deal with Solr pagination
-      rsolr_response['response']['docs'].each { |solr_doc_hash|  
+      rsolr_response['response']['docs'].each { |solr_doc_hash|
         result << Triannon::Graph.new(RDF::Graph.new.from_jsonld(solr_doc_hash['anno_jsonld']))
       }
       result
