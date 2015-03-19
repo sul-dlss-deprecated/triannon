@@ -22,6 +22,9 @@ describe Triannon::AnnotationsController, type: :routing do
       it '/annotation/OA/:id (GET) should not be available' do
         expect(:get => "/annotations/OA/666").to_not be_routable
       end
+      it '/annotation/search/:id (GET) should not be available' do
+        expect(:get => "/annotations/search/666").to_not be_routable
+      end
       it '/annotation/foo/:id (GET) should not be available' do
         expect(:get => "/annotations/foo/666").to_not be_routable
       end
@@ -77,6 +80,9 @@ describe Triannon::AnnotationsController, type: :routing do
     it 'oa should not be available' do
       expect(:get => "/annotations/oa/new").to_not be_routable
     end
+    it 'search should not be available' do
+      expect(:get => "/annotations/search/new").to_not be_routable
+    end
   end
   
   context 'http POST' do
@@ -127,6 +133,41 @@ describe Triannon::AnnotationsController, type: :routing do
     end
     it 'oa should not be available' do
       expect(:patch => "/annotations/oa/666").to_not be_routable
+    end
+  end
+
+  context '/search' do
+    it "/annotations/search?params (GET) routes to #find in search controller with params" do
+      expect(:get => "/annotations/search?target=neato.url.org").to route_to(:controller => "triannon/search", :action => "find", :target => "neato.url.org", )
+      expect(:get => "/annotations/search?foo=bar").to route_to(:controller => "triannon/search", :action => "find", :foo => "bar", )
+      expect(:get => "/annotations/search").to route_to(:controller => "triannon/search", :action => "find" )
+    end
+    it "/search?params (GET) routes to #find in search controller with params" do
+      expect(:get => "/search?target=neato.url.org").to route_to(:controller => "triannon/search", :action => "find", :target => "neato.url.org", )
+      expect(:get => "/search?foo=bar").to route_to(:controller => "triannon/search", :action => "find", :foo => "bar", )
+    end
+    it "should not take an id" do
+      expect(:get => "/annotations/search/666").to_not be_routable
+      expect(:get => "/search/666").to_not be_routable
+    end
+    it "http POST should not be available" do
+      expect(:post => "/annotations/search").to_not be_routable
+      expect(:post => "/search").to_not be_routable
+    end
+    it "http DELETE should not be available" do
+      expect(:delete => "/annotations/search").to_not be_routable
+      expect(:delete => "/search").to_not be_routable
+      expect(:delete => "/annotations/search/666").to_not be_routable
+    end
+    it "http PUT should not be available" do
+      expect(:put => "/annotations/search").to_not be_routable
+      expect(:put => "/search").to_not be_routable
+      expect(:put => "/annotations/search/666").to_not be_routable
+    end
+    it "http PATCH should not be available" do
+      expect(:patch => "/annotations/search").to_not be_routable
+      expect(:patch => "/search").to_not be_routable
+      expect(:patch => "/annotations/search/666").to_not be_routable
     end
   end
 
