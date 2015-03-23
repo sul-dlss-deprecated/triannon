@@ -22,7 +22,7 @@ describe "integration tests for Solr", :vcr do
 
   context 'writes to Solr' do
     it "all fields in Solr doc" do
-      write_solr_hash = write_anno.graph.solr_hash
+      write_solr_hash = Triannon::SolrWriter.solr_hash write_anno.graph
       expect(write_solr_hash.size).to be > 6
       anno_id = write_anno.save
       sleep(1) # give solr time to commit

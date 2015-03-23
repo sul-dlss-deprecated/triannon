@@ -237,25 +237,25 @@ describe Triannon::Annotation, :vcr do
       Triannon::Annotation.find id
     }
     let(:solr_writer) { my_bookmark_anno.send(:solr_writer) }
-    it "calls solr_hash on graph" do
+    it "calls SolrWriter.solr_hash with triannon graph" do
       # TODO: this will move to solr_writer.add call (which will take Triannon::Graph as arg)
-      expect(my_bookmark_anno.graph).to receive(:solr_hash)
+      expect(Triannon::SolrWriter).to receive(:solr_hash).with(my_bookmark_anno.graph)
       allow(solr_writer).to receive(:add)
       my_bookmark_anno.send(:solr_save)
     end
     it "calls SolrWriter.add with solr_hash" do
       fake_solr_hash = {:id => 'test'}
-      allow(my_bookmark_anno.graph).to receive(:solr_hash).and_return(fake_solr_hash)
+      allow(Triannon::SolrWriter).to receive(:solr_hash).with(my_bookmark_anno.graph).and_return(fake_solr_hash)
       expect(solr_writer).to receive(:add).with(fake_solr_hash)
       my_bookmark_anno.send(:solr_save)
     end
     it "does not call SolrWriter.add when solr_hash is empty" do
-      allow(bookmark_anno.graph).to receive(:solr_hash).and_return({})
+      allow(Triannon::SolrWriter).to receive(:solr_hash).with(my_bookmark_anno.graph).and_return({})
       expect(solr_writer).not_to receive(:add)
-      bookmark_anno.send(:solr_save)
+      my_bookmark_anno.send(:solr_save)
     end
     it "raises exception when Solr add is not successful" do
-      allow(my_bookmark_anno.graph).to receive(:solr_hash).and_return({:id => 'test'})
+      allow(Triannon::SolrWriter).to receive(:solr_hash).with(my_bookmark_anno.graph).and_return({:id => 'test'})
       allow(solr_writer).to receive(:add).and_raise(RuntimeError)
       expect { my_bookmark_anno.send(:solr_save) }.to raise_error
     end
