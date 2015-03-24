@@ -87,6 +87,8 @@ Note that OA (Open Annotation) is the default context if none is specified.
 ### Create an anno
 `POST`: `http://(host)/annotations`
 * the body of the HTTP request should contain the annotation, as jsonld, turtle, or rdfxml
+  * Wrap the annotation in an object, as such:
+  * `{ "commit" => "Create Annotation", "annotation" => { "data" => oa_jsonld } }`
 * the `Content-Type` header should be the mime type matching the body
 * the anno to be created should NOT already have an assigned @id
 * to get a particular format back, use the HTTP `Accept` header
