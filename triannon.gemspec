@@ -34,4 +34,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "webmock"
   s.add_development_dependency "coveralls"
   s.add_development_dependency "yard" # for documentation
+  s.add_development_dependency "rest-client", "~> 1.7.2" # for caching jsonld context docs
+  s.add_development_dependency "rest-client-components" # for caching jsonld context docs
+  s.add_development_dependency "rack-cache" # for caching jsonld context docs
 end
