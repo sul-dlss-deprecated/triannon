@@ -170,6 +170,11 @@ describe Triannon::Annotation, :vcr do
       anno_id = bookmark_anno.save
       expect(bookmark_anno.id).to eq anno_id
     end
+    it "reloads graph from storage to ensure id is in the graph" do
+      expect(Triannon::LdpLoader).to receive(:load).and_call_original
+      anno_id = bookmark_anno.save
+      expect(bookmark_anno.graph.id_as_url).to match bookmark_anno.id
+    end
     it "calls solr_save method after successful save to LDP Store" do
       # test to make sure callback logic implemented properly in model
       expect(bookmark_anno).to receive(:solr_save)
@@ -192,7 +197,7 @@ describe Triannon::Annotation, :vcr do
       expect(bookmark_anno.save).to be_falsey
     end
     it "returns false if graph size is 0" do
-      allow(bookmark_anno).to receive(:graph).and_return(RDF::Graph.new)
+      allow(bookmark_anno).to receive(:graph).and_return(Triannon::Graph.new RDF::Graph.new)
       expect(bookmark_anno.save).to be_falsey
     end
   end
@@ -227,43 +232,32 @@ describe Triannon::Annotation, :vcr do
 
   context '#solr_save' do
     let(:my_bookmark_anno) {
+      # make sure we have id for anno
       id = bookmark_anno.save
       Triannon::Annotation.find id
     }
-    let(:solr_writer) { bookmark_anno.send(:solr_writer) }
-    it "calls Triannon::LdpLoader.load" do
+    let(:solr_writer) { my_bookmark_anno.send(:solr_writer) }
+    it "calls solr_hash on graph" do
+      # TODO: this will move to solr_writer.add call (which will take Triannon::Graph as arg)
+      expect(my_bookmark_anno.graph).to receive(:solr_hash)
       allow(solr_writer).to receive(:add)
-      expect(Triannon::LdpLoader).to receive(:load).with(my_bookmark_anno.id).and_call_original
-      bookmark_anno.send(:solr_save)
-    end
-    it "calls solr_hash on triannon graph returned from LdpLoader" do
-      tg = double("triannon_graph")
-      allow(Triannon::LdpLoader).to receive(:load).with(my_bookmark_anno.id).and_return(tg)
-      allow(solr_writer).to receive(:add)
-      expect(tg).to receive(:solr_hash)
-      bookmark_anno.send(:solr_save)
+      my_bookmark_anno.send(:solr_save)
     end
     it "calls SolrWriter.add with solr_hash" do
-      tg = double("triannon_graph")
-      allow(Triannon::LdpLoader).to receive(:load).with(my_bookmark_anno.id).and_return(tg)
       fake_solr_hash = {:id => 'test'}
-      allow(tg).to receive(:solr_hash).and_return(fake_solr_hash)
+      allow(my_bookmark_anno.graph).to receive(:solr_hash).and_return(fake_solr_hash)
       expect(solr_writer).to receive(:add).with(fake_solr_hash)
-      bookmark_anno.send(:solr_save)
+      my_bookmark_anno.send(:solr_save)
     end
     it "does not call SolrWriter.add when solr_hash is empty" do
-      tg = double("triannon_graph")
-      allow(Triannon::LdpLoader).to receive(:load).with(my_bookmark_anno.id).and_return(tg)
-      allow(tg).to receive(:solr_hash).and_return({})
+      allow(bookmark_anno.graph).to receive(:solr_hash).and_return({})
       expect(solr_writer).not_to receive(:add)
       bookmark_anno.send(:solr_save)
     end
     it "raises exception when Solr add is not successful" do
-      tg = double("triannon_graph")
-      allow(Triannon::LdpLoader).to receive(:load).with(my_bookmark_anno.id).and_return(tg)
-      allow(tg).to receive(:solr_hash).and_return({:id => 'test'})
+      allow(my_bookmark_anno.graph).to receive(:solr_hash).and_return({:id => 'test'})
       allow(solr_writer).to receive(:add).and_raise(RuntimeError)
-      expect { bookmark_anno.send(:solr_save) }.to raise_error
+      expect { my_bookmark_anno.send(:solr_save) }.to raise_error
     end
   end
   

@@ -26,23 +26,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"83bef618f16399b862cf4e6ac472298f0736f4e6"'
+      - '"ddd6b8738ae930551ecb51f5e06250a36806d6e1"'
       Last-Modified:
-      - Thu, 12 Mar 2015 21:19:04 GMT
+      - Wed, 25 Mar 2015 22:04:23 GMT
       Content-Length:
       - '75'
       Location:
-      - http://localhost:8983/fedora/rest/anno/862ed336-773c-4c1b-a918-de8f4be10807
+      - http://localhost:8983/fedora/rest/anno/92707864-e518-48fe-8780-ff2819f88fac
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/862ed336-773c-4c1b-a918-de8f4be10807
+      string: http://localhost:8983/fedora/rest/anno/92707864-e518-48fe-8780-ff2819f88fac
     http_version: 
-  recorded_at: Thu, 12 Mar 2015 21:19:04 GMT
+  recorded_at: Wed, 25 Mar 2015 22:04:23 GMT
 - request:
     method: get
-    uri: http://localhost:8983/fedora/rest/anno/862ed336-773c-4c1b-a918-de8f4be10807
+    uri: http://localhost:8983/fedora/rest/anno/92707864-e518-48fe-8780-ff2819f88fac
     body:
       encoding: US-ASCII
       string: ''
@@ -59,9 +59,9 @@ http_interactions:
       message: OK
     headers:
       Etag:
-      - '"83bef618f16399b862cf4e6ac472298f0736f4e6"'
+      - '"ddd6b8738ae930551ecb51f5e06250a36806d6e1"'
       Last-Modified:
-      - Thu, 12 Mar 2015 21:19:04 GMT
+      - Wed, 25 Mar 2015 22:04:23 GMT
       Link:
       - <http://www.w3.org/ns/ldp#DirectContainer>;rel="type"
       - <http://www.w3.org/ns/ldp#Resource>;rel="type"
@@ -93,30 +93,31 @@ http_interactions:
         .\n@prefix triannon: <http://triannon.stanford.edu/ns/> .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         .\n@prefix fedora: <http://fedora.info/definitions/v4/rest-api#> .\n@prefix
         ldp: <http://www.w3.org/ns/ldp#> .\n@prefix xs: <http://www.w3.org/2001/XMLSchema>
-        .\n@prefix dc: <http://purl.org/dc/elements/1.1/> .\n\n\n<http://localhost:8983/fedora/rest/anno/862ed336-773c-4c1b-a918-de8f4be10807>
-        ldp:hasMemberRelation ldp:member ;\n\tldp:membershipResource <http://localhost:8983/fedora/rest/anno/862ed336-773c-4c1b-a918-de8f4be10807>
-        ;\n\ta ldp:Container , ldp:DirectContainer , ldp:RDFSource ;\n\tfcrepo:hasParent
-        <http://localhost:8983/fedora/rest/anno> ;\n\tfedora:writable \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>
-        .\n\n<http://localhost:8983/fedora/rest/anno/862ed336-773c-4c1b-a918-de8f4be10807/fcr:export?format=jcr/xml>
+        .\n@prefix dc: <http://purl.org/dc/elements/1.1/> .\n\n\n<http://localhost:8983/fedora/rest/anno/92707864-e518-48fe-8780-ff2819f88fac>
+        ldp:membershipResource <http://localhost:8983/fedora/rest/anno/92707864-e518-48fe-8780-ff2819f88fac>
+        ;\n\tldp:hasMemberRelation ldp:member ;\n\ta ldp:Container , ldp:DirectContainer
+        , ldp:RDFSource ;\n\tfcrepo:hasParent <http://localhost:8983/fedora/rest/anno>
+        ;\n\tfedora:writable \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>
+        ;\n\tfedora:exportsAs <http://localhost:8983/fedora/rest/anno/92707864-e518-48fe-8780-ff2819f88fac/fcr:export?format=jcr/xml>
+        .\n\n<http://localhost:8983/fedora/rest/anno/92707864-e518-48fe-8780-ff2819f88fac/fcr:export?format=jcr/xml>
         dc:format <http://fedora.info/definitions/v4/repository#jcr/xml> .\n\n<http://fedora.info/definitions/v4/repository#jcr/xml>
-        rdfs:label \"jcr/xml\"^^<http://www.w3.org/2001/XMLSchema#string> .\n\n<http://localhost:8983/fedora/rest/anno/862ed336-773c-4c1b-a918-de8f4be10807>
-        fedora:exportsAs <http://localhost:8983/fedora/rest/anno/862ed336-773c-4c1b-a918-de8f4be10807/fcr:export?format=jcr/xml>
-        ;\n\ta <http://www.jcp.org/jcr/nt/1.0folder> , <http://www.jcp.org/jcr/nt/1.0hierarchyNode>
+        rdfs:label \"jcr/xml\"^^<http://www.w3.org/2001/XMLSchema#string> .\n\n<http://localhost:8983/fedora/rest/anno/92707864-e518-48fe-8780-ff2819f88fac>
+        a <http://www.jcp.org/jcr/nt/1.0folder> , <http://www.jcp.org/jcr/nt/1.0hierarchyNode>
         , <http://www.jcp.org/jcr/nt/1.0base> , <http://www.jcp.org/jcr/mix/1.0created>
         , openannotation:Annotation , fedora:resource , fedora:object , fedora:relations
         , <http://www.jcp.org/jcr/mix/1.0created> , <http://www.jcp.org/jcr/mix/1.0lastModified>
         , <http://www.jcp.org/jcr/mix/1.0referenceable> , fedora:DublinCoreDescribable
         , fedora:resource , ldp:Container ;\n\tfcrepo:lastModifiedBy \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
-        ;\n\tfcrepo:uuid \"2edac98c-07d0-48ee-9d98-2b344f77b683\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfcrepo:uuid \"ec5422a1-4bcd-4cf8-bffd-df9c64cc7f84\"^^<http://www.w3.org/2001/XMLSchema#string>
         ;\n\tfcrepo:createdBy \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
         ;\n\tfcrepo:primaryType \"nt:folder\"^^<http://www.w3.org/2001/XMLSchema#string>
-        ;\n\tfcrepo:created \"2015-03-12T21:19:04.436Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
-        ;\n\tfcrepo:lastModified \"2015-03-12T21:19:04.436Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\tfcrepo:created \"2015-03-25T22:04:23.698Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\tfcrepo:lastModified \"2015-03-25T22:04:23.698Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
         ;\n\tfcrepo:mixinTypes \"openannotation:Annotation\"^^<http://www.w3.org/2001/XMLSchema#string>
         , \"fedora:resource\"^^<http://www.w3.org/2001/XMLSchema#string> , \"fedora:object\"^^<http://www.w3.org/2001/XMLSchema#string>
         ;\n\topenannotation:motivatedBy openannotation:commenting .\n"
     http_version: 
-  recorded_at: Thu, 12 Mar 2015 21:19:04 GMT
+  recorded_at: Wed, 25 Mar 2015 22:04:23 GMT
 - request:
     method: get
     uri: http://www.w3.org/ns/oa-context-20130208.json
@@ -140,7 +141,7 @@ http_interactions:
       message: Temporary Redirect
     headers:
       Date:
-      - Thu, 12 Mar 2015 21:19:04 GMT
+      - Wed, 25 Mar 2015 22:04:23 GMT
       Server:
       - Apache/2
       Location:
@@ -148,7 +149,7 @@ http_interactions:
       Cache-Control:
       - max-age=21600
       Expires:
-      - Fri, 13 Mar 2015 03:19:04 GMT
+      - Thu, 26 Mar 2015 04:04:23 GMT
       Content-Length:
       - '240'
       Content-Type:
@@ -164,7 +165,7 @@ http_interactions:
         <p>The document has moved <a href="http://www.w3.org/ns/oa.jsonld">here</a>.</p>
         </body></html>
     http_version: 
-  recorded_at: Thu, 12 Mar 2015 21:19:04 GMT
+  recorded_at: Wed, 25 Mar 2015 22:04:23 GMT
 - request:
     method: get
     uri: http://www.w3.org/ns/oa.jsonld
@@ -188,7 +189,7 @@ http_interactions:
       message: OK
     headers:
       Date:
-      - Thu, 12 Mar 2015 21:19:04 GMT
+      - Wed, 25 Mar 2015 22:04:23 GMT
       Server:
       - Apache/2
       Last-Modified:
@@ -202,7 +203,7 @@ http_interactions:
       Cache-Control:
       - max-age=21600
       Expires:
-      - Fri, 13 Mar 2015 03:19:04 GMT
+      - Thu, 26 Mar 2015 04:04:23 GMT
       P3p:
       - policyref="http://www.w3.org/2014/08/p3p.xml"
       Content-Type:
@@ -1318,5 +1319,5 @@ http_interactions:
 
 
     http_version: 
-  recorded_at: Thu, 12 Mar 2015 21:19:05 GMT
+  recorded_at: Wed, 25 Mar 2015 22:04:24 GMT
 recorded_with: VCR 2.9.3

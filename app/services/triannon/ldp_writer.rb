@@ -34,8 +34,10 @@ module Triannon
     #  May be a compound id, such as  uuid1/t/uuid2, in which case the LDP container object uuid2 and its children
     #  are deleted from the LDP store, but LDP containers  uuid1/t  and uuid1  are not deleted from the LDP store.
     def self.delete_container id
-      ldpw = Triannon::LdpWriter.new nil
-      ldpw.delete_containers id
+      if id && id.size > 0
+        ldpw = Triannon::LdpWriter.new nil
+        ldpw.delete_containers id
+      end
     end
     
     class << self
@@ -101,6 +103,7 @@ module Triannon
     #  e.g. [@base_uri/(uuid1)/t/(uuid2), @base_uri/(uuid1)/t/(uuid3)] or [@base_uri/(uuid)] or (uuid)
     # @return true if a resource was deleted;  false otherwise
     def delete_containers ldp_container_uris
+      return false if !ldp_container_uris || ldp_container_uris.empty?
       if ldp_container_uris.kind_of? String
         ldp_container_uris = [ldp_container_uris]
       end
@@ -126,6 +129,7 @@ module Triannon
     #   or (anno_id)/b for a body resource (inside the body container of anno_id)
     # @return [String] uuid representing the unique id of the newly created LDP container
     def create_resource ttl, parent_path = nil
+      return if !ttl || ttl.empty?
       resp = conn.post do |req|
         req.url parent_path if parent_path
         req.headers['Content-Type'] = 'application/x-turtle'
