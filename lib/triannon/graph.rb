@@ -47,50 +47,7 @@ module Triannon
       hash_from_json = JSON.parse(inline_context)
       hash_from_json["@context"] = Triannon::JsonldContext::IIIF_CONTEXT_URL
       hash_from_json.to_json
-    end
-
-    # DO NOT CALL before anno is stored.
-    # The graph should have an assigned url for the @id of the root;  it shouldn't be a blank node
-    # @return [Hash] a hash to be written to Solr, populated appropriately
-    def solr_hash
-      doc_hash = {}
-      triannon_id = id_as_url
-      if triannon_id
-        # chars in Solr/Lucene query syntax are a big pain in Solr id fields, so we only use
-        # the uuid portion of the Triannon anno id, not the full url
-        solr_id = triannon_id.sub(Triannon.config[:triannon_base_url], "")
-        doc_hash[:id] = solr_id.sub(/^\//, "") # remove first char slash if it is there
-
-        # use short strings for motivation field
-        doc_hash[:motivation] = motivated_by.map { |m| m.sub(RDF::OpenAnnotation.to_s, "") }
-
-        # date field format: 1995-12-31T23:59:59Z; or w fractional seconds: 1995-12-31T23:59:59.999Z
-        if annotated_at
-          begin
-            dt = Time.parse(annotated_at)
-            doc_hash[:annotated_at] = dt.iso8601 if dt
-          rescue ArgumentError
-            # ignore invalid datestamps
-          end
-        end
-        #doc_hash[:annotated_by_stem] # not yet implemented
-
-        doc_hash[:target_url] = predicate_urls RDF::OpenAnnotation.hasTarget
-        # TODO: recognize more target types
-        doc_hash[:target_type] = ['external_URI'] if doc_hash[:target_url].size > 0
-
-        doc_hash[:body_url] = predicate_urls RDF::OpenAnnotation.hasBody
-        doc_hash[:body_type] = []
-        doc_hash[:body_type] << 'external_URI' if doc_hash[:body_url].size > 0
-        doc_hash[:body_chars_exact] = body_chars.map {|bc| bc.strip}
-        doc_hash[:body_type] << 'content_as_text' if doc_hash[:body_chars_exact].size > 0
-        doc_hash[:body_type] << 'no_body' if doc_hash[:body_type].size == 0
-
-        doc_hash[:anno_jsonld] = jsonld_oa
-      end
-      doc_hash
-    end
-    
+    end    
 
     # Canned Query methods ----------------------------------------------------------------
   

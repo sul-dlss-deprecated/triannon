@@ -69,7 +69,7 @@ module Triannon
       end
     end
 
-    # @param either a Triannon::Graph or RDF::Graph object
+    # @param g either a Triannon::Graph or RDF::Graph object
     def graph= g
       if g.is_a? Triannon::Graph
         @graph = g
@@ -102,8 +102,7 @@ protected
 
     # Add annotation to Solr as a Solr document
     def solr_save
-      solr_hash = graph.solr_hash if graph && graph.id_as_url
-      solr_writer.add(solr_hash) if solr_hash && solr_hash.size > 0
+      solr_writer.write(graph) if graph && graph.id_as_url && !graph.id_as_url.empty?
     end
 
     # Delete annotation from Solr
