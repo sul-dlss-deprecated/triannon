@@ -43,9 +43,12 @@ module Triannon
 
     def save
       _run_save_callbacks do
-        # check if valid?
-        graph
+        # TODO: check if valid anno?
         @id = Triannon::LdpWriter.create_anno self if graph && graph.size > 2
+        # reload from storage to get the anno id within the graph
+        # TODO:  do graph manipulation to add id instead?
+        @graph = Triannon::LdpLoader.load id
+        id
       end
     end
 
@@ -99,10 +102,7 @@ protected
 
     # Add annotation to Solr as a Solr document
     def solr_save
-      # to be certain we are in sync, and to get the anno id within the graph, reload 
-      # the graph from Trianon storage
-      graph_from_storage = Triannon::LdpLoader.load id
-      solr_hash = graph_from_storage.solr_hash
+      solr_hash = graph.solr_hash if graph && graph.id_as_url
       solr_writer.add(solr_hash) if solr_hash && solr_hash.size > 0
     end
 

@@ -92,8 +92,8 @@ module Triannon
     # @return [Array<RDF::Statements>] the RDF statements represented in the ttl 
     def statements_from_ttl_minus_fedora ttl
       # RDF::Turtle::Reader.new(ttl).statements.to_a
-      g = RDF::Graph.new.from_ttl(ttl)
-      RDF::FCRepo4.remove_fedora_triples(g).statements
+      g = RDF::Graph.new.from_ttl(ttl) if ttl
+      RDF::FCRepo4.remove_fedora_triples(g).statements if g
     end
 
     def conn
