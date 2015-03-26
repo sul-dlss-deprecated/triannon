@@ -55,7 +55,15 @@ module Triannon
       @base_sleep_seconds = Triannon.config[:base_sleep_seconds] || 1
       @max_sleep_seconds = Triannon.config[:max_sleep_seconds] || 5
     end
-    
+
+    # Convert the Triannon::Graph to a Solr document hash, then call RSolr.add
+    #  with the doc hash
+    # @param [Triannon::Graph] tgraph anno represented as a Triannon::Graph
+    def write(tgraph)
+      doc_hash = self.class.solr_hash(tgraph) if tgraph && !tgraph.id_as_url.empty?
+      add(doc_hash) if doc_hash && !doc_hash.empty?
+    end
+
     # Add the document to Solr, retrying if an error occurs.
     # See https://github.com/ooyala/retries for info on with_retries.
     # @param [Hash] doc a Hash representation of the Solr document to be added

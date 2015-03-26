@@ -13,6 +13,48 @@ describe Triannon::SolrWriter, :vcr do
     allow(Triannon::SolrWriter.new).to receive("@client").and_return(rsolr_client)
     Triannon::SolrWriter.new
   }
+  
+  context '#write' do
+    let(:uuid) {"814b0225-bd48-4de9-a724-a72a9fa86c18"}
+    let(:base_url) {"https://triannon-dev.stanford.edu/annotations/"}
+    let(:tg) {Triannon::Graph.new RDF::Graph.new.from_ttl "
+     <#{base_url}#{uuid}> a <http://www.w3.org/ns/oa#Annotation>;
+       <http://www.w3.org/ns/oa#annotatedAt> \"2015-01-07T18:01:21Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+       <http://www.w3.org/ns/oa#hasTarget> <http://searchworks.stanford.edu/view/666>;
+       <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#bookmarking> ." }
+    it "calls .solr_hash for tgraph param" do
+      expect(Triannon::SolrWriter).to receive(:solr_hash).with(tg)
+      solr_writer.write(tg)
+    end
+    it "does NOT call solr_hash if tgraph param is nil" do
+      expect(Triannon::SolrWriter).not_to receive(:solr_hash)
+      solr_writer.write(nil)
+    end
+    it "does NOT call solr_hash if tgraph.id_as_url is nil" do
+      expect(Triannon::SolrWriter).not_to receive(:solr_hash)
+      my_tg = Triannon::Graph.new RDF::Graph.new.from_ttl "
+         <> a <http://www.w3.org/ns/oa#Annotation>;
+           <http://www.w3.org/ns/oa#annotatedAt> \"2015-01-07T18:01:21Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+           <http://www.w3.org/ns/oa#hasTarget> <http://searchworks.stanford.edu/view/666>;
+           <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#bookmarking> ."
+      solr_writer.write(my_tg)
+    end
+    it "calls #add" do
+      expect(solr_writer).to receive(:add).with(Triannon::SolrWriter.solr_hash(tg))
+      solr_writer.write(tg)
+    end
+    it "does NOT call #add if doc hash is nil" do
+      expect(solr_writer).not_to receive(:add)
+      allow(Triannon::SolrWriter).to receive(:solr_hash).with(tg).and_return(nil)
+      solr_writer.write(tg)
+    end
+    it "does NOT call #add if doc hash is empty" do
+      expect(solr_writer).not_to receive(:add)
+      allow(Triannon::SolrWriter).to receive(:solr_hash).with(tg).and_return({})
+      solr_writer.write(tg)
+    end
+  end
+  
   context '#add' do
     it "calls RSolr::Client.add with hash and commitWithin=500" do      
       doc_hash = {:id => '666'}

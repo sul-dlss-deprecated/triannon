@@ -237,22 +237,19 @@ describe Triannon::Annotation, :vcr do
       Triannon::Annotation.find id
     }
     let(:solr_writer) { my_bookmark_anno.send(:solr_writer) }
-    it "calls SolrWriter.solr_hash with triannon graph" do
-      # TODO: this will move to solr_writer.add call (which will take Triannon::Graph as arg)
-      expect(Triannon::SolrWriter).to receive(:solr_hash).with(my_bookmark_anno.graph)
-      allow(solr_writer).to receive(:add)
+    it "calls SolrWriter write with triannon graph" do
+      expect(solr_writer).to receive(:write).with(my_bookmark_anno.graph)
       my_bookmark_anno.send(:solr_save)
     end
-    it "calls SolrWriter.add with solr_hash" do
-      fake_solr_hash = {:id => 'test'}
-      allow(Triannon::SolrWriter).to receive(:solr_hash).with(my_bookmark_anno.graph).and_return(fake_solr_hash)
-      expect(solr_writer).to receive(:add).with(fake_solr_hash)
-      my_bookmark_anno.send(:solr_save)
+    it "does NOT call SolrWriter write when graph is nil" do
+      expect(bookmark_anno.graph.id_as_url).to eq nil
+      expect(solr_writer).not_to receive(:write)
+      bookmark_anno.send(:solr_save)
     end
-    it "does not call SolrWriter.add when solr_hash is empty" do
-      allow(Triannon::SolrWriter).to receive(:solr_hash).with(my_bookmark_anno.graph).and_return({})
-      expect(solr_writer).not_to receive(:add)
-      my_bookmark_anno.send(:solr_save)
+    it "does NOT call SolrWriter write when graph has no id" do
+      allow(bookmark_anno.graph).to receive(:id_as_url).and_return("")
+      expect(solr_writer).not_to receive(:write)
+      bookmark_anno.send(:solr_save)
     end
     it "raises exception when Solr add is not successful" do
       allow(Triannon::SolrWriter).to receive(:solr_hash).with(my_bookmark_anno.graph).and_return({:id => 'test'})
