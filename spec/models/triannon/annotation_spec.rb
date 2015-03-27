@@ -9,38 +9,6 @@ describe Triannon::Annotation, :vcr do
     expect(bookmark_anno.graph).to be_a_kind_of Triannon::Graph
   end
 
-  context 'json_ld replaces context url with inline context' do
-    before(:each) do
-      @json_b4_url = "{
-                        \"@context\"  :     \""
-      @json_after_url = "\"   ,
-                        \"@id\": \"http://example.org/annos/annotation/foo.json\",
-                        \"@type\": \"oa:Annotation\",
-                        \"motivatedBy\": \"oa:bookmarking\",
-                        \"hasTarget\": \"http://purl.stanford.edu/kq131cs7229\"
-                      }"
-      @oa_inline_context = File.read "lib/triannon/oa_context_20130208.json"
-    end
-    it "Triannon::JsonldContext::OA_DATED_CONTEXT_URL as url" do
-      data_w_url = @json_b4_url + Triannon::JsonldContext::OA_DATED_CONTEXT_URL + @json_after_url
-      anno = Triannon::Annotation.new data: data_w_url
-      anno.send(:json_ld)
-      expect(anno.data).to include(@oa_inline_context)
-    end
-    it "Triannon::JsonldContext::OA_CONTEXT_URL as url" do
-      data_w_url = @json_b4_url + Triannon::JsonldContext::OA_CONTEXT_URL + @json_after_url
-      anno = Triannon::Annotation.new data: data_w_url
-      anno.send(:json_ld)
-      expect(anno.data).to include(@oa_inline_context)
-    end
-    it "Triannon::JsonldContext::IIIF_CONTEXT_URL as url" do
-      data_w_url = @json_b4_url + Triannon::JsonldContext::IIIF_CONTEXT_URL + @json_after_url
-      anno = Triannon::Annotation.new data: data_w_url
-      anno.send(:json_ld)
-      expect(anno.data).to include(File.read "lib/triannon/iiif_presentation_2_context.json")
-    end
-  end
-  
   it "#jsonld_oa calls Triannon::Graph #jsonld_oa" do
     expect(bookmark_anno.graph).to be_a Triannon::Graph
     expect(bookmark_anno.graph).to receive(:jsonld_oa)

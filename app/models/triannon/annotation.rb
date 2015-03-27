@@ -156,8 +156,7 @@ private
     # SIDE EFFECT: converts data to turtle for LdpWriter
     # @return [RDF::Graph] populated RDF::Graph object, or nil
     def jsonld_to_graph
-      # need to do this to avoid external lookup of jsonld context
-      g ||= RDF::Graph.new << JSON::LD::API.toRdf(json_ld) if json_ld
+      g ||= RDF::Graph.new.from_jsonld(data)
       g = nil if g && g.size == 0
       self.data = g.dump(:ttl) if g  # LdpWriter expects ttl
       g
@@ -171,19 +170,6 @@ private
       g = nil if g && g.size == 0
       self.data = g.dump(:ttl) if g  # LdpWriter expects ttl
       g
-    end
-
-    # avoid external lookup of jsonld context by putting it inline
-    # @return [Hash] the parsed json after the context is put inline
-    def json_ld
-      if data.match(/"@context"\s*\:\s*"http\:\/\/www\.w3\.org\/ns\/oa-context-20130208\.json"/)
-        data.sub!("\"http://www.w3.org/ns/oa-context-20130208.json\"", Triannon::JsonldContext.oa_context)
-      elsif data.match(/"@context"\s*\:\s*"http\:\/\/www\.w3\.org\/ns\/oa\.jsonld"/)
-        data.sub!("\"http://www.w3.org/ns/oa.jsonld\"", Triannon::JsonldContext.oa_context)
-      elsif data.match(/"@context"\s*\:\s*"http\:\/\/iiif\.io\/api\/presentation\/2\/context\.json"/)
-        data.sub!("\"http://iiif.io/api/presentation/2/context.json\"", Triannon::JsonldContext.iiif_context)
-      end
-      @json_ld ||= JSON.parse(data) rescue nil
     end
 
     def graph_exists?
