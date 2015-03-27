@@ -2,6 +2,8 @@ require 'rails/generators'
 
 module Triannon
   class Install < Rails::Generators::Base
+    source_root File.expand_path('../templates', __FILE__)
+
     def inject_Triannon_routes
       route "mount Triannon::Engine, at: ''"
     end
@@ -25,6 +27,18 @@ production:
   triannon_base_url:
       YML
       create_file 'config/triannon.yml', default_yml
+    end
+
+    def add_linked_data_caching
+      gem 'rest-client', '~> 1.7.2'
+      gem 'rack-cache'
+      gem 'rest-client-components'
+
+      Bundler.with_clean_env do
+        run "bundle install"
+      end
+
+      copy_file 'rest_client.rb', 'config/initializers/rest_client.rb'
     end
   end
 end
