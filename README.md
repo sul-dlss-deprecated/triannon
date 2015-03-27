@@ -38,11 +38,35 @@ Edit the `config/triannon.yml` file:
 * `solr_url:` Points to the baseurl of Solr instance configured for Triannon
 * `triannon_base_url:` Used as the base url for all annotations hosted by your Triannon server.  Identifiers from the LDP server will be appended to this base-url.  Generally something like "https://your-triannon-rails-box/annotations", as "/annotations" is added to the path by the Triannon gem
 
-Generate the root annotations container on your LDP server
+Generate the root annotations container on your LDP server:
 
 ```console
 $ rake triannon:create_root_container
 ```
+
+Set up caching for jsonld context documents:
+
+* by using Rack::Cache for RestClient:
+** add to Gemfile:
+
+```ruby
+gem 'rest-client', '~> 1.7.2'
+gem 'rack-cache'
+gem 'rest-client-components'
+``` 
+*** bundle install
+** create a  config/initializers/rest_client.rb
+
+```ruby
+require 'restclient/components'
+require 'rack/cache'
+RestClient.enable Rack::Cache,
+  metastore: "file:#{Rails.root}/tmp/rack-cache/meta",
+  entitystore: "file:#{Rails.root}/tmp/rack-cache/body",
+  default_ttl:  86400, # when to recheck, in seconds (daily = 60 x 60 x 24)
+  verbose: false
+```
+
 
 ## Client Interactions with Triannon
 
