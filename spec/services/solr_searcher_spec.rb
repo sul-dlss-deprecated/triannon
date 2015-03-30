@@ -65,7 +65,6 @@ describe Triannon::SolrSearcher, :vcr do
           }
       }
     }
-    let(:solr_docs) { solr_response['response']['docs'] }
     let(:result_array) { Triannon::SolrSearcher.anno_graphs_array(solr_response)}
     it "returns an Array of Triannon::Graph objects" do
       expect(result_array).to be_a Array
@@ -87,11 +86,12 @@ describe Triannon::SolrSearcher, :vcr do
       expect(result_array[2].body_chars).to eq ["testing redirect 2"]
       expect(result_array[2].predicate_urls(RDF::OpenAnnotation.hasTarget)).to eq ["http://purl.stanford.edu/oo111oo2222"]
     end
-    it "gets jsonld context from local cache" do
-      skip "code and test to be implemented"
-      fail "code and test to be implemented"
+    it "doesn't do external lookup of json_ld context" , :vcr => {:record => :none} do
+      # NOTE:  VCR would throw an error if this does an external lookup
+      # https://www.relishapp.com/vcr/vcr/v/2-9-3/docs/record-modes/none
+      expect(result_array[0]).to be_a Triannon::Graph
     end
-  end
+  end # .anno_graphs_array
   
   
   context '.solr_params' do
