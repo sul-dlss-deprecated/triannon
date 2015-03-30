@@ -1,7 +1,7 @@
 module Triannon
   class SolrSearcher
 
-    # convert RSolr::Response object into an array of RDF::Graph objects,
+    # convert RSolr::Response object into an array of Triannon::Graph objects,
     #   where each graph object contains a single annotation returned in the response docs
     # @param [Hash] rsolr_response an RSolr response to a query.  It's actually an
     #   RSolr::HashWithResponse but let's not quibble
@@ -122,19 +122,26 @@ module Triannon
       @max_sleep_seconds = Triannon.config[:max_sleep_seconds] || 5
     end
 
-    # Ultimately:
-    #   search method:
+    #  to be called from controller:
     #     1.  converts controller params to solr params
     #     2.  sends request to Solr
     #     3.  converts Solr response object to array of anno graphs
-    # anno_graphs_arry = solr_searcher.search(params)
+    # @param [Hash<String => String>] controller_params params from Controller
+    # @return [Array<Triannon::Graph>] array of Triannon::Graph objects,
+    #   where each graph object contains a single annotation returned in the response docs
+    def find(controller_params)
+      solr_params = self.class.solr_params(controller_params)
+      solr_response = search(solr_params)
+      anno_graphs_array = self.class.anno_graphs_array(solr_response)
+    end
 
 
+    protected
 
     # send params to Solr 'select' with POST, retrying if an error occurs.
     # See https://github.com/ooyala/retries for info on with_retries.
     # @param [Hash] solr_params the params to send to Solr
-    # @return # what should it return???
+    # @return RSolr::Response object
     def search(solr_params = {})
       handler = Proc.new do |exception, attempt_cnt, total_delay|
         @logger.debug "#{exception.inspect} on Solr search attempt #{attempt_cnt} for #{solr_params.inspect}"
@@ -152,7 +159,6 @@ module Triannon
       end
       response
     end
-
 
   end
 end

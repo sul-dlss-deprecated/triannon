@@ -14,14 +14,37 @@ describe Triannon::SolrSearcher, :vcr do
     Triannon::SolrSearcher.new
   }
 
+  context '#find' do
+    let(:controller_params) { {'targetUri' => "some.url.org", 'bodyExact' => "foo"} }
+    let(:my_solr_params) { {:q=>"target_url:some.url.org AND target_url:some.url.org#* AND body_chars_exact:\"foo\"", :defType=>"lucene"} }
+    it "calls .solr_params" do
+      expect(Triannon::SolrSearcher).to receive(:solr_params).with(controller_params)
+      allow(solr_searcher).to receive(:search)
+      allow(Triannon::SolrSearcher).to receive(:anno_graphs_array)
+      solr_searcher.find(controller_params)
+    end
+    it "calls #search" do
+      allow(Triannon::SolrSearcher).to receive(:solr_params).with(controller_params).and_call_original
+      expect(solr_searcher).to receive(:search).with(my_solr_params)
+      allow(Triannon::SolrSearcher).to receive(:anno_graphs_array)
+      solr_searcher.find(controller_params)
+    end
+    it "calls .anno_graphs_array" do
+      allow(Triannon::SolrSearcher).to receive(:solr_params).with(controller_params).and_call_original
+      allow(solr_searcher).to receive(:search).with(my_solr_params).and_call_original
+      expect(Triannon::SolrSearcher).to receive(:anno_graphs_array)
+      solr_searcher.find(controller_params)
+    end
+  end
+  
   context '#search' do
     it "calls RSolr::Client.post with params hash" do
       solr_params_hash = {:q => '666'}
       expect_any_instance_of(RSolr::Client).to receive(:post).with('select', {:params => solr_params_hash})
-      solr_searcher.search solr_params_hash
+      solr_searcher.send(:search, solr_params_hash)
     end
     it "returns a solr response object with docs with anno_jsonld field" do
-      solr_response = solr_searcher.search({:fq => ["motivation:commenting"]})
+      solr_response = solr_searcher.send(:search, {:fq => ["motivation:commenting"]})
       expect(solr_response).to be_a_kind_of RSolr::Response
       expect(solr_response).to match a_hash_including('response' => a_hash_including('docs'))
       expect(solr_response['response']['docs'].size).to be > 0
@@ -30,7 +53,7 @@ describe Triannon::SolrSearcher, :vcr do
       }
     end
     it "works with no params" do
-      solr_response = solr_searcher.search
+      solr_response = solr_searcher.send(:search)
       expect(solr_response).to be_a_kind_of RSolr::Response
       expect(solr_response).to match a_hash_including('response' => a_hash_including('docs'))
       expect(solr_response['response']['docs'].size).to be > 0
@@ -40,7 +63,7 @@ describe Triannon::SolrSearcher, :vcr do
     end
     it "uses with_retries" do
       expect(solr_searcher).to receive(:with_retries)
-      solr_searcher.search({:q => '666'})
+      solr_searcher.send(:search, {:q => '666'})
     end
   end
 
@@ -91,8 +114,14 @@ describe Triannon::SolrSearcher, :vcr do
       # https://www.relishapp.com/vcr/vcr/v/2-9-3/docs/record-modes/none
       expect(result_array[0]).to be_a Triannon::Graph
     end
+    it "returns empty array when no docs in response" do
+      my_solr_response =  
+      { "responseHeader"=>{"status"=>0, "QTime"=>9, "params"=>{"fq"=>"motivation:commenting", "wt"=>"ruby"}}, 
+        "response"=>{"numFound"=>0, "start"=>0, "maxScore"=>0.0, "docs"=>[] }
+      }
+      expect(Triannon::SolrSearcher.anno_graphs_array(my_solr_response)).to eq []
+    end
   end # .anno_graphs_array
-  
   
   context '.solr_params' do
     it "no q param if nothing generates a q term" do
@@ -342,7 +371,6 @@ describe Triannon::SolrSearcher, :vcr do
     end
 =end
   end # solr_params
-  
   
   context '.q_terms_for_url' do
     let (:fldname) { 'url_solr_field' }
