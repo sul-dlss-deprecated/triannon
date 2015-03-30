@@ -102,7 +102,7 @@ protected
 
     # Add annotation to Solr as a Solr document
     def solr_save
-      solr_writer.write(graph) if graph && graph.id_as_url && !graph.id_as_url.empty?
+      solr_writer.write(graph) if id_as_url && !id_as_url.empty?
     end
 
     # Delete annotation from Solr
