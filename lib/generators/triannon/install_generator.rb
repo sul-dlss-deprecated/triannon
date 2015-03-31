@@ -30,7 +30,7 @@ production:
     end
 
     def add_linked_data_caching
-      gem 'rest-client', '~> 1.7.2'
+      gem 'rest-client', '~> 1.7.3' # problem with rest-client 1.8.0 and rest-client-components
       gem 'rack-cache'
       gem 'rest-client-components'
 
