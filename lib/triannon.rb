@@ -13,6 +13,7 @@ module Triannon
   require "triannon/engine"
   require "triannon/error"
   require "triannon/graph"
+  require "triannon/iiif_anno_list"
   require "triannon/jsonld_context"
 
   class << self
