@@ -96,6 +96,9 @@ describe Triannon::SolrSearcher, :vcr do
         expect(item.size).to be > 2
       }
     end
+    it "reads each anno in the Solr response" do
+      expect(result_array.size).to eq solr_response['response']['docs'].size
+    end
     it "properly parses the jsonld in anno_jsonld field from each Solr doc in the response" do
       expect(result_array[0].id_as_url).to match a_string_ending_with "d3019689-d3ff-4290-8ee3-72fec2320332"
       expect(result_array[0].body_chars).to eq ["I hate this!"]
