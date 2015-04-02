@@ -82,11 +82,9 @@ describe Triannon::IIIFAnnoList, :vcr do
         anno_list["resources"].each_index { |i|
           element = anno_list["resources"][i]
           expect(element).to be_a Hash
-          g = element["@graph"]
-          anno_node_hash = g.find { |node| node["@type"] == "oa:Annotation"}
-          expect(anno_node_hash["@id"]).to eq anno_graphs_array[i].id_as_url.to_s
+          expect(element["@id"]).to eq anno_graphs_array[i].id_as_url.to_s
           # "on" is IIIF, not OA
-          expect(anno_node_hash["on"]).to eq anno_graphs_array[i].predicate_urls(RDF::OpenAnnotation.hasTarget).first
+          expect(element["on"]).to eq anno_graphs_array[i].predicate_urls(RDF::OpenAnnotation.hasTarget).first
         }
       end
       it "elements do not have @context (it's redundant)" do
@@ -109,6 +107,15 @@ describe Triannon::IIIFAnnoList, :vcr do
         expect(within["total"]).to eq 0
         expect(empty_list["resources"]).to be_an Array
         expect(empty_list["resources"].size).to eq 0
+      end
+      it "doesn't include @graph" do
+        expect(anno_list["resources"].first.key?("@graph")).to be false
+        expect(anno_list.to_s).not_to match "@graph"
+      end
+      it "folds in blank body nodes" do
+        anno_list["resources"].each { |element| 
+          expect(element).to include("resource")
+        }
       end
     end # resources
   end # anno_list
