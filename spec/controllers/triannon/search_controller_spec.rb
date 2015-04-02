@@ -63,30 +63,38 @@ describe Triannon::SearchController, :vcr, type: :controller do
       expect(ss).to receive(:find).with(hash_including(params))
       get :find, params
     end
-    
-=begin TODO: implement find action in controller
-    it "returns a IIIF Annotation List" do
+    it "calls IIIFAnnoList.anno_list" do
       ss = subject.send(:solr_searcher)
       allow(ss).to receive(:find).and_return(anno_graphs_array)
-      fail "test to be implemented"
+      expect(Triannon::IIIFAnnoList).to receive(:anno_list)
+      get :find
     end
+    it "adds triannon search url as @id to anno_list" do
+      ss = subject.send(:solr_searcher)
+      allow(ss).to receive(:find).and_return(anno_graphs_array)
+      get :find, {'targetUri' => "some.url.org"}
+      result = JSON.parse(response.body)
+      expect(result).to be_a Hash
+      expect(result).to include("@id" => "http://test.host/annotations/search?targetUri=some.url.org")
+    end
+    
+=begin TODO: implement find action in controller
     it "has each anno in solr response" do
       ss = subject.send(:solr_searcher)
       allow(ss).to receive(:find).and_return(anno_graphs_array)
       fail "test to be implemented"
     end
-    it "has list size = num annos in the Solr response" do
-      fail "test to be implemented"
-    end
     it "returns jsonld annos in IIIF context" do
       fail "test to be implemented"
     end
+=end
+
     context 'response formats' do
       context 'jsonld context' do
- 
+
       end
     end
-=end
+
   end # GET find
   
 
