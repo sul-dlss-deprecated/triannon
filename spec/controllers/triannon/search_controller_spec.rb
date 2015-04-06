@@ -52,12 +52,12 @@ describe Triannon::SearchController, :vcr, type: :controller do
           ]
         }'))
       ] }
-    
+
     it "returns http success" do
       get :find
       expect(response).to have_http_status(:success)
     end
-    it "calls solr_searcher.find" do
+    it "calls solr_searcher.find with params" do
       params = {'targetUri' => "some.url.org", 'bodyExact' => "foo"}
       ss = subject.send(:solr_searcher)
       expect(ss).to receive(:find).with(hash_including(params))
@@ -77,25 +77,96 @@ describe Triannon::SearchController, :vcr, type: :controller do
       expect(result).to be_a Hash
       expect(result).to include("@id" => "http://test.host/annotations/search?targetUri=some.url.org")
     end
-    
-=begin TODO: implement find action in controller
-    it "has each anno in solr response" do
-      ss = subject.send(:solr_searcher)
-      allow(ss).to receive(:find).and_return(anno_graphs_array)
-      fail "test to be implemented"
-    end
-    it "returns jsonld annos in IIIF context" do
-      fail "test to be implemented"
-    end
-=end
 
-    context 'response formats' do
-      context 'jsonld context' do
+    context "response format" do
+      # regex: \A and \Z and m are needed instead of ^$ due to \n in data)
+      json_regex = /\A\{.+\}\Z/m
 
+      def response_complete? response
+        expect(response.body).to match "http://purl.stanford.edu/kq131cs7229"
+        expect(response.body).to match "http://purl.stanford.edu/oo111oo2222"
+        expect(response.body).to match "I hate this!"
+        expect(response.body).to match "I love this!"
+        expect(response.body).to match "testing redirect 2"
+        expect(response.status).to eq 200
       end
-    end
+
+      shared_examples_for 'accept header determines media type' do | mime_types, regex |
+        mime_types.each { |mtype|
+          it "#{mtype}" do
+            request.accept = mtype
+            ss = subject.send(:solr_searcher)
+            allow(ss).to receive(:find).and_return(anno_graphs_array)
+            get :find, {}
+            expect(response.content_type).to eql mtype
+            expect(response.body).to match regex
+            response_complete? response
+          end
+        }
+      end
+      context "turtle" do
+        # regex:  \Z is needed instead of $ due to \n in data)
+        it_behaves_like 'accept header determines media type', ["text/turtle", "application/x-turtle"], /\.\Z/
+      end
+      context "rdfxml" do
+        # regex: \A and \Z and m are needed instead of ^$ due to \n in data)
+        it_behaves_like 'accept header determines media type', ["application/rdf+xml", "text/rdf+xml", "text/rdf", "application/xml", "text/xml", "application/x-xml"], /\A<.+>\Z/m
+      end
+      context "json" do
+        it_behaves_like 'accept header determines media type', ["application/ld+json", "application/json", "text/x-json", "application/jsonrequest"], json_regex
+      end
+      it "empty string gets json-ld" do
+        request.accept = ""
+        ss = subject.send(:solr_searcher)
+        allow(ss).to receive(:find).and_return(anno_graphs_array)
+        get :find, {}, format: nil
+        expect(response.content_type).to eql("application/ld+json")
+        expect(response.body).to match json_regex
+        response_complete? response
+      end
+      it "nil gets json-ld" do
+        request.accept = nil
+        ss = subject.send(:solr_searcher)
+        allow(ss).to receive(:find).and_return(anno_graphs_array)
+        get :find, {}, format: nil
+        expect(response.content_type).to eql("application/ld+json")
+        expect(response.body).to match json_regex
+        response_complete? response
+      end
+      it "*/* gets json-ld" do
+        request.accept = "*/*"
+        ss = subject.send(:solr_searcher)
+        allow(ss).to receive(:find).and_return(anno_graphs_array)
+        get :find, {}, format: nil
+        expect(response.content_type).to eql("application/ld+json")
+        expect(response.body).to match json_regex
+        response_complete? response
+      end
+      it "html uses view" do
+        request.accept = "text/html"
+        ss = subject.send(:solr_searcher)
+        allow(ss).to receive(:find).and_return(anno_graphs_array)
+        get :find, {}, format: nil
+        expect(response.content_type).to eql("text/html")
+        expect(response).to render_template(:find)
+      end
+      context 'multiple formats' do
+        # rails will use them in order listed in the http accept header value.
+        # also, "note that if browser is sending */* along with other values then Rails totally bails out and just returns Mime::HTML"
+        #   http://blog.bigbinary.com/2010/11/23/mime-type-resolution-in-rails.html
+        it 'uses first known format' do
+          request.accept = "application/ld+json, text/x-json, application/json"
+          ss = subject.send(:solr_searcher)
+          allow(ss).to receive(:find).and_return(anno_graphs_array)
+          get :find, {}, format: nil
+          expect(response.content_type).to eql("application/ld+json")
+          expect(response.body).to match json_regex
+          response_complete? response
+        end
+      end
+    end # response format
 
   end # GET find
-  
+
 
 end
