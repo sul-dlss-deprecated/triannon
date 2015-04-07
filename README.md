@@ -50,10 +50,10 @@ Set up caching for jsonld context documents:
 ** add to Gemfile:
 
 ```ruby
-gem 'rest-client', '~> 1.7.3' # problem with rest-client 1.8.0 and rest-client-components
+gem 'rest-client'
 gem 'rack-cache'
 gem 'rest-client-components'
-``` 
+```
 *** bundle install
 ** create a  config/initializers/rest_client.rb
 
@@ -91,7 +91,7 @@ NOTE:  implementation of Annotation Lists is coming!
   * see https://github.com/sul-dlss/triannon/blob/master/app/controllers/triannon/annotations_controller.rb #show method for mime formats accepted
 
 #### JSON-LD context
-You can request IIIF or OA context for jsonld.  
+You can request IIIF or OA context for jsonld.
 
 The correct way:
 * use HTTP `Accept` header with mime type and context url:
