@@ -34,9 +34,12 @@ Gem::Specification.new do |s|
   s.add_development_dependency "webmock"
   s.add_development_dependency "coveralls"
   s.add_development_dependency "yard" # for documentation
-  # problem with rest-client 1.8.0 and rest-client-components;
-  #  see https://github.com/sul-dlss/triannon-service/issues/7, https://github.com/sul-dlss/triannon/issues/151
-  s.add_development_dependency "rest-client", "~> 1.7.3" # for caching jsonld context docs
-  s.add_development_dependency "rest-client-components" # for caching jsonld context docs
-  s.add_development_dependency "rack-cache" # for caching jsonld context docs
+
+  s.add_development_dependency "faraday_middleware" # cache jsonld context docs
+  s.add_development_dependency "faraday-http-cache" # cache jsonld context docs
+  s.add_development_dependency "http_logger" # cache jsonld context docs
+
+#  s.add_development_dependency "rest-client" # for caching jsonld context docs
+#  s.add_development_dependency "rest-client-components" # for caching jsonld context docs
+#  s.add_development_dependency "rack-cache" # for caching jsonld context docs
 end

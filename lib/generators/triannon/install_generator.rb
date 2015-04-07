@@ -30,15 +30,20 @@ production:
     end
 
     def add_linked_data_caching
-      gem 'rest-client', '~> 1.7.3' # problem with rest-client 1.8.0 and rest-client-components
-      gem 'rack-cache'
-      gem 'rest-client-components'
+#      gem 'rest-client'
+#      gem 'rack-cache'
+#      gem 'rest-client-components'
+      gem 'faraday'
+      gem 'faraday_middleware'
+      gem 'faraday-http-cache'
+      gem 'http_logger'
 
       Bundler.with_clean_env do
         run "bundle install"
       end
 
-      copy_file 'rest_client.rb', 'config/initializers/rest_client.rb'
+#      copy_file 'rest_client.rb', 'config/initializers/rest_client.rb'
+      copy_file 'rdf.rb', 'config/initializers/rdf.rb'
     end
   end
 end
