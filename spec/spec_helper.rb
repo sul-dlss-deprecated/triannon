@@ -95,8 +95,6 @@ end
 require 'vcr'
 VCR.configure do |c|
  	c.cassette_library_dir = 'spec/fixtures/vcr_cassettes'
-#  c.hook_into :webmock
-#  c.hook_into :faraday
   c.hook_into :webmock, :faraday
   c.allow_http_connections_when_no_cassette = true
 #  c.default_cassette_options = { :record => :new_episodes , :re_record_interval => 28.days, :serialize_with => :psych }
@@ -104,11 +102,25 @@ VCR.configure do |c|
   c.configure_rspec_metadata!
 end
 
-# configure RDF to cache via faraday-http-cache for VCR
+# configure RDF to cache external lookups via faraday-http-cache for VCR
 RDF::Util::File.http_adapter = RDF::Util::File::FaradayAdapter
 RDF::Util::File::FaradayAdapter.conn = Faraday.new do |builder|
   builder.use FaradayMiddleware::FollowRedirects
   builder.use VCR::Middleware::Faraday
   builder.use :http_cache, store: Rails.cache, shared_cache: false, logger: Rails.logger, instrumenter: ActiveSupport::Notifications
   builder.adapter Faraday.default_adapter
+end
+
+# FIXME: temporary while we implement caching
+
+# Subscribes to all events from Faraday::HttpCache.
+ActiveSupport::Notifications.subscribe "process_request.http_cache.faraday" do |*args|
+  event = ActiveSupport::Notifications::Event.new(*args)
+  cache_status = event.payload.fetch(:cache_status)
+
+  case cache_status
+    when :unacceptable, :miss, :invalid, :valid
+      p "#{cache_status} for #{event.payload.fetch(:env).url} (status #{event.payload.fetch(:env).status})"
+    when :fresh
+  end
 end

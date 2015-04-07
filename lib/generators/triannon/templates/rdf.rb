@@ -10,11 +10,3 @@ RDF::Util::File::FaradayAdapter.conn = Faraday.new do |builder|
   builder.adapter Faraday.default_adapter
 end
 
-
-# Subscribes to all events from Faraday::HttpCache.
-ActiveSupport::Notifications.subscribe "process_request.http_cache.faraday" do |*args|
-  event = ActiveSupport::Notifications::Event.new(*args)
-
-  p "#{event.payload.fetch(:cache_status)} for #{event.payload.fetch(:env).url} (status #{event.payload.fetch(:env).status})"
-  p event.payload.fetch(:env).response_headers
-end

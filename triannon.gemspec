@@ -30,12 +30,16 @@ Gem::Specification.new do |s|
   s.add_development_dependency "engine_cart"
   s.add_development_dependency "jettywrapper"
   s.add_development_dependency "capybara"
-  s.add_development_dependency "vcr"
+  # TODO: vcr temporarily in Gemfile: we must use master branch of vcr due to incompatibility with faraday 0.9.0
+  #  waiting for vcr release > 2.9.3
+#  s.add_development_dependency "vcr"
   s.add_development_dependency "webmock"
   s.add_development_dependency "coveralls"
   s.add_development_dependency "yard" # for documentation
 
   s.add_development_dependency "faraday_middleware" # cache jsonld context docs
+  # note:  https://github.com/plataformatec/faraday-http-cache/pull/66 not yet merged in -- will cache 307 responses;
+  #  we want this fix as dated OA jsonld context url gives a 307
   s.add_development_dependency "faraday-http-cache" # cache jsonld context docs
   s.add_development_dependency "http_logger" # cache jsonld context docs
 
