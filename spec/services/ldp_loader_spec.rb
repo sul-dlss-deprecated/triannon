@@ -201,17 +201,42 @@ describe Triannon::LdpLoader, :vcr do
   end
 
   describe '#get_ttl' do
+    # TODO these tests are brittle since they stubs the whole http interaction with faraday objects
     it "retrieves data via HTTP over LdpLoader.conn when given an id" do
-      # TODO brittle since it stubs the whole http interaction
       resp = double()
+      allow(resp).to receive(:status).and_return(200)
       allow(resp).to receive(:body)
       conn = double()
       allow(conn).to receive(:get).and_return(resp)
 
       loader = Triannon::LdpLoader.new 'somekey'
-      allow(loader).to receive(:conn).and_return(conn)
+      expect(loader).to receive(:conn).and_return(conn)
 
-      loader.send(:get_ttl, "id")
+      loader.send(:get_ttl, "somekey")
+    end
+
+    context 'LDPStorageError' do
+      it "raised with status code and body when LDP returns [404, 409, 412]" do
+        [404, 409, 412].each { |status_code|
+          resp = double()
+          allow(resp).to receive(:body).and_return("foo")
+          allow(resp).to receive(:status).and_return(status_code)
+          conn = double()
+          allow(conn).to receive(:get).and_return(resp)
+
+          loader = Triannon::LdpLoader.new 'somekey'
+          allow(loader).to receive(:conn).and_return(conn)
+
+          expect { loader.send(:get_ttl, "somekey") }.to raise_error { |error|
+            expect(error).to be_a Triannon::LDPStorageError
+            expect(error.message).to eq "error getting somekey from LDP"
+            expect(error.resp_status).to eq status_code
+            expect(error.resp_body).to eq "foo"
+          }
+        }
+      end
+    end
+  end
 
   describe '#conn' do
     it "returns a Faraday::Connection" do

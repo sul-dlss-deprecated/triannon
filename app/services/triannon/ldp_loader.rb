@@ -83,13 +83,17 @@ module Triannon
         req.url "#{sub_path}" if sub_path
         req.headers['Accept'] = 'application/x-turtle'
       end
-      resp.body
+      if resp.status.between?(400, 600)
+        raise Triannon::LDPStorageError.new("error getting #{sub_path} from LDP", resp.status, resp.body)
+      else
+        resp.body
+      end
     end
 
     # turns turtle serialization into Array of RDF::Statements, removing fedora-specific triples
     #  (leaving LDP and OA triples)
     # @param [String] ttl a String containing RDF serialized as turtle
-    # @return [Array<RDF::Statements>] the RDF statements represented in the ttl 
+    # @return [Array<RDF::Statements>] the RDF statements represented in the ttl
     def statements_from_ttl_minus_fedora ttl
       # RDF::Turtle::Reader.new(ttl).statements.to_a
       g = RDF::Graph.new.from_ttl(ttl) if ttl
