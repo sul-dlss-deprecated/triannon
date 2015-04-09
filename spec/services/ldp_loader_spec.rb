@@ -167,7 +167,7 @@ describe Triannon::LdpLoader, :vcr do
       loader.load_anno_container
       loader.load_targets
       target_uri = loader.ldp_annotation.target_uris.first
-      
+
       default_uri_obj = RDF::URI.new(target_uri.to_s + "#default")
       default_uri_solns = loader.ldp_annotation.graph.query [default_uri_obj, nil, nil]
       expect(default_uri_solns.count).to eql 2
@@ -212,6 +212,17 @@ describe Triannon::LdpLoader, :vcr do
       allow(loader).to receive(:conn).and_return(conn)
 
       loader.send(:get_ttl, "id")
+
+  describe '#conn' do
+    it "returns a Faraday::Connection" do
+      loader = Triannon::LdpLoader.new 'somekey'
+      conn = loader.send(:conn)
+      expect(conn).to be_a Faraday::Connection
+    end
+    it "sets Prefer header to omit server managed triples" do
+      loader = Triannon::LdpLoader.new 'somekey'
+      conn = loader.send(:conn)
+      expect(conn.headers).to include("Prefer" => 'return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"')
     end
   end
 

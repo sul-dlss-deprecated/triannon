@@ -37,7 +37,7 @@ module Triannon
 
     # load body objects into @ldp_annotation's (our Triannon::AnnotationLdp object) graph
     def load_bodies
-      @ldp_annotation.body_uris.each { |body_uri|  
+      @ldp_annotation.body_uris.each { |body_uri|
         body_obj_path = body_uri.to_s.split(@base_uri + '/').last
         load_object_into_annotation_graph(body_obj_path)
       }
@@ -45,12 +45,12 @@ module Triannon
 
     # load target objects into @ldp_annotation's (our Triannon::AnnotationLdp object) graph
     def load_targets
-      @ldp_annotation.target_uris.each { |target_uri| 
+      @ldp_annotation.target_uris.each { |target_uri|
         target_obj_path = target_uri.to_s.split(@base_uri + '/').last
         load_object_into_annotation_graph(target_obj_path)
       }
     end
-    
+
     # @return [Array<Triannon::Annotation>] an array of Triannon::Annotation objects with just the id set. Enough info to build the index page
     def find_all
       root_ttl = get_ttl
@@ -98,6 +98,8 @@ module Triannon
 
     def conn
       @c ||= Faraday.new @base_uri
+      @c.headers['Prefer'] = 'return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"'
+      @c
     end
 
   end
