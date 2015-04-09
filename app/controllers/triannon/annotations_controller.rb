@@ -130,7 +130,11 @@ module Triannon
 private
 
     def set_annotation
-      @annotation = Annotation.find(params[:id])
+      begin
+        @annotation = Annotation.find(params[:id])
+      rescue Triannon::LDPStorageError => e
+        render :body => e.resp_body, status: e.resp_status, content_type: "text/html"
+      end
     end
 
     # handle Triannon::ExternalReferenceError

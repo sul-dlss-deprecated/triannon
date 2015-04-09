@@ -1,7 +1,7 @@
 module Triannon
   class Annotation
     include ActiveModel::Model
-    
+
     define_model_callbacks :save, :destroy
     after_save :solr_save
     after_destroy :solr_delete
@@ -19,7 +19,7 @@ module Triannon
 
 
     # Class Methods ----------------------------------------------------------------
-  
+
     def self.create(attrs = {})
       a = Triannon::Annotation.new attrs
       a.save
@@ -77,12 +77,12 @@ module Triannon
         @graph = Triannon::Graph.new g
       end
     end
-    
+
     # @return json-ld representation of anno with OpenAnnotation context as a url
     def jsonld_oa
       graph.jsonld_oa
     end
-    
+
     # @return json-ld representation of anno with IIIF context as a url
     def jsonld_iiif
       graph.jsonld_iiif
@@ -109,7 +109,7 @@ protected
     def solr_delete
       solr_writer.delete(id) if id
     end
-    
+
 private
 
     # loads RDF::Graph from data attribute.  If data is in json-ld or rdfxml, converts it to turtle.
@@ -130,7 +130,7 @@ private
         else # infer the content type from the content itself
           case data
             # \A and \Z and m are needed instead of ^$ due to \n in data
-            when /\A\{.+\}\Z/m  
+            when /\A\{.+\}\Z/m
               g = jsonld_to_graph
             when /\A<.+>\Z/m
               g = rdfxml_to_graph
@@ -143,7 +143,7 @@ private
       end
       g
     end
-    
+
     # create and load an RDF::Graph object from turtle in data attrib
     # @return [RDF::Graph] populated RDF::Graph object, or nil
     def ttl_to_graph
