@@ -121,8 +121,8 @@ module Triannon
 
   protected
 
-    # POSTS a ttl representation of a graph to a newly created LDP container in the LDP store
-    # @param [String] ttl a turtle representation of RDF data to be put in the new LDP container
+    # POSTS a ttl representation of a graph to an existing LDP container in the LDP store
+    # @param [String] ttl a turtle representation of RDF data to be put in the LDP container
     # @param [String] parent_path the path portion of the url for the LDP parent container for this resource
     #   if no path is supplied, then the resource will be created as a child of the root annotation;
     #   expected paths would also be (anno_id)/t  for a target resource (inside the target container of anno_id)
@@ -136,7 +136,7 @@ module Triannon
         req.body = ttl
       end
       if resp.status != 200 && resp.status != 201
-        raise "Unable to create LDP resource in container #{parent_path}: Response Status: #{resp.status}\nResponse Body: #{resp.body}\nAnnotation sent: #{body}"
+        raise "Unable to create LDP resource in container #{parent_path}: Response Status: #{resp.status}\nResponse Body: #{resp.body}\nAnnotation sent: #{ttl}"
       end
       new_url = resp.headers['Location'] ? resp.headers['Location'] : resp.headers['location']
       new_url.split('/').last if new_url

@@ -336,6 +336,30 @@ describe Triannon::LdpWriter, :vcr do
     end
   end # delete_containers
 
+  context '#create_resource' do
+    it "returns the last part of the url of the newly created resource, derived from Location header" do
+      resp = double()
+      allow(resp).to receive(:status).and_return(201)
+      allow(resp).to receive(:body)
+      allow(resp).to receive(:headers).and_return("Location" => "http://ldpstore.org/ldpcontainter/id")
+      my_conn = double()
+      allow(my_conn).to receive(:post).and_return(resp)
+      my_svc = Triannon::LdpWriter.new anno
+      allow(my_svc).to receive(:conn).and_return(my_conn)
+      expect(my_svc.send(:create_resource, "ignore this fake turtle")).to eq "id"
+    end
+    it "raises an exception if LDP store doesn't return a 200 or 201" do
+      resp = double()
+      allow(resp).to receive(:status).and_return(409)
+      allow(resp).to receive(:body).and_return("exciting info about error")
+      my_conn = double()
+      allow(my_conn).to receive(:post).and_return(resp)
+      my_svc = Triannon::LdpWriter.new anno
+      allow(my_svc).to receive(:conn).and_return(my_conn)
+      expect { my_svc.send(:create_resource, "ignore this fake turtle", "foo") }.to raise_error(/Unable to create LDP resource in container foo: Response Status: 409/)
+    end
+  end
+
   context '#create_direct_container' do
     it 'LDP store creates retrievable, empty LDP DirectContainer with expected id and LDP member relationships' do
       ldpw = Triannon::LdpWriter.new anno
