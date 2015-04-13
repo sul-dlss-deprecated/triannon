@@ -4,9 +4,10 @@ module Triannon
   class AnnotationsController < ApplicationController
     include RdfResponseFormats
 
+    rescue_from Triannon::LDPStorageError, with: :ldp_storage_error
+    rescue_from Triannon::ExternalReferenceError, with: :ext_ref_error
     before_action :default_format_jsonld, only: [:show]
     before_action :set_annotation, only: [:show, :update, :destroy]
-    rescue_from Triannon::ExternalReferenceError, with: :ext_ref_error
 
     # GET /annotations
     def index
@@ -130,16 +131,17 @@ module Triannon
 private
 
     def set_annotation
-      begin
-        @annotation = Annotation.find(params[:id])
-      rescue Triannon::LDPStorageError => e
-        render :body => e.resp_body, status: e.resp_status, content_type: "text/html"
-      end
+      @annotation = Annotation.find(params[:id])
     end
 
-    # handle Triannon::ExternalReferenceError
-    def ext_ref_error(exception)
-      render plain: exception.message, status: 403
+    # render Triannon::ExternalReferenceError
+    def ext_ref_error(err)
+      render plain: err.message, status: 403
+    end
+
+    # render Triannon::LDPStorage error
+    def ldp_storage_error(err)
+      render :body => "<h2>#{err.message}</h2>" + err.ldp_resp_body, status: err.ldp_resp_status, content_type: "text/html"
     end
 
     # render json_ld respecting requested context

@@ -9,12 +9,16 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
   # regex: \A and \Z and m are needed instead of ^$ due to \n in data)
   json_regex = /\A\{.+\}\Z/m
 
-  it "should have an index" do
-    a1 = Triannon::Annotation.new :id => 'abc'
-    a2 = Triannon::Annotation.new :id => 'dce'
-    allow(Triannon::Annotation).to receive(:all).and_return [a1, a2]
-    get :index
+  context '#index' do
+    it "returns ids of annos" do
+      a1 = Triannon::Annotation.new :id => 'abc'
+      a2 = Triannon::Annotation.new :id => 'dce'
+      allow(Triannon::Annotation).to receive(:all).and_return [a1, a2]
+      get :index
+    end
+    # TODO: because this will soon be a sort of redirect to /search, not bothering to test for LDPStorageError
   end
+
 
   context "#create" do
     let (:ttl_data) {Triannon.annotation_fixture("body-chars.ttl")}
@@ -430,6 +434,29 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       end # jsonld context
     end # response format
 
+    context 'LDP storage error' do
+      let(:ldp_resp_code) { 409 }
+      let(:ldp_resp_body) { "body of resp from LDP server" }
+      let(:triannon_err_msg) { "triannon msg" }
+      let(:ldp_error) { Triannon::LDPStorageError.new(triannon_err_msg, ldp_resp_code, ldp_resp_body)}
+
+      it "gives resp code" do
+        allow(Triannon::LdpWriter).to receive(:create_anno).and_raise(ldp_error)
+        post :create, ttl_data
+        expect(response.status).to eq ldp_resp_code
+      end
+      it "gives html response" do
+        allow(Triannon::LdpWriter).to receive(:create_anno).and_raise(ldp_error)
+        post :create, ttl_data
+        expect(response.content_type).to eql "text/html"
+      end
+      it "has useful info in the responose" do
+        allow(Triannon::LdpWriter).to receive(:create_anno).and_raise(ldp_error)
+        post :create, ttl_data
+        expect(response.body).to match ldp_resp_body
+        expect(response.body).to match triannon_err_msg
+      end
+    end # LDP storage error
   end # #create
 
   context '#show' do
