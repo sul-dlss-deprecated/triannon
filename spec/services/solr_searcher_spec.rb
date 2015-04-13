@@ -8,11 +8,7 @@ describe Triannon::SolrSearcher, :vcr do
     end
   end
 
-  let(:rsolr_client) {RSolr.connect(:url => Triannon.config[:solr_url])}
-  let(:solr_searcher) {
-    allow(Triannon::SolrSearcher.new).to receive("@client").and_return(rsolr_client)
-    Triannon::SolrSearcher.new
-  }
+  let(:solr_searcher) { Triannon::SolrSearcher.new }
 
   context '#find' do
     let(:controller_params) { {'targetUri' => "some.url.org", 'bodyExact' => "foo"} }
@@ -36,7 +32,7 @@ describe Triannon::SolrSearcher, :vcr do
       solr_searcher.find(controller_params)
     end
   end
-  
+
   context '#search' do
     it "calls RSolr::Client.post with params hash" do
       solr_params_hash = {:q => '666'}
@@ -65,11 +61,40 @@ describe Triannon::SolrSearcher, :vcr do
       expect(solr_searcher).to receive(:with_retries)
       solr_searcher.send(:search, {:q => '666'})
     end
+    context 'SearchError' do
+      it "raised when StandardError rescued" do
+        my_rsolr_client = double()
+        err_msg_from_rsolr = "some flavor of Runtime exception"
+        allow(my_rsolr_client).to receive(:post).and_raise(RuntimeError.new(err_msg_from_rsolr))
+
+        solr_searcher.rsolr_client = my_rsolr_client
+
+        expect { solr_searcher.send(:search, {:q => '666'}) }.to raise_error { |error|
+          expect(error).to be_a Triannon::SearchError
+          expect(error.message).to eq "error searching Solr with params {:q=>\"666\"}: #{err_msg_from_rsolr}"
+        }
+      end
+      it "raised when RSolr error rescued" do
+        my_rsolr_client = double()
+        solr_resp_body = "response body from Solr"
+        solr_resp_status = 412
+        allow(my_rsolr_client).to receive(:post).and_raise(RSolr::Error::Http.new({:uri => "hahaha"}, {status: solr_resp_status, body: solr_resp_body}))
+
+        solr_searcher.rsolr_client = my_rsolr_client
+
+        expect { solr_searcher.send(:search, {:q => '666'}) }.to raise_error { |error|
+          expect(error).to be_a Triannon::SearchError
+          expect(error.message).to match /^error searching Solr with params {:q=>\"666\"}: RSolr::Error::Http/
+          expect(error.search_resp_status).to eq solr_resp_status
+          expect(error.search_resp_body).to eq solr_resp_body
+        }
+      end
+    end
   end
 
   context '.anno_graphs_array' do
     let(:solr_response) {
-      { "responseHeader"=>{"status"=>0, "QTime"=>9, "params"=>{"fq"=>"motivation:commenting", "wt"=>"ruby"}}, 
+      { "responseHeader"=>{"status"=>0, "QTime"=>9, "params"=>{"fq"=>"motivation:commenting", "wt"=>"ruby"}},
         "response"=>{"numFound"=>3, "start"=>0, "maxScore"=>1.0,
           "docs"=>[
             {"id"=>"d3019689-d3ff-4290-8ee3-72fec2320332",
@@ -118,14 +143,14 @@ describe Triannon::SolrSearcher, :vcr do
       expect(result_array[0]).to be_a Triannon::Graph
     end
     it "returns empty array when no docs in response" do
-      my_solr_response =  
-      { "responseHeader"=>{"status"=>0, "QTime"=>9, "params"=>{"fq"=>"motivation:commenting", "wt"=>"ruby"}}, 
+      my_solr_response =
+      { "responseHeader"=>{"status"=>0, "QTime"=>9, "params"=>{"fq"=>"motivation:commenting", "wt"=>"ruby"}},
         "response"=>{"numFound"=>0, "start"=>0, "maxScore"=>0.0, "docs"=>[] }
       }
       expect(Triannon::SolrSearcher.anno_graphs_array(my_solr_response)).to eq []
     end
   end # .anno_graphs_array
-  
+
   context '.solr_params' do
     it "no q param if nothing generates a q term" do
       expect(Triannon::SolrSearcher.solr_params({})).not_to include :q
@@ -374,7 +399,7 @@ describe Triannon::SolrSearcher, :vcr do
     end
 =end
   end # solr_params
-  
+
   context '.q_terms_for_url' do
     let (:fldname) { 'url_solr_field' }
     let (:url) { 'http://myplace.org' }
@@ -403,7 +428,7 @@ describe Triannon::SolrSearcher, :vcr do
       Triannon::SolrSearcher.q_terms_for_url(fldname, url)
     end
   end #q_terms_for_url
-  
+
 end
 
 # handy for testing when multiple q terms are created
