@@ -19,4 +19,14 @@ module Triannon
     end
   end
 
+  # used to keep HTTP response info from Solr
+  class SearchError < Triannon::Error
+    attr_accessor :search_resp_status, :search_resp_body
+    def initialize(message = nil, search_resp_status = nil, search_resp_body = nil)
+      super(message)
+      self.search_resp_status = search_resp_status if search_resp_status
+      self.search_resp_body = search_resp_body if search_resp_body
+    end
+  end
+
 end
