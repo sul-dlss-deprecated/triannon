@@ -336,11 +336,11 @@ describe Triannon::LdpWriter, :vcr do
         container_id = "container_id"
         ldp_resp_body = "foo"
         [404, 409, 412].each { |status_code|
-          resp = double()
-          allow(resp).to receive(:body).and_return(ldp_resp_body)
-          allow(resp).to receive(:status).and_return(status_code)
+          ldp_resp = double()
+          allow(ldp_resp).to receive(:body).and_return(ldp_resp_body)
+          allow(ldp_resp).to receive(:status).and_return(status_code)
           my_conn = double()
-          allow(my_conn).to receive(:delete).and_return(resp)
+          allow(my_conn).to receive(:delete).and_return(ldp_resp)
 
           writer = Triannon::LdpWriter.new anno
           allow(writer).to receive(:conn).and_return(my_conn)
@@ -348,8 +348,8 @@ describe Triannon::LdpWriter, :vcr do
           expect { writer.delete_containers([container_id]) }.to raise_error { |error|
             expect(error).to be_a Triannon::LDPStorageError
             expect(error.message).to eq "Unable to delete LDP container #{container_id}"
-            expect(error.resp_status).to eq status_code
-            expect(error.resp_body).to eq ldp_resp_body
+            expect(error.ldp_resp_status).to eq status_code
+            expect(error.ldp_resp_body).to eq ldp_resp_body
           }
         }
       end
@@ -375,11 +375,11 @@ describe Triannon::LdpWriter, :vcr do
         container_id = "container_id"
         ldp_resp_body = "foo"
         [404, 409, 412].each { |status_code|
-          resp = double()
-          allow(resp).to receive(:body).and_return(ldp_resp_body)
-          allow(resp).to receive(:status).and_return(status_code)
+          ldp_resp = double()
+          allow(ldp_resp).to receive(:body).and_return(ldp_resp_body)
+          allow(ldp_resp).to receive(:status).and_return(status_code)
           my_conn = double()
-          allow(my_conn).to receive(:post).and_return(resp)
+          allow(my_conn).to receive(:post).and_return(ldp_resp)
 
           writer = Triannon::LdpWriter.new anno
           allow(writer).to receive(:conn).and_return(my_conn)
@@ -387,8 +387,8 @@ describe Triannon::LdpWriter, :vcr do
           expect { writer.send(:create_resource, rdf_as_string, container_id) }.to raise_error { |error|
             expect(error).to be_a Triannon::LDPStorageError
             expect(error.message).to eq "Unable to create LDP resource in container #{container_id}; RDF sent: #{rdf_as_string}"
-            expect(error.resp_status).to eq status_code
-            expect(error.resp_body).to eq ldp_resp_body
+            expect(error.ldp_resp_status).to eq status_code
+            expect(error.ldp_resp_body).to eq ldp_resp_body
           }
         }
       end
@@ -430,11 +430,11 @@ describe Triannon::LdpWriter, :vcr do
       it "raised with status code and body when LDP returns [404, 409, 412]" do
         ldp_resp_body = "foo"
         [404, 409, 412].each { |status_code|
-          resp = double()
-          allow(resp).to receive(:body).and_return(ldp_resp_body)
-          allow(resp).to receive(:status).and_return(status_code)
+          ldp_resp = double()
+          allow(ldp_resp).to receive(:body).and_return(ldp_resp_body)
+          allow(ldp_resp).to receive(:status).and_return(status_code)
           my_conn = double()
-          allow(my_conn).to receive(:post).and_return(resp)
+          allow(my_conn).to receive(:post).and_return(ldp_resp)
 
           writer = Triannon::LdpWriter.new anno
           allow(writer).to receive(:conn).and_return(my_conn)
@@ -442,8 +442,8 @@ describe Triannon::LdpWriter, :vcr do
           expect { writer.send(:create_direct_container, RDF::OpenAnnotation.hasTarget) }.to raise_error { |error|
             expect(error).to be_a Triannon::LDPStorageError
             expect(error.message).to match /^Unable to create Target LDP container for anno; RDF sent: /
-            expect(error.resp_status).to eq status_code
-            expect(error.resp_body).to eq ldp_resp_body
+            expect(error.ldp_resp_status).to eq status_code
+            expect(error.ldp_resp_body).to eq ldp_resp_body
           }
         }
       end

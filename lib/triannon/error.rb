@@ -11,11 +11,11 @@ module Triannon
 
   # used to keep HTTP response info from LDP
   class LDPStorageError < Triannon::Error
-    attr_accessor :resp_status, :resp_body
-    def initialize(message = nil, resp_status = nil, resp_body = nil)
+    attr_accessor :ldp_resp_status, :ldp_resp_body
+    def initialize(message = nil, ldp_resp_status = nil, ldp_resp_body = nil)
       super(message)
-      self.resp_status = resp_status if resp_status
-      self.resp_body = resp_body if resp_body
+      self.ldp_resp_status = ldp_resp_status if ldp_resp_status
+      self.ldp_resp_body = ldp_resp_body if ldp_resp_body
     end
   end
 

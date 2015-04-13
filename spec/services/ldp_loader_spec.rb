@@ -218,11 +218,11 @@ describe Triannon::LdpLoader, :vcr do
     context 'LDPStorageError' do
       it "raised with status code and body when LDP returns [404, 409, 412]" do
         [404, 409, 412].each { |status_code|
-          resp = double()
-          allow(resp).to receive(:body).and_return("foo")
-          allow(resp).to receive(:status).and_return(status_code)
+          ldp_resp = double()
+          allow(ldp_resp).to receive(:body).and_return("foo")
+          allow(ldp_resp).to receive(:status).and_return(status_code)
           conn = double()
-          allow(conn).to receive(:get).and_return(resp)
+          allow(conn).to receive(:get).and_return(ldp_resp)
 
           loader = Triannon::LdpLoader.new 'somekey'
           allow(loader).to receive(:conn).and_return(conn)
@@ -230,8 +230,8 @@ describe Triannon::LdpLoader, :vcr do
           expect { loader.send(:get_ttl, "somekey") }.to raise_error { |error|
             expect(error).to be_a Triannon::LDPStorageError
             expect(error.message).to eq "error getting somekey from LDP"
-            expect(error.resp_status).to eq status_code
-            expect(error.resp_body).to eq "foo"
+            expect(error.ldp_resp_status).to eq status_code
+            expect(error.ldp_resp_body).to eq "foo"
           }
         }
       end
