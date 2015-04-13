@@ -331,9 +331,30 @@ describe Triannon::LdpWriter, :vcr do
       }
     end
 
-    it "raises an exception if the delete does not succeed" do
-      expect { Triannon::LdpWriter.new(anno).delete_containers(['junkpid']) }.to raise_error(/Unable to delete LDP container: junkpid/)
+    context 'LDPStorageError' do
+      it "raised with status code and body when LDP returns [404, 409, 412]" do
+        container_id = "container_id"
+        ldp_resp_body = "foo"
+        [404, 409, 412].each { |status_code|
+          resp = double()
+          allow(resp).to receive(:body).and_return(ldp_resp_body)
+          allow(resp).to receive(:status).and_return(status_code)
+          my_conn = double()
+          allow(my_conn).to receive(:delete).and_return(resp)
+
+          writer = Triannon::LdpWriter.new anno
+          allow(writer).to receive(:conn).and_return(my_conn)
+
+          expect { writer.delete_containers([container_id]) }.to raise_error { |error|
+            expect(error).to be_a Triannon::LDPStorageError
+            expect(error.message).to eq "Unable to delete LDP container #{container_id}"
+            expect(error.resp_status).to eq status_code
+            expect(error.resp_body).to eq ldp_resp_body
+          }
+        }
+      end
     end
+
   end # delete_containers
 
   context '#create_resource' do
@@ -348,15 +369,29 @@ describe Triannon::LdpWriter, :vcr do
       allow(my_svc).to receive(:conn).and_return(my_conn)
       expect(my_svc.send(:create_resource, "ignore this fake turtle")).to eq "id"
     end
-    it "raises an exception if LDP store doesn't return a 200 or 201" do
-      resp = double()
-      allow(resp).to receive(:status).and_return(409)
-      allow(resp).to receive(:body).and_return("exciting info about error")
-      my_conn = double()
-      allow(my_conn).to receive(:post).and_return(resp)
-      my_svc = Triannon::LdpWriter.new anno
-      allow(my_svc).to receive(:conn).and_return(my_conn)
-      expect { my_svc.send(:create_resource, "ignore this fake turtle", "foo") }.to raise_error(/Unable to create LDP resource in container foo: Response Status: 409/)
+    context 'LDPStorageError' do
+      it "raised with status code and body when LDP returns [404, 409, 412]" do
+        rdf_as_string = "resource as string"
+        container_id = "container_id"
+        ldp_resp_body = "foo"
+        [404, 409, 412].each { |status_code|
+          resp = double()
+          allow(resp).to receive(:body).and_return(ldp_resp_body)
+          allow(resp).to receive(:status).and_return(status_code)
+          my_conn = double()
+          allow(my_conn).to receive(:post).and_return(resp)
+
+          writer = Triannon::LdpWriter.new anno
+          allow(writer).to receive(:conn).and_return(my_conn)
+
+          expect { writer.send(:create_resource, rdf_as_string, container_id) }.to raise_error { |error|
+            expect(error).to be_a Triannon::LDPStorageError
+            expect(error.message).to eq "Unable to create LDP resource in container #{container_id}; RDF sent: #{rdf_as_string}"
+            expect(error.resp_status).to eq status_code
+            expect(error.resp_body).to eq ldp_resp_body
+          }
+        }
+      end
     end
   end
 
@@ -391,15 +426,27 @@ describe Triannon::LdpWriter, :vcr do
       full_cont_url = "#{Triannon.config[:ldp_url]}/#{id}/b"
       expect(g.query([RDF::URI.new(full_cont_url), RDF::LDP.hasMemberRelation, RDF::OpenAnnotation.hasBody]).size).to eql 1
     end
-    it "raises an exception if LDP store doesn't return a 200 or 201" do
-      resp = double()
-      allow(resp).to receive(:status).and_return(404)
-      allow(resp).to receive(:body)
-      my_conn = double()
-      allow(my_conn).to receive(:post).and_return(resp)
-      my_svc = Triannon::LdpWriter.new anno
-      allow(my_svc).to receive(:conn).and_return(my_conn)
-      expect { my_svc.send(:create_direct_container, RDF::OpenAnnotation.hasTarget) }.to raise_error(/Unable to create Target LDP container for anno: Response Status: 404/)
+    context 'LDPStorageError' do
+      it "raised with status code and body when LDP returns [404, 409, 412]" do
+        ldp_resp_body = "foo"
+        [404, 409, 412].each { |status_code|
+          resp = double()
+          allow(resp).to receive(:body).and_return(ldp_resp_body)
+          allow(resp).to receive(:status).and_return(status_code)
+          my_conn = double()
+          allow(my_conn).to receive(:post).and_return(resp)
+
+          writer = Triannon::LdpWriter.new anno
+          allow(writer).to receive(:conn).and_return(my_conn)
+
+          expect { writer.send(:create_direct_container, RDF::OpenAnnotation.hasTarget) }.to raise_error { |error|
+            expect(error).to be_a Triannon::LDPStorageError
+            expect(error.message).to match /^Unable to create Target LDP container for anno; RDF sent: /
+            expect(error.resp_status).to eq status_code
+            expect(error.resp_body).to eq ldp_resp_body
+          }
+        }
+      end
     end
   end
 
