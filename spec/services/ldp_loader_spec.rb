@@ -167,7 +167,7 @@ describe Triannon::LdpLoader, :vcr do
       loader.load_anno_container
       loader.load_targets
       target_uri = loader.ldp_annotation.target_uris.first
-      
+
       default_uri_obj = RDF::URI.new(target_uri.to_s + "#default")
       default_uri_solns = loader.ldp_annotation.graph.query [default_uri_obj, nil, nil]
       expect(default_uri_solns.count).to eql 2
@@ -201,17 +201,53 @@ describe Triannon::LdpLoader, :vcr do
   end
 
   describe '#get_ttl' do
+    # TODO these tests are brittle since they stubs the whole http interaction with faraday objects
     it "retrieves data via HTTP over LdpLoader.conn when given an id" do
-      # TODO brittle since it stubs the whole http interaction
       resp = double()
+      allow(resp).to receive(:status).and_return(200)
       allow(resp).to receive(:body)
       conn = double()
       allow(conn).to receive(:get).and_return(resp)
 
       loader = Triannon::LdpLoader.new 'somekey'
-      allow(loader).to receive(:conn).and_return(conn)
+      expect(loader).to receive(:conn).and_return(conn)
 
-      loader.send(:get_ttl, "id")
+      loader.send(:get_ttl, "somekey")
+    end
+
+    context 'LDPStorageError' do
+      it "raised with status code and body when LDP returns [404, 409, 412]" do
+        [404, 409, 412].each { |status_code|
+          ldp_resp = double()
+          allow(ldp_resp).to receive(:body).and_return("foo")
+          allow(ldp_resp).to receive(:status).and_return(status_code)
+          conn = double()
+          allow(conn).to receive(:get).and_return(ldp_resp)
+
+          loader = Triannon::LdpLoader.new 'somekey'
+          allow(loader).to receive(:conn).and_return(conn)
+
+          expect { loader.send(:get_ttl, "somekey") }.to raise_error { |error|
+            expect(error).to be_a Triannon::LDPStorageError
+            expect(error.message).to eq "error getting somekey from LDP"
+            expect(error.ldp_resp_status).to eq status_code
+            expect(error.ldp_resp_body).to eq "foo"
+          }
+        }
+      end
+    end
+  end
+
+  describe '#conn' do
+    it "returns a Faraday::Connection" do
+      loader = Triannon::LdpLoader.new 'somekey'
+      conn = loader.send(:conn)
+      expect(conn).to be_a Faraday::Connection
+    end
+    it "sets Prefer header to omit server managed triples" do
+      loader = Triannon::LdpLoader.new 'somekey'
+      conn = loader.send(:conn)
+      expect(conn.headers).to include("Prefer" => 'return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"')
     end
   end
 

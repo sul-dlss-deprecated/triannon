@@ -37,7 +37,7 @@ module Triannon
 
     # load body objects into @ldp_annotation's (our Triannon::AnnotationLdp object) graph
     def load_bodies
-      @ldp_annotation.body_uris.each { |body_uri|  
+      @ldp_annotation.body_uris.each { |body_uri|
         body_obj_path = body_uri.to_s.split(@base_uri + '/').last
         load_object_into_annotation_graph(body_obj_path)
       }
@@ -45,12 +45,12 @@ module Triannon
 
     # load target objects into @ldp_annotation's (our Triannon::AnnotationLdp object) graph
     def load_targets
-      @ldp_annotation.target_uris.each { |target_uri| 
+      @ldp_annotation.target_uris.each { |target_uri|
         target_obj_path = target_uri.to_s.split(@base_uri + '/').last
         load_object_into_annotation_graph(target_obj_path)
       }
     end
-    
+
     # @return [Array<Triannon::Annotation>] an array of Triannon::Annotation objects with just the id set. Enough info to build the index page
     def find_all
       root_ttl = get_ttl
@@ -83,13 +83,17 @@ module Triannon
         req.url "#{sub_path}" if sub_path
         req.headers['Accept'] = 'application/x-turtle'
       end
-      resp.body
+      if resp.status.between?(400, 600)
+        raise Triannon::LDPStorageError.new("error getting #{sub_path} from LDP", resp.status, resp.body)
+      else
+        resp.body
+      end
     end
 
     # turns turtle serialization into Array of RDF::Statements, removing fedora-specific triples
     #  (leaving LDP and OA triples)
     # @param [String] ttl a String containing RDF serialized as turtle
-    # @return [Array<RDF::Statements>] the RDF statements represented in the ttl 
+    # @return [Array<RDF::Statements>] the RDF statements represented in the ttl
     def statements_from_ttl_minus_fedora ttl
       # RDF::Turtle::Reader.new(ttl).statements.to_a
       g = RDF::Graph.new.from_ttl(ttl) if ttl
@@ -98,6 +102,8 @@ module Triannon
 
     def conn
       @c ||= Faraday.new @base_uri
+      @c.headers['Prefer'] = 'return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"'
+      @c
     end
 
   end

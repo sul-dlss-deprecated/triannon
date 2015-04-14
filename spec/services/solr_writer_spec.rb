@@ -7,13 +7,9 @@ describe Triannon::SolrWriter, :vcr do
       Triannon::SolrWriter.new
     end
   end
-  
-  let(:rsolr_client) {RSolr.connect(:url => Triannon.config[:solr_url])}
-  let(:solr_writer) {
-    allow(Triannon::SolrWriter.new).to receive("@client").and_return(rsolr_client)
-    Triannon::SolrWriter.new
-  }
-  
+
+  let(:solr_writer) { Triannon::SolrWriter.new }
+
   context '#write' do
     let(:uuid) {"814b0225-bd48-4de9-a724-a72a9fa86c18"}
     let(:base_url) {"https://triannon-dev.stanford.edu/annotations/"}
@@ -54,20 +50,48 @@ describe Triannon::SolrWriter, :vcr do
       solr_writer.write(tg)
     end
   end
-  
+
   context '#add' do
-    it "calls RSolr::Client.add with hash and commitWithin=500" do      
-      doc_hash = {:id => '666'}
+    let (:doc_hash) { {:id => '666'} }
+    it "calls RSolr::Client.add with hash and commitWithin=500" do
       expect_any_instance_of(RSolr::Client).to receive(:add).with(doc_hash, :add_attributes => {:commitWithin=> 500})
       solr_writer.add(doc_hash)
     end
     it "uses with_retries" do
-      doc_hash = {:id => '666'}
       expect(solr_writer).to receive(:with_retries)
       solr_writer.add(doc_hash)
     end
+    context 'SearchError' do
+      it "raised when StandardError rescued" do
+        my_rsolr_client = double()
+        err_msg_from_rsolr = "some flavor of Runtime exception"
+        allow(my_rsolr_client).to receive(:add).and_raise(RuntimeError.new(err_msg_from_rsolr))
+
+        solr_writer.rsolr_client = my_rsolr_client
+
+        expect { solr_writer.add(doc_hash) }.to raise_error { |error|
+          expect(error).to be_a Triannon::SearchError
+          expect(error.message).to eq "error adding doc #{doc_hash[:id]} to Solr #{doc_hash}; #{err_msg_from_rsolr}"
+        }
+      end
+      it "raised when RSolr error rescued" do
+        my_rsolr_client = double()
+        solr_resp_body = "response body from Solr"
+        solr_resp_status = 412
+        allow(my_rsolr_client).to receive(:add).and_raise(RSolr::Error::Http.new({:uri => "hahaha"}, {status: solr_resp_status, body: solr_resp_body}))
+
+        solr_writer.rsolr_client = my_rsolr_client
+
+        expect { solr_writer.add(doc_hash) }.to raise_error { |error|
+          expect(error).to be_a Triannon::SearchError
+          expect(error.message).to match "error adding doc #{doc_hash[:id]} to Solr #{doc_hash}; RSolr::Error::Http"
+          expect(error.search_resp_status).to eq solr_resp_status
+          expect(error.search_resp_body).to eq solr_resp_body
+        }
+      end
+    end
   end
-  
+
   context '#delete' do
     it "calls RSolr::Client.delete_by_id" do
       allow_any_instance_of(RSolr::Client).to receive(:commit)
@@ -82,6 +106,35 @@ describe Triannon::SolrWriter, :vcr do
     it "uses with_retries" do
       expect(solr_writer).to receive(:with_retries)
       solr_writer.delete("foo")
+    end
+    context 'SearchError' do
+      it "raised when StandardError rescued" do
+        my_rsolr_client = double()
+        err_msg_from_rsolr = "some flavor of Runtime exception"
+        allow(my_rsolr_client).to receive(:delete_by_id).and_raise(RuntimeError.new(err_msg_from_rsolr))
+
+        solr_writer.rsolr_client = my_rsolr_client
+
+        expect { solr_writer.delete("foo") }.to raise_error { |error|
+          expect(error).to be_a Triannon::SearchError
+          expect(error.message).to eq "error deleting doc foo from Solr: #{err_msg_from_rsolr}"
+        }
+      end
+      it "raised when RSolr error rescued" do
+        my_rsolr_client = double()
+        solr_resp_body = "response body from Solr"
+        solr_resp_status = 412
+        allow(my_rsolr_client).to receive(:delete_by_id).and_raise(RSolr::Error::Http.new({:uri => "hahaha"}, {status: solr_resp_status, body: solr_resp_body}))
+
+        solr_writer.rsolr_client = my_rsolr_client
+
+        expect { solr_writer.delete("foo") }.to raise_error { |error|
+          expect(error).to be_a Triannon::SearchError
+          expect(error.message).to match "error deleting doc foo from Solr: RSolr::Error::Http"
+          expect(error.search_resp_status).to eq solr_resp_status
+          expect(error.search_resp_body).to eq solr_resp_body
+        }
+      end
     end
   end
 
@@ -129,7 +182,7 @@ describe Triannon::SolrWriter, :vcr do
         Triannon::SolrWriter.solr_hash tg
       end
     end
-    
+
     context 'motivation' do
       it "is an Array" do
         expect(sw_solr_hash[:motivation]).to be_an Array
@@ -142,7 +195,7 @@ describe Triannon::SolrWriter, :vcr do
         expect(sw_solr_hash[:motivation]).to eq ["tagging"]
       end
     end
-    
+
     context 'annotated_at' do
       it "is a String" do
         expect(sw_solr_hash[:annotated_at]).to be_a String
@@ -162,11 +215,11 @@ describe Triannon::SolrWriter, :vcr do
       it "nil if date won't parse cleanly" do
         my_tg = Triannon::Graph.new RDF::Graph.new.from_ttl "
          <https://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/f3bc7da9-d531-4b0c-816a-8f2fc849b0b6> a <http://www.w3.org/ns/oa#Annotation>;
-           <http://www.w3.org/ns/oa#annotatedAt> \"not a date\" ." 
+           <http://www.w3.org/ns/oa#annotatedAt> \"not a date\" ."
         expect(Triannon::SolrWriter.solr_hash(my_tg)[:annotated_at]).to eq nil
       end
     end
-    
+
     context 'target_url' do
       it "is an Array of urls as Strings" do
         expect(sw_solr_hash[:target_url]).to be_an Array
@@ -199,7 +252,7 @@ describe Triannon::SolrWriter, :vcr do
         expect(Triannon::SolrWriter.solr_hash(my_g)[:target_type]).to be nil
       end
     end
-    
+
     context 'body_url' do
       it "is an Array of urls as Strings" do
         my_g = Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("body-url.json")
@@ -268,16 +321,16 @@ describe Triannon::SolrWriter, :vcr do
       it "is 'no_body' if there is no body" do
         g2 = Triannon::Graph.new RDF::Graph.new.from_jsonld(
           '{
-              "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+              "@context": "http://www.w3.org/ns/oa-context-20130208.json",
               "@id": "http://my.identifiers.com/oa_bookmark",
-              "@type": "oa:Annotation", 
-              "motivatedBy": "oa:bookmarking", 
+              "@type": "oa:Annotation",
+              "motivatedBy": "oa:bookmarking",
               "hasTarget": "http://purl.stanford.edu/kq131cs7229"
             }' )
         expect(Triannon::SolrWriter.solr_hash(g2)[:body_type]).to eq ['no_body']
       end
     end
-    
+
     context 'anno_jsonld' do
       it "is a String" do
         expect(sw_solr_hash[:anno_jsonld]).to be_a String

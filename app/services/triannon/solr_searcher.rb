@@ -14,7 +14,7 @@ module Triannon
       }
       result
     end
-    
+
     # @note hardcoded Solr search service expectation in generated search params
     # @note hardcoded mapping of REST params for /search to Solr params
     #
@@ -114,6 +114,8 @@ module Triannon
     end
 
 
+    attr_accessor :rsolr_client
+
     def initialize
       @rsolr_client = RSolr.connect :url => Triannon.config[:solr_url]
       @logger = Rails.logger
@@ -145,6 +147,12 @@ module Triannon
     def search(solr_params = {})
       handler = Proc.new do |exception, attempt_cnt, total_delay|
         @logger.debug "#{exception.inspect} on Solr search attempt #{attempt_cnt} for #{solr_params.inspect}"
+        if exception.kind_of?(RSolr::Error::Http)
+          # Note there are extra shenanigans b/c RSolr hijacks the Solr error to return RSolr Error
+          raise Triannon::SearchError.new("error searching Solr with params #{solr_params.inspect}: #{exception.message}", exception.response[:status], exception.response[:body])
+        elsif exception.kind_of?(StandardError)
+          raise Triannon::SearchError.new("error searching Solr with params #{solr_params.inspect}: #{exception.message}")
+        end
       end
 
       response = nil
@@ -154,6 +162,7 @@ module Triannon
                     :max_sleep_seconds => @max_sleep_seconds) do |attempt|
         @logger.debug "Solr search attempt #{attempt} for #{solr_params.inspect}"
         # use POST in case of long params
+        #  RSolr throws RSolr::Error::Http for any Solr response without status 200 or 302
         response = @rsolr_client.post 'select', :params => solr_params
         @logger.info "Successfully searched Solr on attempt #{attempt}"
       end

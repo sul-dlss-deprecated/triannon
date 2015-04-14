@@ -217,7 +217,7 @@ describe Triannon::LdpWriter, :vcr do
       expect(g.query([RDF::URI.new(full_body_obj_url), RDF.type, RDF::DCMIType.Text]).size).to eql 1
       expect(g.query([RDF::URI.new(full_body_obj_url), RDF::Content.chars, "I love this!"]).size).to eql 1
       expect(g.query([RDF::URI.new(full_body_obj_url), RDF::LDP.contains, RDF::URI.new(body_pid)]).size).to eql 0
-      
+
       body_container_url = "#{Triannon.config[:ldp_url]}/#{id}/b"
       body_container_resp = conn.get do |req|
         req.url body_container_url
@@ -262,7 +262,7 @@ describe Triannon::LdpWriter, :vcr do
 
   context '#delete_containers' do
     let(:base_uri) { Triannon.config[:ldp_url] }
-    
+
     it 'deletes the resource from the LDP store when id is full url' do
       ldpw = Triannon::LdpWriter.new anno
       ldp_id = ldpw.create_base
@@ -277,7 +277,7 @@ describe Triannon::LdpWriter, :vcr do
     it 'works when id is just uuid' do
       ldpw = Triannon::LdpWriter.new anno
       ldp_id = ldpw.create_base
-      
+
       ldpw.delete_containers ldp_id
 
       resp = conn.get do |req|
@@ -285,23 +285,23 @@ describe Triannon::LdpWriter, :vcr do
       end
       expect(resp.status).to eq 410
     end
-    
+
     it 'works with a String arg' do
       # see "deletes all child containers, recursively"
     end
     it 'works with Array arg' do
       # see "doesn't delete the parent container"
     end
-    
+
     it "doesn't delete the parent container" do
       ldp_id = Triannon::LdpWriter.create_anno anno
       ldpw = Triannon::LdpWriter.new(nil)
-      
+
       # delete the body resources
       l = Triannon::LdpLoader.new ldp_id
       l.load_anno_container
       ldpw.delete_containers l.ldp_annotation.body_uris
-      
+
       # ensure the body container still exists
       resp = conn.get do |req|
         req.url "#{ldp_id}/b"
@@ -317,10 +317,10 @@ describe Triannon::LdpWriter, :vcr do
       l.load_anno_container
       body_uris = l.ldp_annotation.body_uris
       expect(body_uris.size).to be > 0
-      
+
       # delete body container
       ldpw.delete_containers "#{ldp_id}/b"
-      
+
       # ensure no body objects still exist
       body_uris.each { |body_ldp_uri|
         # get the ids of the body resources
@@ -331,10 +331,69 @@ describe Triannon::LdpWriter, :vcr do
       }
     end
 
-    it "raises an exception if the delete does not succeed" do
-      expect { Triannon::LdpWriter.new(anno).delete_containers(['junkpid']) }.to raise_error(/Unable to delete LDP container: junkpid/)
+    context 'LDPStorageError' do
+      it "raised with status code and body when LDP returns [404, 409, 412]" do
+        container_id = "container_id"
+        ldp_resp_body = "foo"
+        [404, 409, 412].each { |status_code|
+          ldp_resp = double()
+          allow(ldp_resp).to receive(:body).and_return(ldp_resp_body)
+          allow(ldp_resp).to receive(:status).and_return(status_code)
+          my_conn = double()
+          allow(my_conn).to receive(:delete).and_return(ldp_resp)
+
+          writer = Triannon::LdpWriter.new anno
+          allow(writer).to receive(:conn).and_return(my_conn)
+
+          expect { writer.delete_containers([container_id]) }.to raise_error { |error|
+            expect(error).to be_a Triannon::LDPStorageError
+            expect(error.message).to eq "Unable to delete LDP container #{container_id}"
+            expect(error.ldp_resp_status).to eq status_code
+            expect(error.ldp_resp_body).to eq ldp_resp_body
+          }
+        }
+      end
     end
+
   end # delete_containers
+
+  context '#create_resource' do
+    it "returns the last part of the url of the newly created resource, derived from Location header" do
+      resp = double()
+      allow(resp).to receive(:status).and_return(201)
+      allow(resp).to receive(:body)
+      allow(resp).to receive(:headers).and_return("Location" => "http://ldpstore.org/ldpcontainter/id")
+      my_conn = double()
+      allow(my_conn).to receive(:post).and_return(resp)
+      my_svc = Triannon::LdpWriter.new anno
+      allow(my_svc).to receive(:conn).and_return(my_conn)
+      expect(my_svc.send(:create_resource, "ignore this fake turtle")).to eq "id"
+    end
+    context 'LDPStorageError' do
+      it "raised with status code and body when LDP returns [404, 409, 412]" do
+        rdf_as_string = "resource as string"
+        container_id = "container_id"
+        ldp_resp_body = "foo"
+        [404, 409, 412].each { |status_code|
+          ldp_resp = double()
+          allow(ldp_resp).to receive(:body).and_return(ldp_resp_body)
+          allow(ldp_resp).to receive(:status).and_return(status_code)
+          my_conn = double()
+          allow(my_conn).to receive(:post).and_return(ldp_resp)
+
+          writer = Triannon::LdpWriter.new anno
+          allow(writer).to receive(:conn).and_return(my_conn)
+
+          expect { writer.send(:create_resource, rdf_as_string, container_id) }.to raise_error { |error|
+            expect(error).to be_a Triannon::LDPStorageError
+            expect(error.message).to eq "Unable to create LDP resource in container #{container_id}; RDF sent: #{rdf_as_string}"
+            expect(error.ldp_resp_status).to eq status_code
+            expect(error.ldp_resp_body).to eq ldp_resp_body
+          }
+        }
+      end
+    end
+  end
 
   context '#create_direct_container' do
     it 'LDP store creates retrievable, empty LDP DirectContainer with expected id and LDP member relationships' do
@@ -367,15 +426,27 @@ describe Triannon::LdpWriter, :vcr do
       full_cont_url = "#{Triannon.config[:ldp_url]}/#{id}/b"
       expect(g.query([RDF::URI.new(full_cont_url), RDF::LDP.hasMemberRelation, RDF::OpenAnnotation.hasBody]).size).to eql 1
     end
-    it "raises an exception if LDP store doesn't return a 200 or 201" do
-      resp = double()
-      allow(resp).to receive(:status).and_return(404)
-      allow(resp).to receive(:body)
-      my_conn = double()
-      allow(my_conn).to receive(:post).and_return(resp)
-      my_svc = Triannon::LdpWriter.new anno
-      allow(my_svc).to receive(:conn).and_return(my_conn)
-      expect { my_svc.send(:create_direct_container, RDF::OpenAnnotation.hasTarget) }.to raise_error(/Unable to create Target LDP container for anno: Response Status: 404/)
+    context 'LDPStorageError' do
+      it "raised with status code and body when LDP returns [404, 409, 412]" do
+        ldp_resp_body = "foo"
+        [404, 409, 412].each { |status_code|
+          ldp_resp = double()
+          allow(ldp_resp).to receive(:body).and_return(ldp_resp_body)
+          allow(ldp_resp).to receive(:status).and_return(status_code)
+          my_conn = double()
+          allow(my_conn).to receive(:post).and_return(ldp_resp)
+
+          writer = Triannon::LdpWriter.new anno
+          allow(writer).to receive(:conn).and_return(my_conn)
+
+          expect { writer.send(:create_direct_container, RDF::OpenAnnotation.hasTarget) }.to raise_error { |error|
+            expect(error).to be_a Triannon::LDPStorageError
+            expect(error.message).to match /^Unable to create Target LDP container for anno; RDF sent: /
+            expect(error.ldp_resp_status).to eq status_code
+            expect(error.ldp_resp_body).to eq ldp_resp_body
+          }
+        }
+      end
     end
   end
 
@@ -506,9 +577,9 @@ describe Triannon::LdpWriter, :vcr do
     context 'external URI' do
       it 'plain URI' do
         my_anno = Triannon::Annotation.new data: '{
-          "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-          "@type": "oa:Annotation", 
-          "motivatedBy": "oa:commenting", 
+          "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+          "@type": "oa:Annotation",
+          "motivatedBy": "oa:commenting",
           "hasBody": "http://dbpedia.org/resource/Otto_Ege"
         }'
         my_ldpw = Triannon::LdpWriter.new my_anno
@@ -550,18 +621,18 @@ describe Triannon::LdpWriter, :vcr do
       end
       it 'URI has semantic tag' do
         my_anno = Triannon::Annotation.new data: '{
-          "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-          "@type": "oa:Annotation", 
-          "motivatedBy": "oa:commenting", 
+          "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+          "@type": "oa:Annotation",
+          "motivatedBy": "oa:commenting",
           "hasBody": {
-            "@id": "http://dbpedia.org/resource/Love", 
+            "@id": "http://dbpedia.org/resource/Love",
             "@type": "oa:SemanticTag"
           }
         }'
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_body_container
-        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasBody) 
+        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasBody)
         expect(body_uuids.size).to eql 1
         body_obj_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuids[0]}"
         resp = conn.get do |req|
@@ -588,7 +659,7 @@ describe Triannon::LdpWriter, :vcr do
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_body_container
-        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasBody) 
+        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasBody)
         expect(body_uuids.size).to eql 1
         body_obj_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuids[0]}"
         resp = conn.get do |req|
@@ -704,16 +775,16 @@ describe Triannon::LdpWriter, :vcr do
       end
       it 'multiple URI resources with addl properties' do
         my_anno = Triannon::Annotation.new data: '{
-          "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-          "@type": "oa:Annotation", 
-          "motivatedBy": "oa:commenting", 
+          "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+          "@type": "oa:Annotation",
+          "motivatedBy": "oa:commenting",
           "hasBody": [
             {
-              "@id": "http://dbpedia.org/resource/Love", 
+              "@id": "http://dbpedia.org/resource/Love",
               "@type": "oa:SemanticTag"
-            }, 
+            },
             {
-              "@id": "http://www.example.org/comment.mp3", 
+              "@id": "http://www.example.org/comment.mp3",
               "@type": "dctypes:Sound"
             }
           ]
@@ -806,9 +877,9 @@ describe Triannon::LdpWriter, :vcr do
             "@type": "oa:SpecificResource",
             "hasSource": "http://purl.stanford.edu/kq131cs7229.html",
             "hasSelector": {
-              "@type": "oa:TextQuoteSelector", 
-              "suffix": " and The Canonical Epistles,", 
-              "exact": "third and fourth Gospels", 
+              "@type": "oa:TextQuoteSelector",
+              "suffix": " and The Canonical Epistles,",
+              "exact": "third and fourth Gospels",
               "prefix": "manuscript which comprised the "
             }
           }
@@ -1007,7 +1078,7 @@ describe Triannon::LdpWriter, :vcr do
         expect(g.query([selector_obj, RDF::DC.conformsTo, RDF::URI.new("http://www.w3.org/TR/media-frags/")]).size).to eql 1
       end
     end # SpecificResource
-    
+
     context 'Choice' do
       it 'contains all appropriate statements for blank nodes, recursively' do
         my_anno = Triannon::Annotation.new data: '{
@@ -1121,7 +1192,7 @@ describe Triannon::LdpWriter, :vcr do
          g = RDF::FCRepo4.remove_fedora_triples(g)
          target_node_obj = RDF::URI.new(target_url)
          expect(g.query([target_node_obj, RDF.type, RDF::OpenAnnotation.Choice]).size).to eql 1
-         default_pid_solns = g.query [target_node_obj, RDF::OpenAnnotation.default, nil] 
+         default_pid_solns = g.query [target_node_obj, RDF::OpenAnnotation.default, nil]
          expect(default_pid_solns.count).to eql 1
          default_node_pid = default_pid_solns.first.object.to_s
          expect(default_node_pid).to match "#{target_url}#default" # this is a fcrepo4 implementation of hash URI node
@@ -1139,7 +1210,7 @@ describe Triannon::LdpWriter, :vcr do
          expect(default_subj_solns.count).to eql 2
          expect(default_subj_solns).to include [default_node_obj, RDF.type, RDF::DCMIType.Image]
          expect(default_subj_solns).to include [default_node_obj, RDF::Triannon.externalReference, RDF::URI.new(default_url)]
-         
+
          # the first item blank node object / ttl
          item1_node_obj = RDF::URI.new(item1_pid)
          item1_subj_solns = g.query([item1_node_obj, nil, nil])
@@ -1157,7 +1228,7 @@ describe Triannon::LdpWriter, :vcr do
          expect([item1_url, item2_url]).to include item_url
       end
     end # Choice
-    
+
     context 'multiple resources of different types' do
       it 'multiple resources (one URI)' do
         my_anno = Triannon::Annotation.new data: '{
@@ -1214,4 +1285,14 @@ describe Triannon::LdpWriter, :vcr do
     end
   end # create_resources_in_container
 
+  describe '#conn' do
+    it "returns a Faraday::Connection" do
+      conn = ldpw.send(:conn)
+      expect(conn).to be_a Faraday::Connection
+    end
+    it "sets Prefer header to omit server managed triples" do
+      conn = ldpw.send(:conn)
+      expect(conn.headers).to include("Prefer" => 'return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"')
+    end
+  end
 end

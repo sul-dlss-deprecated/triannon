@@ -166,6 +166,61 @@ describe Triannon::SearchController, :vcr, type: :controller do
       end
     end # response format
 
+    context 'SearchError' do
+      let(:triannon_err_msg) { "triannon msg" }
+
+      context 'with Solr HTTP info' do
+        let(:search_resp_code) { 409 }
+        let(:search_resp_body) { "body of error resp from search server" }
+        let(:search_error) { Triannon::SearchError.new(triannon_err_msg, search_resp_code, search_resp_body)}
+        it "gives Solr's resp code" do
+          ss = subject.send(:solr_searcher)
+          allow(ss).to receive(:find).and_raise(search_error)
+          get :find, {'targetUri' => "some.url.org"}
+          expect(response.status).to eq search_resp_code
+        end
+        it "gives html response" do
+          ss = subject.send(:solr_searcher)
+          allow(ss).to receive(:find).and_raise(search_error)
+          get :find, {'targetUri' => "some.url.org"}
+          expect(response.content_type).to eql "text/html"
+        end
+        it "has useful info in the responose" do
+          ss = subject.send(:solr_searcher)
+          allow(ss).to receive(:find).and_raise(search_error)
+          get :find, {'targetUri' => "some.url.org"}
+          expect(response.body).to match search_resp_body
+          expect(response.body).to match triannon_err_msg
+        end
+      end
+
+      context 'no Solr HTTP info' do
+        let(:search_error) { Triannon::SearchError.new(triannon_err_msg)}
+
+        context 'with Solr HTTP info' do
+          it "gives 400 resp code" do
+            ss = subject.send(:solr_searcher)
+            allow(ss).to receive(:find).and_raise(search_error)
+            get :find, {'targetUri' => "some.url.org"}
+            expect(response.status).to eq 400
+          end
+          it "gives html response" do
+            ss = subject.send(:solr_searcher)
+            allow(ss).to receive(:find).and_raise(search_error)
+            get :find, {'targetUri' => "some.url.org"}
+            expect(response.content_type).to eql "text/html"
+          end
+          it "has useful info in the responose" do
+            ss = subject.send(:solr_searcher)
+            allow(ss).to receive(:find).and_raise(search_error)
+            get :find, {'targetUri' => "some.url.org"}
+            expect(response.body).to match triannon_err_msg
+          end
+        end
+      end
+
+    end # SearchError
+
   end # GET find
 
 
