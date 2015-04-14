@@ -47,6 +47,7 @@ module Triannon
       doc_hash
     end
 
+    attr_accessor :rsolr_client
 
     def initialize
       @rsolr_client = RSolr.connect :url => Triannon.config[:solr_url]
@@ -72,37 +73,51 @@ module Triannon
 
       handler = Proc.new do |exception, attempt_cnt, total_delay|
         @logger.debug "#{exception.inspect} on Solr add attempt #{attempt_cnt} for #{id}"
+        if exception.kind_of?(RSolr::Error::Http)
+          # Note there are extra shenanigans b/c RSolr hijacks the Solr error to return RSolr Error
+          raise Triannon::SearchError.new("error adding doc #{id} to Solr #{doc.inspect}; #{exception.message}", exception.response[:status], exception.response[:body])
+        elsif exception.kind_of?(StandardError)
+          raise Triannon::SearchError.new("error adding doc #{id} to Solr #{doc.inspect}; #{exception.message}")
+        end
       end
 
-      with_retries(:handler => handler, 
-                    :max_tries => @max_retries, 
-                    :base_sleep_seconds => @base_sleep_seconds, 
+      with_retries(:handler => handler,
+                    :max_tries => @max_retries,
+                    :base_sleep_seconds => @base_sleep_seconds,
                     :max_sleep_seconds => @max_sleep_seconds) do |attempt|
         @logger.debug "Solr add attempt #{attempt} for #{id}"
         # add it and commit within 0.5 seconds
         @rsolr_client.add(doc, :add_attributes => {:commitWithin => 500})
+        #  RSolr throws RSolr::Error::Http for any Solr response without status 200 or 302
         @logger.info "Successfully indexed #{id} to Solr on attempt #{attempt}"
       end
     end
-    
+
     # Delete the document from Solr, retrying if an error occurs.
     # See https://github.com/ooyala/retries for info on with_retries.
     # @param [String] id the id of the Solr document to be deleted
     def delete(id)
       handler = Proc.new do |exception, attempt_cnt, total_delay|
         @logger.debug "#{exception.inspect} on Solr delete attempt #{attempt_cnt} for #{id}"
-      end  
+        if exception.kind_of?(RSolr::Error::Http)
+          # Note there are extra shenanigans b/c RSolr hijacks the Solr error to return RSolr Error
+          raise Triannon::SearchError.new("error deleting doc #{id} from Solr: #{exception.message}", exception.response[:status], exception.response[:body])
+        elsif exception.kind_of?(StandardError)
+          raise Triannon::SearchError.new("error deleting doc #{id} from Solr: #{exception.message}")
+        end
+      end
 
-      with_retries(:handler => handler, 
-                    :max_tries => @max_retries, 
-                    :base_sleep_seconds => @base_sleep_seconds, 
+      with_retries(:handler => handler,
+                    :max_tries => @max_retries,
+                    :base_sleep_seconds => @base_sleep_seconds,
                     :max_sleep_seconds => @max_sleep_seconds) do |attempt|
         @logger.debug "Solr delete attempt #{attempt} for #{id}"
+        #  RSolr throws RSolr::Error::Http for any Solr response without status 200 or 302
         @rsolr_client.delete_by_id(id)
         @rsolr_client.commit
         @logger.info "Successfully deleted #{id} from Solr"
-      end      
+      end
     end
-    
+
   end
 end
