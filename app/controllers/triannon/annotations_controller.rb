@@ -6,6 +6,7 @@ module Triannon
 
     rescue_from Triannon::LDPStorageError, with: :ldp_storage_error
     rescue_from Triannon::ExternalReferenceError, with: :ext_ref_error
+    rescue_from Triannon::SearchError, with: :search_error
     before_action :default_format_jsonld, only: [:show]
     before_action :set_annotation, only: [:show, :update, :destroy]
 
@@ -142,6 +143,13 @@ private
     # render Triannon::LDPStorage error
     def ldp_storage_error(err)
       render :body => "<h2>#{err.message}</h2>" + err.ldp_resp_body, status: err.ldp_resp_status, content_type: "text/html"
+    end
+
+    # render Triannon::SearchError
+    def search_error(err)
+      render :body => "<h2>#{err.message}</h2>" + (err.search_resp_body ? err.search_resp_body : ""),
+        status: err.search_resp_status ? err.search_resp_status : 400,
+        content_type: "text/html"
     end
 
     # render json_ld respecting requested context

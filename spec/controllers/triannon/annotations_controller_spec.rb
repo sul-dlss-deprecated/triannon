@@ -19,7 +19,6 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
     # TODO: because this will soon be a sort of redirect to /search, not bothering to test for LDPStorageError
   end
 
-
   context "#create" do
     let (:ttl_data) {Triannon.annotation_fixture("body-chars.ttl")}
     it 'creates a new annotation from the body of the request' do
@@ -440,7 +439,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       let(:triannon_err_msg) { "triannon msg" }
       let(:ldp_error) { Triannon::LDPStorageError.new(triannon_err_msg, ldp_resp_code, ldp_resp_body)}
 
-      it "gives resp code" do
+      it "gives LDP resp code" do
         allow(Triannon::LdpWriter).to receive(:create_anno).and_raise(ldp_error)
         post :create, ttl_data
         expect(response.status).to eq ldp_resp_code
@@ -457,6 +456,54 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
         expect(response.body).to match triannon_err_msg
       end
     end # LDP storage error
+
+    context 'SearchError' do
+      let(:triannon_err_msg) { "triannon msg" }
+
+      context 'with Solr HTTP info' do
+        let(:search_resp_code) { 409 }
+        let(:search_resp_body) { "body of error resp from search server" }
+        let(:search_error) { Triannon::SearchError.new(triannon_err_msg, search_resp_code, search_resp_body)}
+        it "gives Solr's resp code" do
+          allow(subject).to receive(:create).and_raise(search_error)
+          get :create, ttl_data
+          expect(response.status).to eq search_resp_code
+        end
+        it "gives html response" do
+          allow(subject).to receive(:create).and_raise(search_error)
+          get :create, ttl_data
+          expect(response.content_type).to eql "text/html"
+        end
+        it "has useful info in the responose" do
+          allow(subject).to receive(:create).and_raise(search_error)
+          get :create, ttl_data
+          expect(response.body).to match search_resp_body
+          expect(response.body).to match triannon_err_msg
+        end
+      end
+
+      context 'no Solr HTTP info' do
+        let(:search_error) { Triannon::SearchError.new(triannon_err_msg)}
+
+        context 'with Solr HTTP info' do
+          it "gives 400 resp code" do
+            allow(subject).to receive(:create).and_raise(search_error)
+            get :create, ttl_data
+            expect(response.status).to eq 400
+          end
+          it "gives html response" do
+            allow(subject).to receive(:create).and_raise(search_error)
+            get :create, ttl_data
+            expect(response.content_type).to eql "text/html"
+          end
+          it "has useful info in the responose" do
+            allow(subject).to receive(:create).and_raise(search_error)
+            get :create, ttl_data
+            expect(response.body).to match triannon_err_msg
+          end
+        end
+      end
+    end # SearchError
   end # #create
 
   context '#show' do
@@ -837,20 +884,69 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       let(:fake_id) { "foo" }
 
       it "gives 404 resp code" do
-        get :destroy, id: fake_id
+        delete :destroy, id: fake_id
         expect(response.status).to eq 404
       end
       it "gives html response" do
-        get :destroy, id: fake_id
+        delete :destroy, id: fake_id
         expect(response.content_type).to eql "text/html"
       end
       it "has useful info in the responose" do
-        get :destroy, id: fake_id
+        delete :destroy, id: fake_id
         expect(response.body).to match fake_id
         expect(response.body).to match "404"
         expect(response.body).to match "Not Found"
       end
     end
+    context 'SearchError' do
+      let(:triannon_err_msg) { "triannon msg" }
+      let(:fake_id) {"blargle"}
+      before(:example) do
+        allow(Triannon::Annotation).to receive(:find)
+        allow(Triannon::LdpWriter).to receive(:delete_anno)
+      end
+
+      context 'with Solr HTTP info' do
+        let(:search_resp_code) { 409 }
+        let(:search_resp_body) { "body of error resp from search server" }
+        let(:search_error) { Triannon::SearchError.new(triannon_err_msg, search_resp_code, search_resp_body)}
+        it "gives Solr's resp code" do
+          allow(subject).to receive(:destroy).and_raise(search_error)
+          delete :destroy, id: fake_id
+          expect(response.status).to eq search_resp_code
+        end
+        it "gives html response" do
+          allow(subject).to receive(:destroy).and_raise(search_error)
+          delete :destroy, id: fake_id
+          expect(response.content_type).to eql "text/html"
+        end
+        it "has useful info in the responose" do
+          allow(subject).to receive(:destroy).and_raise(search_error)
+          delete :destroy, id: fake_id
+          expect(response.body).to match search_resp_body
+          expect(response.body).to match triannon_err_msg
+        end
+      end
+
+      context 'no Solr HTTP info' do
+        let(:search_error) { Triannon::SearchError.new(triannon_err_msg)}
+        it "gives 400 resp code" do
+          allow(subject).to receive(:destroy).and_raise(search_error)
+          delete :destroy, id: fake_id
+          expect(response.status).to eq 400
+        end
+        it "gives html response" do
+          allow(subject).to receive(:destroy).and_raise(search_error)
+          delete :destroy, id: fake_id
+          expect(response.content_type).to eql "text/html"
+        end
+        it "has useful info in the responose" do
+          allow(subject).to receive(:destroy).and_raise(search_error)
+          delete :destroy, id: fake_id
+          expect(response.body).to match triannon_err_msg
+        end
+      end
+    end # SearchError
   end
 
 end
