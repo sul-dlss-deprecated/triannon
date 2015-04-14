@@ -11,13 +11,9 @@ require 'jettywrapper'
 
 require 'engine_cart/rake_task'
 desc 'run the triannon specs'
-task :ci => ['engine_cart:generate', 'jetty:clean'] do
-  # run the tests
+task :ci => 'engine_cart:generate' do
   RAILS_ENV = 'test'
-  jetty_params = Jettywrapper.load_config.merge({:jetty_home => File.expand_path(File.dirname(__FILE__) + '/jetty')})
-  Jettywrapper.wrap(jetty_params) do
-    Rake::Task['spec'].invoke
-  end
+  Rake::Task['spec'].invoke
 end
 
 namespace :triannon do
