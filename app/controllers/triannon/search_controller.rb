@@ -5,6 +5,7 @@ module Triannon
     include RdfResponseFormats
 
     before_action :default_format_jsonld, only: [:find]
+    rescue_from Triannon::SearchError, with: :search_error
 
     def find
       anno_graphs_array = solr_searcher.find(params)
@@ -40,6 +41,14 @@ module Triannon
       @ss ||= Triannon::SolrSearcher.new
     end
 
+  private
+
+    # render Triannon::SearchError
+    def search_error(err)
+      render :body => "<h2>#{err.message}</h2>" + (err.search_resp_body ? err.search_resp_body : ""),
+        status: err.search_resp_status ? err.search_resp_status : 400,
+        content_type: "text/html"
+    end
 
   end # SearchController
 
