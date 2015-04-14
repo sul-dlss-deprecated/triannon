@@ -17,4 +17,25 @@ gem 'pry-byebug', group: [:development, :test]
   if File.exists?(file)
     puts "Loading #{file} ..." if $DEBUG # `ruby -d` or `bundle -v`
     instance_eval File.read(file)
+  else
+    # we get here when we haven't yet generated the testing app via engine_cart
+    #  (perhaps not needed forever)
+    #
+    # as of sometime between 2015-04-09 and 2015-04-13, we get
+    # bundler error when running rake ci w/o generating testing app first (e.g. travis):
+    #
+    # Bundler could not find compatible versions for gem "tilt":
+    #  In snapshot (Gemfile.lock):
+    #    tilt (2.0.1)
+    #
+    #  In Gemfile:
+    #    sass-rails (~> 5.0) ruby depends on
+    #      tilt (~> 1.1) ruby
+    #
+    # this means omewhere in the triannon dependencies (2nd level or lower), the version
+    #  from the triannon dependencies conflicts with the rails application's dependencies on sass
+    #  rails v4.2.1 / sass-rails 5.0.3 / haml
+    #
+    # magically, the following line fixes this problem.
+    gem 'tilt'
   end
