@@ -37,5 +37,5 @@ gem 'pry-byebug', group: [:development, :test]
     #  rails v4.2.1 / sass-rails 5.0.3 / haml
     #
     # magically, the following line fixes this problem.
-    gem 'tilt'
+    gem 'tilt', '~> 1.1'  # sass-rails (~> 5.0) ruby depends on tilt ~> 1.1
   end
