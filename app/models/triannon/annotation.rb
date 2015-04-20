@@ -35,6 +35,7 @@ module Triannon
       anno
     end
 
+    # @deprecated - was used by old annotations#index action, before redirect to search (2015-04)
     def self.all
       Triannon::LdpLoader.find_all
     end

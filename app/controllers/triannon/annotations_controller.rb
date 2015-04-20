@@ -12,7 +12,7 @@ module Triannon
 
     # GET /annotations
     def index
-      @annotations = Annotation.all
+      redirect_to "/search"
     end
 
     # GET /annotations/1

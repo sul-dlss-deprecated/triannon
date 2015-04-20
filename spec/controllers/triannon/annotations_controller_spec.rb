@@ -10,13 +10,14 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
   json_regex = /\A\{.+\}\Z/m
 
   context '#index' do
-    it "returns ids of annos" do
-      a1 = Triannon::Annotation.new :id => 'abc'
-      a2 = Triannon::Annotation.new :id => 'dce'
-      allow(Triannon::Annotation).to receive(:all).and_return [a1, a2]
+    it "redirects to search#find with no params" do
       get :index
+      expect(response).to redirect_to ('/search')
     end
-    # TODO: because this will soon be a sort of redirect to /search, not bothering to test for LDPStorageError
+    it "response code of 302 due to redirect" do
+      get :index
+      expect(response.status).to be 302
+    end
   end
 
   context "#create" do

@@ -57,10 +57,10 @@ describe Triannon::AnnotationsController, type: :routing do
       expect(:get => "/annotations/oa").to_not be_routable
     end
   end
-  
+
   context 'http GET to root without id' do
-    it '(plain) routes to #index in annotations controller' do
-      expect(:get => "/").to route_to(:controller => "triannon/annotations", :action => "index")
+    it '(plain) routes to #find in search controller' do
+      expect(:get => "/").to route_to(:controller => "triannon/search", :action => "find")
     end
     it 'iiif should not be available' do
       expect(:get => "/iiif").to_not be_routable
@@ -84,7 +84,7 @@ describe Triannon::AnnotationsController, type: :routing do
       expect(:get => "/annotations/search/new").to_not be_routable
     end
   end
-  
+
   context 'http POST' do
     it '(plain) routes to #create in annotations controller' do
       expect(:post => "/annotations").to route_to(:controller => "triannon/annotations", :action => "create")
@@ -123,7 +123,7 @@ describe Triannon::AnnotationsController, type: :routing do
       expect(:put => "/annotations/oa/666").to_not be_routable
     end
   end
-  
+
   context 'http PATCH' do
     it '(plain) should not be available' do
       expect(:patch => "/annotations/666").to_not be_routable

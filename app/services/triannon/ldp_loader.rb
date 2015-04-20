@@ -16,6 +16,7 @@ module Triannon
       oa_graph
     end
 
+    # @deprecated was needed by old annotations#index action, which now redirects to search (2015-04)
     def self.find_all
       l = Triannon::LdpLoader.new
       l.find_all
@@ -52,6 +53,7 @@ module Triannon
     end
 
     # @return [Array<Triannon::Annotation>] an array of Triannon::Annotation objects with just the id set. Enough info to build the index page
+    # @deprecated was needed by old annotations#index action, which now redirects to search (2015-04).
     def find_all
       root_ttl = get_ttl
       objs = []
