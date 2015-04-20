@@ -63,9 +63,22 @@ RestClient.enable Rack::Cache,
 ## Client Interactions with Triannon
 
 ### Get a list of annos
-NOTE:  implementation of Annotation Lists is coming!
-* `GET`: `http://(host)/`
-* `GET`: `http://(host)/annotations`
+as a IIIF Annotation List (see http://iiif.io/api/presentation/2.0/#other-content-resources)
+
+* `GET`: `http://(host)/annotations/search?targetUri=some.url.org`
+
+Search Parameters:
+* `targetUri` - matches URI for target, with or without http or https scheme prefix
+* `bodyUri` - matches URI for target, with or without http or https scheme prefix
+* `bodyExact` - matches body characters exactly
+* `bodyKeyword` - matches terms in body characters
+* `motivatedBy` - matches fragment part of motivation predicate URI, e.g.  commenting, tagging, painting
+
+* use HTTP `Accept` header with mime type to indicate desired format
+  * default:  jsonld
+    * `Accept`: `application/ld+json`
+  * also supports turtle, rdfxml, json, html
+    * `Accept`: `application/x-turtle`
 
 ### Get a particular anno
 `GET`: `http://(host)/annotations/(anno_id)`
