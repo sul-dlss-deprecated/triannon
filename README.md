@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/sul-dlss/triannon.png?label=ready&title=Ready)](https://waffle.io/sul-dlss/triannon)
 [![Build Status](https://travis-ci.org/sul-dlss/triannon.svg?branch=master)](https://travis-ci.org/sul-dlss/triannon) [![Coverage Status](https://coveralls.io/repos/sul-dlss/triannon/badge.png)](https://coveralls.io/r/sul-dlss/triannon) [![Dependency Status](https://gemnasium.com/sul-dlss/triannon.svg)](https://gemnasium.com/sul-dlss/triannon) [![Gem Version](https://badge.fury.io/rb/triannon.svg)](http://badge.fury.io/rb/triannon)
 
 # Triannon
