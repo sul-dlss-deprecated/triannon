@@ -14,13 +14,13 @@ describe Triannon::LdpToOaMapper, :vcr do
   }
 
   describe ".ldp_to_oa" do
-    it "maps an AnnotationLdp to an Triannon::Graph" do
+    it "maps an AnnotationLdp to an OA::Graph" do
       ldp_anno.load_statements_into_graph body_stmts
       ldp_anno.load_statements_into_graph target_stmts
       oa_graph = Triannon::LdpToOaMapper.ldp_to_oa ldp_anno
 
-      expect(oa_graph).to be_a Triannon::Graph
-      resp = oa_graph.query [nil, RDF.type, RDF::OpenAnnotation.Annotation ]
+      expect(oa_graph).to be_a OA::Graph
+      resp = oa_graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation ]
       expect(resp.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/deb27887-1241-4ccc-a09c-439293d73fbb"
     end
     it "calls #extract_base" do
@@ -47,7 +47,7 @@ describe Triannon::LdpToOaMapper, :vcr do
 
     it "builds the base identifier from the triannon.yml triannon_base_url and @id" do
       mapper.extract_base
-      soln = mapper.oa_graph.query [nil, RDF.type, RDF::OpenAnnotation.Annotation]
+      soln = mapper.oa_graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
       expect(soln.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/deb27887-1241-4ccc-a09c-439293d73fbb"
     end
 
@@ -55,33 +55,33 @@ describe Triannon::LdpToOaMapper, :vcr do
       orig_val = Triannon.config[:triannon_base_url]
       Triannon.config[:triannon_base_url] = "http://mine.com/annotations/"  # with trailing slash
       mapper.extract_base
-      soln = mapper.oa_graph.query [nil, RDF.type, RDF::OpenAnnotation.Annotation]
+      soln = mapper.oa_graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
       expect(soln.first.subject.to_s).to match "http://mine.com/annotations/deb27887-1241-4ccc-a09c-439293d73fbb"
       Triannon.config[:triannon_base_url] = "http://mine.com/annotations"  # without trailing slash
       mapper.extract_base
-      soln = mapper.oa_graph.query [nil, RDF.type, RDF::OpenAnnotation.Annotation]
+      soln = mapper.oa_graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
       expect(soln.first.subject.to_s).to match "http://mine.com/annotations/deb27887-1241-4ccc-a09c-439293d73fbb"
       Triannon.config[:triannon_base_url] = orig_val
     end
 
-    it "checks the RDF.type to be RDF::OpenAnnotation.Annotation" do
+    it "checks the RDF.type to be RDF::Vocab::OA.Annotation" do
       skip "raise an exception if it is not?"
     end
 
     it "extracts the motivations" do
       mapper.extract_base
-      soln = mapper.oa_graph.query [nil, RDF::OpenAnnotation.motivatedBy, nil]
+      soln = mapper.oa_graph.query [nil, RDF::Vocab::OA.motivatedBy, nil]
       expect(soln.count).to eq 1
-      expect(soln.first.object).to eq RDF::OpenAnnotation.commenting
+      expect(soln.first.object).to eq RDF::Vocab::OA.commenting
     end
-    
+
     it "extracts annotatedAt" do
       prov_base_ttl = File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_base_prov.ttl')
       my_ldp_anno = Triannon::AnnotationLdp.new
       my_ldp_anno.load_statements_into_graph RDF::Graph.new.from_ttl(prov_base_ttl).statements
       my_mapper = Triannon::LdpToOaMapper.new my_ldp_anno
       my_mapper.extract_base
-      soln = my_mapper.oa_graph.query [nil, RDF::OpenAnnotation.annotatedAt, nil]
+      soln = my_mapper.oa_graph.query [nil, RDF::Vocab::OA.annotatedAt, nil]
       expect(soln.count).to eq 1
       expect(soln.first.object.to_s).to eq "2015-01-07T18:01:21Z"
     end
@@ -90,7 +90,7 @@ describe Triannon::LdpToOaMapper, :vcr do
   describe "#extract_bodies" do
     it "calls #map_external_ref when body is an external ref" do
       body_ttl = "
-        <http://localhost:8983/fedora/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23> 
+        <http://localhost:8983/fedora/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23>
         <http://triannon.stanford.edu/ns/externalReference> <http://some.external.ref> ."
       my_body_stmts = RDF::Graph.new.from_ttl(body_ttl).statements
       ldp_anno.load_statements_into_graph my_body_stmts
@@ -113,7 +113,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
       @prefix triannon: <http://triannon.stanford.edu/ns/> .
       @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-      
+
       <#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23> a ldp:Container,
            ldp:DirectContainer,
            ldp:RDFSource,
@@ -169,7 +169,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       @prefix openannotation: <http://www.w3.org/ns/oa#> .
       @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
       @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-      
+
       <#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1> a ldp:Container,
            ldp:DirectContainer,
            ldp:RDFSource,
@@ -210,7 +210,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       mapper.extract_targets
     end
   end #extract_targets
-  
+
   describe '#map_external_ref' do
     let(:target_url) { "http://purl.stanford.edu/kq131cs7229" }
     it "adds statement with external uri from externalReference statement to oa_graph" do
@@ -220,12 +220,12 @@ describe Triannon::LdpToOaMapper, :vcr do
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
       orig_size = mapper.oa_graph.size
-      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      solns = mapper.oa_graph.query [nil, RDF::Vocab::OA.hasTarget, nil]
       expect(solns.count).to eq 0
-      
-      mapper.map_external_ref(target_uri, RDF::OpenAnnotation.hasTarget)
 
-      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      mapper.map_external_ref(target_uri, RDF::Vocab::OA.hasTarget)
+
+      solns = mapper.oa_graph.query [nil, RDF::Vocab::OA.hasTarget, nil]
       expect(solns.count).to eq 1
       uri = solns.first.object
       expect(uri.class).to eq RDF::URI
@@ -239,8 +239,8 @@ describe Triannon::LdpToOaMapper, :vcr do
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
       orig_size = mapper.oa_graph.size
-      
-      expect(mapper.map_external_ref(target_uri, RDF::OpenAnnotation.hasTarget)).to be true
+
+      expect(mapper.map_external_ref(target_uri, RDF::Vocab::OA.hasTarget)).to be true
       expect(mapper.oa_graph.size).to be > orig_size
     end
     it "returns false if it doesn't change oa_graph" do
@@ -250,8 +250,8 @@ describe Triannon::LdpToOaMapper, :vcr do
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
       orig_size = mapper.oa_graph.size
-      
-      expect(mapper.map_external_ref(body_uri, RDF::OpenAnnotation.hasTarget)).to be false
+
+      expect(mapper.map_external_ref(body_uri, RDF::Vocab::OA.hasTarget)).to be false
       expect(mapper.oa_graph.size).to eql orig_size
     end
     it "doesn't change @oa_graph if there is no Triannon:externalReference in the container" do
@@ -262,7 +262,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       target_url1 = target_url
       target_url2 = "http://purl.stanford.edu/ab123cd4567"
       target_ttl = "
-        <http://localhost:8983/fedora/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1> 
+        <http://localhost:8983/fedora/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1>
         <http://triannon.stanford.edu/ns/externalReference> <#{target_url1}>, <#{target_url2}>; ."
       my_target_stmts = RDF::Graph.new.from_ttl(target_ttl).statements
       ldp_anno.load_statements_into_graph my_target_stmts
@@ -270,10 +270,10 @@ describe Triannon::LdpToOaMapper, :vcr do
 
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
-      expect(mapper.oa_graph.query([nil, RDF::OpenAnnotation.hasTarget, nil]).size).to eq 0
-      
-      mapper.map_external_ref(target_uri, RDF::OpenAnnotation.hasTarget)
-      expect(mapper.oa_graph.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI.new(target_url1)]).size).to eq 1
+      expect(mapper.oa_graph.query([nil, RDF::Vocab::OA.hasTarget, nil]).size).to eq 0
+
+      mapper.map_external_ref(target_uri, RDF::Vocab::OA.hasTarget)
+      expect(mapper.oa_graph.query([nil, RDF::Vocab::OA.hasTarget, RDF::URI.new(target_url1)]).size).to eq 1
       expect(mapper.oa_graph.query([nil, nil, RDF::URI.new(target_url2)]).size).to eq 0
     end
     it "includes SemanticTags when present" do
@@ -291,13 +291,13 @@ describe Triannon::LdpToOaMapper, :vcr do
       mapper.extract_base
       orig_size = mapper.oa_graph.size
 
-      mapper.map_external_ref(RDF::URI.new(stored_body_obj_url), RDF::OpenAnnotation.hasBody)
-      
-      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasBody, nil]
+      mapper.map_external_ref(RDF::URI.new(stored_body_obj_url), RDF::Vocab::OA.hasBody)
+
+      solns = mapper.oa_graph.query [nil, RDF::Vocab::OA.hasBody, nil]
       expect(solns.count).to eq 1
       uri_obj = solns.first.object
       expect(uri_obj).to eql RDF::URI.new(body_ext_url)
-      expect(mapper.oa_graph.query([uri_obj, RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
+      expect(mapper.oa_graph.query([uri_obj, RDF.type, RDF::Vocab::OA.SemanticTag]).size).to eql 1
       expect(mapper.oa_graph.size).to eql orig_size + 2
     end
     it "includes additional metadata when present" do
@@ -319,13 +319,13 @@ describe Triannon::LdpToOaMapper, :vcr do
       mapper.extract_base
       orig_size = mapper.oa_graph.size
 
-      mapper.map_external_ref(RDF::URI.new(stored_body_obj_url), RDF::OpenAnnotation.hasBody)
+      mapper.map_external_ref(RDF::URI.new(stored_body_obj_url), RDF::Vocab::OA.hasBody)
 
-      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasBody, nil]
+      solns = mapper.oa_graph.query [nil, RDF::Vocab::OA.hasBody, nil]
       expect(solns.count).to eq 1
       uri_obj = solns.first.object
       expect(uri_obj).to eql RDF::URI.new(body_ext_url)
-      expect(mapper.oa_graph.query([uri_obj, RDF.type, RDF::DCMIType.Sound]).size).to eql 1
+      expect(mapper.oa_graph.query([uri_obj, RDF.type, RDF::Vocab::DCMIType.Sound]).size).to eql 1
       expect(mapper.oa_graph.query([uri_obj, RDF::DC11.format, body_format]).size).to eql 1
       expect(mapper.oa_graph.size).to eql orig_size + 3
     end
@@ -344,18 +344,18 @@ describe Triannon::LdpToOaMapper, :vcr do
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
       # map target to root statement
-      mapper.map_external_ref(target_uri, RDF::OpenAnnotation.hasTarget)
+      mapper.map_external_ref(target_uri, RDF::Vocab::OA.hasTarget)
       orig_size = mapper.oa_graph.size
-      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      solns = mapper.oa_graph.query [nil, RDF::Vocab::OA.hasTarget, nil]
       expect(solns.count).to eq 1
       target_obj = solns.first.object
       expect(mapper.oa_graph.query([target_obj, nil, nil]).size).to eq 0
       # map body to target object
-      mapper.map_external_ref(RDF::URI.new(stored_body_obj_url), RDF::OpenAnnotation.hasBody, target_obj)
+      mapper.map_external_ref(RDF::URI.new(stored_body_obj_url), RDF::Vocab::OA.hasBody, target_obj)
 
       solns = mapper.oa_graph.query [target_obj, nil, nil]
       expect(solns.count).to eq 1
-      expect(mapper.oa_graph.query([target_obj, RDF::OpenAnnotation.hasBody, RDF::URI.new(body_ext_url)]).size).to eql 1
+      expect(mapper.oa_graph.query([target_obj, RDF::Vocab::OA.hasBody, RDF::URI.new(body_ext_url)]).size).to eql 1
       expect(mapper.oa_graph.size).to eql orig_size + 1
     end
   end #map_external_ref
@@ -367,16 +367,16 @@ describe Triannon::LdpToOaMapper, :vcr do
 
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
-      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasBody, nil]
+      solns = mapper.oa_graph.query [nil, RDF::Vocab::OA.hasBody, nil]
       expect(solns.count).to eq 0
-      
-      mapper.map_content_as_text(body_uri, RDF::OpenAnnotation.hasBody)
-      
-      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasBody, nil]
+
+      mapper.map_content_as_text(body_uri, RDF::Vocab::OA.hasBody)
+
+      solns = mapper.oa_graph.query [nil, RDF::Vocab::OA.hasBody, nil]
       expect(solns.count).to eq 1
       blank_node = solns.first.object
       expect(blank_node.class).to eq RDF::Node
-      expect(mapper.oa_graph.query([blank_node, RDF.type, RDF::Content.ContentAsText]).size).to eq 1
+      expect(mapper.oa_graph.query([blank_node, RDF.type, RDF::Vocab::CNT.ContentAsText]).size).to eq 1
     end
     it "adds all relevant statements in simple skolemized blank node to @oa_graph" do
       ldp_anno.load_statements_into_graph body_stmts
@@ -384,16 +384,16 @@ describe Triannon::LdpToOaMapper, :vcr do
 
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
-      mapper.map_content_as_text(body_uri, RDF::OpenAnnotation.hasBody)
+      mapper.map_content_as_text(body_uri, RDF::Vocab::OA.hasBody)
 
-      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasBody, nil]
+      solns = mapper.oa_graph.query [nil, RDF::Vocab::OA.hasBody, nil]
       expect(solns.count).to eq 1
       blank_node = solns.first.object
       blank_node_solns = mapper.oa_graph.query [blank_node, nil, nil]
       expect(blank_node_solns.count).to eq 3
-      expect(blank_node_solns).to include [blank_node, RDF.type, RDF::Content.ContentAsText]
-      expect(blank_node_solns).to include [blank_node, RDF.type, RDF::DCMIType.Text]
-      expect(blank_node_solns).to include [blank_node, RDF::Content.chars, "I love this!"]
+      expect(blank_node_solns).to include [blank_node, RDF.type, RDF::Vocab::CNT.ContentAsText]
+      expect(blank_node_solns).to include [blank_node, RDF.type, RDF::Vocab::DCMIType.Text]
+      expect(blank_node_solns).to include [blank_node, RDF::Vocab::CNT.chars, "I love this!"]
     end
     it "adds all relevant statements in skolemized blank node to @oa_graph" do
       body_container_stmts = RDF::Turtle::Reader.new('
@@ -420,18 +420,18 @@ describe Triannon::LdpToOaMapper, :vcr do
 
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
-      mapper.map_content_as_text(body_uri, RDF::OpenAnnotation.hasBody)
+      mapper.map_content_as_text(body_uri, RDF::Vocab::OA.hasBody)
 
-      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasBody, nil]
+      solns = mapper.oa_graph.query [nil, RDF::Vocab::OA.hasBody, nil]
       expect(solns.count).to eq 1
       blank_node = solns.first.object
       blank_node_solns = mapper.oa_graph.query [blank_node, nil, nil]
       expect(blank_node_solns.count).to eq 5
-      expect(blank_node_solns).to include [blank_node, RDF.type, RDF::Content.ContentAsText]
-      expect(blank_node_solns).to include [blank_node, RDF.type, RDF::DCMIType.Text]
+      expect(blank_node_solns).to include [blank_node, RDF.type, RDF::Vocab::CNT.ContentAsText]
+      expect(blank_node_solns).to include [blank_node, RDF.type, RDF::Vocab::DCMIType.Text]
       expect(blank_node_solns).to include [blank_node, RDF::DC11.format, "text/plain"]
       expect(blank_node_solns).to include [blank_node, RDF::DC11.language, "en"]
-      expect(blank_node_solns).to include [blank_node, RDF::Content.chars, "I love this!"]
+      expect(blank_node_solns).to include [blank_node, RDF::Vocab::CNT.chars, "I love this!"]
     end
     it "returns true if it adds statements to oa_graph" do
       ldp_anno.load_statements_into_graph body_stmts
@@ -440,8 +440,8 @@ describe Triannon::LdpToOaMapper, :vcr do
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
       orig_size = mapper.oa_graph.size
-      
-      expect(mapper.map_content_as_text(body_uri, RDF::OpenAnnotation.hasBody)).to be true
+
+      expect(mapper.map_content_as_text(body_uri, RDF::Vocab::OA.hasBody)).to be true
       expect(mapper.oa_graph.size).to be > orig_size
     end
     it "returns false if it doesn't change oa_graph" do
@@ -451,8 +451,8 @@ describe Triannon::LdpToOaMapper, :vcr do
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
       orig_size = mapper.oa_graph.size
-      
-      expect(mapper.map_content_as_text(target_uri, RDF::OpenAnnotation.hasTarget)).to be false
+
+      expect(mapper.map_content_as_text(target_uri, RDF::Vocab::OA.hasTarget)).to be false
       expect(mapper.oa_graph.size).to eql orig_size
     end
     it "doesn't change @oa_graph if the object doesn't have ContentAsText type" do
@@ -468,18 +468,18 @@ describe Triannon::LdpToOaMapper, :vcr do
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
       # map target to root statement
-      mapper.map_external_ref(target_uri, RDF::OpenAnnotation.hasTarget)
+      mapper.map_external_ref(target_uri, RDF::Vocab::OA.hasTarget)
       orig_size = mapper.oa_graph.size
-      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      solns = mapper.oa_graph.query [nil, RDF::Vocab::OA.hasTarget, nil]
       expect(solns.count).to eq 1
       target_obj = solns.first.object
       expect(mapper.oa_graph.query([target_obj, nil, nil]).size).to eq 0
       # map body to target object
-      mapper.map_content_as_text(RDF::URI.new(stored_body_obj_url), RDF::OpenAnnotation.hasBody, target_obj)
+      mapper.map_content_as_text(RDF::URI.new(stored_body_obj_url), RDF::Vocab::OA.hasBody, target_obj)
 
       solns = mapper.oa_graph.query [target_obj, nil, nil]
       expect(solns.count).to eq 1
-      expect(mapper.oa_graph.query([target_obj, RDF::OpenAnnotation.hasBody, nil]).size).to eql 1
+      expect(mapper.oa_graph.query([target_obj, RDF::Vocab::OA.hasBody, nil]).size).to eql 1
       expect(mapper.oa_graph.size).to eql orig_size + 4
     end
   end #map_content_as_text
@@ -503,7 +503,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
       @prefix triannon: <http://triannon.stanford.edu/ns/> .
       @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-      
+
       <#{stored_target_obj_url}> a ldp:Container,
            ldp:DirectContainer,
            ldp:RDFSource,
@@ -512,9 +512,9 @@ describe Triannon::LdpToOaMapper, :vcr do
          ldp:membershipResource <#{stored_target_obj_url}>;
          openannotation:hasSelector <#{stored_selector_obj_url}>;
          openannotation:hasSource <#{stored_source_obj_url}> .
-      
+
       <#{stored_source_obj_url}> triannon:externalReference <#{source_url}> .
-         
+
       <#{stored_selector_obj_url}> a openannotation:TextPositionSelector;
          openannotation:start \"0\"^^xsd:long;
          openannotation:end \"66\"^^xsd:long .
@@ -524,36 +524,36 @@ describe Triannon::LdpToOaMapper, :vcr do
 
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
-      mapper.map_specific_resource(target_uri, RDF::OpenAnnotation.hasTarget)
+      mapper.map_specific_resource(target_uri, RDF::Vocab::OA.hasTarget)
 
-      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      solns = mapper.oa_graph.query [nil, RDF::Vocab::OA.hasTarget, nil]
       expect(solns.count).to eq 1
       blank_node = solns.first.object
       blank_node_solns = mapper.oa_graph.query [blank_node, nil, nil]
       expect(blank_node_solns.count).to eq 3
-      expect(blank_node_solns).to include [blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]
+      expect(blank_node_solns).to include [blank_node, RDF.type, RDF::Vocab::OA.SpecificResource]
       source_obj = RDF::URI.new(source_url)
-      expect(blank_node_solns).to include [blank_node, RDF::OpenAnnotation.hasSource, source_obj]
-      
+      expect(blank_node_solns).to include [blank_node, RDF::Vocab::OA.hasSource, source_obj]
+
       # source obj should only be in the mapped response for addl metadata assoc with the URI
       source_obj_subject_solns = mapper.oa_graph.query [source_obj, nil, nil]
       expect(source_obj_subject_solns.count).to eq 0
 
       # selector object
-      selector_solns = mapper.oa_graph.query [blank_node, RDF::OpenAnnotation.hasSelector, nil]
+      selector_solns = mapper.oa_graph.query [blank_node, RDF::Vocab::OA.hasSelector, nil]
       expect(selector_solns.count).to eq 1
       selector_blank_node = selector_solns.first.object
       selector_obj_subject_solns = mapper.oa_graph.query [selector_blank_node, nil, nil]
       expect(selector_obj_subject_solns.count).to eq 3
-      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.TextPositionSelector]
-      start_obj_solns = mapper.oa_graph.query [selector_blank_node, RDF::OpenAnnotation.start, nil]
+      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF.type, RDF::Vocab::OA.TextPositionSelector]
+      start_obj_solns = mapper.oa_graph.query [selector_blank_node, RDF::Vocab::OA.start, nil]
       expect(start_obj_solns.count).to eq 1
       start_obj = start_obj_solns.first.object
       expect(start_obj.to_s).to eql "0"
-# FIXME:  these should be converted back to nonNegativeInteger, per OA spec  
+# FIXME:  these should be converted back to nonNegativeInteger, per OA spec
 # See https://github.com/sul-dlss/triannon/issues/78
       expect(start_obj.datatype).to eql RDF::XSD.long
-      end_obj_solns = mapper.oa_graph.query [selector_blank_node, RDF::OpenAnnotation.end, nil]
+      end_obj_solns = mapper.oa_graph.query [selector_blank_node, RDF::Vocab::OA.end, nil]
       expect(end_obj_solns.count).to eq 1
       end_obj = end_obj_solns.first.object
       expect(end_obj.to_s).to eql "66"
@@ -564,7 +564,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       expect(mapper.oa_graph.query([RDF::URI.new(stored_selector_obj_url), nil, nil]).size).to eql 0
     end
     it "start and end in TextPositionSelector have type nonNegativeIntegers" do
-      # See https://github.com/sul-dlss/triannon/issues/78  
+      # See https://github.com/sul-dlss/triannon/issues/78
       skip 'converting returned xsd:long to xsd:nonNegativeInteger not yet implemented'
     end
     it "TextQuoteSelector" do
@@ -582,7 +582,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
       @prefix triannon: <http://triannon.stanford.edu/ns/> .
       @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-      
+
       <#{stored_target_obj_url}> a ldp:Container,
            ldp:DirectContainer,
            ldp:RDFSource,
@@ -591,9 +591,9 @@ describe Triannon::LdpToOaMapper, :vcr do
          ldp:membershipResource <#{stored_target_obj_url}>;
          openannotation:hasSelector <#{stored_selector_obj_url}>;
          openannotation:hasSource <#{stored_source_obj_url}> .
-      
+
       <#{stored_source_obj_url}> triannon:externalReference <#{source_url}> .
-         
+
       <#{stored_selector_obj_url}> a openannotation:TextQuoteSelector;
          openannotation:suffix \"#{suffix}\";
          openannotation:exact \"#{exact}\";
@@ -604,31 +604,31 @@ describe Triannon::LdpToOaMapper, :vcr do
 
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
-      mapper.map_specific_resource(target_uri, RDF::OpenAnnotation.hasTarget)
+      mapper.map_specific_resource(target_uri, RDF::Vocab::OA.hasTarget)
 
-      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      solns = mapper.oa_graph.query [nil, RDF::Vocab::OA.hasTarget, nil]
       expect(solns.count).to eq 1
       blank_node = solns.first.object
       blank_node_solns = mapper.oa_graph.query [blank_node, nil, nil]
       expect(blank_node_solns.count).to eq 3
-      expect(blank_node_solns).to include [blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]
+      expect(blank_node_solns).to include [blank_node, RDF.type, RDF::Vocab::OA.SpecificResource]
       source_obj = RDF::URI.new(source_url)
-      expect(blank_node_solns).to include [blank_node, RDF::OpenAnnotation.hasSource, source_obj]
-      
+      expect(blank_node_solns).to include [blank_node, RDF::Vocab::OA.hasSource, source_obj]
+
       # source obj should only be in the mapped response for addl metadata assoc with the URI
       source_obj_subject_solns = mapper.oa_graph.query [source_obj, nil, nil]
       expect(source_obj_subject_solns.count).to eq 0
 
       # selector object
-      selector_solns = mapper.oa_graph.query [blank_node, RDF::OpenAnnotation.hasSelector, nil]
+      selector_solns = mapper.oa_graph.query [blank_node, RDF::Vocab::OA.hasSelector, nil]
       expect(selector_solns.count).to eq 1
       selector_blank_node = selector_solns.first.object
       selector_obj_subject_solns = mapper.oa_graph.query [selector_blank_node, nil, nil]
       expect(selector_obj_subject_solns.count).to eq 4
-      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.TextQuoteSelector]
-      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF::OpenAnnotation.suffix, suffix]
-      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF::OpenAnnotation.exact, exact]
-      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF::OpenAnnotation.prefix, prefix]
+      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF.type, RDF::Vocab::OA.TextQuoteSelector]
+      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF::Vocab::OA.suffix, suffix]
+      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF::Vocab::OA.exact, exact]
+      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF::Vocab::OA.prefix, prefix]
 
       # should get no triples with stored selector or source object urls
       expect(mapper.oa_graph.query([RDF::URI.new(stored_source_obj_url), nil, nil]).size).to eql 0
@@ -650,7 +650,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
       @prefix triannon: <http://triannon.stanford.edu/ns/> .
       @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-      
+
       <#{stored_target_obj_url}> a ldp:Container,
            ldp:DirectContainer,
            ldp:RDFSource,
@@ -659,10 +659,10 @@ describe Triannon::LdpToOaMapper, :vcr do
          ldp:membershipResource <#{stored_target_obj_url}>;
          openannotation:hasSelector <#{stored_selector_obj_url}>;
          openannotation:hasSource <#{stored_source_obj_url}> .
-      
+
       <#{stored_source_obj_url}> a dcmitype:Image;
          triannon:externalReference <#{source_url}> .
-         
+
       <#{stored_selector_obj_url}> a openannotation:FragmentSelector;
          rdf:value \"#{frag_value}\";
          dcterms:conformsTo <#{conforms_to_url}> .
@@ -672,29 +672,29 @@ describe Triannon::LdpToOaMapper, :vcr do
 
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
-      mapper.map_specific_resource(target_uri, RDF::OpenAnnotation.hasTarget)
+      mapper.map_specific_resource(target_uri, RDF::Vocab::OA.hasTarget)
 
-      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      solns = mapper.oa_graph.query [nil, RDF::Vocab::OA.hasTarget, nil]
       expect(solns.count).to eq 1
       blank_node = solns.first.object
       blank_node_solns = mapper.oa_graph.query [blank_node, nil, nil]
       expect(blank_node_solns.count).to eq 3
-      expect(blank_node_solns).to include [blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]
+      expect(blank_node_solns).to include [blank_node, RDF.type, RDF::Vocab::OA.SpecificResource]
       source_obj = RDF::URI.new(source_url)
-      expect(blank_node_solns).to include [blank_node, RDF::OpenAnnotation.hasSource, source_obj]
+      expect(blank_node_solns).to include [blank_node, RDF::Vocab::OA.hasSource, source_obj]
 
       # source obj should only be in the mapped response for addl metadata assoc with the URI
       source_obj_subject_solns = mapper.oa_graph.query [source_obj, nil, nil]
       expect(source_obj_subject_solns.count).to eq 1
-      expect(source_obj_subject_solns).to include [source_obj, RDF.type, RDF::DCMIType.Image]
+      expect(source_obj_subject_solns).to include [source_obj, RDF.type, RDF::Vocab::DCMIType.Image]
 
       # selector object
-      selector_solns = mapper.oa_graph.query [blank_node, RDF::OpenAnnotation.hasSelector, nil]
+      selector_solns = mapper.oa_graph.query [blank_node, RDF::Vocab::OA.hasSelector, nil]
       expect(selector_solns.count).to eq 1
       selector_blank_node = selector_solns.first.object
       selector_obj_subject_solns = mapper.oa_graph.query [selector_blank_node, nil, nil]
       expect(selector_obj_subject_solns.count).to eq 3
-      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.FragmentSelector]
+      expect(selector_obj_subject_solns).to include [selector_blank_node, RDF.type, RDF::Vocab::OA.FragmentSelector]
       expect(selector_obj_subject_solns).to include [selector_blank_node, RDF.value, frag_value]
       expect(selector_obj_subject_solns).to include [selector_blank_node, RDF::DC.conformsTo, conforms_to_url]
 
@@ -715,7 +715,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
       @prefix triannon: <http://triannon.stanford.edu/ns/> .
       @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-      
+
       <#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1> a ldp:Container,
            ldp:DirectContainer,
            ldp:RDFSource,
@@ -727,12 +727,12 @@ describe Triannon::LdpToOaMapper, :vcr do
       ").statements.to_a
       ldp_anno.load_statements_into_graph target_container_stmts
       target_uri = ldp_anno.target_uris.first
-      
+
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
       orig_size = mapper.oa_graph.size
-      
-      expect(mapper.map_specific_resource(target_uri, RDF::OpenAnnotation.hasTarget)).to be true
+
+      expect(mapper.map_specific_resource(target_uri, RDF::Vocab::OA.hasTarget)).to be true
       expect(mapper.oa_graph.size).to be > orig_size
     end
     it "returns false if it doesn't change oa_graph" do
@@ -742,15 +742,15 @@ describe Triannon::LdpToOaMapper, :vcr do
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
       orig_size = mapper.oa_graph.size
-      
-      expect(mapper.map_specific_resource(target_uri, RDF::OpenAnnotation.hasTarget)).to be false
+
+      expect(mapper.map_specific_resource(target_uri, RDF::Vocab::OA.hasTarget)).to be false
       expect(mapper.oa_graph.size).to eql orig_size
     end
     it "doesn't change @oa_graph if the object doesn't have type SpecificResource" do
       # see 'returns false if it doesn't change oa_graph'
     end
   end #map_specific_resource
-  
+
   describe '#map_choice' do
     let(:stored_body_obj_url) { "#{Triannon.config[:ldp_url]}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23" }
     it "default, item both ContentAsText" do
@@ -788,37 +788,37 @@ describe Triannon::LdpToOaMapper, :vcr do
       ").statements.to_a
       ldp_anno.load_statements_into_graph body_container_stmts
       body_uri = ldp_anno.body_uris.first
-      
+
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
-      mapper.map_choice(body_uri, RDF::OpenAnnotation.hasBody)
+      mapper.map_choice(body_uri, RDF::Vocab::OA.hasBody)
 
-      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasBody, nil]
+      solns = mapper.oa_graph.query [nil, RDF::Vocab::OA.hasBody, nil]
       expect(solns.count).to eq 1
       body_blank_node = solns.first.object
       blank_node_solns = mapper.oa_graph.query [body_blank_node, nil, nil]
       expect(blank_node_solns.count).to eq 3
-      expect(blank_node_solns).to include [body_blank_node, RDF.type, RDF::OpenAnnotation.Choice]
+      expect(blank_node_solns).to include [body_blank_node, RDF.type, RDF::Vocab::OA.Choice]
 
-      default_solns = mapper.oa_graph.query [body_blank_node, RDF::OpenAnnotation.default, nil]
+      default_solns = mapper.oa_graph.query [body_blank_node, RDF::Vocab::OA.default, nil]
       expect(default_solns.count).to eq 1
       default_blank_node = default_solns.first.object
       default_node_subject_solns = mapper.oa_graph.query [default_blank_node, nil, nil]
       expect(default_node_subject_solns.count).to eq 4
-      expect(default_node_subject_solns).to include [default_blank_node, RDF.type, RDF::DCMIType.Text]
-      expect(default_node_subject_solns).to include [default_blank_node, RDF.type, RDF::Content.ContentAsText]
+      expect(default_node_subject_solns).to include [default_blank_node, RDF.type, RDF::Vocab::DCMIType.Text]
+      expect(default_node_subject_solns).to include [default_blank_node, RDF.type, RDF::Vocab::CNT.ContentAsText]
       expect(default_node_subject_solns).to include [default_blank_node, RDF::DC11.language, "en"]
-      expect(default_node_subject_solns).to include [default_blank_node, RDF::Content.chars, default_chars]
+      expect(default_node_subject_solns).to include [default_blank_node, RDF::Vocab::CNT.chars, default_chars]
 
-      item_solns = mapper.oa_graph.query [body_blank_node, RDF::OpenAnnotation.item, nil]
+      item_solns = mapper.oa_graph.query [body_blank_node, RDF::Vocab::OA.item, nil]
       expect(item_solns.count).to eq 1
       item_blank_node = item_solns.first.object
       item_node_subject_solns = mapper.oa_graph.query [item_blank_node, nil, nil]
       expect(item_node_subject_solns.count).to eq 4
-      expect(item_node_subject_solns).to include [item_blank_node, RDF.type, RDF::DCMIType.Text]
-      expect(item_node_subject_solns).to include [item_blank_node, RDF.type, RDF::Content.ContentAsText]
+      expect(item_node_subject_solns).to include [item_blank_node, RDF.type, RDF::Vocab::DCMIType.Text]
+      expect(item_node_subject_solns).to include [item_blank_node, RDF.type, RDF::Vocab::CNT.ContentAsText]
       expect(item_node_subject_solns).to include [item_blank_node, RDF::DC11.language, "fr"]
-      expect(item_node_subject_solns).to include [item_blank_node, RDF::Content.chars, item_chars]
+      expect(item_node_subject_solns).to include [item_blank_node, RDF::Vocab::CNT.chars, item_chars]
 
       # should get no triples with stored default or item object urls
       expect(mapper.oa_graph.query([RDF::URI.new(stored_default_url), nil, nil]).size).to eql 0
@@ -853,25 +853,25 @@ describe Triannon::LdpToOaMapper, :vcr do
       ").statements.to_a
       ldp_anno.load_statements_into_graph target_container_stmts
       target_uri = ldp_anno.target_uris.first
-      
+
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
-      mapper.map_choice(target_uri, RDF::OpenAnnotation.hasTarget)
+      mapper.map_choice(target_uri, RDF::Vocab::OA.hasTarget)
 
-      solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      solns = mapper.oa_graph.query [nil, RDF::Vocab::OA.hasTarget, nil]
       expect(solns.count).to eq 1
       target_blank_node = solns.first.object
       target_blank_node_solns = mapper.oa_graph.query [target_blank_node, nil, nil]
       expect(target_blank_node_solns.count).to eq 3
-      expect(target_blank_node_solns).to include [target_blank_node, RDF.type, RDF::OpenAnnotation.Choice]
+      expect(target_blank_node_solns).to include [target_blank_node, RDF.type, RDF::Vocab::OA.Choice]
       default_uri_obj = RDF::URI.new(default_url)
-      expect(target_blank_node_solns).to include [target_blank_node, RDF::OpenAnnotation.default, default_uri_obj]
-      expect(target_blank_node_solns).to include [target_blank_node, RDF::OpenAnnotation.item, RDF::URI.new(item_url)]
+      expect(target_blank_node_solns).to include [target_blank_node, RDF::Vocab::OA.default, default_uri_obj]
+      expect(target_blank_node_solns).to include [target_blank_node, RDF::Vocab::OA.item, RDF::URI.new(item_url)]
 
       default_url_subj_solns = mapper.oa_graph.query [default_uri_obj, nil, nil]
       expect(default_url_subj_solns.size).to eql 1
-      expect(default_url_subj_solns).to include [default_uri_obj, RDF.type, RDF::OpenAnnotation.SemanticTag]
-      
+      expect(default_url_subj_solns).to include [default_uri_obj, RDF.type, RDF::Vocab::OA.SemanticTag]
+
       expect(mapper.oa_graph.query([RDF::URI.new(item_url), nil, nil]).size).to eql 0
 
       # should get no triples with stored default or item object urls
@@ -915,36 +915,36 @@ describe Triannon::LdpToOaMapper, :vcr do
       ").statements.to_a
       ldp_anno.load_statements_into_graph target_container_stmts
       target_uri = ldp_anno.target_uris.first
-      
+
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
-      mapper.map_choice(target_uri, RDF::OpenAnnotation.hasTarget)
+      mapper.map_choice(target_uri, RDF::Vocab::OA.hasTarget)
 
-      target_solns = mapper.oa_graph.query [nil, RDF::OpenAnnotation.hasTarget, nil]
+      target_solns = mapper.oa_graph.query [nil, RDF::Vocab::OA.hasTarget, nil]
       expect(target_solns.count).to eq 1
       target_blank_node = target_solns.first.object
       target_blank_node_solns = mapper.oa_graph.query [target_blank_node, nil, nil]
       expect(target_blank_node_solns.count).to eq 4
-      expect(target_blank_node_solns).to include [target_blank_node, RDF.type, RDF::OpenAnnotation.Choice]
+      expect(target_blank_node_solns).to include [target_blank_node, RDF.type, RDF::Vocab::OA.Choice]
       default_uri_obj = RDF::URI.new(default_url)
-      expect(target_blank_node_solns).to include [target_blank_node, RDF::OpenAnnotation.default, default_uri_obj]
+      expect(target_blank_node_solns).to include [target_blank_node, RDF::Vocab::OA.default, default_uri_obj]
       item1_uri_obj = RDF::URI.new(item1_url)
-      expect(target_blank_node_solns).to include [target_blank_node, RDF::OpenAnnotation.item, item1_uri_obj]
+      expect(target_blank_node_solns).to include [target_blank_node, RDF::Vocab::OA.item, item1_uri_obj]
       item2_uri_obj = RDF::URI.new(item2_url)
-      expect(target_blank_node_solns).to include [target_blank_node, RDF::OpenAnnotation.item, item2_uri_obj]
+      expect(target_blank_node_solns).to include [target_blank_node, RDF::Vocab::OA.item, item2_uri_obj]
 
       default_uri_subj_solns = mapper.oa_graph.query [default_uri_obj, nil, nil]
       expect(default_uri_subj_solns.count).to eql 1
-      expect(default_uri_subj_solns).to include [default_uri_obj, RDF.type, RDF::DCMIType.Image]
+      expect(default_uri_subj_solns).to include [default_uri_obj, RDF.type, RDF::Vocab::DCMIType.Image]
 
       item1_uri_subj_solns = mapper.oa_graph.query [item1_uri_obj, nil, nil]
       expect(item1_uri_subj_solns.count).to eql 1
-      expect(item1_uri_subj_solns).to include [item1_uri_obj, RDF.type, RDF::DCMIType.Image]
+      expect(item1_uri_subj_solns).to include [item1_uri_obj, RDF.type, RDF::Vocab::DCMIType.Image]
 
       item2_uri_subj_solns = mapper.oa_graph.query [item2_uri_obj, nil, nil]
       expect(item2_uri_subj_solns.count).to eql 1
-      expect(item2_uri_subj_solns).to include [item2_uri_obj, RDF.type, RDF::DCMIType.Image]
-      
+      expect(item2_uri_subj_solns).to include [item2_uri_obj, RDF.type, RDF::Vocab::DCMIType.Image]
+
       # should get no triples with stored default or item object urls
       expect(mapper.oa_graph.query([RDF::URI.new(stored_default_url), nil, nil]).size).to eql 0
       expect(mapper.oa_graph.query([RDF::URI.new(stored_item1_url), nil, nil]).size).to eql 0
@@ -970,12 +970,12 @@ describe Triannon::LdpToOaMapper, :vcr do
       ").statements.to_a
       ldp_anno.load_statements_into_graph body_container_stmts
       body_uri = ldp_anno.body_uris.first
-      
+
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
       orig_size = mapper.oa_graph.size
-      
-      expect(mapper.map_choice(body_uri, RDF::OpenAnnotation.hasBody)).to be true
+
+      expect(mapper.map_choice(body_uri, RDF::Vocab::OA.hasBody)).to be true
       expect(mapper.oa_graph.size).to be > orig_size
     end
     it "returns false if it doesn't change oa_graph" do
@@ -985,13 +985,13 @@ describe Triannon::LdpToOaMapper, :vcr do
       mapper = Triannon::LdpToOaMapper.new ldp_anno
       mapper.extract_base
       orig_size = mapper.oa_graph.size
-      
-      expect(mapper.map_choice(target_uri, RDF::OpenAnnotation.hasTarget)).to be false
+
+      expect(mapper.map_choice(target_uri, RDF::Vocab::OA.hasTarget)).to be false
       expect(mapper.oa_graph.size).to eql orig_size
     end
     it "doesn't change @oa_graph if the object doesn't have type Choice" do
       # see 'returns false if it doesn't change oa_graph'
     end
   end #map_choice
-  
+
 end

@@ -33,7 +33,7 @@ describe Triannon::RootAnnotationCreator, :vcr do
       g = RDF::Graph.new
       g.from_ttl resp.body
       q = RDF::Query.new
-      q << [uri, RDF.type, RDF::LDP.Container]
+      q << [uri, RDF.type, RDF::Vocab::LDP.Container]
       soln = g.query q
       expect(soln.size).to eq 1
     end

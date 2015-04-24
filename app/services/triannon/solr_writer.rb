@@ -4,9 +4,9 @@ module Triannon
     # DO NOT CALL before anno is stored: the graph should have an assigned url for the
     #   @id of the root;  it shouldn't be a blank node
     #
-    # Convert a Triannon::Graph object into a Hash suitable for writing to Solr.
+    # Convert a OA::Graph object into a Hash suitable for writing to Solr.
     #
-    # @param [Triannon::Graph] triannon_graph a populated Triannon::Graph object for a *stored* anno
+    # @param [OA::Graph] triannon_graph a populated OA::Graph object for a *stored* anno
     # @return [Hash] a hash to be written to Solr, populated appropriately
     def self.solr_hash(triannon_graph)
       doc_hash = {}
@@ -18,7 +18,7 @@ module Triannon
         doc_hash[:id] = solr_id.sub(/^\/*/, "") # remove first char slash(es) if present
 
         # use short strings for motivation field
-        doc_hash[:motivation] = triannon_graph.motivated_by.map { |m| m.sub(RDF::OpenAnnotation.to_s, "") }
+        doc_hash[:motivation] = triannon_graph.motivated_by.map { |m| m.sub(RDF::Vocab::OA.to_s, "") }
 
         # date field format: 1995-12-31T23:59:59Z; or w fractional seconds: 1995-12-31T23:59:59.999Z
         if triannon_graph.annotated_at
@@ -31,11 +31,11 @@ module Triannon
         end
         #doc_hash[:annotated_by_stem] # not yet implemented
 
-        doc_hash[:target_url] = triannon_graph.predicate_urls RDF::OpenAnnotation.hasTarget
+        doc_hash[:target_url] = triannon_graph.predicate_urls RDF::Vocab::OA.hasTarget
         # TODO: recognize more target types
         doc_hash[:target_type] = ['external_URI'] if doc_hash[:target_url].size > 0
 
-        doc_hash[:body_url] = triannon_graph.predicate_urls RDF::OpenAnnotation.hasBody
+        doc_hash[:body_url] = triannon_graph.predicate_urls RDF::Vocab::OA.hasBody
         doc_hash[:body_type] = []
         doc_hash[:body_type] << 'external_URI' if doc_hash[:body_url].size > 0
         doc_hash[:body_chars_exact] = triannon_graph.body_chars.map {|bc| bc.strip}
@@ -57,9 +57,9 @@ module Triannon
       @max_sleep_seconds = Triannon.config[:max_sleep_seconds] || 5
     end
 
-    # Convert the Triannon::Graph to a Solr document hash, then call RSolr.add
+    # Convert the OA::Graph to a Solr document hash, then call RSolr.add
     #  with the doc hash
-    # @param [Triannon::Graph] tgraph anno represented as a Triannon::Graph
+    # @param [OA::Graph] tgraph anno represented as a OA::Graph
     def write(tgraph)
       doc_hash = self.class.solr_hash(tgraph) if tgraph && !tgraph.id_as_url.empty?
       add(doc_hash) if doc_hash && !doc_hash.empty?

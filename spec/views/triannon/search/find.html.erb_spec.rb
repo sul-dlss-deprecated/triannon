@@ -3,7 +3,7 @@ require 'spec_helper'
 RSpec.describe "triannon/search/find.html.erb", :type => :view do
 
   let(:anno_graphs_array) { [
-    Triannon::Graph.new(RDF::Graph.new.from_jsonld('
+    OA::Graph.new(RDF::Graph.new.from_jsonld('
       { "@context":"http://www.w3.org/ns/oa-context-20130208.json",
         "@graph": [
           { "@id":"_:g70337046884060",
@@ -18,7 +18,7 @@ RSpec.describe "triannon/search/find.html.erb", :type => :view do
           }
         ]
       }')),
-    Triannon::Graph.new(RDF::Graph.new.from_jsonld('
+    OA::Graph.new(RDF::Graph.new.from_jsonld('
       { "@context":"http://www.w3.org/ns/oa-context-20130208.json",
         "@graph": [
           { "@id":"_:g70337056969180",
@@ -33,7 +33,7 @@ RSpec.describe "triannon/search/find.html.erb", :type => :view do
           }
         ]
       }')),
-    Triannon::Graph.new(RDF::Graph.new.from_jsonld('
+    OA::Graph.new(RDF::Graph.new.from_jsonld('
       { "@context":"http://www.w3.org/ns/oa-context-20130208.json",
         "@graph": [
           { "@id":"_:g70252904268480",

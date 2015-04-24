@@ -36,12 +36,12 @@ describe "viewing an annotation", :vcr, type: :feature do
 
     it "jsonld OpenAnnotation context" do
       expect(page).to have_content "OpenAnnotation context"
-      expect(page).to have_content "@context\":\"#{Triannon::JsonldContext::OA_DATED_CONTEXT_URL}\""
+      expect(page).to have_content "@context\":\"#{OA::Graph::OA_DATED_CONTEXT_URL}\""
     end
 
     it "jsonld IIIF context" do
       expect(page).to have_content "IIIF context"
-      expect(page).to have_content "@context\":\"#{Triannon::JsonldContext::IIIF_CONTEXT_URL}\""
+      expect(page).to have_content "@context\":\"#{OA::Graph::IIIF_CONTEXT_URL}\""
     end
   end
 

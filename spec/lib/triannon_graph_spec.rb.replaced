@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Triannon::Graph, :vcr do
-  
+
   let(:g1) { Triannon::Graph.new RDF::Graph.new.from_ttl("
     <http://my.identifiers.com/oa_comment> a <http://www.w3.org/ns/oa#Annotation>;
        <http://www.w3.org/ns/oa#hasBody> [
@@ -13,14 +13,14 @@ describe Triannon::Graph, :vcr do
        <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#commenting> . ") }
   let(:g2) { Triannon::Graph.new RDF::Graph.new.from_jsonld(
     '{
-        "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
+        "@context": "http://www.w3.org/ns/oa-context-20130208.json",
         "@id": "http://my.identifiers.com/oa_bookmark",
-        "@type": "oa:Annotation", 
-        "motivatedBy": "oa:bookmarking", 
+        "@type": "oa:Annotation",
+        "motivatedBy": "oa:bookmarking",
         "hasTarget": "http://purl.stanford.edu/kq131cs7229"
       }' ) }
   let(:g3) {Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("mult-targets.json")}
-  
+
   context 'jsonld flavors' do
     context '#jsonld_oa' do
       it 'has context as url' do
@@ -70,7 +70,7 @@ describe Triannon::Graph, :vcr do
       it "missing: empty Array" do
         my_tg = Triannon::Graph.new RDF::Graph.new.from_ttl "
          <https://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/f3bc7da9-d531-4b0c-816a-8f2fc849b0b6> a <http://www.w3.org/ns/oa#Annotation>;
-           <http://www.w3.org/ns/oa#hasTarget> <http://searchworks.stanford.edu/view/666> ." 
+           <http://www.w3.org/ns/oa#hasTarget> <http://searchworks.stanford.edu/view/666> ."
         expect(my_tg.motivated_by).to eq []
       end
     end
@@ -100,22 +100,22 @@ describe Triannon::Graph, :vcr do
       it "multiple" do
         g = Triannon::Graph.new RDF::Graph.new.from_jsonld '
         {
-          "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-          "@type": "oa:Annotation", 
+          "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+          "@type": "oa:Annotation",
           "motivatedBy": [
             "oa:tagging"
-          ], 
+          ],
           "hasBody": [
             {
               "@type": [
                 "cnt:ContentAsText"
-              ], 
+              ],
               "chars": "I love this!"
-            }, 
+            },
             {
               "@type": [
                 "cnt:ContentAsText"
-              ], 
+              ],
               "chars": "me too"
             }
           ],
@@ -133,16 +133,16 @@ describe Triannon::Graph, :vcr do
       it "whitespace retained at beginning or ending" do
         g = Triannon::Graph.new RDF::Graph.new.from_jsonld '
         {
-          "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-          "@type": "oa:Annotation", 
+          "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+          "@type": "oa:Annotation",
           "motivatedBy": [
             "oa:tagging"
-          ], 
+          ],
           "hasBody": [
             {
               "@type": [
                 "cnt:ContentAsText"
-              ], 
+              ],
               "chars": "  la  "
             }
           ],
@@ -153,16 +153,16 @@ describe Triannon::Graph, :vcr do
       it "chars is empty string" do
         g = Triannon::Graph.new RDF::Graph.new.from_jsonld '
         {
-          "@context": "http://www.w3.org/ns/oa-context-20130208.json", 
-          "@type": "oa:Annotation", 
+          "@context": "http://www.w3.org/ns/oa-context-20130208.json",
+          "@type": "oa:Annotation",
           "motivatedBy": [
             "oa:tagging"
-          ], 
+          ],
           "hasBody": [
             {
               "@type": [
                 "cnt:ContentAsText"
-              ], 
+              ],
               "chars": ""
             }
           ],
@@ -200,7 +200,7 @@ describe Triannon::Graph, :vcr do
       g.remove_non_base_statements
     end
   end
-  
+
   context '#remove_has_body_statements' do
     it 'calls remove_predicate_and_its_object_statements with RDF::OpenAnnotation.hasBody' do
       g = Triannon::Graph.new(RDF::Graph.new)
@@ -216,7 +216,7 @@ describe Triannon::Graph, :vcr do
       g.remove_has_target_statements
     end
   end
-  
+
   context '#remove_predicate_and_its_object_statements' do
     it 'calls *subject_statements for each object of predicate statement' do
       g = Triannon::Graph.new(RDF::Graph.new.from_jsonld('{
@@ -239,15 +239,15 @@ describe Triannon::Graph, :vcr do
         "hasTarget": [
           "http://target.one.org",
           {
-            "@id": "http://dbpedia.org/resource/Love", 
+            "@id": "http://dbpedia.org/resource/Love",
             "@type": "oa:SemanticTag"
           }
         ]
-      }'  
+      }'
       tg = Triannon::Graph.new rg
       pred_stmts = tg.query([nil, RDF::OpenAnnotation.hasTarget, nil])
 
-      pred_stmts.each { |stmt| 
+      pred_stmts.each { |stmt|
         expect(rg).to receive(:delete).with(stmt)
       }
       allow(Triannon::Graph).to receive(:subject_statements).and_return([])
@@ -274,7 +274,7 @@ describe Triannon::Graph, :vcr do
       pred_obj = pred_stmts.first.object
       sub_stmts = Triannon::Graph.subject_statements(pred_obj, tg)
       expect(sub_stmts.size).to eql 5
-      sub_stmts.each { |s|  
+      sub_stmts.each { |s|
         expect(rg).to receive(:delete).with(s).and_call_original
       }
       allow(rg).to receive(:delete).with(pred_stmts.first).and_call_original
@@ -282,10 +282,10 @@ describe Triannon::Graph, :vcr do
       expect(tg.size).to eql 2
     end
   end
-  
+
   context '#make_null_relative_uri_out_of_blank_node' do
     it 'outer blank node becomes null relative uri' do
-      g = RDF::Graph.new.from_ttl('[ 
+      g = RDF::Graph.new.from_ttl('[
       a <http://www.w3.org/ns/oa#Annotation>;
       <http://www.w3.org/ns/oa#hasBody> [
         a <http://www.w3.org/2011/content#ContentAsText>,
@@ -327,7 +327,7 @@ describe Triannon::Graph, :vcr do
       expect(g.size).to eql orig_size
     end
   end
-  
+
   context '*subject_statements' do
     it 'returns appropriate blank node statements when the subject is an RDF::Node in the graph' do
       graph = RDF::Graph.new.from_ttl('<http://example.org/annos/annotation/body-chars.ttl> <http://www.w3.org/ns/oa#hasBody> [

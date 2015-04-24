@@ -30,7 +30,7 @@ describe Triannon::LdpWriter, :vcr do
         end
         g = RDF::Graph.new.from_ttl(resp.body)
         full_url = "#{Triannon.config[:ldp_url]}/#{id}"
-        expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
+        expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
       end
       it 'does not create a body container if there are no bodies' do
         my_anno = Triannon::Annotation.new data: '{
@@ -49,7 +49,7 @@ describe Triannon::LdpWriter, :vcr do
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(container_resp.body)
-        expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 1
+        expect(g.query([RDF::URI.new(container_url), RDF::Vocab::LDP.contains, nil]).size).to eql 1
       end
       it 'calls create_body_container and create_body_resources if there are bodies' do
         expect_any_instance_of(Triannon::LdpWriter).to receive(:create_body_container).and_call_original
@@ -82,7 +82,7 @@ describe Triannon::LdpWriter, :vcr do
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(container_resp.body)
-        expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 2
+        expect(g.query([RDF::URI.new(container_url), RDF::Vocab::LDP.contains, nil]).size).to eql 2
       end
       it 'calls create_target_container and create_target_resource' do
         expect_any_instance_of(Triannon::LdpWriter).to receive(:create_target_container).and_call_original
@@ -97,7 +97,7 @@ describe Triannon::LdpWriter, :vcr do
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(container_resp.body)
-        expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 1
+        expect(g.query([RDF::URI.new(container_url), RDF::Vocab::LDP.contains, nil]).size).to eql 1
       end
       it 'creates a single target container with multiple resources if there are multiple targets' do
         my_anno = Triannon::Annotation.new data: '{
@@ -115,7 +115,7 @@ describe Triannon::LdpWriter, :vcr do
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(container_resp.body)
-        expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 2
+        expect(g.query([RDF::URI.new(container_url), RDF::Vocab::LDP.contains, nil]).size).to eql 2
       end
       it "raises an exception if the create does not succeed" do
         allow_any_instance_of(Triannon::LdpWriter).to receive(:create_resource).and_raise("reason")

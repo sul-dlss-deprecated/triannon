@@ -12,13 +12,13 @@ module Triannon
         ldp_writer = Triannon::LdpWriter.new anno
         id = ldp_writer.create_base
 
-        bodies_solns = anno.graph.query([nil, RDF::OpenAnnotation.hasBody, nil])
+        bodies_solns = anno.graph.query([nil, RDF::Vocab::OA.hasBody, nil])
         if bodies_solns.size > 0
           ldp_writer.create_body_container
           ldp_writer.create_body_resources
         end
 
-        targets_solns = anno.graph.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+        targets_solns = anno.graph.query([nil, RDF::Vocab::OA.hasTarget, nil])
         # NOTE:  Annotation is invalid if there are no target statements
         if targets_solns.size > 0
           ldp_writer.create_target_container
@@ -72,7 +72,7 @@ module Triannon
       @anno.graph.each { |s|
         g << s
       }
-      g = Triannon::Graph.new(g)
+      g = OA::Graph.new(g)
       g.remove_non_base_statements
       g.make_null_relative_uri_out_of_blank_node
 
@@ -81,22 +81,22 @@ module Triannon
 
     # creates the LDP container for any and all bodies for this annotation
     def create_body_container
-      create_direct_container RDF::OpenAnnotation.hasBody
+      create_direct_container RDF::Vocab::OA.hasBody
     end
 
     # creates the LDP container for any and all targets for this annotation
     def create_target_container
-      create_direct_container RDF::OpenAnnotation.hasTarget
+      create_direct_container RDF::Vocab::OA.hasTarget
     end
 
     # create the body resources inside the (already created) body container
     def create_body_resources
-      create_resources_in_container RDF::OpenAnnotation.hasBody
+      create_resources_in_container RDF::Vocab::OA.hasBody
     end
 
     # create the target resources inside the (already created) target container
     def create_target_resources
-      create_resources_in_container RDF::OpenAnnotation.hasTarget
+      create_resources_in_container RDF::Vocab::OA.hasTarget
     end
 
     # @param [Array<String>] ldp_container_uris an Array of ids for LDP containers.  (can also be a String)
@@ -144,13 +144,13 @@ module Triannon
 
     # Creates an empty LDP DirectContainer in LDP Storage that is a member of the base container and has the memberRelation per the oa_vocab_term
     # The id of the created containter will be (base container id)/b  if hasBody or  (base container id)/t  if hasTarget
-    # @param [RDF::Vocabulary::Term] oa_vocab_term RDF::OpenAnnotation.hasTarget or RDF::OpenAnnotation.hasBody
+    # @param [RDF::Vocabulary::Term] oa_vocab_term RDF::Vocab::OA.hasTarget or RDF::Vocab::OA.hasBody
     def create_direct_container oa_vocab_term
       null_rel_uri = RDF::URI.new
       g = RDF::Graph.new
-      g << [null_rel_uri, RDF.type, RDF::LDP.DirectContainer]
-      g << [null_rel_uri, RDF::LDP.hasMemberRelation, oa_vocab_term]
-      g << [null_rel_uri, RDF::LDP.membershipResource, RDF::URI.new("#{@base_uri}/#{@id}")]
+      g << [null_rel_uri, RDF.type, RDF::Vocab::LDP.DirectContainer]
+      g << [null_rel_uri, RDF::Vocab::LDP.hasMemberRelation, oa_vocab_term]
+      g << [null_rel_uri, RDF::Vocab::LDP.membershipResource, RDF::URI.new("#{@base_uri}/#{@id}")]
 
       resp = conn.post do |req|
         req.url "#{@id}"
@@ -166,7 +166,7 @@ module Triannon
     end
 
     # create the target/body resources inside the (already created) target/body container
-    # @param [RDF::URI] predicate either RDF::OpenAnnotation.hasTarget or RDF::OpenAnnotation.hasBody
+    # @param [RDF::URI] predicate either RDF::Vocab::OA.hasTarget or RDF::Vocab::OA.hasBody
     def create_resources_in_container(predicate)
       predicate_solns = @anno.graph.query([nil, predicate, nil])
       resource_ids = []
@@ -198,17 +198,17 @@ module Triannon
         # add statements with predicate_obj as the subject
         orig_hash_uri_objs = [] # the orig URI objects from [targetObject, OA.hasSource/.default/.item, (uri)] statements
         hash_uri_counter = 1
-        Triannon::Graph.subject_statements(predicate_obj, @anno.graph).each { |s|
+        OA::Graph.subject_statements(predicate_obj, @anno.graph).each { |s|
           if s.subject == predicate_obj
             # deal with any external URI references which may occur in:
             #  OA.hasSource (from SpecificResource), OA.default or OA.item (from Choice, Composite, List)
             if s.object.is_a?(RDF::URI) && s.object.to_s
               # do we need to represent the URL as an externalReference with hash URI
-              if s.predicate == RDF::OpenAnnotation.hasSource
+              if s.predicate == RDF::Vocab::OA.hasSource
                 hash_uri_str = "#source"
-              elsif s.predicate == RDF::OpenAnnotation.default
+              elsif s.predicate == RDF::Vocab::OA.default
                 hash_uri_str = "#default"
-              elsif s.predicate == RDF::OpenAnnotation.item
+              elsif s.predicate == RDF::Vocab::OA.item
                 hash_uri_str = "#item#{hash_uri_counter}"
                 hash_uri_counter = hash_uri_counter + 1
               else
@@ -234,7 +234,7 @@ module Triannon
                                                       :predicate => RDF::Triannon.externalReference,
                                                       :object => RDF::URI.new(orig_hash_uri_obj.to_s)})
                 # and all of the orig URL's addl props
-                Triannon::Graph.subject_statements(orig_hash_uri_obj, @anno.graph).each { |ss|
+                OA::Graph.subject_statements(orig_hash_uri_obj, @anno.graph).each { |ss|
                   if ss.subject == orig_hash_uri_obj
                     graph_for_resource << RDF::Statement({:subject => new_hash_uri_obj,
                                                           :predicate => ss.predicate,
@@ -259,11 +259,11 @@ module Triannon
         # make sure the graph we will write contains no extraneous statements about URIs
         #  now represented as hash URIs
         orig_hash_uri_objs.each { |uri_node|
-          Triannon::Graph.subject_statements(uri_node, graph_for_resource).each { |s|
+          OA::Graph.subject_statements(uri_node, graph_for_resource).each { |s|
             graph_for_resource.delete(s)
           }
         }
-        if (predicate == RDF::OpenAnnotation.hasTarget)
+        if (predicate == RDF::Vocab::OA.hasTarget)
           resource_ids << create_resource(graph_for_resource.to_ttl, "#{@id}/t")
         else
           resource_ids << create_resource(graph_for_resource.to_ttl, "#{@id}/b")

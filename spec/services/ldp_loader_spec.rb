@@ -8,17 +8,17 @@ describe Triannon::LdpLoader, :vcr do
   let(:root_anno_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_root_anno_container.ttl') }
 
   describe '*load' do
-    it "returns a Triannon::Graph of an OpenAnnotation without LDP or FCrepo triples" do
+    it "returns a OA::Graph of an OpenAnnotation without LDP or FCrepo triples" do
       allow_any_instance_of(Triannon::LdpLoader).to receive(:get_ttl).and_return(anno_ttl, body_ttl, target_ttl)
       result = Triannon::LdpLoader.load('somekey')
-      expect(result).to be_an_instance_of(Triannon::Graph)
-      root_node_solns = result.query [nil, RDF.type, RDF::OpenAnnotation.Annotation]
+      expect(result).to be_an_instance_of(OA::Graph)
+      root_node_solns = result.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
       expect(root_node_solns.count).to eql 1
       root_node = root_node_solns.first.subject
       # no LDP
       expect(result.query([nil, RDF.type, RDF::URI("http://www.w3.org/ns/ldp#Container")]).size).to eql 0
-      # no FCrepo
-      expect(result.query([nil, RDF::FCRepo4.created, nil]).size).to eql 0
+      # no Fcrepo4
+      expect(result.query([nil, RDF::Vocab::Fcrepo4.created, nil]).size).to eql 0
     end
     it "calls #load_anno_container, #load_bodies and #load_targets" do
       expect_any_instance_of(Triannon::LdpLoader).to receive(:load_anno_container)
@@ -50,7 +50,7 @@ describe Triannon::LdpLoader, :vcr do
     it "removes Fedora triples before calling AnnotationLdp.load_statements_into_graph" do
       loader = Triannon::LdpLoader.new 'somekey'
       allow(loader).to receive(:get_ttl).with("somekey").and_return(anno_ttl)
-      expect(RDF::FCRepo4).to receive(:remove_fedora_triples).and_return(RDF::Graph.new)
+      expect(OA::Graph).to receive(:remove_fedora_triples).and_return(RDF::Graph.new)
       expect(loader.ldp_annotation).to receive(:load_statements_into_graph)
       loader.load_anno_container
     end
@@ -59,7 +59,7 @@ describe Triannon::LdpLoader, :vcr do
       prov_ttl = File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_base_prov.ttl')
       allow(loader).to receive(:get_ttl).with("somekey").and_return(prov_ttl)
       loader.load_anno_container
-      result = loader.ldp_annotation.graph.query [nil, RDF::OpenAnnotation.annotatedAt, nil]
+      result = loader.ldp_annotation.graph.query [nil, RDF::Vocab::OA.annotatedAt, nil]
       expect(result.size).to eq 1
     end
     it "no triple in the graph has the (ldp store) body uri as a subject (before #load_bodies is called)" do
@@ -100,7 +100,7 @@ describe Triannon::LdpLoader, :vcr do
       loader = Triannon::LdpLoader.new 'somekey'
       allow(loader.ldp_annotation).to receive(:body_uris).and_return(["some_body_key"])
       allow(loader).to receive(:get_ttl).with("some_body_key").and_return(body_ttl)
-      expect(RDF::FCRepo4).to receive(:remove_fedora_triples).and_return(RDF::Graph.new)
+      expect(OA::Graph).to receive(:remove_fedora_triples).and_return(RDF::Graph.new)
       expect(loader.ldp_annotation).to receive(:load_statements_into_graph)
       loader.load_bodies
     end
@@ -110,7 +110,7 @@ describe Triannon::LdpLoader, :vcr do
       loader.load_anno_container
       loader.load_bodies
       body_uri = loader.ldp_annotation.body_uris.first
-      result = loader.ldp_annotation.graph.query [body_uri, RDF::Content.chars, nil]
+      result = loader.ldp_annotation.graph.query [body_uri, RDF::Vocab::CNT.chars, nil]
       expect(result.first.object.to_s).to match /I love this/
     end
     it "retrieves triples about external refs" do
@@ -123,7 +123,7 @@ describe Triannon::LdpLoader, :vcr do
       ext_ref_solns = loader.ldp_annotation.graph.query [body_uri, RDF::Triannon.externalReference, nil]
       expect(ext_ref_solns.count).to eql 1
       expect(ext_ref_solns).to include [body_uri, RDF::Triannon.externalReference, RDF::URI.new("http://dbpedia.org/resource/Love")]
-      expect(loader.ldp_annotation.graph.query([body_uri, RDF.type, RDF::OpenAnnotation.SemanticTag]).count).to eql 1
+      expect(loader.ldp_annotation.graph.query([body_uri, RDF.type, RDF::Vocab::OA.SemanticTag]).count).to eql 1
     end
   end
 
@@ -147,7 +147,7 @@ describe Triannon::LdpLoader, :vcr do
       loader = Triannon::LdpLoader.new 'somekey'
       allow(loader.ldp_annotation).to receive(:target_uris).and_return(["some_target_key"])
       allow(loader).to receive(:get_ttl).with("some_target_key").and_return(body_ttl)
-      expect(RDF::FCRepo4).to receive(:remove_fedora_triples).and_return(RDF::Graph.new)
+      expect(OA::Graph).to receive(:remove_fedora_triples).and_return(RDF::Graph.new)
       expect(loader.ldp_annotation).to receive(:load_statements_into_graph)
       loader.load_targets
     end
@@ -172,19 +172,19 @@ describe Triannon::LdpLoader, :vcr do
       default_uri_solns = loader.ldp_annotation.graph.query [default_uri_obj, nil, nil]
       expect(default_uri_solns.count).to eql 2
       expect(default_uri_solns).to include [default_uri_obj, RDF::Triannon.externalReference, RDF::URI.new("http://images.com/small")]
-      expect(default_uri_solns).to include [default_uri_obj, RDF.type, RDF::DCMIType.Image]
+      expect(default_uri_solns).to include [default_uri_obj, RDF.type, RDF::Vocab::DCMIType.Image]
 
       item1_uri_obj = RDF::URI.new(target_uri.to_s + "#item1")
       item1_uri_solns = loader.ldp_annotation.graph.query [item1_uri_obj, nil, nil]
       expect(item1_uri_solns.count).to eql 2
       expect(item1_uri_solns).to include [item1_uri_obj, RDF::Triannon.externalReference, RDF::URI.new("http://images.com/large")]
-      expect(item1_uri_solns).to include [item1_uri_obj, RDF.type, RDF::DCMIType.Image]
+      expect(item1_uri_solns).to include [item1_uri_obj, RDF.type, RDF::Vocab::DCMIType.Image]
 
       item2_uri_obj = RDF::URI.new(target_uri.to_s + "#item2")
       item2_uri_solns = loader.ldp_annotation.graph.query [item2_uri_obj, nil, nil]
       expect(item2_uri_solns.count).to eql 2
       expect(item2_uri_solns).to include [item2_uri_obj, RDF::Triannon.externalReference, RDF::URI.new("http://images.com/huge")]
-      expect(item2_uri_solns).to include [item2_uri_obj, RDF.type, RDF::DCMIType.Image]
+      expect(item2_uri_solns).to include [item2_uri_obj, RDF.type, RDF::Vocab::DCMIType.Image]
     end
   end
 

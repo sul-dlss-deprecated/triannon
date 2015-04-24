@@ -15,9 +15,9 @@ describe "integration tests for external URIs", :vcr do
      ] ."
      g = write_anno.graph
      expect(g.size).to eql 3
-     expect(g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-     expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.bookmarking]).size).to eql 1
-     expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
+     expect(g.query([nil, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+     expect(g.query([nil, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.bookmarking]).size).to eql 1
+     expect(g.query([nil, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1
      
      sw = write_anno.send(:solr_writer)
      allow(sw).to receive(:add)
@@ -27,9 +27,9 @@ describe "integration tests for external URIs", :vcr do
      h = anno.graph
      expect(h.size).to eql 3
      anno_uri_obj = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
-     expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-     expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.bookmarking]).size).to eql 1
-     expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1     
+     expect(h.query([anno_uri_obj, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+     expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.bookmarking]).size).to eql 1
+     expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1     
   end
   
   it 'mult targets with plain external URIs' do
@@ -47,10 +47,10 @@ describe "integration tests for external URIs", :vcr do
      ] ."
      g = write_anno.graph
      expect(g.size).to eql 4
-     expect(g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-     expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.bookmarking]).size).to eql 1
-     expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri1)]).size).to eql 1
-     expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri2)]).size).to eql 1
+     expect(g.query([nil, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+     expect(g.query([nil, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.bookmarking]).size).to eql 1
+     expect(g.query([nil, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri1)]).size).to eql 1
+     expect(g.query([nil, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri2)]).size).to eql 1
      
      sw = write_anno.send(:solr_writer)
      allow(sw).to receive(:add)
@@ -60,10 +60,10 @@ describe "integration tests for external URIs", :vcr do
      h = anno.graph
      expect(h.size).to eql 4
      anno_uri_obj = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
-     expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-     expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.bookmarking]).size).to eql 1
-     expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri1)]).size).to eql 1     
-     expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri2)]).size).to eql 1     
+     expect(h.query([anno_uri_obj, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+     expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.bookmarking]).size).to eql 1
+     expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri1)]).size).to eql 1     
+     expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri2)]).size).to eql 1     
   end
 
   it 'body and target have plain external URI' do
@@ -81,10 +81,10 @@ describe "integration tests for external URIs", :vcr do
      ] ."
     g = write_anno.graph
     expect(g.size).to eql 4
-    expect(g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri)]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
+    expect(g.query([nil, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.identifying]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasBody, RDF::URI(body_uri)]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1
 
     sw = write_anno.send(:solr_writer)
     allow(sw).to receive(:add)
@@ -94,10 +94,10 @@ describe "integration tests for external URIs", :vcr do
     h = anno.graph
     expect(h.size).to eql 4
     anno_uri_obj = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
-    expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri)]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.identifying]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasBody, RDF::URI(body_uri)]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1
   end
   
   it "mult bodies with plain external URIs" do
@@ -117,11 +117,11 @@ describe "integration tests for external URIs", :vcr do
      ] ."
     g = write_anno.graph
     expect(g.size).to eql 5
-    expect(g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri1)]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri2)]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
+    expect(g.query([nil, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.identifying]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasBody, RDF::URI(body_uri1)]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasBody, RDF::URI(body_uri2)]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1
 
     sw = write_anno.send(:solr_writer)
     allow(sw).to receive(:add)
@@ -131,11 +131,11 @@ describe "integration tests for external URIs", :vcr do
     h = anno.graph
     expect(h.size).to eql 5
     anno_uri_obj = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
-    expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri1)]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri2)]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.identifying]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasBody, RDF::URI(body_uri1)]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasBody, RDF::URI(body_uri2)]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1
   end
   
   it 'target uri has additional properties' do
@@ -159,12 +159,12 @@ describe "integration tests for external URIs", :vcr do
         dc11:format \"#{target_format}\" ."
     g = write_anno.graph
     expect(g.size).to eql 6
-    expect(g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
-    expect(g.query([RDF::URI(target_uri), RDF.type, RDF::DCMIType.Text]).size).to eql 1
+    expect(g.query([nil, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1
+    expect(g.query([RDF::URI(target_uri), RDF.type, RDF::Vocab::DCMIType.Text]).size).to eql 1
     expect(g.query([RDF::URI(target_uri), RDF::DC11.format, target_format]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri)]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.identifying]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasBody, RDF::URI(body_uri)]).size).to eql 1
 
     sw = write_anno.send(:solr_writer)
     allow(sw).to receive(:add)
@@ -174,12 +174,12 @@ describe "integration tests for external URIs", :vcr do
     h = anno.graph
     expect(h.size).to eql 6
     anno_uri_obj = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
-    expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
-    expect(h.query([RDF::URI(target_uri), RDF.type, RDF::DCMIType.Text]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1
+    expect(h.query([RDF::URI(target_uri), RDF.type, RDF::Vocab::DCMIType.Text]).size).to eql 1
     expect(h.query([RDF::URI(target_uri), RDF::DC11.format, target_format]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri)]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.identifying]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasBody, RDF::URI(body_uri)]).size).to eql 1
   end
   
   it 'body uri with semantic tag' do
@@ -199,11 +199,11 @@ describe "integration tests for external URIs", :vcr do
      <#{body_uri}> a openannotation:SemanticTag ."
     g = write_anno.graph
     expect(g.size).to eql 5
-    expect(g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri)]).size).to eql 1
-    expect(g.query([RDF::URI(body_uri), RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
+    expect(g.query([nil, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasBody, RDF::URI(body_uri)]).size).to eql 1
+    expect(g.query([RDF::URI(body_uri), RDF.type, RDF::Vocab::OA.SemanticTag]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.identifying]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1
 
     sw = write_anno.send(:solr_writer)
     allow(sw).to receive(:add)
@@ -213,11 +213,11 @@ describe "integration tests for external URIs", :vcr do
     h = anno.graph
     expect(h.size).to eql 5
     anno_uri_obj = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
-    expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri)]).size).to eql 1
-    expect(h.query([RDF::URI(body_uri), RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasBody, RDF::URI(body_uri)]).size).to eql 1
+    expect(h.query([RDF::URI(body_uri), RDF.type, RDF::Vocab::OA.SemanticTag]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.identifying]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1
   end
   
   it "body uri with metadata" do
@@ -241,12 +241,12 @@ describe "integration tests for external URIs", :vcr do
         dc11:format \"#{body_format}\" ."
     g = write_anno.graph
     expect(g.size).to eql 6
-    expect(g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri)]).size).to eql 1
-    expect(g.query([RDF::URI(body_uri), RDF.type, RDF::DCMIType.Sound]).size).to eql 1
+    expect(g.query([nil, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasBody, RDF::URI(body_uri)]).size).to eql 1
+    expect(g.query([RDF::URI(body_uri), RDF.type, RDF::Vocab::DCMIType.Sound]).size).to eql 1
     expect(g.query([RDF::URI(body_uri), RDF::DC11.format, body_format]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.identifying]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1
 
     sw = write_anno.send(:solr_writer)
     allow(sw).to receive(:add)
@@ -256,12 +256,12 @@ describe "integration tests for external URIs", :vcr do
     h = anno.graph
     expect(h.size).to eql 6
     anno_uri_obj = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
-    expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasBody, RDF::URI(body_uri)]).size).to eql 1
-    expect(h.query([RDF::URI(body_uri), RDF.type, RDF::DCMIType.Sound]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasBody, RDF::URI(body_uri)]).size).to eql 1
+    expect(h.query([RDF::URI(body_uri), RDF.type, RDF::Vocab::DCMIType.Sound]).size).to eql 1
     expect(h.query([RDF::URI(body_uri), RDF::DC11.format, body_format]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.identifying]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI(target_uri)]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.identifying]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1
   end
   
 end

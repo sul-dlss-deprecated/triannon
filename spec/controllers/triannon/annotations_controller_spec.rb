@@ -280,13 +280,13 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
           end
           context 'jsonld' do
             context 'oa dated' do
-              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/ld+json", OA::Graph::OA_DATED_CONTEXT_URL
             end
             context 'oa generic' do
-              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::OA_CONTEXT_URL, Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/ld+json", OA::Graph::OA_CONTEXT_URL, OA::Graph::OA_DATED_CONTEXT_URL
             end
             context 'iiif' do
-              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::IIIF_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/ld+json", OA::Graph::IIIF_CONTEXT_URL
             end
             it "missing context returns oa dated" do
               request.accept = "application/ld+json"
@@ -295,7 +295,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
               expect(response.content_type).to eql("application/ld+json")
               expect(response.body).to match json_regex
               expect(response.body).to match "kq131cs7229"
-              expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              expect(response.body).to match OA::Graph::OA_DATED_CONTEXT_URL
             end
             it "unrecognized context returns oa dated" do
               request.accept = "application/ld+json; profile=\"http://not.a.real.doctor.com/\""
@@ -304,18 +304,18 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
               expect(response.content_type).to eql("application/ld+json")
               expect(response.body).to match json_regex
               expect(response.body).to match "kq131cs7229"
-              expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              expect(response.body).to match OA::Graph::OA_DATED_CONTEXT_URL
             end
           end
           context 'json (be nice and pay attention to profile)' do
             context 'oa dated' do
-              it_behaves_like 'creates anno successfully', "application/json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/json", OA::Graph::OA_DATED_CONTEXT_URL
             end
             context 'oa generic' do
-              it_behaves_like 'creates anno successfully', "text/x-json", Triannon::JsonldContext::OA_CONTEXT_URL, Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "text/x-json", OA::Graph::OA_CONTEXT_URL, OA::Graph::OA_DATED_CONTEXT_URL
             end
             context 'iiif' do
-              it_behaves_like 'creates anno successfully', "application/jsonrequest", Triannon::JsonldContext::IIIF_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/jsonrequest", OA::Graph::IIIF_CONTEXT_URL
             end
             it "missing context returns oa dated" do
               request.accept = "application/json"
@@ -324,17 +324,17 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
               expect(response.content_type).to eql("application/json")
               expect(response.body).to match json_regex
               expect(response.body).to match "kq131cs7229"
-              expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              expect(response.body).to match OA::Graph::OA_DATED_CONTEXT_URL
             end
           end
           it "context specified for non-json returns non-json" do
-            request.accept = "application/x-turtle; profile=\"#{Triannon::JsonldContext::IIIF_CONTEXT_URL}\""
+            request.accept = "application/x-turtle; profile=\"#{OA::Graph::IIIF_CONTEXT_URL}\""
             post :create, Triannon.annotation_fixture("body-chars.ttl")
             expect(response.status).to eq 201
             expect(response.content_type).to eql("application/x-turtle")
             expect(response.body).to match /\.\Z/  # \Z is needed instead of $ due to \n in data)
             expect(response.body).to match "kq131cs7229"
-            expect(response.body).not_to match Triannon::JsonldContext::IIIF_CONTEXT_URL
+            expect(response.body).not_to match OA::Graph::IIIF_CONTEXT_URL
           end
         end
         context 'Link header specifies context URL' do
@@ -370,19 +370,19 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
           end
           context 'json' do
             context 'oa dated' do
-              it_behaves_like 'creates anno successfully', "application/json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/json", OA::Graph::OA_DATED_CONTEXT_URL
             end
             context 'oa generic' do
-              it_behaves_like 'creates anno successfully', "text/x-json", Triannon::JsonldContext::OA_CONTEXT_URL, Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "text/x-json", OA::Graph::OA_CONTEXT_URL, OA::Graph::OA_DATED_CONTEXT_URL
             end
             context 'iiif' do
-              it_behaves_like 'creates anno successfully', "application/jsonrequest", Triannon::JsonldContext::IIIF_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/jsonrequest", OA::Graph::IIIF_CONTEXT_URL
             end
             context "unrecognized context returns oa dated" do
-              it_behaves_like 'creates anno successfully', "application/jsonrequest", "http://context.unknown.org", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/jsonrequest", "http://context.unknown.org", OA::Graph::OA_DATED_CONTEXT_URL
             end
             context "missing context returns oa dated" do
-              it_behaves_like 'creates anno successfully', "text/x-json", "", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "text/x-json", "", OA::Graph::OA_DATED_CONTEXT_URL
             end
             it "no link header returns oa dated" do
               request.accept = "application/json"
@@ -391,24 +391,24 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
               expect(response.content_type).to eql("application/json")
               expect(response.body).to match json_regex
               expect(response.body).to match "kq131cs7229"
-              expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              expect(response.body).to match OA::Graph::OA_DATED_CONTEXT_URL
             end
           end
           context 'jsonld (be nice and pay attention to link)' do
             context 'oa dated' do
-              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/ld+json", OA::Graph::OA_DATED_CONTEXT_URL
             end
             context 'oa generic' do
-              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::OA_CONTEXT_URL, Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/ld+json", OA::Graph::OA_CONTEXT_URL, OA::Graph::OA_DATED_CONTEXT_URL
             end
             context 'iiif' do
-              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::IIIF_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/ld+json", OA::Graph::IIIF_CONTEXT_URL
             end
             context "unrecognized context returns oa dated" do
-              it_behaves_like 'creates anno successfully', "application/ld+json", "http://context.unknown.org", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/ld+json", "http://context.unknown.org", OA::Graph::OA_DATED_CONTEXT_URL
             end
             context "missing context returns oa dated" do
-              it_behaves_like 'creates anno successfully', "application/ld+json", "", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/ld+json", "", OA::Graph::OA_DATED_CONTEXT_URL
             end
             it "no link header returns oa dated" do
               request.accept = "application/ld+json"
@@ -417,18 +417,18 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
               expect(response.content_type).to eql("application/ld+json")
               expect(response.body).to match json_regex
               expect(response.body).to match "kq131cs7229"
-              expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              expect(response.body).to match OA::Graph::OA_DATED_CONTEXT_URL
             end
           end
           it "context specified for non-json returns non-json" do
             request.accept = "application/x-turtle"
-            request.headers["Link"] = "#{Triannon::JsonldContext::IIIF_CONTEXT_URL}; rel=\"http://www.w3.org/ns/json-ld#context\""
+            request.headers["Link"] = "#{OA::Graph::IIIF_CONTEXT_URL}; rel=\"http://www.w3.org/ns/json-ld#context\""
             post :create, Triannon.annotation_fixture("body-chars.ttl")
             expect(response.status).to eq 201
             expect(response.content_type).to eql("application/x-turtle")
             expect(response.body).to match /\.\Z/  # \Z is needed instead of $ due to \n in data)
             expect(response.body).to match "kq131cs7229"
-            expect(response.body).not_to match Triannon::JsonldContext::IIIF_CONTEXT_URL
+            expect(response.body).not_to match OA::Graph::IIIF_CONTEXT_URL
           end
         end
       end # jsonld context
@@ -562,10 +562,10 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
               get :show, id: anno.id, jsonld_context: jsonld_context
               case jsonld_context
                 when "iiif", "IIIF"
-                  expect(response.body).to match(Triannon::JsonldContext::IIIF_CONTEXT_URL)
+                  expect(response.body).to match(OA::Graph::IIIF_CONTEXT_URL)
                   expect(response.body).to match(/"on":/)
                 when "oa", "OA"
-                  expect(response.body).to match(Triannon::JsonldContext::OA_DATED_CONTEXT_URL)
+                  expect(response.body).to match(OA::Graph::OA_DATED_CONTEXT_URL)
                   expect(response.body).to match(/"hasTarget":/)
               end
               expect(response.content_type).to eql("application/ld+json")
@@ -590,7 +590,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
         it 'returns OA context jsonld when neither iiif or oa is in path' do
           request.accept = "application/ld+json"
           get :show, id: bookmark_anno.id, jsonld_context: 'foo'
-          expect(response.body).to match(Triannon::JsonldContext::OA_DATED_CONTEXT_URL)
+          expect(response.body).to match(OA::Graph::OA_DATED_CONTEXT_URL)
           expect(response.body).to match(/"hasTarget":/)
           expect(response.content_type).to eql("application/ld+json")
           expect(response.body).to match json_regex
@@ -599,7 +599,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
         it 'returns OA context jsonld when context is missing in path' do
           request.accept = "application/ld+json"
           get :show, id: bookmark_anno.id, jsonld_context: ''
-          expect(response.body).to match(Triannon::JsonldContext::OA_DATED_CONTEXT_URL)
+          expect(response.body).to match(OA::Graph::OA_DATED_CONTEXT_URL)
           expect(response.body).to match(/"hasTarget":/)
           expect(response.content_type).to eql("application/ld+json")
           expect(response.body).to match json_regex
@@ -622,7 +622,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
             request.accept = mime_type
             [bookmark_anno, body_chars_anno].each { |anno|
               get :show, id: anno.id, jsonld_context: 'iiif'
-              expect(response.body).not_to match(Triannon::JsonldContext::IIIF_CONTEXT_URL)
+              expect(response.body).not_to match(OA::Graph::IIIF_CONTEXT_URL)
               expect(response.body).not_to match(/"on":/)
               expect(response.body).not_to match json_regex
               expect(response.content_type).to eql(mime_type)
@@ -717,13 +717,13 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
           end
           context 'jsonld' do
             context 'oa dated' do
-              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/ld+json", OA::Graph::OA_DATED_CONTEXT_URL
             end
             context 'oa generic' do
-              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::OA_CONTEXT_URL, Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/ld+json", OA::Graph::OA_CONTEXT_URL, OA::Graph::OA_DATED_CONTEXT_URL
             end
             context 'iiif' do
-              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::IIIF_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/ld+json", OA::Graph::IIIF_CONTEXT_URL
             end
             it "missing context returns oa dated" do
               request.accept = "application/ld+json"
@@ -732,7 +732,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
               expect(response.content_type).to eql("application/ld+json")
               expect(response.body).to match json_regex
               expect(response.body).to match "kq131cs7229"
-              expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              expect(response.body).to match OA::Graph::OA_DATED_CONTEXT_URL
             end
             it "unrecognized context returns oa dated" do
               request.accept = "application/ld+json; profile=\"http://not.a.real.doctor.com/\""
@@ -741,18 +741,18 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
               expect(response.content_type).to eql("application/ld+json")
               expect(response.body).to match json_regex
               expect(response.body).to match "kq131cs7229"
-              expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              expect(response.body).to match OA::Graph::OA_DATED_CONTEXT_URL
             end
           end
           context 'json (be nice and pay attention to profile)' do
             context 'oa dated' do
-              it_behaves_like 'creates anno successfully', "application/json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/json", OA::Graph::OA_DATED_CONTEXT_URL
             end
             context 'oa generic' do
-              it_behaves_like 'creates anno successfully', "text/x-json", Triannon::JsonldContext::OA_CONTEXT_URL, Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "text/x-json", OA::Graph::OA_CONTEXT_URL, OA::Graph::OA_DATED_CONTEXT_URL
             end
             context 'iiif' do
-              it_behaves_like 'creates anno successfully', "application/jsonrequest", Triannon::JsonldContext::IIIF_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/jsonrequest", OA::Graph::IIIF_CONTEXT_URL
             end
             it "missing context returns oa dated" do
               request.accept = "application/json"
@@ -761,17 +761,17 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
               expect(response.content_type).to eql("application/json")
               expect(response.body).to match json_regex
               expect(response.body).to match "kq131cs7229"
-              expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              expect(response.body).to match OA::Graph::OA_DATED_CONTEXT_URL
             end
           end
           it "context specified for non-json returns non-json" do
-            request.accept = "application/x-turtle; profile=\"#{Triannon::JsonldContext::IIIF_CONTEXT_URL}\""
+            request.accept = "application/x-turtle; profile=\"#{OA::Graph::IIIF_CONTEXT_URL}\""
             get :show, id: bookmark_anno.id
             expect(response.status).to eq 200
             expect(response.content_type).to eql("application/x-turtle")
             expect(response.body).to match /\.\Z/  # \Z is needed instead of $ due to \n in data)
             expect(response.body).to match "kq131cs7229"
-            expect(response.body).not_to match Triannon::JsonldContext::IIIF_CONTEXT_URL
+            expect(response.body).not_to match OA::Graph::IIIF_CONTEXT_URL
           end
         end
         context 'Link header specifies context URL' do
@@ -807,19 +807,19 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
           end
           context 'json' do
             context 'oa dated' do
-              it_behaves_like 'creates anno successfully', "application/json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/json", OA::Graph::OA_DATED_CONTEXT_URL
             end
             context 'oa generic' do
-              it_behaves_like 'creates anno successfully', "text/x-json", Triannon::JsonldContext::OA_CONTEXT_URL, Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "text/x-json", OA::Graph::OA_CONTEXT_URL, OA::Graph::OA_DATED_CONTEXT_URL
             end
             context 'iiif' do
-              it_behaves_like 'creates anno successfully', "application/jsonrequest", Triannon::JsonldContext::IIIF_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/jsonrequest", OA::Graph::IIIF_CONTEXT_URL
             end
             context "unrecognized context returns oa dated" do
-              it_behaves_like 'creates anno successfully', "application/jsonrequest", "http://context.unknown.org", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/jsonrequest", "http://context.unknown.org", OA::Graph::OA_DATED_CONTEXT_URL
             end
             context "missing context returns oa dated" do
-              it_behaves_like 'creates anno successfully', "text/x-json", "", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "text/x-json", "", OA::Graph::OA_DATED_CONTEXT_URL
             end
             it "no link header returns oa dated" do
               request.accept = "application/json"
@@ -828,24 +828,24 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
               expect(response.content_type).to eql("application/json")
               expect(response.body).to match json_regex
               expect(response.body).to match "kq131cs7229"
-              expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              expect(response.body).to match OA::Graph::OA_DATED_CONTEXT_URL
             end
           end
           context 'jsonld (be nice and pay attention to link)' do
             context 'oa dated' do
-              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/ld+json", OA::Graph::OA_DATED_CONTEXT_URL
             end
             context 'oa generic' do
-              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::OA_CONTEXT_URL, Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/ld+json", OA::Graph::OA_CONTEXT_URL, OA::Graph::OA_DATED_CONTEXT_URL
             end
             context 'iiif' do
-              it_behaves_like 'creates anno successfully', "application/ld+json", Triannon::JsonldContext::IIIF_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/ld+json", OA::Graph::IIIF_CONTEXT_URL
             end
             context "unrecognized context returns oa dated" do
-              it_behaves_like 'creates anno successfully', "application/ld+json", "http://context.unknown.org", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/ld+json", "http://context.unknown.org", OA::Graph::OA_DATED_CONTEXT_URL
             end
             context "missing context returns oa dated" do
-              it_behaves_like 'creates anno successfully', "application/ld+json", "", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              it_behaves_like 'creates anno successfully', "application/ld+json", "", OA::Graph::OA_DATED_CONTEXT_URL
             end
             it "no link header returns oa dated" do
               request.accept = "application/ld+json"
@@ -854,18 +854,18 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
               expect(response.content_type).to eql("application/ld+json")
               expect(response.body).to match json_regex
               expect(response.body).to match "kq131cs7229"
-              expect(response.body).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+              expect(response.body).to match OA::Graph::OA_DATED_CONTEXT_URL
             end
           end
           it "context specified for non-json returns non-json" do
             request.accept = "application/x-turtle"
-            request.headers["Link"] = "#{Triannon::JsonldContext::IIIF_CONTEXT_URL}; rel=\"http://www.w3.org/ns/json-ld#context\""
+            request.headers["Link"] = "#{OA::Graph::IIIF_CONTEXT_URL}; rel=\"http://www.w3.org/ns/json-ld#context\""
             get :show, id: bookmark_anno.id
             expect(response.status).to eq 200
             expect(response.content_type).to eql("application/x-turtle")
             expect(response.body).to match /\.\Z/  # \Z is needed instead of $ due to \n in data)
             expect(response.body).to match "kq131cs7229"
-            expect(response.body).not_to match Triannon::JsonldContext::IIIF_CONTEXT_URL
+            expect(response.body).not_to match OA::Graph::IIIF_CONTEXT_URL
           end
         end
       end # jsonld_context via HTTP header

@@ -1,8 +1,6 @@
 require 'linkeddata'
-require 'rdf/open_annotation'
+require 'oa/graph'
 require 'rdf/iiif'
-require 'rdf/ldp'
-require 'rdf/fcrepo4'
 require 'rdf/triannon_vocab'
 require 'bootstrap-sass'
 require 'faraday' # for writing to LDP store
@@ -12,9 +10,8 @@ require 'retries' # for writing to Solr
 module Triannon
   require "triannon/engine"
   require "triannon/error"
-  require "triannon/graph"
   require "triannon/iiif_anno_list"
-  require "triannon/jsonld_context"
+  require "triannon/oa_graph_helper.rb"
 
   class << self
     attr_accessor :config

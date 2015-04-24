@@ -2,7 +2,7 @@ module Triannon
   # a wrapper class for RDF::Graph that adds methods specific to Triannon
   # this is intended to be used for an RDF::Graph of a single annotation
   class Graph
-    
+
 # Class Methods ----------------------------------------------------------------
 
     # given an RDF::Resource (an RDF::Node or RDF::URI), look for all the statements with that object
@@ -18,21 +18,21 @@ module Triannon
       }
       result.uniq
     end
-    
+
     # @return [RDF::Query] query for a subject :s with type of RDF::OpenAnnotation.Annotation
     def self.anno_query
       q = RDF::Query.new
       q << [:s, RDF.type, RDF::OpenAnnotation.Annotation]
     end
-    
-    
+
+
 # Instance Methods ----------------------------------------------------------------
 
     # instantiate this class for an RDF::Graph of a single annotation
     def initialize(rdf_graph)
       @graph = rdf_graph
     end
-    
+
     # @return json-ld representation of graph with OpenAnnotation context as a url
     def jsonld_oa
       inline_context = @graph.dump(:jsonld, :context => Triannon::JsonldContext::OA_DATED_CONTEXT_URL)
@@ -40,17 +40,17 @@ module Triannon
       hash_from_json["@context"] = Triannon::JsonldContext::OA_DATED_CONTEXT_URL
       hash_from_json.to_json
     end
-    
+
     # @return json-ld representation of graph with IIIF context as a url
     def jsonld_iiif
       inline_context = @graph.dump(:jsonld, :context => Triannon::JsonldContext::IIIF_CONTEXT_URL)
       hash_from_json = JSON.parse(inline_context)
       hash_from_json["@context"] = Triannon::JsonldContext::IIIF_CONTEXT_URL
       hash_from_json.to_json
-    end    
+    end
 
     # Canned Query methods ----------------------------------------------------------------
-  
+
     # @return [String] the id of this annotation as a url string, or nil if it is a Node
     def id_as_url
       solution = @graph.query self.class.anno_query
@@ -87,7 +87,7 @@ module Triannon
       }
       urls
     end
-    
+
     # For all bodies that are of type ContentAsText, get the characters as a single String in the returned Array.
     # @return [Array<String>] body chars as Strings, in an Array (one element for each contentAsText body)
     def body_chars
@@ -97,12 +97,12 @@ module Triannon
       q << [:body, RDF.type, RDF::Content.ContentAsText]
       q << [:body, RDF::Content.chars, :body_chars]
       solns = @graph.query q
-      solns.each { |soln| 
+      solns.each { |soln|
         result << soln.body_chars.value
       }
       result
     end
-    
+
     # @return [String] The datetime from the annotatedAt property, or nil
     def annotated_at
       solution = @graph.query [nil, RDF::OpenAnnotation.annotatedAt, nil]
@@ -115,23 +115,23 @@ module Triannon
     # Changing the Graph ----------------------------------------------------------------
 
     # remove all RDF::OpenAnnotation.hasBody and .hasTarget statements
-    #  and any other statements associated with body and target objects, 
+    #  and any other statements associated with body and target objects,
     #  leaving all statements to be stored as part of base object in LDP store
     def remove_non_base_statements
       remove_has_target_statements
       remove_has_body_statements
     end
-    
+
     # remove all RDF::OpenAnnotation.hasBody statements and any other statements associated with body objects
     def remove_has_body_statements
       remove_predicate_and_its_object_statements RDF::OpenAnnotation.hasBody
     end
-    
+
     # remove all RDF::OpenAnnotation.hasTarget statements and any other statements associated with body objects
     def remove_has_target_statements
       remove_predicate_and_its_object_statements RDF::OpenAnnotation.hasTarget
     end
-    
+
     # remove all such predicate statements and any other statements associated with predicates' objects
     def remove_predicate_and_its_object_statements(predicate)
       predicate_stmts = @graph.query([nil, predicate, nil])
@@ -143,7 +143,7 @@ module Triannon
         @graph.delete pstmt
       }
     end
-    
+
     # transform an outer blank node into a null relative URI
     def make_null_relative_uri_out_of_blank_node
       anno_stmts = @graph.query([nil, RDF.type, RDF::OpenAnnotation.Annotation])
@@ -163,11 +163,11 @@ module Triannon
         end
       }
     end
-    
+
     # send unknown methods to RDF::Graph
     def method_missing(sym, *args, &block)
       @graph.send sym, *args, &block
     end
-    
+
   end
 end

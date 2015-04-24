@@ -23,8 +23,8 @@ describe Triannon::LdpWriter, :vcr do
       end
       g = RDF::Graph.new.from_ttl(resp.body)
       full_url = "#{Triannon.config[:ldp_url]}/#{new_pid}"
-      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
     end
     it 'IIIF anno has sc:painting motivation' do
       iiif_anno = Triannon::Annotation.new data: '
@@ -48,8 +48,8 @@ describe Triannon::LdpWriter, :vcr do
       end
       g = RDF::Graph.new.from_ttl(resp.body)
       full_url = "#{Triannon.config[:ldp_url]}/#{base_pid}"
-      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.motivatedBy, RDF::IIIFPresentation.painting]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.motivatedBy, RDF::IIIFPresentation.painting]).size).to eql 1
     end
     it 'keeps multiple motivations if present' do
       my_anno = Triannon::Annotation.new data: '{
@@ -73,9 +73,9 @@ describe Triannon::LdpWriter, :vcr do
       end
       g = RDF::Graph.new.from_ttl(resp.body)
       full_url = "#{Triannon.config[:ldp_url]}/#{new_pid}"
-      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.moderating]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.tagging]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.moderating]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.tagging]).size).to eql 1
     end
     it 'posts provenance if present' do
       my_anno = Triannon::Annotation.new data: '{
@@ -110,12 +110,12 @@ describe Triannon::LdpWriter, :vcr do
       end
       g = RDF::Graph.new.from_ttl(resp.body)
       full_url = "#{Triannon.config[:ldp_url]}/#{new_pid}"
-      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.annotatedAt, "2014-09-03T17:16:13Z"]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.annotatedBy, nil]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.serializedAt, "2014-09-03T17:16:13Z"]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::OpenAnnotation.serializedBy, nil]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.annotatedAt, "2014-09-03T17:16:13Z"]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.annotatedBy, nil]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.serializedAt, "2014-09-03T17:16:13Z"]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.serializedBy, nil]).size).to eql 1
     end
     it "raises Triannon::ExternalReferenceError if incoming anno graph contains RDF::Triannon.externalReference in target" do
       my_anno = Triannon::Annotation.new data: '
@@ -151,7 +151,7 @@ describe Triannon::LdpWriter, :vcr do
 
   context "#create_body_container" do
     it 'calls #create_direct_container with hasBody' do
-      expect(ldpw).to receive(:create_direct_container).with(RDF::OpenAnnotation.hasBody)
+      expect(ldpw).to receive(:create_direct_container).with(RDF::Vocab::OA.hasBody)
       ldpw.create_body_container
     end
     it 'LDP store creates retrievable LDP DirectContainer with correct member relationships' do
@@ -164,16 +164,16 @@ describe Triannon::LdpWriter, :vcr do
       end
       g = RDF::Graph.new.from_ttl(resp.body)
       full_url = "#{Triannon.config[:ldp_url]}/#{id}/b"
-      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::LDP.DirectContainer]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::LDP.membershipResource, RDF::URI.new("#{Triannon.config[:ldp_url]}/#{id}")]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::LDP.hasMemberRelation, RDF::OpenAnnotation.hasBody]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::LDP.contains, nil]).size).to eql 0
+      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::Vocab::LDP.DirectContainer]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::LDP.membershipResource, RDF::URI.new("#{Triannon.config[:ldp_url]}/#{id}")]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::LDP.hasMemberRelation, RDF::Vocab::OA.hasBody]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::LDP.contains, nil]).size).to eql 0
     end
   end
 
   context "#create_target_container" do
     it 'calls #create_direct_container with hasTarget' do
-      expect(ldpw).to receive(:create_direct_container).with(RDF::OpenAnnotation.hasTarget)
+      expect(ldpw).to receive(:create_direct_container).with(RDF::Vocab::OA.hasTarget)
       ldpw.create_target_container
     end
     it 'LDP store creates retrievable LDP DirectContainer with correct member relationships' do
@@ -186,10 +186,10 @@ describe Triannon::LdpWriter, :vcr do
       end
       g = RDF::Graph.new.from_ttl(resp.body)
       full_url = "#{Triannon.config[:ldp_url]}/#{id}/t"
-      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::LDP.DirectContainer]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::LDP.membershipResource, RDF::URI.new("#{Triannon.config[:ldp_url]}/#{id}")]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::LDP.hasMemberRelation, RDF::OpenAnnotation.hasTarget]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::LDP.contains, nil]).size).to eql 0
+      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::Vocab::LDP.DirectContainer]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::LDP.membershipResource, RDF::URI.new("#{Triannon.config[:ldp_url]}/#{id}")]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::LDP.hasMemberRelation, RDF::Vocab::OA.hasTarget]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::LDP.contains, nil]).size).to eql 0
     end
   end
 
@@ -197,7 +197,7 @@ describe Triannon::LdpWriter, :vcr do
     it "calls create_resources_in_container with hasBody predicate" do
       new_pid = ldpw.create_base
       ldpw.create_body_container
-      expect(ldpw).to receive(:create_resources_in_container).with(RDF::OpenAnnotation.hasBody)
+      expect(ldpw).to receive(:create_resources_in_container).with(RDF::Vocab::OA.hasBody)
       body_uuids = ldpw.create_body_resources
     end
     it 'creates resources in the body container' do
@@ -213,10 +213,10 @@ describe Triannon::LdpWriter, :vcr do
       end
       g = RDF::Graph.new.from_ttl(resp.body)
       full_body_obj_url = "#{Triannon.config[:ldp_url]}/#{body_pid}"
-      expect(g.query([RDF::URI.new(full_body_obj_url), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_body_obj_url), RDF.type, RDF::DCMIType.Text]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_body_obj_url), RDF::Content.chars, "I love this!"]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_body_obj_url), RDF::LDP.contains, RDF::URI.new(body_pid)]).size).to eql 0
+      expect(g.query([RDF::URI.new(full_body_obj_url), RDF.type, RDF::Vocab::CNT.ContentAsText]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_body_obj_url), RDF.type, RDF::Vocab::DCMIType.Text]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_body_obj_url), RDF::Vocab::CNT.chars, "I love this!"]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_body_obj_url), RDF::Vocab::LDP.contains, RDF::URI.new(body_pid)]).size).to eql 0
 
       body_container_url = "#{Triannon.config[:ldp_url]}/#{id}/b"
       body_container_resp = conn.get do |req|
@@ -224,7 +224,7 @@ describe Triannon::LdpWriter, :vcr do
         req.headers['Accept'] = 'application/x-turtle'
       end
       g = RDF::Graph.new.from_ttl(body_container_resp.body)
-      expect(g.query([RDF::URI.new(body_container_url), RDF::LDP.contains, RDF::URI.new(full_body_obj_url)]).size).to eql 1
+      expect(g.query([RDF::URI.new(body_container_url), RDF::Vocab::LDP.contains, RDF::URI.new(full_body_obj_url)]).size).to eql 1
     end
   end # create_body_resources
 
@@ -232,7 +232,7 @@ describe Triannon::LdpWriter, :vcr do
     it "calls create_resources_in_container with hasTarget predicate" do
       new_pid = ldpw.create_base
       ldpw.create_target_container
-      expect(ldpw).to receive(:create_resources_in_container).with(RDF::OpenAnnotation.hasTarget)
+      expect(ldpw).to receive(:create_resources_in_container).with(RDF::Vocab::OA.hasTarget)
       body_uuids = ldpw.create_target_resources
     end
     it 'creates resources in the target container' do
@@ -248,7 +248,7 @@ describe Triannon::LdpWriter, :vcr do
       end
       g = RDF::Graph.new.from_ttl(resp.body)
       full_target_obj_url = "#{Triannon.config[:ldp_url]}/#{target_pid}"
-      expect(g.query([RDF::URI.new(full_target_obj_url), RDF::LDP.contains, RDF::URI.new(target_pid)]).size).to eql 0
+      expect(g.query([RDF::URI.new(full_target_obj_url), RDF::Vocab::LDP.contains, RDF::URI.new(target_pid)]).size).to eql 0
 
       container_url = "#{Triannon.config[:ldp_url]}/#{id}/t"
       container_resp = conn.get do |req|
@@ -256,7 +256,7 @@ describe Triannon::LdpWriter, :vcr do
         req.headers['Accept'] = 'application/x-turtle'
       end
       g = RDF::Graph.new.from_ttl(container_resp.body)
-      expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, RDF::URI.new(full_target_obj_url)]).size).to eql 1
+      expect(g.query([RDF::URI.new(container_url), RDF::Vocab::LDP.contains, RDF::URI.new(full_target_obj_url)]).size).to eql 1
     end
   end # create_target_resources
 
@@ -399,7 +399,7 @@ describe Triannon::LdpWriter, :vcr do
     it 'LDP store creates retrievable, empty LDP DirectContainer with expected id and LDP member relationships' do
       ldpw = Triannon::LdpWriter.new anno
       id = ldpw.create_base
-      ldpw.send(:create_direct_container, RDF::OpenAnnotation.hasTarget)
+      ldpw.send(:create_direct_container, RDF::Vocab::OA.hasTarget)
       cont_url = "#{id}/t"
       resp = conn.get do |req|
         req.url cont_url
@@ -407,9 +407,9 @@ describe Triannon::LdpWriter, :vcr do
       end
       g = RDF::Graph.new.from_ttl(resp.body)
       full_cont_url = "#{Triannon.config[:ldp_url]}/#{cont_url}"
-      expect(g.query([RDF::URI.new(full_cont_url), RDF.type, RDF::LDP.DirectContainer]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_cont_url), RDF::LDP.membershipResource, RDF::URI.new("#{Triannon.config[:ldp_url]}/#{id}")]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_cont_url), RDF::LDP.hasMemberRelation, RDF::OpenAnnotation.hasTarget]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_cont_url), RDF.type, RDF::Vocab::LDP.DirectContainer]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_cont_url), RDF::Vocab::LDP.membershipResource, RDF::URI.new("#{Triannon.config[:ldp_url]}/#{id}")]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_cont_url), RDF::Vocab::LDP.hasMemberRelation, RDF::Vocab::OA.hasTarget]).size).to eql 1
     end
     it 'has the correct ldp:memberRelation and id for hasTarget' do
       # see previous spec
@@ -417,14 +417,14 @@ describe Triannon::LdpWriter, :vcr do
     it 'has the correct ldp:memberRelation and id for hasBody' do
       ldpw = Triannon::LdpWriter.new anno
       id = ldpw.create_base
-      ldpw.send(:create_direct_container, RDF::OpenAnnotation.hasBody)
+      ldpw.send(:create_direct_container, RDF::Vocab::OA.hasBody)
       resp = conn.get do |req|
         req.url "#{id}/b"
         req.headers['Accept'] = 'text/turtle'
       end
       g = RDF::Graph.new.from_ttl(resp.body)
       full_cont_url = "#{Triannon.config[:ldp_url]}/#{id}/b"
-      expect(g.query([RDF::URI.new(full_cont_url), RDF::LDP.hasMemberRelation, RDF::OpenAnnotation.hasBody]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_cont_url), RDF::Vocab::LDP.hasMemberRelation, RDF::Vocab::OA.hasBody]).size).to eql 1
     end
     context 'LDPStorageError' do
       it "raised with status code and body when LDP returns [404, 409, 412]" do
@@ -439,7 +439,7 @@ describe Triannon::LdpWriter, :vcr do
           writer = Triannon::LdpWriter.new anno
           allow(writer).to receive(:conn).and_return(my_conn)
 
-          expect { writer.send(:create_direct_container, RDF::OpenAnnotation.hasTarget) }.to raise_error { |error|
+          expect { writer.send(:create_direct_container, RDF::Vocab::OA.hasTarget) }.to raise_error { |error|
             expect(error).to be_a Triannon::LDPStorageError
             expect(error.message).to match /^Unable to create Target LDP container for anno; RDF sent: /
             expect(error.ldp_resp_status).to eq status_code
@@ -476,16 +476,16 @@ describe Triannon::LdpWriter, :vcr do
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_body_container
-        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasBody)
+        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::Vocab::OA.hasBody)
         body_pid = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuids[0]}"
         resp = conn.get do |req|
           req.url body_pid
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(resp.body)
-        expect(g.query([RDF::URI.new(body_pid), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
-        expect(g.query([RDF::URI.new(body_pid), RDF.type, RDF::DCMIType.Text]).size).to eql 1
-        expect(g.query([RDF::URI.new(body_pid), RDF::Content.chars, "I love this!"]).size).to eql 1
+        expect(g.query([RDF::URI.new(body_pid), RDF.type, RDF::Vocab::CNT.ContentAsText]).size).to eql 1
+        expect(g.query([RDF::URI.new(body_pid), RDF.type, RDF::Vocab::DCMIType.Text]).size).to eql 1
+        expect(g.query([RDF::URI.new(body_pid), RDF::Vocab::CNT.chars, "I love this!"]).size).to eql 1
         expect(g.query([RDF::URI.new(body_pid), RDF::DC11.language, "en"]).size).to eql 1
       end
       it 'IIIF context flavor' do
@@ -503,7 +503,7 @@ describe Triannon::LdpWriter, :vcr do
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_body_container
-        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasBody)
+        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::Vocab::OA.hasBody)
         body_pid = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuids[0]}"
         resp = conn.get do |req|
           req.url body_pid
@@ -511,9 +511,9 @@ describe Triannon::LdpWriter, :vcr do
         end
         g = RDF::Graph.new.from_ttl(resp.body)
         body_obj = RDF::URI.new(body_pid)
-        expect(g.query([body_obj, RDF.type, RDF::Content.ContentAsText]).size).to eql 1
-        expect(g.query([body_obj, RDF.type, RDF::DCMIType.Text]).size).to eql 0
-        expect(g.query([body_obj, RDF::Content.chars, "I love this line!"]).size).to eql 1
+        expect(g.query([body_obj, RDF.type, RDF::Vocab::CNT.ContentAsText]).size).to eql 1
+        expect(g.query([body_obj, RDF.type, RDF::Vocab::DCMIType.Text]).size).to eql 0
+        expect(g.query([body_obj, RDF::Vocab::CNT.chars, "I love this line!"]).size).to eql 1
         expect(g.query([body_obj, RDF::DC11.format, "text/plain"]).size).to eql 1
       end
       it 'multiple resources' do
@@ -541,7 +541,7 @@ describe Triannon::LdpWriter, :vcr do
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_body_container
-        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasBody)
+        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::Vocab::OA.hasBody)
         expect(body_uuids.size).to eql 2
         body_cont_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/b"
         resp = conn.get do |req|
@@ -549,7 +549,7 @@ describe Triannon::LdpWriter, :vcr do
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(resp.body)
-        contains_stmts = g.query([RDF::URI.new(body_cont_url), RDF::LDP.contains, :body_url])
+        contains_stmts = g.query([RDF::URI.new(body_cont_url), RDF::Vocab::LDP.contains, :body_url])
         expect(contains_stmts.size).to eql 2
 
         first_body_url = contains_stmts.first.object.to_s
@@ -558,9 +558,9 @@ describe Triannon::LdpWriter, :vcr do
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(resp.body)
-        expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
-        expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::DCMIType.Text]).size).to eql 1
-        expect(g.query([RDF::URI.new(first_body_url), RDF::Content.chars, "I love this!"]).size).to eql 1
+        expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::Vocab::CNT.ContentAsText]).size).to eql 1
+        expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::Vocab::DCMIType.Text]).size).to eql 1
+        expect(g.query([RDF::URI.new(first_body_url), RDF::Vocab::CNT.chars, "I love this!"]).size).to eql 1
 
         second_body_url = contains_stmts.to_a[1].object.to_s
         resp = conn.get do |req|
@@ -568,9 +568,9 @@ describe Triannon::LdpWriter, :vcr do
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(resp.body)
-        expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
-        expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::DCMIType.Text]).size).to eql 1
-        expect(g.query([RDF::URI.new(second_body_url), RDF::Content.chars, "I hate this!"]).size).to eql 1
+        expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::Vocab::CNT.ContentAsText]).size).to eql 1
+        expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::Vocab::DCMIType.Text]).size).to eql 1
+        expect(g.query([RDF::URI.new(second_body_url), RDF::Vocab::CNT.chars, "I hate this!"]).size).to eql 1
       end
     end # ContentAsText
 
@@ -585,7 +585,7 @@ describe Triannon::LdpWriter, :vcr do
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_body_container
-        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasBody)
+        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::Vocab::OA.hasBody)
         expect(body_uuids.size).to eql 1
         body_obj_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuids[0]}"
         resp = conn.get do |req|
@@ -607,7 +607,7 @@ describe Triannon::LdpWriter, :vcr do
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_target_container
-        target_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasTarget)
+        target_uuids = my_ldpw.send(:create_resources_in_container, RDF::Vocab::OA.hasTarget)
         expect(target_uuids.size).to eql 1
         target_obj_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/t/#{target_uuids[0]}"
         resp = conn.get do |req|
@@ -617,7 +617,7 @@ describe Triannon::LdpWriter, :vcr do
         g = RDF::Graph.new.from_ttl(resp.body)
         target_obj = RDF::URI.new(target_obj_url)
         expect(g.query([target_obj, RDF::Triannon.externalReference, RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg#xywh=0,0,200,200")]).size).to eql 1
-        expect(g.query([target_obj, RDF.type, RDF::DCMIType.Image]).size).to eql 1
+        expect(g.query([target_obj, RDF.type, RDF::Vocab::DCMIType.Image]).size).to eql 1
       end
       it 'URI has semantic tag' do
         my_anno = Triannon::Annotation.new data: '{
@@ -632,7 +632,7 @@ describe Triannon::LdpWriter, :vcr do
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_body_container
-        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasBody)
+        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::Vocab::OA.hasBody)
         expect(body_uuids.size).to eql 1
         body_obj_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuids[0]}"
         resp = conn.get do |req|
@@ -641,7 +641,7 @@ describe Triannon::LdpWriter, :vcr do
         end
         g = RDF::Graph.new.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(body_obj_url), RDF::Triannon.externalReference, RDF::URI.new("http://dbpedia.org/resource/Love")]).size).to eql 1
-        expect(g.query([RDF::URI.new(body_obj_url), RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
+        expect(g.query([RDF::URI.new(body_obj_url), RDF.type, RDF::Vocab::OA.SemanticTag]).size).to eql 1
       end
       it 'IIIF context has additional properties' do
         my_anno = Triannon::Annotation.new data: '{
@@ -659,7 +659,7 @@ describe Triannon::LdpWriter, :vcr do
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_body_container
-        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasBody)
+        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::Vocab::OA.hasBody)
         expect(body_uuids.size).to eql 1
         body_obj_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuids[0]}"
         resp = conn.get do |req|
@@ -669,7 +669,7 @@ describe Triannon::LdpWriter, :vcr do
         g = RDF::Graph.new.from_ttl(resp.body)
         body_obj = RDF::URI.new(body_obj_url)
         expect(g.query([body_obj, RDF::Triannon.externalReference, RDF::URI.new("http://example.org/alto/p1.xml#xpointer(/alto/line[1])")]).size).to eql 1
-        expect(g.query([body_obj, RDF.type, RDF::DCMIType.Text]).size).to eql 1
+        expect(g.query([body_obj, RDF.type, RDF::Vocab::DCMIType.Text]).size).to eql 1
         expect(g.query([body_obj, RDF::DC11.format, "text/xml"]).size).to eql 1
         expect(g.query([body_obj, RDF::DC11.language, "en"]).size).to eql 1
       end
@@ -685,7 +685,7 @@ describe Triannon::LdpWriter, :vcr do
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_target_container
-        target_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasTarget)
+        target_uuids = my_ldpw.send(:create_resources_in_container, RDF::Vocab::OA.hasTarget)
         expect(target_uuids.size).to eql 2
 
         container_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/t"
@@ -694,7 +694,7 @@ describe Triannon::LdpWriter, :vcr do
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(container_resp.body)
-        expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 2
+        expect(g.query([RDF::URI.new(container_url), RDF::Vocab::LDP.contains, nil]).size).to eql 2
 
         first_target_url = "#{container_url}/#{target_uuids[0]}"
         resp = conn.get do |req|
@@ -733,7 +733,7 @@ describe Triannon::LdpWriter, :vcr do
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_target_container
-        target_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasTarget)
+        target_uuids = my_ldpw.send(:create_resources_in_container, RDF::Vocab::OA.hasTarget)
         expect(target_uuids.size).to eql 3
 
         container_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/t"
@@ -742,7 +742,7 @@ describe Triannon::LdpWriter, :vcr do
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(container_resp.body)
-        expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 3
+        expect(g.query([RDF::URI.new(container_url), RDF::Vocab::LDP.contains, nil]).size).to eql 3
 
         first_target_url = "#{container_url}/#{target_uuids[0]}"
         resp = conn.get do |req|
@@ -761,7 +761,7 @@ describe Triannon::LdpWriter, :vcr do
         g = RDF::Graph.new
         g.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(second_target_url), RDF::Triannon.externalReference, RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_thumb.jpg")]).size).to eql 1
-        expect(g.query([RDF::URI.new(second_target_url), RDF.type, RDF::DCMIType.Image]).size).to eql 1
+        expect(g.query([RDF::URI.new(second_target_url), RDF.type, RDF::Vocab::DCMIType.Image]).size).to eql 1
 
         third_target_url = "#{container_url}/#{target_uuids[2]}"
         resp = conn.get do |req|
@@ -771,7 +771,7 @@ describe Triannon::LdpWriter, :vcr do
         g = RDF::Graph.new
         g.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(third_target_url), RDF::Triannon.externalReference, RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg")]).size).to eql 1
-        expect(g.query([RDF::URI.new(third_target_url), RDF.type, RDF::DCMIType.Image]).size).to eql 1
+        expect(g.query([RDF::URI.new(third_target_url), RDF.type, RDF::Vocab::DCMIType.Image]).size).to eql 1
       end
       it 'multiple URI resources with addl properties' do
         my_anno = Triannon::Annotation.new data: '{
@@ -792,7 +792,7 @@ describe Triannon::LdpWriter, :vcr do
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_body_container
-        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasBody)
+        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::Vocab::OA.hasBody)
         expect(body_uuids.size).to eql 2
         body_cont_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/b"
         resp = conn.get do |req|
@@ -800,7 +800,7 @@ describe Triannon::LdpWriter, :vcr do
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(resp.body)
-        contains_stmts = g.query([RDF::URI.new(body_cont_url), RDF::LDP.contains, :body_url])
+        contains_stmts = g.query([RDF::URI.new(body_cont_url), RDF::Vocab::LDP.contains, :body_url])
         expect(contains_stmts.size).to eql 2
 
         first_body_url = contains_stmts.first.object.to_s
@@ -810,7 +810,7 @@ describe Triannon::LdpWriter, :vcr do
         end
         g = RDF::Graph.new.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(first_body_url), RDF::Triannon.externalReference, RDF::URI.new("http://dbpedia.org/resource/Love")]).size).to eql 1
-        expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
+        expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::Vocab::OA.SemanticTag]).size).to eql 1
 
         second_body_url = contains_stmts.to_a[1].object.to_s
         resp = conn.get do |req|
@@ -819,7 +819,7 @@ describe Triannon::LdpWriter, :vcr do
         end
         g = RDF::Graph.new.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(second_body_url), RDF::Triannon.externalReference, RDF::URI.new("http://www.example.org/comment.mp3")]).size).to eql 1
-        expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::DCMIType.Sound]).size).to eql 1
+        expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::Vocab::DCMIType.Sound]).size).to eql 1
       end
     end # external URI
 
@@ -841,7 +841,7 @@ describe Triannon::LdpWriter, :vcr do
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_target_container
-        target_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasTarget)
+        target_uuids = my_ldpw.send(:create_resources_in_container, RDF::Vocab::OA.hasTarget)
         expect(target_uuids.size).to eql 1
         target_obj_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/t/#{target_uuids[0]}"
         resp = conn.get do |req|
@@ -850,14 +850,14 @@ describe Triannon::LdpWriter, :vcr do
         end
         g = RDF::Graph.new.from_ttl(resp.body)
         target_obj = RDF::URI.new(target_obj_url)
-        expect(g.query([target_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
-        source_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSource, :source_node]).first.object.to_s
+        expect(g.query([target_obj, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
+        source_node_url = g.query([target_obj, RDF::Vocab::OA.hasSource, :source_node]).first.object.to_s
         # it's a hashURI so it's in the same response due to fcrepo4 implementation of hash URI nodes
         expect(source_node_url).to match "#{target_obj_url}#source"  # this is a fcrepo4 implementation of hash URI node
         expect(g.query([RDF::URI.new(source_node_url), RDF::Triannon.externalReference, RDF::URI.new("http://purl.stanford.edu/kq131cs7229.html")]).size).to eql 1
 
         # the selector node object / ttl
-        selector_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSelector, :selector_node]).first.object.to_s
+        selector_node_url = g.query([target_obj, RDF::Vocab::OA.hasSelector, :selector_node]).first.object.to_s
         expect(selector_node_url).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
         resp = conn.get do |req|
           req.url selector_node_url
@@ -865,9 +865,9 @@ describe Triannon::LdpWriter, :vcr do
         end
         g = RDF::Graph.new.from_ttl(resp.body)
         selector_obj = RDF::URI.new(selector_node_url)
-        expect(g.query([selector_obj, RDF.type, RDF::OpenAnnotation.TextPositionSelector]).size).to eql 1
-        expect(g.query([selector_obj, RDF::OpenAnnotation.start, RDF::Literal.new(0)]).size).to eql 1
-        expect(g.query([selector_obj, RDF::OpenAnnotation.end, RDF::Literal.new(66)]).size).to eql 1
+        expect(g.query([selector_obj, RDF.type, RDF::Vocab::OA.TextPositionSelector]).size).to eql 1
+        expect(g.query([selector_obj, RDF::Vocab::OA.start, RDF::Literal.new(0)]).size).to eql 1
+        expect(g.query([selector_obj, RDF::Vocab::OA.end, RDF::Literal.new(66)]).size).to eql 1
       end
       it "TextQuoteSelector" do
         my_anno = Triannon::Annotation.new data: '{
@@ -887,7 +887,7 @@ describe Triannon::LdpWriter, :vcr do
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_target_container
-        target_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasTarget)
+        target_uuids = my_ldpw.send(:create_resources_in_container, RDF::Vocab::OA.hasTarget)
         expect(target_uuids.size).to eql 1
         target_obj_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/t/#{target_uuids[0]}"
         resp = conn.get do |req|
@@ -896,14 +896,14 @@ describe Triannon::LdpWriter, :vcr do
         end
         g = RDF::Graph.new.from_ttl(resp.body)
         target_obj = RDF::URI.new(target_obj_url)
-        expect(g.query([target_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
-        source_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSource, :source_node]).first.object.to_s
+        expect(g.query([target_obj, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
+        source_node_url = g.query([target_obj, RDF::Vocab::OA.hasSource, :source_node]).first.object.to_s
         # it's a hashURI so it's in the same response due to fcrepo4 implementation of hash URI nodes
         expect(source_node_url).to match "#{target_obj_url}#source"  # this is a fcrepo4 implementation of hash URI node
         expect(g.query([RDF::URI.new(source_node_url), RDF::Triannon.externalReference, RDF::URI.new("http://purl.stanford.edu/kq131cs7229.html")]).size).to eql 1
 
         # the selector node object / ttl
-        selector_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSelector, :selector_node]).first.object.to_s
+        selector_node_url = g.query([target_obj, RDF::Vocab::OA.hasSelector, :selector_node]).first.object.to_s
         expect(selector_node_url).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
         resp = conn.get do |req|
           req.url selector_node_url
@@ -911,10 +911,10 @@ describe Triannon::LdpWriter, :vcr do
         end
         g = RDF::Graph.new.from_ttl(resp.body)
         selector_obj = RDF::URI.new(selector_node_url)
-        expect(g.query([selector_obj, RDF.type, RDF::OpenAnnotation.TextQuoteSelector]).size).to eql 1
-        expect(g.query([selector_obj, RDF::OpenAnnotation.suffix, RDF::Literal.new(" and The Canonical Epistles,")]).size).to eql 1
-        expect(g.query([selector_obj, RDF::OpenAnnotation.prefix, RDF::Literal.new("manuscript which comprised the ")]).size).to eql 1
-        expect(g.query([selector_obj, RDF::OpenAnnotation.exact, RDF::Literal.new("third and fourth Gospels")]).size).to eql 1
+        expect(g.query([selector_obj, RDF.type, RDF::Vocab::OA.TextQuoteSelector]).size).to eql 1
+        expect(g.query([selector_obj, RDF::Vocab::OA.suffix, RDF::Literal.new(" and The Canonical Epistles,")]).size).to eql 1
+        expect(g.query([selector_obj, RDF::Vocab::OA.prefix, RDF::Literal.new("manuscript which comprised the ")]).size).to eql 1
+        expect(g.query([selector_obj, RDF::Vocab::OA.exact, RDF::Literal.new("third and fourth Gospels")]).size).to eql 1
       end
       it 'FragmentSelector with Source having addl metadata' do
         my_anno = Triannon::Annotation.new data: '{
@@ -936,7 +936,7 @@ describe Triannon::LdpWriter, :vcr do
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_target_container
-        target_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasTarget)
+        target_uuids = my_ldpw.send(:create_resources_in_container, RDF::Vocab::OA.hasTarget)
         expect(target_uuids.size).to eql 1
         target_obj_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/t/#{target_uuids[0]}"
         resp = conn.get do |req|
@@ -945,15 +945,15 @@ describe Triannon::LdpWriter, :vcr do
         end
         g = RDF::Graph.new.from_ttl(resp.body)
         target_obj = RDF::URI.new(target_obj_url)
-        expect(g.query([target_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
-        source_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSource, :source_node]).first.object.to_s
+        expect(g.query([target_obj, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
+        source_node_url = g.query([target_obj, RDF::Vocab::OA.hasSource, :source_node]).first.object.to_s
         # it's a hashURI so it's in the same response due to fcrepo4 implementation of hash URI nodes
         expect(source_node_url).to match "#{target_obj_url}#source"
         expect(g.query([RDF::URI.new(source_node_url), RDF::Triannon.externalReference, RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg")]).size).to eql 1
-        expect(g.query([RDF::URI.new(source_node_url), RDF.type, RDF::DCMIType.Image]).size).to eql 1
+        expect(g.query([RDF::URI.new(source_node_url), RDF.type, RDF::Vocab::DCMIType.Image]).size).to eql 1
 
         # the selector node object / ttl
-        selector_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSelector, :selector_node]).first.object.to_s
+        selector_node_url = g.query([target_obj, RDF::Vocab::OA.hasSelector, :selector_node]).first.object.to_s
         expect(selector_node_url).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
         resp = conn.get do |req|
           req.url selector_node_url
@@ -961,7 +961,7 @@ describe Triannon::LdpWriter, :vcr do
         end
         g = RDF::Graph.new.from_ttl(resp.body)
         selector_obj = RDF::URI.new(selector_node_url)
-        expect(g.query([selector_obj, RDF.type, RDF::OpenAnnotation.FragmentSelector]).size).to eql 1
+        expect(g.query([selector_obj, RDF.type, RDF::Vocab::OA.FragmentSelector]).size).to eql 1
         expect(g.query([selector_obj, RDF.value, RDF::Literal.new("xywh=0,0,200,200")]).size).to eql 1
         expect(g.query([selector_obj, RDF::DC.conformsTo, RDF::URI.new("http://www.w3.org/TR/media-frags/")]).size).to eql 1
       end
@@ -1003,7 +1003,7 @@ describe Triannon::LdpWriter, :vcr do
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_target_container
-        target_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasTarget)
+        target_uuids = my_ldpw.send(:create_resources_in_container, RDF::Vocab::OA.hasTarget)
         expect(target_uuids.size).to eql 3
 
         container_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/t"
@@ -1012,7 +1012,7 @@ describe Triannon::LdpWriter, :vcr do
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(container_resp.body)
-        expect(g.query([RDF::URI.new(container_url), RDF::LDP.contains, nil]).size).to eql 3
+        expect(g.query([RDF::URI.new(container_url), RDF::Vocab::LDP.contains, nil]).size).to eql 3
 
         first_target_url = "#{container_url}/#{target_uuids[0]}"
         resp = conn.get do |req|
@@ -1030,14 +1030,14 @@ describe Triannon::LdpWriter, :vcr do
         end
         g = RDF::Graph.new.from_ttl(resp.body)
         target_obj = RDF::URI.new(second_target_url)
-        expect(g.query([target_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
-        source_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSource, :source_node]).first.object.to_s
+        expect(g.query([target_obj, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
+        source_node_url = g.query([target_obj, RDF::Vocab::OA.hasSource, :source_node]).first.object.to_s
         # it's a hashURI so it's in the same response due to fcrepo4 implementation of hash URI nodes
         expect(source_node_url).to match "#{second_target_url}#source"
         expect(g.query([RDF::URI.new(source_node_url), RDF::Triannon.externalReference, RDF::URI.new("http://purl.stanford.edu/kq666cs6666.html")]).size).to eql 1
 
         # the selector node object / ttl
-        selector_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSelector, :selector_node]).first.object.to_s
+        selector_node_url = g.query([target_obj, RDF::Vocab::OA.hasSelector, :selector_node]).first.object.to_s
         expect(selector_node_url).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
         resp = conn.get do |req|
           req.url selector_node_url
@@ -1045,9 +1045,9 @@ describe Triannon::LdpWriter, :vcr do
         end
         g = RDF::Graph.new.from_ttl(resp.body)
         selector_obj = RDF::URI.new(selector_node_url)
-        expect(g.query([selector_obj, RDF.type, RDF::OpenAnnotation.TextPositionSelector]).size).to eql 1
-        expect(g.query([selector_obj, RDF::OpenAnnotation.start, RDF::Literal.new(0)]).size).to eql 1
-        expect(g.query([selector_obj, RDF::OpenAnnotation.end, RDF::Literal.new(66)]).size).to eql 1
+        expect(g.query([selector_obj, RDF.type, RDF::Vocab::OA.TextPositionSelector]).size).to eql 1
+        expect(g.query([selector_obj, RDF::Vocab::OA.start, RDF::Literal.new(0)]).size).to eql 1
+        expect(g.query([selector_obj, RDF::Vocab::OA.end, RDF::Literal.new(66)]).size).to eql 1
 
 
         third_target_url = "#{container_url}/#{target_uuids[2]}"
@@ -1057,15 +1057,15 @@ describe Triannon::LdpWriter, :vcr do
         end
         g = RDF::Graph.new.from_ttl(resp.body)
         target_obj = RDF::URI.new(third_target_url)
-        expect(g.query([target_obj, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
-        source_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSource, :source_node]).first.object.to_s
+        expect(g.query([target_obj, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
+        source_node_url = g.query([target_obj, RDF::Vocab::OA.hasSource, :source_node]).first.object.to_s
         # it's a hashURI so it's in the same response due to fcrepo4 implementation of hash URI nodes
         expect(source_node_url).to match "#{third_target_url}#source"
         expect(g.query([RDF::URI.new(source_node_url), RDF::Triannon.externalReference, RDF::URI.new("https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg")]).size).to eql 1
-        expect(g.query([RDF::URI.new(source_node_url), RDF.type, RDF::DCMIType.Image]).size).to eql 1
+        expect(g.query([RDF::URI.new(source_node_url), RDF.type, RDF::Vocab::DCMIType.Image]).size).to eql 1
 
         # the selector node object / ttl
-        selector_node_url = g.query([target_obj, RDF::OpenAnnotation.hasSelector, :selector_node]).first.object.to_s
+        selector_node_url = g.query([target_obj, RDF::Vocab::OA.hasSelector, :selector_node]).first.object.to_s
         expect(selector_node_url).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
         resp = conn.get do |req|
           req.url selector_node_url
@@ -1073,7 +1073,7 @@ describe Triannon::LdpWriter, :vcr do
         end
         g = RDF::Graph.new.from_ttl(resp.body)
         selector_obj = RDF::URI.new(selector_node_url)
-        expect(g.query([selector_obj, RDF.type, RDF::OpenAnnotation.FragmentSelector]).size).to eql 1
+        expect(g.query([selector_obj, RDF.type, RDF::Vocab::OA.FragmentSelector]).size).to eql 1
         expect(g.query([selector_obj, RDF.value, RDF::Literal.new("xywh=0,0,200,200")]).size).to eql 1
         expect(g.query([selector_obj, RDF::DC.conformsTo, RDF::URI.new("http://www.w3.org/TR/media-frags/")]).size).to eql 1
       end
@@ -1110,7 +1110,7 @@ describe Triannon::LdpWriter, :vcr do
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_body_container
-        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasBody)
+        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::Vocab::OA.hasBody)
         expect(body_uuids.size).to eql 1
         body_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/b/#{body_uuids[0]}"
         body_resp = conn.get do |req|
@@ -1118,12 +1118,12 @@ describe Triannon::LdpWriter, :vcr do
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(body_resp.body)
-        expect(g.query([RDF::URI.new(body_url), RDF.type, RDF::OpenAnnotation.Choice]).size).to eql 1
-        expect(g.query([RDF::URI.new(body_url), RDF::OpenAnnotation.default, nil]).size).to eql 1
-        expect(g.query([RDF::URI.new(body_url), RDF::OpenAnnotation.item, nil]).size).to eql 1
+        expect(g.query([RDF::URI.new(body_url), RDF.type, RDF::Vocab::OA.Choice]).size).to eql 1
+        expect(g.query([RDF::URI.new(body_url), RDF::Vocab::OA.default, nil]).size).to eql 1
+        expect(g.query([RDF::URI.new(body_url), RDF::Vocab::OA.item, nil]).size).to eql 1
 
-        default_node_pid = g.query([RDF::URI.new(body_url), RDF::OpenAnnotation.default, :default_blank_node]).first.object.to_s
-        item_node_pid = g.query([RDF::URI.new(body_url), RDF::OpenAnnotation.item, :item_blank_node]).first.object.to_s
+        default_node_pid = g.query([RDF::URI.new(body_url), RDF::Vocab::OA.default, :default_blank_node]).first.object.to_s
+        item_node_pid = g.query([RDF::URI.new(body_url), RDF::Vocab::OA.item, :item_blank_node]).first.object.to_s
 
         # the default blank node object / ttl
         expect(default_node_pid).to match /\/.well-known\//  # this is a fcrepo4 implementation of inner blank nodes
@@ -1132,9 +1132,9 @@ describe Triannon::LdpWriter, :vcr do
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(resp.body)
-        expect(g.query([RDF::URI.new(default_node_pid), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
-        expect(g.query([RDF::URI.new(default_node_pid), RDF.type, RDF::DCMIType.Text]).size).to eql 1
-        expect(g.query([RDF::URI.new(default_node_pid), RDF::Content.chars, "I love this Englishly!"]).size).to eql 1
+        expect(g.query([RDF::URI.new(default_node_pid), RDF.type, RDF::Vocab::CNT.ContentAsText]).size).to eql 1
+        expect(g.query([RDF::URI.new(default_node_pid), RDF.type, RDF::Vocab::DCMIType.Text]).size).to eql 1
+        expect(g.query([RDF::URI.new(default_node_pid), RDF::Vocab::CNT.chars, "I love this Englishly!"]).size).to eql 1
         expect(g.query([RDF::URI.new(default_node_pid), RDF::DC11.language, "en"]).size).to eql 1
 
         # the item blank node object / ttl
@@ -1144,9 +1144,9 @@ describe Triannon::LdpWriter, :vcr do
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(resp.body)
-        expect(g.query([RDF::URI.new(item_node_pid), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
-        expect(g.query([RDF::URI.new(item_node_pid), RDF.type, RDF::DCMIType.Text]).size).to eql 1
-        expect(g.query([RDF::URI.new(item_node_pid), RDF::Content.chars, "Je l'aime en Francais!"]).size).to eql 1
+        expect(g.query([RDF::URI.new(item_node_pid), RDF.type, RDF::Vocab::CNT.ContentAsText]).size).to eql 1
+        expect(g.query([RDF::URI.new(item_node_pid), RDF.type, RDF::Vocab::DCMIType.Text]).size).to eql 1
+        expect(g.query([RDF::URI.new(item_node_pid), RDF::Vocab::CNT.chars, "Je l'aime en Francais!"]).size).to eql 1
         expect(g.query([RDF::URI.new(item_node_pid), RDF::DC11.language, "fr"]).size).to eql 1
       end
       it "three images" do
@@ -1181,7 +1181,7 @@ describe Triannon::LdpWriter, :vcr do
          my_ldpw = Triannon::LdpWriter.new my_anno
          new_pid = my_ldpw.create_base
          my_ldpw.create_target_container
-         target_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasTarget)
+         target_uuids = my_ldpw.send(:create_resources_in_container, RDF::Vocab::OA.hasTarget)
          expect(target_uuids.size).to eql 1
          target_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/t/#{target_uuids[0]}"
          target_resp = conn.get do |req|
@@ -1189,14 +1189,14 @@ describe Triannon::LdpWriter, :vcr do
            req.headers['Accept'] = 'application/x-turtle'
          end
          g = RDF::Graph.new.from_ttl(target_resp.body)
-         g = RDF::FCRepo4.remove_fedora_triples(g)
+         g = OA::Graph.remove_fedora_triples(g)
          target_node_obj = RDF::URI.new(target_url)
-         expect(g.query([target_node_obj, RDF.type, RDF::OpenAnnotation.Choice]).size).to eql 1
-         default_pid_solns = g.query [target_node_obj, RDF::OpenAnnotation.default, nil]
+         expect(g.query([target_node_obj, RDF.type, RDF::Vocab::OA.Choice]).size).to eql 1
+         default_pid_solns = g.query [target_node_obj, RDF::Vocab::OA.default, nil]
          expect(default_pid_solns.count).to eql 1
          default_node_pid = default_pid_solns.first.object.to_s
          expect(default_node_pid).to match "#{target_url}#default" # this is a fcrepo4 implementation of hash URI node
-         item_pid_solns = g.query([target_node_obj, RDF::OpenAnnotation.item, nil])
+         item_pid_solns = g.query([target_node_obj, RDF::Vocab::OA.item, nil])
          expect(item_pid_solns.count).to eql 2
          item1_pid = item_pid_solns.first.object.to_s
          expect(item1_pid).to match "#{target_url}#item" # this is a fcrepo4 implementation of hash URI node
@@ -1208,14 +1208,14 @@ describe Triannon::LdpWriter, :vcr do
          default_node_obj = RDF::URI.new(default_node_pid)
          default_subj_solns = g.query([default_node_obj, nil, nil])
          expect(default_subj_solns.count).to eql 2
-         expect(default_subj_solns).to include [default_node_obj, RDF.type, RDF::DCMIType.Image]
+         expect(default_subj_solns).to include [default_node_obj, RDF.type, RDF::Vocab::DCMIType.Image]
          expect(default_subj_solns).to include [default_node_obj, RDF::Triannon.externalReference, RDF::URI.new(default_url)]
 
          # the first item blank node object / ttl
          item1_node_obj = RDF::URI.new(item1_pid)
          item1_subj_solns = g.query([item1_node_obj, nil, nil])
          expect(item1_subj_solns.count).to eql 2
-         expect(item1_subj_solns).to include [item1_node_obj, RDF.type, RDF::DCMIType.Image]
+         expect(item1_subj_solns).to include [item1_node_obj, RDF.type, RDF::Vocab::DCMIType.Image]
          item_url = g.query([item1_node_obj, RDF::Triannon.externalReference, nil]).first.object.to_s
          expect([item1_url, item2_url]).to include item_url
 
@@ -1223,7 +1223,7 @@ describe Triannon::LdpWriter, :vcr do
          item2_node_obj = RDF::URI.new(item2_pid)
          item2_subj_solns = g.query([item2_node_obj, nil, nil])
          expect(item2_subj_solns.count).to eql 2
-         expect(item2_subj_solns).to include [item2_node_obj, RDF.type, RDF::DCMIType.Image]
+         expect(item2_subj_solns).to include [item2_node_obj, RDF.type, RDF::Vocab::DCMIType.Image]
          item_url = g.query([item2_node_obj, RDF::Triannon.externalReference, nil]).first.object.to_s
          expect([item1_url, item2_url]).to include item_url
       end
@@ -1252,7 +1252,7 @@ describe Triannon::LdpWriter, :vcr do
         my_ldpw = Triannon::LdpWriter.new my_anno
         new_pid = my_ldpw.create_base
         my_ldpw.create_body_container
-        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::OpenAnnotation.hasBody)
+        body_uuids = my_ldpw.send(:create_resources_in_container, RDF::Vocab::OA.hasBody)
         expect(body_uuids.size).to eql 2
         body_cont_url = "#{Triannon.config[:ldp_url]}/#{new_pid}/b"
         resp = conn.get do |req|
@@ -1260,7 +1260,7 @@ describe Triannon::LdpWriter, :vcr do
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(resp.body)
-        contains_stmts = g.query([RDF::URI.new(body_cont_url), RDF::LDP.contains, :body_url])
+        contains_stmts = g.query([RDF::URI.new(body_cont_url), RDF::Vocab::LDP.contains, :body_url])
         expect(contains_stmts.size).to eql 2
 
         first_body_url = contains_stmts.first.object.to_s
@@ -1269,9 +1269,9 @@ describe Triannon::LdpWriter, :vcr do
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(resp.body)
-        expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::Content.ContentAsText]).size).to eql 1
-        expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::DCMIType.Text]).size).to eql 1
-        expect(g.query([RDF::URI.new(first_body_url), RDF::Content.chars, "I love this!"]).size).to eql 1
+        expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::Vocab::CNT.ContentAsText]).size).to eql 1
+        expect(g.query([RDF::URI.new(first_body_url), RDF.type, RDF::Vocab::DCMIType.Text]).size).to eql 1
+        expect(g.query([RDF::URI.new(first_body_url), RDF::Vocab::CNT.chars, "I love this!"]).size).to eql 1
 
         second_body_url = contains_stmts.to_a[1].object.to_s
         resp = conn.get do |req|
@@ -1280,7 +1280,7 @@ describe Triannon::LdpWriter, :vcr do
         end
         g = RDF::Graph.new.from_ttl(resp.body)
         expect(g.query([RDF::URI.new(second_body_url), RDF::Triannon.externalReference, RDF::URI.new("http://dbpedia.org/resource/Love")]).size).to eql 1
-        expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::OpenAnnotation.SemanticTag]).size).to eql 1
+        expect(g.query([RDF::URI.new(second_body_url), RDF.type, RDF::Vocab::OA.SemanticTag]).size).to eql 1
       end
     end
   end # create_resources_in_container

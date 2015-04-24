@@ -16,10 +16,8 @@ Gem::Specification.new do |s|
 
   s.add_dependency "rails", "~> 4.2"
   s.add_dependency "linkeddata"
-  s.add_dependency "rdf-open_annotation"
-  s.add_dependency "rdf-iiif"
-  s.add_dependency "rdf-ldp"
-  s.add_dependency "rdf-fcrepo4"
+  s.add_dependency 'oa-graph'
+  s.add_dependency "rdf-iiif"  # RDF vocab for IIIF
   s.add_dependency "bootstrap-sass"
   s.add_dependency "faraday" # for writing to LDP store
   s.add_dependency "rsolr"

@@ -120,7 +120,7 @@ describe Triannon::AnnotationLdp, :vcr do
     it 'loads passed statements to graph' do
       stmts = RDF::Graph.new.from_ttl(anno_ttl).statements
       anno.load_statements_into_graph stmts
-      solns = anno.graph.query [nil, RDF.type, RDF::OpenAnnotation.Annotation]
+      solns = anno.graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
       expect(solns.size).to eq 1
       expect(solns.first.subject.path).to match /\/deb27887-1241-4ccc-a09c-439293d73fbb$/
     end
@@ -188,7 +188,7 @@ describe Triannon::AnnotationLdp, :vcr do
     it 'has open anno triples' do
       anno.load_statements_into_graph base_stmts
       stripped_graph = anno.stripped_graph
-      result = stripped_graph.query [nil, RDF.type, RDF::OpenAnnotation.Annotation]
+      result = stripped_graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
       expect(result.size).to eql 1
     end
   end
