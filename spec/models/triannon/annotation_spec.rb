@@ -6,36 +6,36 @@ describe Triannon::Annotation, :vcr do
   it "doesn't do external lookup of json_ld context" , :vcr => {:record => :none} do
     # NOTE:  VCR would throw an error if this does an external lookup
     # https://www.relishapp.com/vcr/vcr/v/2-9-3/docs/record-modes/none
-    expect(bookmark_anno.graph).to be_a_kind_of Triannon::Graph
+    expect(bookmark_anno.graph).to be_a_kind_of OA::Graph
   end
 
-  it "#jsonld_oa calls Triannon::Graph #jsonld_oa" do
-    expect(bookmark_anno.graph).to be_a Triannon::Graph
+  it "#jsonld_oa calls OA::Graph #jsonld_oa" do
+    expect(bookmark_anno.graph).to be_a OA::Graph
     expect(bookmark_anno.graph).to receive(:jsonld_oa)
     bookmark_anno.jsonld_oa
   end
 
-  it "#jsonld_iiif calls Triannon::Graph #jsonld_iiif" do
-    expect(bookmark_anno.graph).to be_a Triannon::Graph
+  it "#jsonld_iiif calls OA::Graph #jsonld_iiif" do
+    expect(bookmark_anno.graph).to be_a OA::Graph
     expect(bookmark_anno.graph).to receive(:jsonld_iiif)
     bookmark_anno.jsonld_iiif
   end
 
-  it "#graph is a Triannon::Graph" do
-    expect(bookmark_anno.graph).to be_a Triannon::Graph
+  it "#graph is a OA::Graph" do
+    expect(bookmark_anno.graph).to be_a OA::Graph
   end
-  
+
   context '#graph=' do
-    it "works with Triannon::Graph as param" do
-      bookmark_anno.graph = Triannon::Graph.new RDF::Graph.new
-      expect(bookmark_anno.graph).to be_a Triannon::Graph
+    it "works with OA::Graph as param" do
+      bookmark_anno.graph = OA::Graph.new RDF::Graph.new
+      expect(bookmark_anno.graph).to be_a OA::Graph
     end
     it "works with RDF::Graph as param" do
       bookmark_anno.graph = RDF::Graph.new
-      expect(bookmark_anno.graph).to be_a Triannon::Graph
+      expect(bookmark_anno.graph).to be_a OA::Graph
     end
   end
-  
+
   context "#data_as_graph" do
     before(:each) do
       @json_ld_data = Triannon.annotation_fixture("bookmark.json")
@@ -43,18 +43,18 @@ describe Triannon::Annotation, :vcr do
     it "does Mime::Type.lookup if expected_content_type" do
       anno = Triannon::Annotation.new({data: @json_ld_data, expected_content_type: "application/ld+json"})
       expect(Mime::Type).to receive(:lookup).with("application/ld+json").and_call_original
-      expect(anno.graph).to be_a_kind_of Triannon::Graph
+      expect(anno.graph).to be_a_kind_of OA::Graph
     end
     it "does NOT do Mime::Type.lookup if no expected_content_type" do
       anno = Triannon::Annotation.new data: @json_ld_data
       expect(Mime::Type).not_to receive(:lookup)
-      expect(anno.graph).to be_a_kind_of Triannon::Graph
+      expect(anno.graph).to be_a_kind_of OA::Graph
     end
     context "json-ld data" do
       it "populates graph from json-ld" do
         expect(@json_ld_data).to match(/\A\{.+\}\Z/m) # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
         anno = Triannon::Annotation.new data: @json_ld_data
-        expect(anno.graph).to be_a_kind_of Triannon::Graph
+        expect(anno.graph).to be_a_kind_of OA::Graph
         expect(anno.graph.count).to be > 1
       end
       it "is rejected if first and last non whitespace characters aren't { and }" do
@@ -76,7 +76,7 @@ describe Triannon::Annotation, :vcr do
       it "populates graph from ttl" do
         expect(@ttl_data).to match(/\.\Z/)  # (Note:  \Z is needed instead of $ due to \n in data)
         anno = Triannon::Annotation.new data: @ttl_data
-        expect(anno.graph).to be_a_kind_of Triannon::Graph
+        expect(anno.graph).to be_a_kind_of OA::Graph
         expect(anno.graph.count).to be > 1
       end
       it "is rejected if it doesn't end in period" do
@@ -91,7 +91,7 @@ describe Triannon::Annotation, :vcr do
       it "populates graph from rdfxml" do
         expect(@rdfxml_data).to match(/\A<.+>\Z/m) # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
         anno = Triannon::Annotation.new data: @rdfxml_data
-        expect(anno.graph).to be_a_kind_of Triannon::Graph
+        expect(anno.graph).to be_a_kind_of OA::Graph
         expect(anno.graph.count).to be > 1
       end
       it "is rejected if first and last non whitespace characters aren't < and >" do
@@ -110,8 +110,8 @@ describe Triannon::Annotation, :vcr do
 
   context "parsing graph" do
     context '#id_as_url' do
-      it "calls Triannon::Graph #id_as_url" do
-        expect(bookmark_anno.graph).to be_a Triannon::Graph
+      it "calls OA::Graph #id_as_url" do
+        expect(bookmark_anno.graph).to be_a OA::Graph
         expect(bookmark_anno.graph).to receive(:id_as_url)
         bookmark_anno.id_as_url
       end
@@ -121,8 +121,8 @@ describe Triannon::Annotation, :vcr do
       end
     end
     context '#motivated_by' do
-      it "calls Triannon::Graph #motivated_by" do
-        expect(bookmark_anno.graph).to be_a Triannon::Graph
+      it "calls OA::Graph #motivated_by" do
+        expect(bookmark_anno.graph).to be_a OA::Graph
         expect(bookmark_anno.graph).to receive(:motivated_by)
         bookmark_anno.motivated_by
       end
@@ -165,7 +165,7 @@ describe Triannon::Annotation, :vcr do
       expect(bookmark_anno.save).to be_falsey
     end
     it "returns false if graph size is 0" do
-      allow(bookmark_anno).to receive(:graph).and_return(Triannon::Graph.new RDF::Graph.new)
+      allow(bookmark_anno).to receive(:graph).and_return(OA::Graph.new RDF::Graph.new)
       expect(bookmark_anno.save).to be_falsey
     end
   end
@@ -225,7 +225,7 @@ describe Triannon::Annotation, :vcr do
       expect { my_bookmark_anno.send(:solr_save) }.to raise_error
     end
   end
-  
+
   context '#solr_delete' do
     let(:solr_writer) { bookmark_anno.send(:solr_writer) }
     it "calls SolrWriter.delete with id" do

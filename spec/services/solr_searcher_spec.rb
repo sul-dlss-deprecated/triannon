@@ -114,10 +114,10 @@ describe Triannon::SolrSearcher, :vcr do
       }
     }
     let(:result_array) { Triannon::SolrSearcher.anno_graphs_array(solr_response)}
-    it "returns an Array of Triannon::Graph objects" do
+    it "returns an Array of OA::Graph objects" do
       expect(result_array).to be_a Array
       result_array.each { |item|
-        expect(item).to be_a Triannon::Graph
+        expect(item).to be_a OA::Graph
         expect(item.size).to be > 2
       }
     end
@@ -127,20 +127,20 @@ describe Triannon::SolrSearcher, :vcr do
     it "properly parses the jsonld in anno_jsonld field from each Solr doc in the response" do
       expect(result_array[0].id_as_url).to match a_string_ending_with "d3019689-d3ff-4290-8ee3-72fec2320332"
       expect(result_array[0].body_chars).to eq ["I hate this!"]
-      expect(result_array[0].predicate_urls(RDF::OpenAnnotation.hasTarget)).to eq ["http://purl.stanford.edu/kq131cs7229"]
+      expect(result_array[0].predicate_urls(RDF::Vocab::OA.hasTarget)).to eq ["http://purl.stanford.edu/kq131cs7229"]
 
       expect(result_array[1].id_as_url).to match a_string_ending_with "51558876-f6df-4da4-b268-02c8bff94391"
       expect(result_array[1].body_chars).to eq ["I love this!"]
-      expect(result_array[1].predicate_urls(RDF::OpenAnnotation.hasTarget)).to eq ["http://purl.stanford.edu/kq131cs7229"]
+      expect(result_array[1].predicate_urls(RDF::Vocab::OA.hasTarget)).to eq ["http://purl.stanford.edu/kq131cs7229"]
 
       expect(result_array[2].id_as_url).to match a_string_ending_with"5686cffa-14c1-4aa4-8cef-bf62e9f4ab82"
       expect(result_array[2].body_chars).to eq ["testing redirect 2"]
-      expect(result_array[2].predicate_urls(RDF::OpenAnnotation.hasTarget)).to eq ["http://purl.stanford.edu/oo111oo2222"]
+      expect(result_array[2].predicate_urls(RDF::Vocab::OA.hasTarget)).to eq ["http://purl.stanford.edu/oo111oo2222"]
     end
     it "doesn't do external lookup of json_ld context" , :vcr => {:record => :none} do
       # NOTE:  VCR would throw an error if this does an external lookup
       # https://www.relishapp.com/vcr/vcr/v/2-9-3/docs/record-modes/none
-      expect(result_array[0]).to be_a Triannon::Graph
+      expect(result_array[0]).to be_a OA::Graph
     end
     it "returns empty array when no docs in response" do
       my_solr_response =

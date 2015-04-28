@@ -66,16 +66,16 @@ module Triannon
     def graph
       @graph ||= begin
         g = data_to_graph
-        Triannon::Graph.new g if g.kind_of? RDF::Graph
+        OA::Graph.new g if g.kind_of? RDF::Graph
       end
     end
 
-    # @param g either a Triannon::Graph or RDF::Graph object
+    # @param g either a OA::Graph or RDF::Graph object
     def graph= g
-      if g.is_a? Triannon::Graph
+      if g.is_a? OA::Graph
         @graph = g
       elsif g.kind_of? RDF::Graph
-        @graph = Triannon::Graph.new g
+        @graph = OA::Graph.new g
       end
     end
 

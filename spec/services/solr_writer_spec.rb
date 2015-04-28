@@ -13,7 +13,7 @@ describe Triannon::SolrWriter, :vcr do
   context '#write' do
     let(:uuid) {"814b0225-bd48-4de9-a724-a72a9fa86c18"}
     let(:base_url) {"https://triannon-dev.stanford.edu/annotations/"}
-    let(:tg) {Triannon::Graph.new RDF::Graph.new.from_ttl "
+    let(:tg) {OA::Graph.new RDF::Graph.new.from_ttl "
      <#{base_url}#{uuid}> a <http://www.w3.org/ns/oa#Annotation>;
        <http://www.w3.org/ns/oa#annotatedAt> \"2015-01-07T18:01:21Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
        <http://www.w3.org/ns/oa#hasTarget> <http://searchworks.stanford.edu/view/666>;
@@ -28,7 +28,7 @@ describe Triannon::SolrWriter, :vcr do
     end
     it "does NOT call solr_hash if tgraph.id_as_url is nil" do
       expect(Triannon::SolrWriter).not_to receive(:solr_hash)
-      my_tg = Triannon::Graph.new RDF::Graph.new.from_ttl "
+      my_tg = OA::Graph.new RDF::Graph.new.from_ttl "
          <> a <http://www.w3.org/ns/oa#Annotation>;
            <http://www.w3.org/ns/oa#annotatedAt> \"2015-01-07T18:01:21Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
            <http://www.w3.org/ns/oa#hasTarget> <http://searchworks.stanford.edu/view/666>;
@@ -141,7 +141,7 @@ describe Triannon::SolrWriter, :vcr do
   context '.solr_hash' do
     let(:uuid) {"814b0225-bd48-4de9-a724-a72a9fa86c18"}
     let(:base_url) {"https://triannon-dev.stanford.edu/annotations/"}
-    let(:tg) {Triannon::Graph.new RDF::Graph.new.from_ttl "
+    let(:tg) {OA::Graph.new RDF::Graph.new.from_ttl "
      <#{base_url}#{uuid}> a <http://www.w3.org/ns/oa#Annotation>;
        <http://www.w3.org/ns/oa#annotatedAt> \"2015-01-07T18:01:21Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
        <http://www.w3.org/ns/oa#hasBody> [
@@ -168,7 +168,7 @@ describe Triannon::SolrWriter, :vcr do
       it "slash not part of base_url" do
         config = { :triannon_base_url =>  "https://triannon-dev.stanford.edu/annotations" }
         allow(Triannon).to receive(:config).and_return(config)
-        my_tg = Triannon::Graph.new RDF::Graph.new.from_ttl "
+        my_tg = OA::Graph.new RDF::Graph.new.from_ttl "
          <#{base_url}/#{uuid}> a <http://www.w3.org/ns/oa#Annotation>;
            <http://www.w3.org/ns/oa#hasTarget> <http://searchworks.stanford.edu/view/666>;
            <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#tagging> ."
@@ -177,7 +177,7 @@ describe Triannon::SolrWriter, :vcr do
       it "slash part of base_url" do
         # see 'only the uuid, not the full url'
       end
-      it "calls id_as_url in Triannon::Graph instance" do
+      it "calls id_as_url in OA::Graph instance" do
         expect(tg).to receive(:id_as_url).and_call_original
         Triannon::SolrWriter.solr_hash tg
       end
@@ -213,7 +213,7 @@ describe Triannon::SolrWriter, :vcr do
         Triannon::SolrWriter.solr_hash tg
       end
       it "nil if date won't parse cleanly" do
-        my_tg = Triannon::Graph.new RDF::Graph.new.from_ttl "
+        my_tg = OA::Graph.new RDF::Graph.new.from_ttl "
          <https://sul-fedora-dev-a.stanford.edu/fedora/rest/anno/f3bc7da9-d531-4b0c-816a-8f2fc849b0b6> a <http://www.w3.org/ns/oa#Annotation>;
            <http://www.w3.org/ns/oa#annotatedAt> \"not a date\" ."
         expect(Triannon::SolrWriter.solr_hash(my_tg)[:annotated_at]).to eq nil
@@ -227,12 +227,12 @@ describe Triannon::SolrWriter, :vcr do
         expect(sw_solr_hash[:target_url].first).to match /^http/
       end
       it "calls predicate_urls with hasTarget" do
-        allow(tg).to receive(:predicate_urls).with(RDF::OpenAnnotation.hasBody).and_call_original
-        expect(tg).to receive(:predicate_urls).with(RDF::OpenAnnotation.hasTarget).and_call_original
+        allow(tg).to receive(:predicate_urls).with(RDF::Vocab::OA.hasBody).and_call_original
+        expect(tg).to receive(:predicate_urls).with(RDF::Vocab::OA.hasTarget).and_call_original
         Triannon::SolrWriter.solr_hash tg
       end
       it "is empty array if no target is a url" do
-        my_g = Triannon::Graph.new RDF::Graph.new.from_ttl Triannon.annotation_fixture("target-choice.ttl")
+        my_g = OA::Graph.new RDF::Graph.new.from_ttl Triannon.annotation_fixture("target-choice.ttl")
         expect(Triannon::SolrWriter.solr_hash(my_g)[:target_url]).to eq []
       end
     end
@@ -244,26 +244,26 @@ describe Triannon::SolrWriter, :vcr do
         expect(sw_solr_hash[:target_type].first).to eq 'external_URI'
       end
       it "has external_URI once if multiple targets" do
-        g3 = Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("mult-targets.json")
+        g3 = OA::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("mult-targets.json")
         expect(Triannon::SolrWriter.solr_hash(g3)[:target_type]).to eq ['external_URI']
       end
       it "is nil if no target is a url" do
-        my_g = Triannon::Graph.new RDF::Graph.new.from_ttl Triannon.annotation_fixture("target-choice.ttl")
+        my_g = OA::Graph.new RDF::Graph.new.from_ttl Triannon.annotation_fixture("target-choice.ttl")
         expect(Triannon::SolrWriter.solr_hash(my_g)[:target_type]).to be nil
       end
     end
 
     context 'body_url' do
       it "is an Array of urls as Strings" do
-        my_g = Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("body-url.json")
+        my_g = OA::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("body-url.json")
         my_body_urls = Triannon::SolrWriter.solr_hash(my_g)[:body_url]
         expect(my_body_urls).to be_an Array
         expect(my_body_urls.first).to be_a String
         expect(my_body_urls.first).to match /^http/
       end
       it "calls predicate_urls with hasBody" do
-        allow(tg).to receive(:predicate_urls).with(RDF::OpenAnnotation.hasTarget).and_call_original
-        expect(tg).to receive(:predicate_urls).with(RDF::OpenAnnotation.hasBody).and_call_original
+        allow(tg).to receive(:predicate_urls).with(RDF::Vocab::OA.hasTarget).and_call_original
+        expect(tg).to receive(:predicate_urls).with(RDF::Vocab::OA.hasBody).and_call_original
         Triannon::SolrWriter.solr_hash tg
       end
       it "is empty array if no bodies are urls" do
@@ -292,17 +292,17 @@ describe Triannon::SolrWriter, :vcr do
            ];
            <http://www.w3.org/ns/oa#hasTarget> <http://searchworks.stanford.edu/view/666>;
            <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#tagging> ."
-        my_tg = Triannon::Graph.new RDF::Graph.new.from_ttl my_ttl
+        my_tg = OA::Graph.new RDF::Graph.new.from_ttl my_ttl
         expect(Triannon::SolrWriter.solr_hash(my_tg)[:body_chars_exact]).to eq ['spaces']
       end
       it "empty Array if no bodies are contentAsText" do
-        my_g = Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("body-url.json")
+        my_g = OA::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("body-url.json")
         expect(Triannon::SolrWriter.solr_hash(my_g)[:body_chars_exact]).to eq []
       end
     end
     context 'body_type' do
       it "is an Array with 'external_URI' if a body is a url" do
-        my_g = Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("body-url.json")
+        my_g = OA::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("body-url.json")
         my_body_types = Triannon::SolrWriter.solr_hash(my_g)[:body_type]
         expect(my_body_types).to be_an Array
         expect(my_body_types.first).to be_a String
@@ -312,14 +312,14 @@ describe Triannon::SolrWriter, :vcr do
         expect(sw_solr_hash[:body_type]).to eq ['content_as_text']
       end
       it "has all types represented by multiple bodies" do
-        my_g = Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("mult-bodies.json")
+        my_g = OA::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("mult-bodies.json")
         my_body_types = Triannon::SolrWriter.solr_hash(my_g)[:body_type]
         expect(my_body_types.size).to eq 2
         expect(my_body_types).to include 'external_URI'
         expect(my_body_types).to include 'content_as_text'
       end
       it "is 'no_body' if there is no body" do
-        g2 = Triannon::Graph.new RDF::Graph.new.from_jsonld(
+        g2 = OA::Graph.new RDF::Graph.new.from_jsonld(
           '{
               "@context": "http://www.w3.org/ns/oa-context-20130208.json",
               "@id": "http://my.identifiers.com/oa_bookmark",
@@ -340,11 +340,11 @@ describe Triannon::SolrWriter, :vcr do
         Triannon::SolrWriter.solr_hash tg
       end
       it "is entire anno as jsonld" do
-        my_tg = Triannon::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("mult-bodies.json")
+        my_tg = OA::Graph.new RDF::Graph.new.from_jsonld Triannon.annotation_fixture("mult-bodies.json")
         expect(Triannon::SolrWriter.solr_hash(my_tg)[:anno_jsonld]).to eq my_tg.jsonld_oa
       end
       it "has OA context" do
-        my_tg = Triannon::Graph.new RDF::Graph.new.from_jsonld '
+        my_tg = OA::Graph.new RDF::Graph.new.from_jsonld '
           {
               "@context":"http://iiif.io/api/presentation/2/context.json",
               "@id": "http://my.cool.anno/id",
@@ -358,10 +358,10 @@ describe Triannon::SolrWriter, :vcr do
               },
               "on":"http://purl.stanford.edu/kq131cs7229"
           }'
-        expect(Triannon::SolrWriter.solr_hash(my_tg)[:anno_jsonld]).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
-        expect(Triannon::SolrWriter.solr_hash(my_tg)[:anno_jsonld]).not_to match Triannon::JsonldContext::IIIF_CONTEXT_URL
-        my_tg = Triannon::Graph.new RDF::Graph.new.from_ttl Triannon.annotation_fixture("body-chars.ttl")
-        expect(Triannon::SolrWriter.solr_hash(my_tg)[:anno_jsonld]).to match Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+        expect(Triannon::SolrWriter.solr_hash(my_tg)[:anno_jsonld]).to match OA::Graph::OA_DATED_CONTEXT_URL
+        expect(Triannon::SolrWriter.solr_hash(my_tg)[:anno_jsonld]).not_to match OA::Graph::IIIF_CONTEXT_URL
+        my_tg = OA::Graph.new RDF::Graph.new.from_ttl Triannon.annotation_fixture("body-chars.ttl")
+        expect(Triannon::SolrWriter.solr_hash(my_tg)[:anno_jsonld]).to match OA::Graph::OA_DATED_CONTEXT_URL
       end
       it "has non-empty id value for outer node" do
         expect(sw_solr_hash[:anno_jsonld]).not_to match "@id\":\"\""

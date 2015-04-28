@@ -61,7 +61,7 @@ module Triannon
       g = RDF::Graph.new
       g.from_ttl root_ttl
       root_uri = RDF::URI.new @base_uri
-      results = g.query [root_uri, RDF::LDP.contains, nil]
+      results = g.query [root_uri, RDF::Vocab::LDP.contains, nil]
       results.each do |stmt|
         id = stmt.object.to_s.split('/').last
         objs << Triannon::Annotation.new(:id => id)
@@ -99,7 +99,7 @@ module Triannon
     def statements_from_ttl_minus_fedora ttl
       # RDF::Turtle::Reader.new(ttl).statements.to_a
       g = RDF::Graph.new.from_ttl(ttl) if ttl
-      RDF::FCRepo4.remove_fedora_triples(g).statements if g
+      OA::Graph.remove_fedora_triples(g).statements if g
     end
 
     def conn

@@ -1,10 +1,10 @@
 require 'spec_helper'
 
 describe Triannon::IIIFAnnoList, :vcr do
-  
+
   context '.anno_list' do
     let(:anno_graphs_array) { [
-      Triannon::Graph.new(RDF::Graph.new.from_jsonld('
+      OA::Graph.new(RDF::Graph.new.from_jsonld('
         { "@context":"http://www.w3.org/ns/oa-context-20130208.json",
           "@graph": [
             { "@id":"_:g70337046884060",
@@ -19,7 +19,7 @@ describe Triannon::IIIFAnnoList, :vcr do
             }
           ]
         }')),
-      Triannon::Graph.new(RDF::Graph.new.from_jsonld('
+      OA::Graph.new(RDF::Graph.new.from_jsonld('
         { "@context":"http://www.w3.org/ns/oa-context-20130208.json",
           "@graph": [
             { "@id":"_:g70337056969180",
@@ -34,7 +34,7 @@ describe Triannon::IIIFAnnoList, :vcr do
             }
           ]
         }')),
-      Triannon::Graph.new(RDF::Graph.new.from_jsonld('
+      OA::Graph.new(RDF::Graph.new.from_jsonld('
         { "@context":"http://www.w3.org/ns/oa-context-20130208.json",
           "@graph": [
             { "@id":"_:g70252904268480",
@@ -51,12 +51,12 @@ describe Triannon::IIIFAnnoList, :vcr do
         }'))
       ] }
     let(:anno_list) { Triannon::IIIFAnnoList.anno_list(anno_graphs_array) }
-    
+
     it "returns a Hash" do
       expect(anno_list).to be_a Hash
     end
     it "@context is IIIF" do
-      expect(anno_list["@context"]).to eq Triannon::JsonldContext::IIIF_CONTEXT_URL
+      expect(anno_list["@context"]).to eq OA::Graph::IIIF_CONTEXT_URL
     end
     it "@type is sc:AnnotationList" do
       expect(anno_list["@type"]).to eq "sc:AnnotationList"
@@ -84,7 +84,7 @@ describe Triannon::IIIFAnnoList, :vcr do
           expect(element).to be_a Hash
           expect(element["@id"]).to eq anno_graphs_array[i].id_as_url.to_s
           # "on" is IIIF, not OA
-          expect(element["on"]).to eq anno_graphs_array[i].predicate_urls(RDF::OpenAnnotation.hasTarget).first
+          expect(element["on"]).to eq anno_graphs_array[i].predicate_urls(RDF::Vocab::OA.hasTarget).first
         }
       end
       it "elements do not have @context (it's redundant)" do
@@ -99,7 +99,7 @@ describe Triannon::IIIFAnnoList, :vcr do
       it "returns empty list if it receives empty Array" do
         empty_list = Triannon::IIIFAnnoList.anno_list []
         expect(empty_list).to be_a Hash
-        expect(empty_list["@context"]).to eq Triannon::JsonldContext::IIIF_CONTEXT_URL
+        expect(empty_list["@context"]).to eq OA::Graph::IIIF_CONTEXT_URL
         expect(empty_list["@type"]).to eq "sc:AnnotationList"
         expect(empty_list["@id"]).to eq nil
         within = empty_list["within"]
@@ -113,7 +113,7 @@ describe Triannon::IIIFAnnoList, :vcr do
         expect(anno_list.to_s).not_to match "@graph"
       end
       it "folds in blank body nodes" do
-        anno_list["resources"].each { |element| 
+        anno_list["resources"].each { |element|
           expect(element).to include("resource")
         }
       end

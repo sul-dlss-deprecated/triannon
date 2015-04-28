@@ -6,7 +6,7 @@ describe Triannon::SearchController, :vcr, type: :controller do
 
   describe "GET find" do
     let(:anno_graphs_array) { [
-      Triannon::Graph.new(RDF::Graph.new.from_jsonld('
+      OA::Graph.new(RDF::Graph.new.from_jsonld('
         { "@context":"http://www.w3.org/ns/oa-context-20130208.json",
           "@graph": [
             { "@id":"_:g70337046884060",
@@ -21,7 +21,7 @@ describe Triannon::SearchController, :vcr, type: :controller do
             }
           ]
         }')),
-      Triannon::Graph.new(RDF::Graph.new.from_jsonld('
+      OA::Graph.new(RDF::Graph.new.from_jsonld('
         { "@context":"http://www.w3.org/ns/oa-context-20130208.json",
           "@graph": [
             { "@id":"_:g70337056969180",
@@ -36,7 +36,7 @@ describe Triannon::SearchController, :vcr, type: :controller do
             }
           ]
         }')),
-      Triannon::Graph.new(RDF::Graph.new.from_jsonld('
+      OA::Graph.new(RDF::Graph.new.from_jsonld('
         { "@context":"http://www.w3.org/ns/oa-context-20130208.json",
           "@graph": [
             { "@id":"_:g70252904268480",

@@ -54,29 +54,29 @@ describe RdfResponseFormatsTestController, type: :controller do
     context 'jsonld' do
       it 'oa dated' do
         request.accept = 'application/ld+json; profile="http://www.w3.org/ns/oa-context-20130208.json"'
-        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+        expect(controller.send(:context_url_from_accept)).to eq OA::Graph::OA_DATED_CONTEXT_URL
       end
       it 'oa generic' do
         request.accept = 'application/ld+json; profile="http://www.w3.org/ns/oa.jsonld"'
-        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::OA_CONTEXT_URL
+        expect(controller.send(:context_url_from_accept)).to eq OA::Graph::OA_CONTEXT_URL
       end
       it 'iiif' do
         request.accept = 'application/ld+json; profile="http://iiif.io/api/presentation/2/context.json"'
-        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::IIIF_CONTEXT_URL
+        expect(controller.send(:context_url_from_accept)).to eq OA::Graph::IIIF_CONTEXT_URL
       end
     end
     context 'json, accept profile' do
       it 'oa dated' do
         request.accept = 'application/json; profile="http://www.w3.org/ns/oa-context-20130208.json"'
-        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+        expect(controller.send(:context_url_from_accept)).to eq OA::Graph::OA_DATED_CONTEXT_URL
       end
       it 'oa generic' do
         request.accept = 'text/x-json; profile="http://www.w3.org/ns/oa.jsonld"'
-        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::OA_CONTEXT_URL
+        expect(controller.send(:context_url_from_accept)).to eq OA::Graph::OA_CONTEXT_URL
       end
       it 'iiif' do
         request.accept = 'application/jsonrequest; profile="http://iiif.io/api/presentation/2/context.json"'
-        expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::IIIF_CONTEXT_URL
+        expect(controller.send(:context_url_from_accept)).to eq OA::Graph::IIIF_CONTEXT_URL
       end
     end
     it 'non-jsonld format gives nil' do
@@ -89,7 +89,7 @@ describe RdfResponseFormatsTestController, type: :controller do
     end
     it "missing quotes around profile value works" do
       request.accept = 'application/ld+json; profile=http://www.w3.org/ns/oa-context-20130208.json'
-      expect(controller.send(:context_url_from_accept)).to eq Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+      expect(controller.send(:context_url_from_accept)).to eq OA::Graph::OA_DATED_CONTEXT_URL
     end
     it "unrecognized context_url gives nil" do
       request.accept = 'application/ld+json; profile=http://unknown.context.org'
@@ -112,19 +112,19 @@ describe RdfResponseFormatsTestController, type: :controller do
     end
     context 'json' do
       context 'oa dated' do
-        it_behaves_like "parses successfully", "application/json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
-        it_behaves_like "parses successfully", "text/x-json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
-        it_behaves_like "parses successfully", "application/jsonrequest", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+        it_behaves_like "parses successfully", "application/json", OA::Graph::OA_DATED_CONTEXT_URL
+        it_behaves_like "parses successfully", "text/x-json", OA::Graph::OA_DATED_CONTEXT_URL
+        it_behaves_like "parses successfully", "application/jsonrequest", OA::Graph::OA_DATED_CONTEXT_URL
       end
       context 'oa generic' do
-        it_behaves_like "parses successfully", "application/json", Triannon::JsonldContext::OA_CONTEXT_URL
-        it_behaves_like "parses successfully", "text/x-json", Triannon::JsonldContext::OA_CONTEXT_URL
-        it_behaves_like "parses successfully", "application/jsonrequest", Triannon::JsonldContext::OA_CONTEXT_URL
+        it_behaves_like "parses successfully", "application/json", OA::Graph::OA_CONTEXT_URL
+        it_behaves_like "parses successfully", "text/x-json", OA::Graph::OA_CONTEXT_URL
+        it_behaves_like "parses successfully", "application/jsonrequest", OA::Graph::OA_CONTEXT_URL
       end
       context 'iiif' do
-        it_behaves_like "parses successfully", "application/json", Triannon::JsonldContext::IIIF_CONTEXT_URL
-        it_behaves_like "parses successfully", "text/x-json", Triannon::JsonldContext::IIIF_CONTEXT_URL
-        it_behaves_like "parses successfully", "application/jsonrequest", Triannon::JsonldContext::IIIF_CONTEXT_URL
+        it_behaves_like "parses successfully", "application/json", OA::Graph::IIIF_CONTEXT_URL
+        it_behaves_like "parses successfully", "text/x-json", OA::Graph::IIIF_CONTEXT_URL
+        it_behaves_like "parses successfully", "application/jsonrequest", OA::Graph::IIIF_CONTEXT_URL
       end
       it 'unrecognized context_url specified gives nil' do
         request.accept = 'application/ld+json'
@@ -143,18 +143,18 @@ describe RdfResponseFormatsTestController, type: :controller do
     end
     context 'jsonld, accept link' do
       context 'oa dated' do
-        it_behaves_like "parses successfully", "application/ld+json", Triannon::JsonldContext::OA_DATED_CONTEXT_URL
+        it_behaves_like "parses successfully", "application/ld+json", OA::Graph::OA_DATED_CONTEXT_URL
       end
       context 'oa generic' do
-        it_behaves_like "parses successfully", "application/ld+json", Triannon::JsonldContext::OA_CONTEXT_URL
+        it_behaves_like "parses successfully", "application/ld+json", OA::Graph::OA_CONTEXT_URL
       end
       context 'iiif' do
-        it_behaves_like "parses successfully", "application/ld+json", Triannon::JsonldContext::IIIF_CONTEXT_URL
+        it_behaves_like "parses successfully", "application/ld+json", OA::Graph::IIIF_CONTEXT_URL
       end
     end
     it 'non-json format gives nil' do
       request.accept = 'application/x-turtle'
-      request.headers["Link"] = "#{Triannon::JsonldContext::OA_CONTEXT_URL}; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\""
+      request.headers["Link"] = "#{OA::Graph::OA_CONTEXT_URL}; rel=\"http://www.w3.org/ns/json-ld#context\"; type=\"application/ld+json\""
       expect(controller.send(:context_url_from_link)).to eq nil
     end
   end # context_url_from_accept

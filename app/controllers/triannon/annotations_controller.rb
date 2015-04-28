@@ -17,11 +17,11 @@ module Triannon
 
     # GET /annotations/1
     def show
-      # TODO:  json.set! "@context", Triannon::JsonldContext::OA_DATED_CONTEXT_URL - would this work?
+      # TODO:  json.set! "@context", OA::Graph::OA_DATED_CONTEXT_URL - would this work?
       respond_to do |format|
         format.jsonld {
           context_url = context_url_from_accept ? context_url_from_accept : context_url_from_link
-          if context_url && context_url == Triannon::JsonldContext::IIIF_CONTEXT_URL
+          if context_url && context_url == OA::Graph::IIIF_CONTEXT_URL
             render_jsonld_per_context("iiif", "application/ld+json")
           else
             render_jsonld_per_context(params[:jsonld_context], "application/ld+json")
@@ -36,7 +36,7 @@ module Triannon
         format.json {
           accept_return_type = mime_type_from_accept(["application/json", "text/x-json", "application/jsonrequest"])
           context_url = context_url_from_link ? context_url_from_link : context_url_from_accept
-          if context_url && context_url == Triannon::JsonldContext::IIIF_CONTEXT_URL
+          if context_url && context_url == OA::Graph::IIIF_CONTEXT_URL
             render_jsonld_per_context("iiif", accept_return_type)
           else
             render_jsonld_per_context(params[:jsonld_context], accept_return_type)
@@ -82,7 +82,7 @@ module Triannon
         respond_to do |format|
           format.jsonld {
             context_url = context_url_from_link ? context_url_from_link : context_url_from_accept
-            if context_url && context_url == Triannon::JsonldContext::IIIF_CONTEXT_URL
+            if context_url && context_url == OA::Graph::IIIF_CONTEXT_URL
               render :json => @annotation.jsonld_iiif, status: 201, content_type: "application/ld+json"
             else
               render :json => @annotation.jsonld_oa, status: 201, content_type: "application/ld+json"
@@ -97,7 +97,7 @@ module Triannon
           format.json {
             accept_return_type = mime_type_from_accept(["application/json", "text/x-json", "application/jsonrequest"])
             context_url = context_url_from_link ? context_url_from_link : context_url_from_accept
-            if context_url && context_url == Triannon::JsonldContext::IIIF_CONTEXT_URL
+            if context_url && context_url == OA::Graph::IIIF_CONTEXT_URL
               render :json => @annotation.jsonld_iiif, status: 201, content_type: accept_return_type if accept_return_type
             else
               render :json => @annotation.jsonld_oa, status: 201, content_type: accept_return_type if accept_return_type

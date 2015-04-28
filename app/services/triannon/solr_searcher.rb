@@ -1,16 +1,16 @@
 module Triannon
   class SolrSearcher
 
-    # convert RSolr::Response object into an array of Triannon::Graph objects,
+    # convert RSolr::Response object into an array of OA::Graph objects,
     #   where each graph object contains a single annotation returned in the response docs
     # @param [Hash] rsolr_response an RSolr response to a query.  It's actually an
     #   RSolr::HashWithResponse but let's not quibble
-    # @return [Array<Triannon::Graph>]
+    # @return [Array<OA::Graph>]
     def self.anno_graphs_array(rsolr_response)
       result = []
       # TODO: deal with Solr pagination
       rsolr_response['response']['docs'].each { |solr_doc_hash|
-        result << Triannon::Graph.new(RDF::Graph.new.from_jsonld(solr_doc_hash['anno_jsonld']))
+        result << OA::Graph.new(RDF::Graph.new.from_jsonld(solr_doc_hash['anno_jsonld']))
       }
       result
     end
@@ -129,7 +129,7 @@ module Triannon
     #     2.  sends request to Solr
     #     3.  converts Solr response object to array of anno graphs
     # @param [Hash<String => String>] controller_params params from Controller
-    # @return [Array<Triannon::Graph>] array of Triannon::Graph objects,
+    # @return [Array<OA::Graph>] array of OA::Graph objects,
     #   where each graph object contains a single annotation returned in the response docs
     def find(controller_params)
       solr_params = self.class.solr_params(controller_params)

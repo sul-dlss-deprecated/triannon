@@ -29,20 +29,20 @@ describe "integration tests for SpecificResource", :vcr do
      ] ."
     g = write_anno.graph
     expect(g.size).to eql 10
-    expect(g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasBody, RDF::URI(body_url)]).size).to eql 1
-    target_solns = g.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+    expect(g.query([nil, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasBody, RDF::URI(body_url)]).size).to eql 1
+    target_solns = g.query([nil, RDF::Vocab::OA.hasTarget, nil])
     expect(target_solns.size).to eql 1
     target_blank_node = target_solns.first.object
-    expect(g.query([target_blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
-    expect(g.query([target_blank_node, RDF::OpenAnnotation.hasSource, RDF::URI(source_url)]).size).to eql 1
-    selector_solns = g.query([target_blank_node, RDF::OpenAnnotation.hasSelector, nil])
+    expect(g.query([target_blank_node, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
+    expect(g.query([target_blank_node, RDF::Vocab::OA.hasSource, RDF::URI(source_url)]).size).to eql 1
+    selector_solns = g.query([target_blank_node, RDF::Vocab::OA.hasSelector, nil])
     expect(selector_solns.size).to eql 1
     selector_blank_node = selector_solns.first.object
     sel_contents_solns = g.query([selector_blank_node, nil, nil])
     expect(sel_contents_solns.size).to eql 3
-    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.FragmentSelector]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::Vocab::OA.FragmentSelector]
     expect(sel_contents_solns).to include [selector_blank_node, RDF::DC.conformsTo, RDF::URI(conforms_to_url)]
     expect(sel_contents_solns).to include [selector_blank_node, RDF.value, frag_value]
 
@@ -54,20 +54,20 @@ describe "integration tests for SpecificResource", :vcr do
     h = anno.graph
     expect(h.size).to eql g.size
     anno_uri_obj = RDF::URI.new("#{Triannon.config[:triannon_base_url]}/#{id}")
-    expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasBody, RDF::URI(body_url)]).size).to eql 1
-    target_solns = h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, nil])
+    expect(h.query([anno_uri_obj, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasBody, RDF::URI(body_url)]).size).to eql 1
+    target_solns = h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, nil])
     expect(target_solns.size).to eql 1
     target_blank_node = target_solns.first.object
-    expect(h.query([target_blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
-    expect(h.query([target_blank_node, RDF::OpenAnnotation.hasSource, RDF::URI(source_url)]).size).to eql 1
-    selector_solns = h.query([target_blank_node, RDF::OpenAnnotation.hasSelector, nil])
+    expect(h.query([target_blank_node, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
+    expect(h.query([target_blank_node, RDF::Vocab::OA.hasSource, RDF::URI(source_url)]).size).to eql 1
+    selector_solns = h.query([target_blank_node, RDF::Vocab::OA.hasSelector, nil])
     expect(selector_solns.size).to eql 1
     selector_blank_node = selector_solns.first.object
     sel_contents_solns = h.query([selector_blank_node, nil, nil])
     expect(sel_contents_solns.size).to eql 3
-    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.FragmentSelector]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::Vocab::OA.FragmentSelector]
     expect(sel_contents_solns).to include [selector_blank_node, RDF::DC.conformsTo, RDF::URI(conforms_to_url)]
     expect(sel_contents_solns).to include [selector_blank_node, RDF.value, frag_value]
   end
@@ -99,20 +99,20 @@ describe "integration tests for SpecificResource", :vcr do
      ] ."
     g = write_anno.graph
     expect(g.size).to eql 10
-    expect(g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_url)]).size).to eql 1
-    body_solns = g.query([nil, RDF::OpenAnnotation.hasBody, nil])
+    expect(g.query([nil, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasTarget, RDF::URI(target_url)]).size).to eql 1
+    body_solns = g.query([nil, RDF::Vocab::OA.hasBody, nil])
     expect(body_solns.size).to eql 1
     body_blank_node = body_solns.first.object
-    expect(g.query([body_blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
-    expect(g.query([body_blank_node, RDF::OpenAnnotation.hasSource, RDF::URI(source_url)]).size).to eql 1
-    selector_solns = g.query([body_blank_node, RDF::OpenAnnotation.hasSelector, nil])
+    expect(g.query([body_blank_node, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
+    expect(g.query([body_blank_node, RDF::Vocab::OA.hasSource, RDF::URI(source_url)]).size).to eql 1
+    selector_solns = g.query([body_blank_node, RDF::Vocab::OA.hasSelector, nil])
     expect(selector_solns.size).to eql 1
     selector_blank_node = selector_solns.first.object
     sel_contents_solns = g.query([selector_blank_node, nil, nil])
     expect(sel_contents_solns.size).to eql 3
-    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.FragmentSelector]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::Vocab::OA.FragmentSelector]
     expect(sel_contents_solns).to include [selector_blank_node, RDF::DC.conformsTo, RDF::URI(conforms_to_url)]
     expect(sel_contents_solns).to include [selector_blank_node, RDF.value, frag_value]
 
@@ -124,20 +124,20 @@ describe "integration tests for SpecificResource", :vcr do
     h = anno.graph
     expect(h.size).to eql g.size
     anno_uri_obj = RDF::URI.new("#{Triannon.config[:triannon_base_url]}/#{id}")
-    expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI(target_url)]).size).to eql 1
-    body_solns = h.query([anno_uri_obj, RDF::OpenAnnotation.hasBody, nil])
+    expect(h.query([anno_uri_obj, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI(target_url)]).size).to eql 1
+    body_solns = h.query([anno_uri_obj, RDF::Vocab::OA.hasBody, nil])
     expect(body_solns.size).to eql 1
     body_blank_node = body_solns.first.object
-    expect(h.query([body_blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
-    expect(h.query([body_blank_node, RDF::OpenAnnotation.hasSource, RDF::URI(source_url)]).size).to eql 1
-    selector_solns = h.query([body_blank_node, RDF::OpenAnnotation.hasSelector, nil])
+    expect(h.query([body_blank_node, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
+    expect(h.query([body_blank_node, RDF::Vocab::OA.hasSource, RDF::URI(source_url)]).size).to eql 1
+    selector_solns = h.query([body_blank_node, RDF::Vocab::OA.hasSelector, nil])
     expect(selector_solns.size).to eql 1
     selector_blank_node = selector_solns.first.object
     sel_contents_solns = h.query([selector_blank_node, nil, nil])
     expect(sel_contents_solns.size).to eql 3
-    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.FragmentSelector]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::Vocab::OA.FragmentSelector]
     expect(sel_contents_solns).to include [selector_blank_node, RDF::DC.conformsTo, RDF::URI(conforms_to_url)]
     expect(sel_contents_solns).to include [selector_blank_node, RDF.value, frag_value]
   end
@@ -168,26 +168,26 @@ describe "integration tests for SpecificResource", :vcr do
      ] ."
     g = write_anno.graph
     expect(g.size).to eql 10
-    expect(g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasBody, RDF::URI(body_url)]).size).to eql 1
-    target_solns = g.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+    expect(g.query([nil, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasBody, RDF::URI(body_url)]).size).to eql 1
+    target_solns = g.query([nil, RDF::Vocab::OA.hasTarget, nil])
     expect(target_solns.size).to eql 1
     target_blank_node = target_solns.first.object
-    expect(g.query([target_blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
-    expect(g.query([target_blank_node, RDF::OpenAnnotation.hasSource, RDF::URI(source_url)]).size).to eql 1
-    selector_solns = g.query([target_blank_node, RDF::OpenAnnotation.hasSelector, nil])
+    expect(g.query([target_blank_node, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
+    expect(g.query([target_blank_node, RDF::Vocab::OA.hasSource, RDF::URI(source_url)]).size).to eql 1
+    selector_solns = g.query([target_blank_node, RDF::Vocab::OA.hasSelector, nil])
     expect(selector_solns.size).to eql 1
     selector_blank_node = selector_solns.first.object
     sel_contents_solns = g.query([selector_blank_node, nil, nil])
     expect(sel_contents_solns.size).to eql 3
-    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.TextPositionSelector]
-    start_obj_solns = g.query [selector_blank_node, RDF::OpenAnnotation.start, nil]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::Vocab::OA.TextPositionSelector]
+    start_obj_solns = g.query [selector_blank_node, RDF::Vocab::OA.start, nil]
     expect(start_obj_solns.count).to eq 1
     start_obj = start_obj_solns.first.object
     expect(start_obj.to_s).to eql "0"
     expect(start_obj.datatype).to eql RDF::XSD.nonNegativeInteger
-    end_obj_solns = g.query [selector_blank_node, RDF::OpenAnnotation.end, nil]
+    end_obj_solns = g.query [selector_blank_node, RDF::Vocab::OA.end, nil]
     expect(end_obj_solns.count).to eq 1
     end_obj = end_obj_solns.first.object
     expect(end_obj.to_s).to eql "66"
@@ -201,28 +201,28 @@ describe "integration tests for SpecificResource", :vcr do
     h = anno.graph
     expect(h.size).to eql g.size
     anno_uri_obj = RDF::URI.new("#{Triannon.config[:triannon_base_url]}/#{id}")
-    expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasBody, RDF::URI(body_url)]).size).to eql 1
-    target_solns = h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, nil])
+    expect(h.query([anno_uri_obj, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasBody, RDF::URI(body_url)]).size).to eql 1
+    target_solns = h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, nil])
     expect(target_solns.size).to eql 1
     target_blank_node = target_solns.first.object
-    expect(h.query([target_blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
-    expect(h.query([target_blank_node, RDF::OpenAnnotation.hasSource, RDF::URI(source_url)]).size).to eql 1
-    selector_solns = h.query([target_blank_node, RDF::OpenAnnotation.hasSelector, nil])
+    expect(h.query([target_blank_node, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
+    expect(h.query([target_blank_node, RDF::Vocab::OA.hasSource, RDF::URI(source_url)]).size).to eql 1
+    selector_solns = h.query([target_blank_node, RDF::Vocab::OA.hasSelector, nil])
     expect(selector_solns.size).to eql 1
     selector_blank_node = selector_solns.first.object
     sel_contents_solns = h.query([selector_blank_node, nil, nil])
     expect(sel_contents_solns.size).to eql 3
-    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.TextPositionSelector]
-    start_obj_solns = h.query [selector_blank_node, RDF::OpenAnnotation.start, nil]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::Vocab::OA.TextPositionSelector]
+    start_obj_solns = h.query [selector_blank_node, RDF::Vocab::OA.start, nil]
     expect(start_obj_solns.count).to eq 1
     start_obj = start_obj_solns.first.object
     expect(start_obj.to_s).to eql "0"
 # FIXME:  these should be converted back to nonNegativeInteger, per OA spec
 # See https://github.com/sul-dlss/triannon/issues/78
     expect(start_obj.datatype).to eql RDF::XSD.long
-    end_obj_solns = h.query [selector_blank_node, RDF::OpenAnnotation.end, nil]
+    end_obj_solns = h.query [selector_blank_node, RDF::Vocab::OA.end, nil]
     expect(end_obj_solns.count).to eq 1
     end_obj = end_obj_solns.first.object
     expect(end_obj.to_s).to eql "66"
@@ -254,26 +254,26 @@ describe "integration tests for SpecificResource", :vcr do
      ] ."
     g = write_anno.graph
     expect(g.size).to eql 10
-    expect(g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_url)]).size).to eql 1
-    body_solns = g.query([nil, RDF::OpenAnnotation.hasBody, nil])
+    expect(g.query([nil, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasTarget, RDF::URI(target_url)]).size).to eql 1
+    body_solns = g.query([nil, RDF::Vocab::OA.hasBody, nil])
     expect(body_solns.size).to eql 1
     body_blank_node = body_solns.first.object
-    expect(g.query([body_blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
-    expect(g.query([body_blank_node, RDF::OpenAnnotation.hasSource, RDF::URI(source_url)]).size).to eql 1
-    selector_solns = g.query([body_blank_node, RDF::OpenAnnotation.hasSelector, nil])
+    expect(g.query([body_blank_node, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
+    expect(g.query([body_blank_node, RDF::Vocab::OA.hasSource, RDF::URI(source_url)]).size).to eql 1
+    selector_solns = g.query([body_blank_node, RDF::Vocab::OA.hasSelector, nil])
     expect(selector_solns.size).to eql 1
     selector_blank_node = selector_solns.first.object
     sel_contents_solns = g.query([selector_blank_node, nil, nil])
     expect(sel_contents_solns.size).to eql 3
-    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.TextPositionSelector]
-    start_obj_solns = g.query [selector_blank_node, RDF::OpenAnnotation.start, nil]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::Vocab::OA.TextPositionSelector]
+    start_obj_solns = g.query [selector_blank_node, RDF::Vocab::OA.start, nil]
     expect(start_obj_solns.count).to eq 1
     start_obj = start_obj_solns.first.object
     expect(start_obj.to_s).to eql "0"
     expect(start_obj.datatype).to eql RDF::XSD.nonNegativeInteger
-    end_obj_solns = g.query [selector_blank_node, RDF::OpenAnnotation.end, nil]
+    end_obj_solns = g.query [selector_blank_node, RDF::Vocab::OA.end, nil]
     expect(end_obj_solns.count).to eq 1
     end_obj = end_obj_solns.first.object
     expect(end_obj.to_s).to eql "66"
@@ -287,28 +287,28 @@ describe "integration tests for SpecificResource", :vcr do
     h = anno.graph
     expect(h.size).to eql g.size
     anno_uri_obj = RDF::URI.new("#{Triannon.config[:triannon_base_url]}/#{id}")
-    expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI(target_url)]).size).to eql 1
-    body_solns = h.query([anno_uri_obj, RDF::OpenAnnotation.hasBody, nil])
+    expect(h.query([anno_uri_obj, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI(target_url)]).size).to eql 1
+    body_solns = h.query([anno_uri_obj, RDF::Vocab::OA.hasBody, nil])
     expect(body_solns.size).to eql 1
     body_blank_node = body_solns.first.object
-    expect(h.query([body_blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
-    expect(h.query([body_blank_node, RDF::OpenAnnotation.hasSource, RDF::URI(source_url)]).size).to eql 1
-    selector_solns = h.query([body_blank_node, RDF::OpenAnnotation.hasSelector, nil])
+    expect(h.query([body_blank_node, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
+    expect(h.query([body_blank_node, RDF::Vocab::OA.hasSource, RDF::URI(source_url)]).size).to eql 1
+    selector_solns = h.query([body_blank_node, RDF::Vocab::OA.hasSelector, nil])
     expect(selector_solns.size).to eql 1
     selector_blank_node = selector_solns.first.object
     sel_contents_solns = h.query([selector_blank_node, nil, nil])
     expect(sel_contents_solns.size).to eql 3
-    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.TextPositionSelector]
-    start_obj_solns = h.query [selector_blank_node, RDF::OpenAnnotation.start, nil]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::Vocab::OA.TextPositionSelector]
+    start_obj_solns = h.query [selector_blank_node, RDF::Vocab::OA.start, nil]
     expect(start_obj_solns.count).to eq 1
     start_obj = start_obj_solns.first.object
     expect(start_obj.to_s).to eql "0"
 # FIXME:  these should be converted back to nonNegativeInteger, per OA spec
 # See https://github.com/sul-dlss/triannon/issues/78
     expect(start_obj.datatype).to eql RDF::XSD.long
-    end_obj_solns = h.query [selector_blank_node, RDF::OpenAnnotation.end, nil]
+    end_obj_solns = h.query [selector_blank_node, RDF::Vocab::OA.end, nil]
     expect(end_obj_solns.count).to eq 1
     end_obj = end_obj_solns.first.object
     expect(end_obj.to_s).to eql "66"
@@ -344,23 +344,23 @@ describe "integration tests for SpecificResource", :vcr do
      ] ."
     g = write_anno.graph
     expect(g.size).to eql 11
-    expect(g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasBody, RDF::URI(body_url)]).size).to eql 1
-    target_solns = g.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+    expect(g.query([nil, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasBody, RDF::URI(body_url)]).size).to eql 1
+    target_solns = g.query([nil, RDF::Vocab::OA.hasTarget, nil])
     expect(target_solns.size).to eql 1
     target_blank_node = target_solns.first.object
-    expect(g.query([target_blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
-    expect(g.query([target_blank_node, RDF::OpenAnnotation.hasSource, RDF::URI(source_url)]).size).to eql 1
-    selector_solns = g.query([target_blank_node, RDF::OpenAnnotation.hasSelector, nil])
+    expect(g.query([target_blank_node, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
+    expect(g.query([target_blank_node, RDF::Vocab::OA.hasSource, RDF::URI(source_url)]).size).to eql 1
+    selector_solns = g.query([target_blank_node, RDF::Vocab::OA.hasSelector, nil])
     expect(selector_solns.size).to eql 1
     selector_blank_node = selector_solns.first.object
     sel_contents_solns = g.query([selector_blank_node, nil, nil])
     expect(sel_contents_solns.size).to eql 4
-    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.TextQuoteSelector]
-    expect(sel_contents_solns).to include [selector_blank_node, RDF::OpenAnnotation.exact, RDF::Literal.new(exact_str)]
-    expect(sel_contents_solns).to include [selector_blank_node, RDF::OpenAnnotation.prefix, RDF::Literal.new(prefix_str)]
-    expect(sel_contents_solns).to include [selector_blank_node, RDF::OpenAnnotation.suffix, RDF::Literal.new(suffix_str)]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::Vocab::OA.TextQuoteSelector]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF::Vocab::OA.exact, RDF::Literal.new(exact_str)]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF::Vocab::OA.prefix, RDF::Literal.new(prefix_str)]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF::Vocab::OA.suffix, RDF::Literal.new(suffix_str)]
 
     sw = write_anno.send(:solr_writer)
     allow(sw).to receive(:add)
@@ -370,23 +370,23 @@ describe "integration tests for SpecificResource", :vcr do
     h = anno.graph
     expect(h.size).to eql g.size
     anno_uri_obj = RDF::URI.new("#{Triannon.config[:triannon_base_url]}/#{id}")
-    expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasBody, RDF::URI(body_url)]).size).to eql 1
-    target_solns = h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, nil])
+    expect(h.query([anno_uri_obj, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasBody, RDF::URI(body_url)]).size).to eql 1
+    target_solns = h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, nil])
     expect(target_solns.size).to eql 1
     target_blank_node = target_solns.first.object
-    expect(h.query([target_blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
-    expect(h.query([target_blank_node, RDF::OpenAnnotation.hasSource, RDF::URI(source_url)]).size).to eql 1
-    selector_solns = h.query([target_blank_node, RDF::OpenAnnotation.hasSelector, nil])
+    expect(h.query([target_blank_node, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
+    expect(h.query([target_blank_node, RDF::Vocab::OA.hasSource, RDF::URI(source_url)]).size).to eql 1
+    selector_solns = h.query([target_blank_node, RDF::Vocab::OA.hasSelector, nil])
     expect(selector_solns.size).to eql 1
     selector_blank_node = selector_solns.first.object
     sel_contents_solns = h.query([selector_blank_node, nil, nil])
     expect(sel_contents_solns.size).to eql 4
-    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.TextQuoteSelector]
-    expect(sel_contents_solns).to include [selector_blank_node, RDF::OpenAnnotation.exact, RDF::Literal.new(exact_str)]
-    expect(sel_contents_solns).to include [selector_blank_node, RDF::OpenAnnotation.prefix, RDF::Literal.new(prefix_str)]
-    expect(sel_contents_solns).to include [selector_blank_node, RDF::OpenAnnotation.suffix, RDF::Literal.new(suffix_str)]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::Vocab::OA.TextQuoteSelector]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF::Vocab::OA.exact, RDF::Literal.new(exact_str)]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF::Vocab::OA.prefix, RDF::Literal.new(prefix_str)]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF::Vocab::OA.suffix, RDF::Literal.new(suffix_str)]
   end
   it "body is TextQuoteSelector" do
     target_url = "http://dbpedia.org/resource/Otto_Ege"
@@ -417,23 +417,23 @@ describe "integration tests for SpecificResource", :vcr do
      ] ."
     g = write_anno.graph
     expect(g.size).to eql 11
-    expect(g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasTarget, RDF::URI(target_url)]).size).to eql 1
-    body_solns = g.query([nil, RDF::OpenAnnotation.hasBody, nil])
+    expect(g.query([nil, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasTarget, RDF::URI(target_url)]).size).to eql 1
+    body_solns = g.query([nil, RDF::Vocab::OA.hasBody, nil])
     expect(body_solns.size).to eql 1
     body_blank_node = body_solns.first.object
-    expect(g.query([body_blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
-    expect(g.query([body_blank_node, RDF::OpenAnnotation.hasSource, RDF::URI(source_url)]).size).to eql 1
-    selector_solns = g.query([body_blank_node, RDF::OpenAnnotation.hasSelector, nil])
+    expect(g.query([body_blank_node, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
+    expect(g.query([body_blank_node, RDF::Vocab::OA.hasSource, RDF::URI(source_url)]).size).to eql 1
+    selector_solns = g.query([body_blank_node, RDF::Vocab::OA.hasSelector, nil])
     expect(selector_solns.size).to eql 1
     selector_blank_node = selector_solns.first.object
     sel_contents_solns = g.query([selector_blank_node, nil, nil])
     expect(sel_contents_solns.size).to eql 4
-    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.TextQuoteSelector]
-    expect(sel_contents_solns).to include [selector_blank_node, RDF::OpenAnnotation.exact, RDF::Literal.new(exact_str)]
-    expect(sel_contents_solns).to include [selector_blank_node, RDF::OpenAnnotation.prefix, RDF::Literal.new(prefix_str)]
-    expect(sel_contents_solns).to include [selector_blank_node, RDF::OpenAnnotation.suffix, RDF::Literal.new(suffix_str)]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::Vocab::OA.TextQuoteSelector]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF::Vocab::OA.exact, RDF::Literal.new(exact_str)]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF::Vocab::OA.prefix, RDF::Literal.new(prefix_str)]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF::Vocab::OA.suffix, RDF::Literal.new(suffix_str)]
 
     sw = write_anno.send(:solr_writer)
     allow(sw).to receive(:add)
@@ -443,23 +443,23 @@ describe "integration tests for SpecificResource", :vcr do
     h = anno.graph
     expect(h.size).to eql g.size
     anno_uri_obj = RDF::URI.new("#{Triannon.config[:triannon_base_url]}/#{id}")
-    expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, RDF::URI(target_url)]).size).to eql 1
-    body_solns = h.query([anno_uri_obj, RDF::OpenAnnotation.hasBody, nil])
+    expect(h.query([anno_uri_obj, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI(target_url)]).size).to eql 1
+    body_solns = h.query([anno_uri_obj, RDF::Vocab::OA.hasBody, nil])
     expect(body_solns.size).to eql 1
     body_blank_node = body_solns.first.object
-    expect(h.query([body_blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
-    expect(h.query([body_blank_node, RDF::OpenAnnotation.hasSource, RDF::URI(source_url)]).size).to eql 1
-    selector_solns = h.query([body_blank_node, RDF::OpenAnnotation.hasSelector, nil])
+    expect(h.query([body_blank_node, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
+    expect(h.query([body_blank_node, RDF::Vocab::OA.hasSource, RDF::URI(source_url)]).size).to eql 1
+    selector_solns = h.query([body_blank_node, RDF::Vocab::OA.hasSelector, nil])
     expect(selector_solns.size).to eql 1
     selector_blank_node = selector_solns.first.object
     sel_contents_solns = h.query([selector_blank_node, nil, nil])
     expect(sel_contents_solns.size).to eql 4
-    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.TextQuoteSelector]
-    expect(sel_contents_solns).to include [selector_blank_node, RDF::OpenAnnotation.exact, RDF::Literal.new(exact_str)]
-    expect(sel_contents_solns).to include [selector_blank_node, RDF::OpenAnnotation.prefix, RDF::Literal.new(prefix_str)]
-    expect(sel_contents_solns).to include [selector_blank_node, RDF::OpenAnnotation.suffix, RDF::Literal.new(suffix_str)]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::Vocab::OA.TextQuoteSelector]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF::Vocab::OA.exact, RDF::Literal.new(exact_str)]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF::Vocab::OA.prefix, RDF::Literal.new(prefix_str)]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF::Vocab::OA.suffix, RDF::Literal.new(suffix_str)]
   end
 
   it "source uri has additional metadata" do
@@ -493,22 +493,22 @@ describe "integration tests for SpecificResource", :vcr do
      ] ."
     g = write_anno.graph
     expect(g.size).to eql 11
-    expect(g.query([nil, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
-    expect(g.query([nil, RDF::OpenAnnotation.hasBody, RDF::URI(body_url)]).size).to eql 1
-    target_solns = g.query([nil, RDF::OpenAnnotation.hasTarget, nil])
+    expect(g.query([nil, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
+    expect(g.query([nil, RDF::Vocab::OA.hasBody, RDF::URI(body_url)]).size).to eql 1
+    target_solns = g.query([nil, RDF::Vocab::OA.hasTarget, nil])
     expect(target_solns.size).to eql 1
     target_blank_node = target_solns.first.object
-    expect(g.query([target_blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
+    expect(g.query([target_blank_node, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
     source_obj = RDF::URI.new(source_url)
-    expect(g.query([target_blank_node, RDF::OpenAnnotation.hasSource, source_obj]).size).to eql 1
-    expect(g.query([source_obj, RDF.type, RDF::DCMIType.Image]).size).to eql 1
-    selector_solns = g.query([target_blank_node, RDF::OpenAnnotation.hasSelector, nil])
+    expect(g.query([target_blank_node, RDF::Vocab::OA.hasSource, source_obj]).size).to eql 1
+    expect(g.query([source_obj, RDF.type, RDF::Vocab::DCMIType.Image]).size).to eql 1
+    selector_solns = g.query([target_blank_node, RDF::Vocab::OA.hasSelector, nil])
     expect(selector_solns.size).to eql 1
     selector_blank_node = selector_solns.first.object
     sel_contents_solns = g.query([selector_blank_node, nil, nil])
     expect(sel_contents_solns.size).to eql 3
-    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.FragmentSelector]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::Vocab::OA.FragmentSelector]
     expect(sel_contents_solns).to include [selector_blank_node, RDF::DC.conformsTo, RDF::URI(conforms_to_url)]
     expect(sel_contents_solns).to include [selector_blank_node, RDF.value, frag_value]
 
@@ -520,22 +520,22 @@ describe "integration tests for SpecificResource", :vcr do
     h = anno.graph
     expect(h.size).to eql g.size
     anno_uri_obj = RDF::URI.new("#{Triannon.config[:triannon_base_url]}/#{id}")
-    expect(h.query([anno_uri_obj, RDF.type, RDF::OpenAnnotation.Annotation]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.motivatedBy, RDF::OpenAnnotation.commenting]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::OpenAnnotation.hasBody, RDF::URI(body_url)]).size).to eql 1
-    target_solns = h.query([anno_uri_obj, RDF::OpenAnnotation.hasTarget, nil])
+    expect(h.query([anno_uri_obj, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasBody, RDF::URI(body_url)]).size).to eql 1
+    target_solns = h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, nil])
     expect(target_solns.size).to eql 1
     target_blank_node = target_solns.first.object
-    expect(h.query([target_blank_node, RDF.type, RDF::OpenAnnotation.SpecificResource]).size).to eql 1
+    expect(h.query([target_blank_node, RDF.type, RDF::Vocab::OA.SpecificResource]).size).to eql 1
     source_obj = RDF::URI.new(source_url)
-    expect(h.query([target_blank_node, RDF::OpenAnnotation.hasSource, source_obj]).size).to eql 1
-    expect(h.query([source_obj, RDF.type, RDF::DCMIType.Image]).size).to eql 1
-    selector_solns = h.query([target_blank_node, RDF::OpenAnnotation.hasSelector, nil])
+    expect(h.query([target_blank_node, RDF::Vocab::OA.hasSource, source_obj]).size).to eql 1
+    expect(h.query([source_obj, RDF.type, RDF::Vocab::DCMIType.Image]).size).to eql 1
+    selector_solns = h.query([target_blank_node, RDF::Vocab::OA.hasSelector, nil])
     expect(selector_solns.size).to eql 1
     selector_blank_node = selector_solns.first.object
     sel_contents_solns = h.query([selector_blank_node, nil, nil])
     expect(sel_contents_solns.size).to eql 3
-    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::OpenAnnotation.FragmentSelector]
+    expect(sel_contents_solns).to include [selector_blank_node, RDF.type, RDF::Vocab::OA.FragmentSelector]
     expect(sel_contents_solns).to include [selector_blank_node, RDF::DC.conformsTo, RDF::URI(conforms_to_url)]
     expect(sel_contents_solns).to include [selector_blank_node, RDF.value, frag_value]
   end
