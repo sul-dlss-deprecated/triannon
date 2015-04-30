@@ -11,18 +11,38 @@ module Triannon
     def create_triannon_yml_file
       default_yml =<<-YML
 development:
-  ldp_url: http://localhost:8983/fedora/rest/anno
+  ldp:
+    url: http://localhost:8983/fedora/rest
+    # uber_container:  LDP BasicContainer that will have anno containers as members
+    uber_container:  anno
+    # anno_containers:  LDP BasicContainers that will have individual annotations as members
+    #  the container names here will also map to paths in the triannon url, e.g.
+    #  "foo" here will mean you add a foo anno by POST to http://your.triannon-server.com/annotations/foo
+    #  and you get the foo anno by GET to http://your.triannon-server.com/annotations/foo/(anno_uuid)
+    anno_containers:
+      - foo
+      - blah
   solr_url: http://localhost:8983/solr/triannon
   triannon_base_url: http://your.triannon-server.com/annotations/
   max_solr_retries: 5
   base_sleep_seconds: 1
   max_sleep_seconds: 5
 test: &test
-  ldp_url: http://localhost:8983/fedora/rest/anno
+  ldp:
+    url: http://localhost:8983/fedora/rest
+    uber_container:  anno
+    anno_containers:
+      - foo
+      - blah
   solr_url: http://localhost:8983/solr/triannon
   triannon_base_url: http://your.triannon-server.com/annotations/
 production:
-  ldp_url:
+  ldp:
+    url:
+    uber_container:  anno
+    anno_containers:
+      - foo
+      - blah
   solr_url:
   triannon_base_url:
       YML
