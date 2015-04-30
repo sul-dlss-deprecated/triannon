@@ -146,7 +146,7 @@ describe Triannon::AnnotationsController, type: :routing do
       expect(:get => "/search?target=neato.url.org").to route_to(:controller => "triannon/search", :action => "find", :target => "neato.url.org", )
       expect(:get => "/search?foo=bar").to route_to(:controller => "triannon/search", :action => "find", :foo => "bar", )
     end
-    it "should not take an id" do
+    it "does not take an id" do
       expect(:get => "/annotations/search/666").to_not be_routable
       expect(:get => "/search/666").to_not be_routable
     end

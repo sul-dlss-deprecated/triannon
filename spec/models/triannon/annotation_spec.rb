@@ -37,32 +37,31 @@ describe Triannon::Annotation, :vcr do
   end
 
   context "#data_as_graph" do
-    before(:each) do
-      @json_ld_data = Triannon.annotation_fixture("bookmark.json")
-    end
+    let(:json_ld_data) { Triannon.annotation_fixture("bookmark.json") }
+
     it "does Mime::Type.lookup if expected_content_type" do
-      anno = Triannon::Annotation.new({data: @json_ld_data, expected_content_type: "application/ld+json"})
+      anno = Triannon::Annotation.new({data: json_ld_data, expected_content_type: "application/ld+json"})
       expect(Mime::Type).to receive(:lookup).with("application/ld+json").and_call_original
       expect(anno.graph).to be_a_kind_of OA::Graph
     end
     it "does NOT do Mime::Type.lookup if no expected_content_type" do
-      anno = Triannon::Annotation.new data: @json_ld_data
+      anno = Triannon::Annotation.new data: json_ld_data
       expect(Mime::Type).not_to receive(:lookup)
       expect(anno.graph).to be_a_kind_of OA::Graph
     end
     context "json-ld data" do
       it "populates graph from json-ld" do
-        expect(@json_ld_data).to match(/\A\{.+\}\Z/m) # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
-        anno = Triannon::Annotation.new data: @json_ld_data
+        expect(json_ld_data).to match(/\A\{.+\}\Z/m) # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
+        anno = Triannon::Annotation.new data: json_ld_data
         expect(anno.graph).to be_a_kind_of OA::Graph
         expect(anno.graph.count).to be > 1
       end
       it "is rejected if first and last non whitespace characters aren't { and }" do
-        anno = Triannon::Annotation.new data: "xxx " + @json_ld_data
+        anno = Triannon::Annotation.new data: "xxx " + json_ld_data
         expect(anno.graph).to be_nil
       end
       it "converts data to turtle" do
-        anno = Triannon::Annotation.new data: @json_ld_data
+        anno = Triannon::Annotation.new data: json_ld_data
         c = anno.graph.count
         g = RDF::Graph.new
         g.from_ttl(anno.data)
@@ -70,36 +69,34 @@ describe Triannon::Annotation, :vcr do
       end
     end
     context "turtle data" do
-      before(:each) do
-        @ttl_data = Triannon.annotation_fixture("body-chars.ttl")
-      end
+      let(:ttl_data) { Triannon.annotation_fixture("body-chars.ttl") }
+
       it "populates graph from ttl" do
-        expect(@ttl_data).to match(/\.\Z/)  # (Note:  \Z is needed instead of $ due to \n in data)
-        anno = Triannon::Annotation.new data: @ttl_data
+        expect(ttl_data).to match(/\.\Z/)  # (Note:  \Z is needed instead of $ due to \n in data)
+        anno = Triannon::Annotation.new data: ttl_data
         expect(anno.graph).to be_a_kind_of OA::Graph
         expect(anno.graph.count).to be > 1
       end
       it "is rejected if it doesn't end in period" do
-        anno = Triannon::Annotation.new data: @ttl_data + "xxx"
+        anno = Triannon::Annotation.new data: ttl_data + "xxx"
         expect(anno.graph).to be_nil
       end
     end
     context "rdf(xml) data" do
-      before(:each) do
-        @rdfxml_data = Triannon.annotation_fixture("body-chars.rdf")
-      end
+      let(:rdfxml_data) { Triannon.annotation_fixture("body-chars.rdf") }
+
       it "populates graph from rdfxml" do
-        expect(@rdfxml_data).to match(/\A<.+>\Z/m) # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
-        anno = Triannon::Annotation.new data: @rdfxml_data
+        expect(rdfxml_data).to match(/\A<.+>\Z/m) # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
+        anno = Triannon::Annotation.new data: rdfxml_data
         expect(anno.graph).to be_a_kind_of OA::Graph
         expect(anno.graph.count).to be > 1
       end
       it "is rejected if first and last non whitespace characters aren't < and >" do
-        anno = Triannon::Annotation.new data: "xxx " + @rdfxml_data
+        anno = Triannon::Annotation.new data: "xxx " + rdfxml_data
         expect(anno.graph).to be_nil
       end
       it "converts data to turtle" do
-        anno = Triannon::Annotation.new data: @rdfxml_data
+        anno = Triannon::Annotation.new data: rdfxml_data
         c = anno.graph.count
         g = RDF::Graph.new
         g.from_ttl(anno.data)
