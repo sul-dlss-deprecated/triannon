@@ -232,7 +232,7 @@ module Triannon
                 hash_uri_str = "#default"
               elsif s.predicate == RDF::Vocab::OA.item
                 hash_uri_str = "#item#{hash_uri_counter}"
-                hash_uri_counter = hash_uri_counter + 1
+                hash_uri_counter += 1
               else
                 # we don't need to represent the object URI as an external ref
                 hash_uri_str = nil
