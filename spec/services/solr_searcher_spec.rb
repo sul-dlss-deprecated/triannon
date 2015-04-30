@@ -137,7 +137,7 @@ describe Triannon::SolrSearcher, :vcr do
       expect(result_array[2].body_chars).to eq ["testing redirect 2"]
       expect(result_array[2].predicate_urls(RDF::Vocab::OA.hasTarget)).to eq ["http://purl.stanford.edu/oo111oo2222"]
     end
-    it "doesn't do external lookup of json_ld context" , :vcr => {:record => :none} do
+    it "doesn't do external lookup of json_ld context", :vcr => {:record => :none} do
       # NOTE:  VCR would throw an error if this does an external lookup
       # https://www.relishapp.com/vcr/vcr/v/2-9-3/docs/record-modes/none
       expect(result_array[0]).to be_a OA::Graph

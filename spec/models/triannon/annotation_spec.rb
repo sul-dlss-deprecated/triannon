@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Triannon::Annotation, :vcr do
   let(:bookmark_anno) {Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")}
 
-  it "doesn't do external lookup of json_ld context" , :vcr => {:record => :none} do
+  it "doesn't do external lookup of json_ld context", :vcr => {:record => :none} do
     # NOTE:  VCR would throw an error if this does an external lookup
     # https://www.relishapp.com/vcr/vcr/v/2-9-3/docs/record-modes/none
     expect(bookmark_anno.graph).to be_a_kind_of OA::Graph
