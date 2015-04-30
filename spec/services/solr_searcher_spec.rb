@@ -133,7 +133,7 @@ describe Triannon::SolrSearcher, :vcr do
       expect(result_array[1].body_chars).to eq ["I love this!"]
       expect(result_array[1].predicate_urls(RDF::Vocab::OA.hasTarget)).to eq ["http://purl.stanford.edu/kq131cs7229"]
 
-      expect(result_array[2].id_as_url).to match a_string_ending_with"5686cffa-14c1-4aa4-8cef-bf62e9f4ab82"
+      expect(result_array[2].id_as_url).to match a_string_ending_with "5686cffa-14c1-4aa4-8cef-bf62e9f4ab82"
       expect(result_array[2].body_chars).to eq ["testing redirect 2"]
       expect(result_array[2].predicate_urls(RDF::Vocab::OA.hasTarget)).to eq ["http://purl.stanford.edu/oo111oo2222"]
     end
@@ -401,8 +401,8 @@ describe Triannon::SolrSearcher, :vcr do
   end # solr_params
 
   context '.q_terms_for_url' do
-    let (:fldname) { 'url_solr_field' }
-    let (:url) { 'http://myplace.org' }
+    let(:fldname) { 'url_solr_field' }
+    let(:url) { 'http://myplace.org' }
     it "exact match term" do
       expect(Triannon::SolrSearcher.q_terms_for_url(fldname, url)).to include "#{fldname}:#{RSolr.solr_escape(url)}"
       expect(Triannon::SolrSearcher.q_terms_for_url(fldname, "#{url}#foo")).to include "#{fldname}:#{RSolr.solr_escape(url + '#foo')}"

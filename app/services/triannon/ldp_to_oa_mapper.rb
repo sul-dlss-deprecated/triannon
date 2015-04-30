@@ -132,7 +132,7 @@ module Triannon
           if stmt.predicate == RDF::Vocab::OA.hasSource
             # expecting a hash URI
             source_obj = stmt.object
-            if source_obj.to_s.match("#{uri_obj.to_s}#source")
+            if source_obj.to_s.match("#{uri_obj}#source")
               source_has_ext_uri = map_external_ref source_obj, RDF::Vocab::OA.hasSource, blank_node
             end
           elsif stmt.predicate == RDF::Vocab::OA.hasSelector

@@ -20,10 +20,10 @@ require 'rspec/rails'
 require 'capybara/rails'
 require 'capybara/rspec'
 
+=begin
 RSpec.configure do |config|
 # The settings below are suggested to provide a good initial experience
 # with RSpec, but feel free to customize to your heart's content.
-=begin
 
   # Print the 10 slowest examples and example groups at the
   # end of the spec run, to help surface which specs are running
@@ -46,8 +46,8 @@ RSpec.configure do |config|
     # a real object. This is generally recommended.
     mocks.verify_partial_doubles = true
   end
-=end
 end
+=end
 
 module Triannon
   def self.fixture_path path
