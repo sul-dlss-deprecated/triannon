@@ -6,7 +6,7 @@ describe "integration tests for no body", :vcr do
     write_anno = Triannon::Annotation.new data: '{
       "@context": "http://www.w3.org/ns/oa-context-20130208.json",
       "@type": "oa:Annotation",
-      "motivatedBy": "oa:bookmarking", 
+      "motivatedBy": "oa:bookmarking",
       "hasTarget": "http://purl.stanford.edu/kq131cs7229"
     }'
     g = write_anno.graph
@@ -27,5 +27,5 @@ describe "integration tests for no body", :vcr do
     expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.bookmarking]).size).to eql 1
     expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI("http://purl.stanford.edu/kq131cs7229")]).size).to eql 1
   end
-  
+
 end

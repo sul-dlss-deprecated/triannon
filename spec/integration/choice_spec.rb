@@ -31,7 +31,7 @@ describe "integration tests for Choice", :vcr do
          ]
        ];
        openannotation:hasTarget <#{target_url}>;
-       openannotation:motivatedBy openannotation:commenting 
+       openannotation:motivatedBy openannotation:commenting
      ] ."
     g = write_anno.graph
     expect(g.size).to eql 15
@@ -50,7 +50,7 @@ describe "integration tests for Choice", :vcr do
     item_solns = g.query [body_blank_node, RDF::Vocab::OA.item, nil]
     expect(item_solns.count).to eq 1
     item_blank_node = item_solns.first.object
-    
+
     default_node_subject_solns = g.query [default_blank_node, nil, nil]
     expect(default_node_subject_solns.count).to eq 4
     expect(default_node_subject_solns).to include [default_blank_node, RDF.type, RDF::Vocab::DCMIType.Text]
@@ -88,7 +88,7 @@ describe "integration tests for Choice", :vcr do
     item_solns = h.query [body_blank_node, RDF::Vocab::OA.item, nil]
     expect(item_solns.count).to eq 1
     item_blank_node = item_solns.first.object
-    
+
     default_node_subject_solns = h.query [default_blank_node, nil, nil]
     expect(default_node_subject_solns.count).to eq 4
     expect(default_node_subject_solns).to include [default_blank_node, RDF.type, RDF::Vocab::DCMIType.Text]
@@ -127,10 +127,10 @@ describe "integration tests for Choice", :vcr do
           ];
           openannotation:motivatedBy openannotation:commenting
        ] .
-     
+
        <#{body_default_uri}> a dcmitype:Sound;
            dc11:format \"#{body_default_format}\" .
-         
+
        <#{body_item_uri}> a dcmitype:Text;
            dc11:format \"#{body_item_format}\" ."
      g = write_anno.graph
@@ -144,7 +144,7 @@ describe "integration tests for Choice", :vcr do
      body_subj_node_solns = g.query [body_blank_node, nil, nil]
      expect(body_subj_node_solns.count).to eq 3
      expect(body_subj_node_solns).to include [body_blank_node, RDF.type, RDF::Vocab::OA.Choice]
-     
+
      default_uri_obj = RDF::URI.new(body_default_uri)
      expect(g.query([body_blank_node, RDF::Vocab::OA.default, default_uri_obj]).count).to eql 1
      default_solns = g.query [default_uri_obj, nil, nil]
@@ -176,7 +176,7 @@ describe "integration tests for Choice", :vcr do
      body_subj_node_solns = h.query [body_blank_node, nil, nil]
      expect(body_subj_node_solns.count).to eq 3
      expect(body_subj_node_solns).to include [body_blank_node, RDF.type, RDF::Vocab::OA.Choice]
-     
+
      expect(h.query([body_blank_node, RDF::Vocab::OA.default, default_uri_obj]).count).to eql 1
      default_solns = h.query [default_uri_obj, nil, nil]
      expect(default_solns.count).to eq 2
@@ -210,7 +210,7 @@ describe "integration tests for Choice", :vcr do
         ];
         openannotation:motivatedBy openannotation:commenting
      ] .
-     
+
      <#{default_url}> a dcmitype:Text ."
      g = write_anno.graph
      expect(g.size).to eql 8
@@ -293,7 +293,7 @@ describe "integration tests for Choice", :vcr do
      <#{default_url}> a dcmitype:Image .
 
      <#{item1_url}> a dcmitype:Image .
-     
+
      <#{item2_url}> a dcmitype:Image ."
 
      g = write_anno.graph

@@ -40,7 +40,7 @@ describe Triannon::AnnotationLdp, :vcr do
       	 openannotation:hasBody <#{body_url1}>,
       	    <#{body_url2}> .
       ").statements.to_a
-      anno.load_statements_into_graph stmts 
+      anno.load_statements_into_graph stmts
       expect(anno.body_uris.class).to eql Array
       expect(anno.body_uris.size).to eq 2
       expect(anno.body_uris).to include RDF::URI.new(body_url1)
@@ -63,7 +63,7 @@ describe Triannon::AnnotationLdp, :vcr do
          ldp:membershipResource <http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2>;
          openannotation:motivatedBy openannotation:bookmarking .
       ").statements.to_a
-      anno.load_statements_into_graph stmts 
+      anno.load_statements_into_graph stmts
       expect(anno.body_uris).to eql []
     end
   end
@@ -88,7 +88,7 @@ describe Triannon::AnnotationLdp, :vcr do
       	 openannotation:hasTarget <#{target_url1}>,
       	    <#{target_url2}> .
       ").statements.to_a
-      anno.load_statements_into_graph stmts 
+      anno.load_statements_into_graph stmts
       expect(anno.target_uris.class).to eql Array
       expect(anno.target_uris.size).to eq 2
       expect(anno.target_uris).to include RDF::URI.new(target_url1)
@@ -111,7 +111,7 @@ describe Triannon::AnnotationLdp, :vcr do
          ldp:membershipResource <http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2>;
          openannotation:motivatedBy openannotation:bookmarking .
       ").statements.to_a
-      anno.load_statements_into_graph stmts 
+      anno.load_statements_into_graph stmts
       expect(anno.target_uris).to eql []
     end
   end
@@ -149,7 +149,7 @@ describe Triannon::AnnotationLdp, :vcr do
       expect(result.first.subject.to_s).to eql anno.base_uri.to_s
       result = anno.graph.query [nil, RDF::URI.new("http://www.w3.org/ns/ldp#contains"), nil]
       expect(result.size).to eql 2
-      
+
       stripped_graph = anno.stripped_graph
       result = stripped_graph.query [nil, RDF.type, RDF::URI.new("http://www.w3.org/ns/ldp#Container")]
       expect(result.size).to eql 0

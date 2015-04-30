@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "integration tests for Solr", :vcr do
 
   let(:rsolr_client) {RSolr.connect(:url => Triannon.config[:solr_url])}
-  let(:write_anno) { Triannon::Annotation.new data: 
+  let(:write_anno) { Triannon::Annotation.new data:
     "@prefix content: <http://www.w3.org/2011/content#> .
     @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
     @prefix openannotation: <http://www.w3.org/ns/oa#> .
@@ -46,7 +46,7 @@ describe "integration tests for Solr", :vcr do
       expect(solr_doc["anno_jsonld"]).to match "@id\":\".+\""
     end
   end
-  
+
   it 'deletes from Solr' do
     anno_id = write_anno.save
     sleep(1) # give solr time to commit
