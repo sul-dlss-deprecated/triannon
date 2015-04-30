@@ -51,7 +51,7 @@ module Triannon
     # @param [Triannon::Annotation] anno a Triannon::Annotation object
     # @param [String] id the unique id for the LDP container for the passed
     #   annotation; defaults to nil
-    def initialize(anno, id=nil)
+    def initialize(anno, id = nil)
       @anno = anno
       @id = id
       @base_uri = "#{Triannon.config[:ldp]['url']}/#{Triannon.config[:ldp]['uber_container']}"
