@@ -27,7 +27,7 @@ module Triannon
     # @param [String] id the unique id of the annotation.  Can include base_uri prefix or omit it.
     def initialize id = nil
       @id = id
-      @base_uri = Triannon.config[:ldp_url]
+      @base_uri = "#{Triannon.config[:ldp]['url']}/#{Triannon.config[:ldp]['uber_container']}"
       @ldp_annotation = Triannon::AnnotationLdp.new
     end
 

@@ -49,7 +49,7 @@ module Triannon
     def initialize(anno, id=nil)
       @anno = anno
       @id = id
-      @base_uri = Triannon.config[:ldp_url]
+      @base_uri = "#{Triannon.config[:ldp]['url']}/#{Triannon.config[:ldp]['uber_container']}"
     end
 
     # creates a stored LDP container for this object's Annotation, without its targets or bodies (as those are put in descendant containers)

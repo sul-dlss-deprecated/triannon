@@ -98,7 +98,7 @@ namespace :doc do
 
   desc "Remove generated documenation"
   task :clean do
-    rm_r 'rdoc' if File.exists?('rdoc')
+    rm_r 'rdoc' if File.exist?('rdoc')
   end
 end
 Bundler::GemHelper.install_tasks

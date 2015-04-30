@@ -11,7 +11,8 @@ describe Triannon::LdpWriter, :vcr do
        ];
        <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq131cs7229>;
        <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#commenting> .' }
-  let(:conn) { Faraday.new(:url => Triannon.config[:ldp_url]) }
+  let(:triannon_anno_container) {"#{Triannon.config[:ldp]['url']}/#{Triannon.config[:ldp]['uber_container']}"}
+  let(:conn) { Faraday.new(url: triannon_anno_container) }
 
   context 'class methods' do
 
@@ -29,7 +30,7 @@ describe Triannon::LdpWriter, :vcr do
           req.headers['Accept'] = 'application/x-turtle'
         end
         g = RDF::Graph.new.from_ttl(resp.body)
-        full_url = "#{Triannon.config[:ldp_url]}/#{id}"
+        full_url = "#{triannon_anno_container}/#{id}"
         expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
       end
       it 'does not create a body container if there are no bodies' do
@@ -43,7 +44,7 @@ describe Triannon::LdpWriter, :vcr do
       end
       it 'creates a LDP resource for bodies ldp container at (id)/b' do
         pid = Triannon::LdpWriter.create_anno anno
-        container_url = "#{Triannon.config[:ldp_url]}/#{pid}/b"
+        container_url = "#{triannon_anno_container}/#{pid}/b"
         container_resp = conn.get do |req|
           req.url container_url
           req.headers['Accept'] = 'application/x-turtle'
@@ -76,7 +77,7 @@ describe Triannon::LdpWriter, :vcr do
           ]
         }'
         id = Triannon::LdpWriter.create_anno my_anno
-        container_url = "#{Triannon.config[:ldp_url]}/#{id}/b"
+        container_url = "#{triannon_anno_container}/#{id}/b"
         container_resp = conn.get do |req|
           req.url container_url
           req.headers['Accept'] = 'application/x-turtle'
@@ -91,7 +92,7 @@ describe Triannon::LdpWriter, :vcr do
       end
       it 'creates a LDP resource for targets ldp container at (id)/t' do
         pid = Triannon::LdpWriter.create_anno anno
-        container_url = "#{Triannon.config[:ldp_url]}/#{pid}/t"
+        container_url = "#{triannon_anno_container}/#{pid}/t"
         container_resp = conn.get do |req|
           req.url container_url
           req.headers['Accept'] = 'application/x-turtle'
@@ -109,7 +110,7 @@ describe Triannon::LdpWriter, :vcr do
           ]
         }'
         id = Triannon::LdpWriter.create_anno my_anno
-        container_url = "#{Triannon.config[:ldp_url]}/#{id}/t"
+        container_url = "#{triannon_anno_container}/#{id}/t"
         container_resp = conn.get do |req|
           req.url container_url
           req.headers['Accept'] = 'application/x-turtle'

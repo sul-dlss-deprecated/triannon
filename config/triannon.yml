@@ -1,15 +1,38 @@
 development:
-  ldp_url: yer_ldp_store_url_here
-  solr_url: yer_triannon_solr_url_here
+  ldp:
+    url: http://your.ldp_store_url.here
+    # uber_container:  LDP BasicContainer that will have anno containers as members
+    uber_container:  anno
+    # anno_containers:  LDP BasicContainers that will have individual annotations as members
+    #  the container names here will also map to paths in the triannon url, e.g.
+    #  "foo" here will mean you add a foo anno by POST to http://your.triannon-server.com/annotations/foo
+    #  and you get the foo anno by GET to http://your.triannon-server.com/annotations/foo/(anno_uuid)
+    anno_containers:
+      - foo
+      - blah
+  solr_url: http://your.triannon_solr_url.here
+  # triannon_base_url:  the prefix for the urls for your annos
   triannon_base_url: http://your.triannon-server.com/annotations/
   max_solr_retries: 5
   base_sleep_seconds: 1
   max_sleep_seconds: 5
+
 test: &test
-  ldp_url: yer_ldp_url_here
-  solr_url: yer_triannon_solr_url_here
+  ldp:
+    url: http://your.ldp_store_url.here
+    uber_container:  anno
+    anno_containers:
+      - foo
+      - blah
+  solr_url: http://your.triannon_solr_url.here
   triannon_base_url: http://your.triannon-server.com/annotations/
+
 production:
-  ldp_url: yer_ldp_url_here
-  solr_url: yer_triannon_solr_url_here
+  ldp:
+    url: http://your.ldp_store_url.here
+    uber_container:  anno
+    anno_containers:
+      - foo
+      - blah
+  solr_url: http://your.triannon_solr_url.here
   triannon_base_url: http://your.triannon-server.com/annotations/
