@@ -13,4 +13,5 @@ describe Triannon::Annotation do
     def model
       subject
     end
+
 end

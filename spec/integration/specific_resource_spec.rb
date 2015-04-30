@@ -540,11 +540,11 @@ describe "integration tests for SpecificResource", :vcr do
     expect(sel_contents_solns).to include [selector_blank_node, RDF.value, frag_value]
   end
 
-#  it "DataPositionSelector" do
-#    skip 'DataPositionSelector not yet implemented'
-#  end
-#  it "SvgSelector" do
-#    skip 'SvgSelector not yet implemented'
-#  end
+  #it "DataPositionSelector" do
+  #  skip 'DataPositionSelector not yet implemented'
+  #end
+  #it "SvgSelector" do
+  #  skip 'SvgSelector not yet implemented'
+  #end
 
 end

@@ -363,4 +363,5 @@ describe "integration tests for Choice", :vcr do
   it "Choice as object of hasSelector" do
     skip 'need to implement Choice for hasSelector (does this test belong in SpecificResource?)'
   end
+
 end

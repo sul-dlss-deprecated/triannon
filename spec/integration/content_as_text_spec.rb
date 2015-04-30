@@ -174,4 +174,5 @@ describe "integration tests for content as text", :vcr do
     expect(h.query([body_node2, RDF.type, RDF::Vocab::DCMIType.Text]).size).to eql 1
     expect(h.query([body_node2, RDF::Vocab::CNT.chars, RDF::Literal.new(body_text2)]).size).to eql 1
   end
+
 end

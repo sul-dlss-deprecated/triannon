@@ -59,4 +59,5 @@ describe "integration tests for Solr", :vcr do
     solr_resp = rsolr_client.get 'doc', :params => {:id => anno_id}
     expect(solr_resp["response"]["numFound"]).to eq 0
   end
+
 end
