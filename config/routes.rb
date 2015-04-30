@@ -7,7 +7,7 @@ Triannon::Engine.routes.draw do
     constraints: lambda { |request|
                             id = request.env["action_dispatch.request.path_parameters"][:id]
                             id !~ /^iiif$/ && id !~ /^oa$/ && id !~ /^search$/
-                        } do
+                 } do
     collection do
       get 'search', to: 'search#find'
     end
@@ -26,6 +26,6 @@ Triannon::Engine.routes.draw do
                           jsonld_context = request.env["action_dispatch.request.path_parameters"][:jsonld_context]
                           id = request.env["action_dispatch.request.path_parameters"][:id]
                           (jsonld_context =~ /^iiif$/ || jsonld_context =~ /^oa$/ ) && id !~ /^new$/
-                      }
+                 }
 
 end
