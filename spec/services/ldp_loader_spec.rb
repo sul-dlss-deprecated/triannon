@@ -200,7 +200,7 @@ describe Triannon::LdpLoader, :vcr do
   end
 
   describe '#get_ttl' do
-    # TODO these tests are brittle since they stubs the whole http interaction with faraday objects
+    # TODO: these tests are brittle since they stubs the whole http interaction with faraday objects
     it "retrieves data via HTTP over LdpLoader.conn when given an id" do
       resp = double()
       allow(resp).to receive(:status).and_return(200)
