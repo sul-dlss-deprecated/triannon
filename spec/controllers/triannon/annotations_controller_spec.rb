@@ -12,7 +12,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
   context '#index' do
     it "redirects to search#find with no params" do
       get :index
-      expect(response).to redirect_to ('/search')
+      expect(response).to redirect_to('/search')
     end
     it "response code of 302 due to redirect" do
       get :index
@@ -21,7 +21,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
   end
 
   context "#create" do
-    let (:ttl_data) {Triannon.annotation_fixture("body-chars.ttl")}
+    let(:ttl_data) {Triannon.annotation_fixture("body-chars.ttl")}
     it 'creates a new annotation from the body of the request' do
       post :create, ttl_data
       expect(response.status).to eq 201

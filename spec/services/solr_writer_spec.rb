@@ -52,7 +52,7 @@ describe Triannon::SolrWriter, :vcr do
   end
 
   context '#add' do
-    let (:doc_hash) { {:id => '666'} }
+    let(:doc_hash) { {:id => '666'} }
     it "calls RSolr::Client.add with hash and commitWithin=500" do
       expect_any_instance_of(RSolr::Client).to receive(:add).with(doc_hash, :add_attributes => {:commitWithin=> 500})
       solr_writer.add(doc_hash)

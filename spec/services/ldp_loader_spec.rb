@@ -14,7 +14,6 @@ describe Triannon::LdpLoader, :vcr do
       expect(result).to be_an_instance_of(OA::Graph)
       root_node_solns = result.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
       expect(root_node_solns.count).to eql 1
-      root_node = root_node_solns.first.subject
       # no LDP
       expect(result.query([nil, RDF.type, RDF::URI("http://www.w3.org/ns/ldp#Container")]).size).to eql 0
       # no Fcrepo4

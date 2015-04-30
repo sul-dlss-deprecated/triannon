@@ -134,7 +134,7 @@ module Triannon
     def find(controller_params)
       solr_params = self.class.solr_params(controller_params)
       solr_response = search(solr_params)
-      anno_graphs_array = self.class.anno_graphs_array(solr_response)
+      self.class.anno_graphs_array(solr_response)
     end
 
 
