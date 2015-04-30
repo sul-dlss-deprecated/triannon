@@ -138,13 +138,13 @@ describe Triannon::AnnotationsController, type: :routing do
 
   context '/search' do
     it "/annotations/search?params (GET) routes to #find in search controller with params" do
-      expect(:get => "/annotations/search?target=neato.url.org").to route_to(:controller => "triannon/search", :action => "find", :target => "neato.url.org", )
-      expect(:get => "/annotations/search?foo=bar").to route_to(:controller => "triannon/search", :action => "find", :foo => "bar", )
-      expect(:get => "/annotations/search").to route_to(:controller => "triannon/search", :action => "find" )
+      expect(:get => "/annotations/search?target=neato.url.org").to route_to(:controller => "triannon/search", :action => "find", :target => "neato.url.org")
+      expect(:get => "/annotations/search?foo=bar").to route_to(:controller => "triannon/search", :action => "find", :foo => "bar")
+      expect(:get => "/annotations/search").to route_to(:controller => "triannon/search", :action => "find")
     end
     it "/search?params (GET) routes to #find in search controller with params" do
-      expect(:get => "/search?target=neato.url.org").to route_to(:controller => "triannon/search", :action => "find", :target => "neato.url.org", )
-      expect(:get => "/search?foo=bar").to route_to(:controller => "triannon/search", :action => "find", :foo => "bar", )
+      expect(:get => "/search?target=neato.url.org").to route_to(:controller => "triannon/search", :action => "find", :target => "neato.url.org")
+      expect(:get => "/search?foo=bar").to route_to(:controller => "triannon/search", :action => "find", :foo => "bar")
     end
     it "does not take an id" do
       expect(:get => "/annotations/search/666").to_not be_routable
