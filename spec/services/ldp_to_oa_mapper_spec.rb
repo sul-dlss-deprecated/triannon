@@ -21,7 +21,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       oa_graph = Triannon::LdpToOaMapper.ldp_to_oa ldp_anno
 
       expect(oa_graph).to be_a OA::Graph
-      resp = oa_graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation ]
+      resp = oa_graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
       expect(resp.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/deb27887-1241-4ccc-a09c-439293d73fbb"
     end
     it "calls #extract_base" do

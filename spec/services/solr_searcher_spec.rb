@@ -349,8 +349,8 @@ describe Triannon::SolrSearcher, :vcr do
         raw_value = "a!b[c|d]"
         expect(RSolr).to receive(:solr_escape).with(raw_value).and_call_original
         solr_params = Triannon::SolrSearcher.solr_params('motivatedBy' => raw_value)
-        expect(solr_params).not_to include :fq => [ (a_string_ending_with(raw_value))]
-        expect(solr_params).to include :fq => [ a_string_ending_with("a\\!b\\[c\\|d\\]") ]
+        expect(solr_params).not_to include :fq => [(a_string_ending_with(raw_value))]
+        expect(solr_params).to include :fq => [a_string_ending_with("a\\!b\\[c\\|d\\]")]
       end
       it "param key not case sensitive" do
         ['motivatedBy', 'motivatedby', 'MotivatedBy'].each { |str|
