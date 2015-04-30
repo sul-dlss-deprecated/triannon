@@ -155,7 +155,7 @@ private
     # render json_ld respecting requested context
     # @param [String] req_context set to "iiif" or "oa".  Default is oa
     # @param [String] mime_type the mime type to be set in the Content-Type header of the HTTP response
-    def render_jsonld_per_context (req_context, mime_type = nil)
+    def render_jsonld_per_context(req_context, mime_type = nil)
       case req_context
         when "iiif", "IIIF"
           if mime_type
