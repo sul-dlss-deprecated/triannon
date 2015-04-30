@@ -33,7 +33,8 @@ describe "integration tests for Solr", :vcr do
       expect(Time.parse(solr_doc["timestamp"])).to be_a Time
       # all fields in orig solr_hash are stored fields and will be in solr response
       write_solr_hash.each_pair { |k,v|
-        expect(solr_doc[k.to_s]).to eq v unless k = :id || v = nil
+        # :id isn't set before, which is also a factor in :anno_jsonld value
+        expect(solr_doc[k.to_s]).to eq v unless (k == :id || k == :anno_jsonld || v.blank?)
       }
     end
     it "has non-empty id value for outer node of anno_jsonld" do
