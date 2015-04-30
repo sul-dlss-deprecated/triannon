@@ -4,7 +4,8 @@ module Triannon
   class LdpWriter
 
     # use LDP protocol to create the OpenAnnotation.Annotation in an RDF store
-    # @param [Triannon::Annotation] anno a Triannon::Annotation object, from which we use the graph
+    # @param [Triannon::Annotation] anno a Triannon::Annotation object, from
+    #   which we use the graph
     def self.create_anno(anno)
       if anno && anno.graph
         # TODO:  special case if the Annotation object already has an id --
@@ -29,10 +30,13 @@ module Triannon
       end
     end
 
-    # deletes the indicated container and all its child containers from the LDP store
-    # @param [String] id the unique id for the LDP container for an annotation
-    #  May be a compound id, such as  uuid1/t/uuid2, in which case the LDP container object uuid2 and its children
-    #  are deleted from the LDP store, but LDP containers  uuid1/t  and uuid1  are not deleted from the LDP store.
+    # deletes the indicated container and all its child containers from the LDP
+    #   store
+    # @param [String] id the unique id for the LDP container for an annotation.
+    #   May be a compound id, such as  uuid1/t/uuid2, in which case the LDP
+    #   container object uuid2 and its children are deleted from the LDP
+    #   store, but LDP containers  uuid1/t  and uuid1  are not deleted from
+    #   the LDP store.
     def self.delete_container id
       if id && id.size > 0
         ldpw = Triannon::LdpWriter.new nil
@@ -45,16 +49,19 @@ module Triannon
     end
 
     # @param [Triannon::Annotation] anno a Triannon::Annotation object
-    # @param [String] id the unique id for the LDP container for the passed annotation; defaults to nil
+    # @param [String] id the unique id for the LDP container for the passed
+    #   annotation; defaults to nil
     def initialize(anno, id=nil)
       @anno = anno
       @id = id
       @base_uri = "#{Triannon.config[:ldp]['url']}/#{Triannon.config[:ldp]['uber_container']}"
     end
 
-    # creates a stored LDP container for this object's Annotation, without its targets or bodies (as those are put in descendant containers)
+    # creates a stored LDP container for this object's Annotation, without its
+    #   targets or bodies (as those are put in descendant containers)
     #   SIDE EFFECT:  assigns the uuid of the container created to @id
-    # @return [String] the unique id for the LDP container created for this annotation
+    # @return [String] the unique id for the LDP container created for this
+    #   annotation
     def create_base
       if @anno.graph.query([nil, RDF::Triannon.externalReference, nil]).count > 0
         raise Triannon::ExternalReferenceError, "Incoming annotations may not have http://triannon.stanford.edu/ns/externalReference as a predicate."
@@ -99,8 +106,9 @@ module Triannon
       create_resources_in_container RDF::Vocab::OA.hasTarget
     end
 
-    # @param [Array<String>] ldp_container_uris an Array of ids for LDP containers.  (can also be a String)
-    #  e.g. [@base_uri/(uuid1)/t/(uuid2), @base_uri/(uuid1)/t/(uuid3)] or [@base_uri/(uuid)] or (uuid)
+    # @param [Array<String>] ldp_container_uris an Array of ids for LDP
+    #   containers.  (can also be a String)  e.g. [@base_uri/(uuid1)/t/(uuid2),
+    #   @base_uri/(uuid1)/t/(uuid3)] or [@base_uri/(uuid)] or (uuid)
     # @return true if a resource was deleted;  false otherwise
     def delete_containers ldp_container_uris
       return false if !ldp_container_uris || ldp_container_uris.empty?
@@ -121,13 +129,18 @@ module Triannon
 
   protected
 
-    # POSTS a ttl representation of a graph to an existing LDP container in the LDP store
-    # @param [String] ttl a turtle representation of RDF data to be put in the LDP container
-    # @param [String] parent_path the path portion of the url for the LDP parent container for this resource
-    #   if no path is supplied, then the resource will be created as a child of the root annotation;
-    #   expected paths would also be (anno_id)/t  for a target resource (inside the target container of anno_id)
-    #   or (anno_id)/b for a body resource (inside the body container of anno_id)
-    # @return [String] uuid representing the unique id of the newly created LDP container
+    # POSTS a ttl representation of a graph to an existing LDP container in the
+    #   LDP store
+    # @param [String] ttl a turtle representation of RDF data to be put in the
+    #   LDP container
+    # @param [String] parent_path the path portion of the url for the LDP parent
+    #   container for this resource if no path is supplied, then the resource
+    #   will be created as a child of the root annotation; expected paths would
+    #   also be (anno_id)/t  for a target resource (inside the target container
+    #   of anno_id) or (anno_id)/b for a body resource (inside the body
+    #   container of anno_id)
+    # @return [String] uuid representing the unique id of the newly created LDP
+    #   container
     def create_resource ttl, parent_path = nil
       return if !ttl || ttl.empty?
       resp = conn.post do |req|
@@ -142,9 +155,12 @@ module Triannon
       new_url.split('/').last if new_url
     end
 
-    # Creates an empty LDP DirectContainer in LDP Storage that is a member of the base container and has the memberRelation per the oa_vocab_term
-    # The id of the created containter will be (base container id)/b  if hasBody or  (base container id)/t  if hasTarget
-    # @param [RDF::Vocabulary::Term] oa_vocab_term RDF::Vocab::OA.hasTarget or RDF::Vocab::OA.hasBody
+    # Creates an empty LDP DirectContainer in LDP Storage that is a member of
+    #   the base container at @id and has the memberRelation per the
+    #   oa_vocab_term. The id of the created containter will be (base container
+    #   id)/b  if hasBody or  (base container id)/t  if hasTarget
+    # @param [RDF::Vocabulary::Term] oa_vocab_term RDF::Vocab::OA.hasTarget or
+    #   RDF::Vocab::OA.hasBody
     def create_direct_container oa_vocab_term
       null_rel_uri = RDF::URI.new
       g = RDF::Graph.new
@@ -165,8 +181,10 @@ module Triannon
       resp
     end
 
-    # create the target/body resources inside the (already created) target/body container
-    # @param [RDF::URI] predicate either RDF::Vocab::OA.hasTarget or RDF::Vocab::OA.hasBody
+    # create the target/body resources inside the (already created) target/body
+    #   container
+    # @param [RDF::URI] predicate either RDF::Vocab::OA.hasTarget or
+    #   RDF::Vocab::OA.hasBody
     def create_resources_in_container(predicate)
       predicate_solns = @anno.graph.query([nil, predicate, nil])
       resource_ids = []
@@ -174,11 +192,13 @@ module Triannon
         graph_for_resource = RDF::Graph.new
         predicate_obj = predicate_stmt.object
         if predicate_obj.is_a?(RDF::Node)
-          # we need to use the null relative URI representation of blank nodes to write to LDP
+          # we need to use the null relative URI representation of blank nodes
+          # to write to LDP
           predicate_subject = RDF::URI.new
         else
-          # it's already a URI, but we need to use the null relative URI representation so we can
-          # write out as a Triannon:externalRef property with the URL, and any addl props too.
+          # it's already a URI, but we need to use the null relative URI
+          # representation so we can write out as a Triannon:externalRef
+          # property with the URL, and any addl props too.
           if predicate_obj.to_str
             predicate_subject = RDF::URI.new
             graph_for_resource << RDF::Statement({:subject => predicate_subject,
@@ -201,9 +221,11 @@ module Triannon
         OA::Graph.subject_statements(predicate_obj, @anno.graph).each { |s|
           if s.subject == predicate_obj
             # deal with any external URI references which may occur in:
-            #  OA.hasSource (from SpecificResource), OA.default or OA.item (from Choice, Composite, List)
+            #   OA.hasSource (from SpecificResource), OA.default or
+            #   OA.item (from Choice, Composite, List)
             if s.object.is_a?(RDF::URI) && s.object.to_s
-              # do we need to represent the URL as an externalReference with hash URI
+              # do we need to represent the URL as an externalReference
+              #   with hash URI?
               if s.predicate == RDF::Vocab::OA.hasSource
                 hash_uri_str = "#source"
               elsif s.predicate == RDF::Vocab::OA.default
@@ -224,7 +246,7 @@ module Triannon
                 new_hash_uri_obj = RDF::URI.new(hash_uri_str)
                 orig_hash_uri_obj = s.object
                 orig_hash_uri_objs << orig_hash_uri_obj
-                # add [targetObj, OA.hasSource/.default/.item, (hash URI)] triple to graph
+                # add [targetObj, OA.hasSource/.default/.item, (hash URI)]
                 graph_for_resource << RDF::Statement({:subject => predicate_subject,
                                                       :predicate => s.predicate,
                                                       :object => new_hash_uri_obj})
@@ -246,7 +268,8 @@ module Triannon
               end
               # NOTE: already dealt with case where there is no hash uri above
             else
-              # s.object is not a URI, and subject = predicate_subject -- it may be a blank node
+              # s.object is not a URI, and subject = predicate_subject -- it may
+              #   be a blank node
               graph_for_resource << RDF::Statement({:subject => predicate_subject,
                                                     :predicate => s.predicate,
                                                     :object => s.object})
@@ -256,8 +279,8 @@ module Triannon
             graph_for_resource << s
           end
         }
-        # make sure the graph we will write contains no extraneous statements about URIs
-        #  now represented as hash URIs
+        # make sure the graph we will write contains no extraneous statements
+        #   about URIs now represented as hash URIs
         orig_hash_uri_objs.each { |uri_node|
           OA::Graph.subject_statements(uri_node, graph_for_resource).each { |s|
             graph_for_resource.delete(s)
