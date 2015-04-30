@@ -86,7 +86,7 @@ module Triannon
         req.headers['Accept'] = 'application/x-turtle'
       end
       if resp.status.between?(400, 600)
-        raise Triannon::LDPStorageError.new("error getting #{sub_path} from LDP", resp.status, resp.body)
+        fail Triannon::LDPStorageError.new("error getting #{sub_path} from LDP", resp.status, resp.body)
       else
         resp.body
       end

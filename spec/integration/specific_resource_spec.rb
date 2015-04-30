@@ -141,7 +141,7 @@ describe "integration tests for SpecificResource", :vcr do
     expect(sel_contents_solns).to include [selector_blank_node, RDF::DC.conformsTo, RDF::URI(conforms_to_url)]
     expect(sel_contents_solns).to include [selector_blank_node, RDF.value, frag_value]
   end
-  
+
   it "target is TextPositionSelector" do
     body_url = "http://dbpedia.org/resource/Otto_Ege"
     source_url = "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg"
@@ -539,12 +539,12 @@ describe "integration tests for SpecificResource", :vcr do
     expect(sel_contents_solns).to include [selector_blank_node, RDF::DC.conformsTo, RDF::URI(conforms_to_url)]
     expect(sel_contents_solns).to include [selector_blank_node, RDF.value, frag_value]
   end
-  
-#  it "DataPositionSelector" do
-#    skip 'DataPositionSelector not yet implemented'
-#  end
-#  it "SvgSelector" do
-#    skip 'SvgSelector not yet implemented'
-#  end
+
+  #it "DataPositionSelector" do
+  #  skip 'DataPositionSelector not yet implemented'
+  #end
+  #it "SvgSelector" do
+  #  skip 'SvgSelector not yet implemented'
+  #end
 
 end

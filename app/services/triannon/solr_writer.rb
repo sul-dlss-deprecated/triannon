@@ -75,9 +75,9 @@ module Triannon
         @logger.debug "#{exception.inspect} on Solr add attempt #{attempt_cnt} for #{id}"
         if exception.kind_of?(RSolr::Error::Http)
           # Note there are extra shenanigans b/c RSolr hijacks the Solr error to return RSolr Error
-          raise Triannon::SearchError.new("error adding doc #{id} to Solr #{doc.inspect}; #{exception.message}", exception.response[:status], exception.response[:body])
+          fail Triannon::SearchError.new("error adding doc #{id} to Solr #{doc.inspect}; #{exception.message}", exception.response[:status], exception.response[:body])
         elsif exception.kind_of?(StandardError)
-          raise Triannon::SearchError.new("error adding doc #{id} to Solr #{doc.inspect}; #{exception.message}")
+          fail Triannon::SearchError.new("error adding doc #{id} to Solr #{doc.inspect}; #{exception.message}")
         end
       end
 
@@ -101,9 +101,9 @@ module Triannon
         @logger.debug "#{exception.inspect} on Solr delete attempt #{attempt_cnt} for #{id}"
         if exception.kind_of?(RSolr::Error::Http)
           # Note there are extra shenanigans b/c RSolr hijacks the Solr error to return RSolr Error
-          raise Triannon::SearchError.new("error deleting doc #{id} from Solr: #{exception.message}", exception.response[:status], exception.response[:body])
+          fail Triannon::SearchError.new("error deleting doc #{id} from Solr: #{exception.message}", exception.response[:status], exception.response[:body])
         elsif exception.kind_of?(StandardError)
-          raise Triannon::SearchError.new("error deleting doc #{id} from Solr: #{exception.message}")
+          fail Triannon::SearchError.new("error deleting doc #{id} from Solr: #{exception.message}")
         end
       end
 

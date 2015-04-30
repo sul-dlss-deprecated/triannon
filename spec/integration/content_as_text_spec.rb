@@ -5,7 +5,7 @@ describe "integration tests for content as text", :vcr do
   it 'body is blank node with content as text' do
     body_text = "I love this!"
     target_uri = "http://purl.stanford.edu/kq131cs7229"
-    write_anno = Triannon::Annotation.new data: 
+    write_anno = Triannon::Annotation.new data:
     "@prefix content: <http://www.w3.org/2011/content#> .
     @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
     @prefix openannotation: <http://www.w3.org/ns/oa#> .
@@ -43,7 +43,7 @@ describe "integration tests for content as text", :vcr do
     anno_uri_obj = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
     expect(h.query([anno_uri_obj, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
     expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1 
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1
     body_solns = h.query([anno_uri_obj, RDF::Vocab::OA.hasBody, nil])
     expect(body_solns.size).to eql 1
     body_node = body_solns.first.object
@@ -51,13 +51,13 @@ describe "integration tests for content as text", :vcr do
     expect(h.query([body_node, RDF.type, RDF::Vocab::DCMIType.Text]).size).to eql 1
     expect(h.query([body_node, RDF::Vocab::CNT.chars, RDF::Literal.new(body_text)]).size).to eql 1
   end
-  
+
   it 'body is blank node with content as text w diff triples' do
     body_text = "I love this!"
     body_format = "text/plain"
     body_lang = "en"
     target_uri = "http://purl.stanford.edu/kq131cs7229"
-    write_anno = Triannon::Annotation.new data: 
+    write_anno = Triannon::Annotation.new data:
     "@prefix content: <http://www.w3.org/2011/content#> .
     @prefix dc11: <http://purl.org/dc/elements/1.1/> .
     @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
@@ -100,7 +100,7 @@ describe "integration tests for content as text", :vcr do
     anno_uri_obj = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
     expect(h.query([anno_uri_obj, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
     expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1 
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1
     body_solns = h.query([anno_uri_obj, RDF::Vocab::OA.hasBody, nil])
     expect(body_solns.size).to eql 1
     body_node = body_solns.first.object
@@ -115,7 +115,7 @@ describe "integration tests for content as text", :vcr do
     body_text1 = "I love this!"
     body_text2 = "I hate this!"
     target_uri = "http://purl.stanford.edu/kq131cs7229"
-    write_anno = Triannon::Annotation.new data: 
+    write_anno = Triannon::Annotation.new data:
     "@prefix content: <http://www.w3.org/2011/content#> .
     @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
     @prefix openannotation: <http://www.w3.org/ns/oa#> .
@@ -162,7 +162,7 @@ describe "integration tests for content as text", :vcr do
     anno_uri_obj = RDF::URI("#{Triannon.config[:triannon_base_url]}/#{id}")
     expect(h.query([anno_uri_obj, RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
     expect(h.query([anno_uri_obj, RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
-    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1 
+    expect(h.query([anno_uri_obj, RDF::Vocab::OA.hasTarget, RDF::URI(target_uri)]).size).to eql 1
     body_solns = h.query([anno_uri_obj, RDF::Vocab::OA.hasBody, nil])
     expect(body_solns.size).to eql 2
     body_node1 = body_solns.first.object
@@ -174,4 +174,5 @@ describe "integration tests for content as text", :vcr do
     expect(h.query([body_node2, RDF.type, RDF::Vocab::DCMIType.Text]).size).to eql 1
     expect(h.query([body_node2, RDF::Vocab::CNT.chars, RDF::Literal.new(body_text2)]).size).to eql 1
   end
+
 end

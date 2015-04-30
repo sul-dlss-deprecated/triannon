@@ -355,7 +355,6 @@ describe Triannon::LdpWriter, :vcr do
         }
       end
     end
-
   end # delete_containers
 
 end

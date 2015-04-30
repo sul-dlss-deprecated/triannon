@@ -4,7 +4,7 @@ describe Triannon::Annotation do
   include ActiveModel::Lint::Tests
 
     # to_s is to support ruby-1.9
-    ActiveModel::Lint::Tests.public_instance_methods.map{|m| m.to_s}.grep(/^test/).each do |m|
+    ActiveModel::Lint::Tests.public_instance_methods.map {|m| m.to_s}.grep(/^test/).each do |m|
       example m.gsub('_',' ') do
         send m
       end
@@ -13,4 +13,5 @@ describe Triannon::Annotation do
     def model
       subject
     end
+
 end

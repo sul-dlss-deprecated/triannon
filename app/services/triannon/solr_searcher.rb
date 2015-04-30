@@ -149,9 +149,9 @@ module Triannon
         @logger.debug "#{exception.inspect} on Solr search attempt #{attempt_cnt} for #{solr_params.inspect}"
         if exception.kind_of?(RSolr::Error::Http)
           # Note there are extra shenanigans b/c RSolr hijacks the Solr error to return RSolr Error
-          raise Triannon::SearchError.new("error searching Solr with params #{solr_params.inspect}: #{exception.message}", exception.response[:status], exception.response[:body])
+          fail Triannon::SearchError.new("error searching Solr with params #{solr_params.inspect}: #{exception.message}", exception.response[:status], exception.response[:body])
         elsif exception.kind_of?(StandardError)
-          raise Triannon::SearchError.new("error searching Solr with params #{solr_params.inspect}: #{exception.message}")
+          fail Triannon::SearchError.new("error searching Solr with params #{solr_params.inspect}: #{exception.message}")
         end
       end
 

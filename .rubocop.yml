@@ -2,8 +2,25 @@ inherit_from: .rubocop_todo.yml
 
 require: rubocop-rspec
 
-Style/BlockDelimiters:
+#Metrics/AbcSize:
+#  Max: 20
+
+#Metrics/ClassLength:
+#  CountComments: false  # count full line comments?
+#  Max: 150
+
+#Metrics/LineLength:
+#  Max: 120
+
+#Metrics/MethodLength:
+#  CountComments: false  # count full line comments?
+#  Max: 25
+
+RSpec/DescribedClass:
   Enabled: false
+
+#Style/BlockDelimiters:
+#  Enabled: false
 
 Style/CollectionMethods:
   Enabled: true
@@ -26,19 +43,5 @@ Style/RegexpLiteral:
 Style/StringLiterals:
   Enabled: false
 
-Metrics/AbcSize:
-  Max: 20
-
-Metrics/ClassLength:
-  CountComments: false  # count full line comments?
-  Max: 150
-
-#Metrics/LineLength:
-#  Max: 180
-
-Metrics/MethodLength:
-  CountComments: false  # count full line comments?
-  Max: 20
-
-RSpec/DescribedClass:
+Style/WordArray:
   Enabled: false

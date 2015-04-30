@@ -24,9 +24,11 @@ module RdfResponseFormats
     end
   end
 
-  # parse the Accept HTTP header for the value of profile if it is a request for jsonld or json
-  # e.g. Accept: application/ld+json; profile="http://www.w3.org/ns/oa-context-20130208.json"
-  # @return [String] url for jsonld @context or nil if missing or non-jsonld/json format
+  # parse the Accept HTTP header for the value of profile if it is a request for
+  #   jsonld or json.
+  #  e.g. Accept: application/ld+json; profile="http://www.w3.org/ns/oa-context-20130208.json"
+  # @return [String] url for jsonld @context or nil if missing or
+  #   non-jsonld/json format
   def context_url_from_accept
     if request.format == "jsonld" || request.format == "json"
       accept_str = request.accept
@@ -46,10 +48,12 @@ module RdfResponseFormats
     end
   end
 
-  # parse the Accept HTTP Link for the value of rel if it is a request for jsonld or json
+  # parse the Accept HTTP Link for the value of rel if it is a request for
+  #   jsonld or json
   # e.g. Link: http://www.w3.org/ns/oa.json; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"
   # note that the "type" part is optional
-  # @return [String] url for jsonld @context or nil if missing or non-jsonld/json format
+  # @return [String] url for jsonld @context or nil if missing or
+  #   non-jsonld/json format
   def context_url_from_link
     if request.format == "jsonld" || request.format == "json"
       link_str = request.headers["Link"]
@@ -66,7 +70,5 @@ module RdfResponseFormats
       end
     end
   end
-
-
 
 end

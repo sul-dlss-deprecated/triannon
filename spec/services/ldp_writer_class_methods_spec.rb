@@ -123,7 +123,7 @@ describe Triannon::LdpWriter, :vcr do
         expect { Triannon::LdpWriter.create anno }.to raise_error
       end
     end # *create_anno
-  
+
     context "deleting" do
       shared_examples_for 'ldp container deleted' do | method_name |
         it 'calls instance method delete_containers' do
@@ -132,7 +132,7 @@ describe Triannon::LdpWriter, :vcr do
           Triannon::LdpWriter.send(method_name, ldp_id)
         end
       end
-      
+
       context '*delete_container' do
         it_behaves_like "ldp container deleted", :delete_container
       end
@@ -140,7 +140,7 @@ describe Triannon::LdpWriter, :vcr do
         it_behaves_like "ldp container deleted", :delete_anno
       end
     end
-    
+
   end # class methods
 
 end

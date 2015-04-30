@@ -1,6 +1,6 @@
 require 'rdf'
 module RDF
-  # contains RDF predefined terms and properties for Triannon 
+  # contains RDF predefined terms and properties for Triannon
   class Triannon < RDF::StrictVocabulary("http://triannon.stanford.edu/ns/")
 
     # Property definitions

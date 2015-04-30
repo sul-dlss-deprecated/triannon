@@ -60,7 +60,7 @@ module Triannon
     end
 
     def persisted?
-      self.id.present?
+      id.present?
     end
 
     def graph

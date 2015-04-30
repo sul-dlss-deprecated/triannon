@@ -137,7 +137,7 @@ describe Triannon::SolrSearcher, :vcr do
       expect(result_array[2].body_chars).to eq ["testing redirect 2"]
       expect(result_array[2].predicate_urls(RDF::Vocab::OA.hasTarget)).to eq ["http://purl.stanford.edu/oo111oo2222"]
     end
-    it "doesn't do external lookup of json_ld context" , :vcr => {:record => :none} do
+    it "doesn't do external lookup of json_ld context", :vcr => {:record => :none} do
       # NOTE:  VCR would throw an error if this does an external lookup
       # https://www.relishapp.com/vcr/vcr/v/2-9-3/docs/record-modes/none
       expect(result_array[0]).to be_a OA::Graph
@@ -349,8 +349,8 @@ describe Triannon::SolrSearcher, :vcr do
         raw_value = "a!b[c|d]"
         expect(RSolr).to receive(:solr_escape).with(raw_value).and_call_original
         solr_params = Triannon::SolrSearcher.solr_params('motivatedBy' => raw_value)
-        expect(solr_params).not_to include :fq => [ (a_string_ending_with(raw_value))]
-        expect(solr_params).to include :fq => [ a_string_ending_with("a\\!b\\[c\\|d\\]") ]
+        expect(solr_params).not_to include :fq => [(a_string_ending_with(raw_value))]
+        expect(solr_params).to include :fq => [a_string_ending_with("a\\!b\\[c\\|d\\]")]
       end
       it "param key not case sensitive" do
         ['motivatedBy', 'motivatedby', 'MotivatedBy'].each { |str|
