@@ -64,11 +64,11 @@ module Triannon
     #   annotation
     def create_base
       if @anno.graph.query([nil, RDF::Triannon.externalReference, nil]).count > 0
-        raise Triannon::ExternalReferenceError, "Incoming annotations may not have http://triannon.stanford.edu/ns/externalReference as a predicate."
+        fail Triannon::ExternalReferenceError, "Incoming annotations may not have http://triannon.stanford.edu/ns/externalReference as a predicate."
       end
 
       if @anno.graph.id_as_url && @anno.graph.id_as_url.size > 0
-        raise Triannon::ExternalReferenceError, "Incoming new annotations may not have an existing id (yet)."
+        fail Triannon::ExternalReferenceError, "Incoming new annotations may not have an existing id (yet)."
       end
 
       # TODO:  special case if the Annotation object already has an id --
@@ -120,7 +120,7 @@ module Triannon
         ldp_id = uri.to_s.split(@base_uri + '/').last
         resp = conn.delete { |req| req.url ldp_id }
         if resp.status != 204
-          raise Triannon::LDPStorageError.new("Unable to delete LDP container #{ldp_id}", resp.status, resp.body)
+          fail Triannon::LDPStorageError.new("Unable to delete LDP container #{ldp_id}", resp.status, resp.body)
         end
         something_deleted = true
       }
@@ -149,7 +149,7 @@ module Triannon
         req.body = ttl
       end
       if resp.status != 200 && resp.status != 201
-        raise Triannon::LDPStorageError.new("Unable to create LDP resource in container #{parent_path}; RDF sent: #{ttl}", resp.status, resp.body)
+        fail Triannon::LDPStorageError.new("Unable to create LDP resource in container #{parent_path}; RDF sent: #{ttl}", resp.status, resp.body)
       end
       new_url = resp.headers['Location'] ? resp.headers['Location'] : resp.headers['location']
       new_url.split('/').last if new_url
@@ -176,7 +176,7 @@ module Triannon
         req.body = g.to_ttl
       end
       if resp.status != 201
-        raise Triannon::LDPStorageError.new("Unable to create #{oa_vocab_term.fragment.sub('has', '')} LDP container for anno; RDF sent: #{g.to_ttl}", resp.status, resp.body)
+        fail Triannon::LDPStorageError.new("Unable to create #{oa_vocab_term.fragment.sub('has', '')} LDP container for anno; RDF sent: #{g.to_ttl}", resp.status, resp.body)
       end
       resp
     end
