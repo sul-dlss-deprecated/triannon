@@ -37,8 +37,8 @@ describe Triannon::AnnotationLdp, :vcr do
       @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
       <http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2> a openannotation:Annotation;
          openannotation:motivatedBy openannotation:commenting;
-      	 openannotation:hasBody <#{body_url1}>,
-      	    <#{body_url2}> .
+         openannotation:hasBody <#{body_url1}>,
+           <#{body_url2}> .
       ").statements.to_a
       anno.load_statements_into_graph stmts
       expect(anno.body_uris.class).to eql Array
@@ -85,8 +85,8 @@ describe Triannon::AnnotationLdp, :vcr do
       @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
       <http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2> a openannotation:Annotation;
          openannotation:motivatedBy openannotation:commenting;
-      	 openannotation:hasTarget <#{target_url1}>,
-      	    <#{target_url2}> .
+         openannotation:hasTarget <#{target_url1}>,
+            <#{target_url2}> .
       ").statements.to_a
       anno.load_statements_into_graph stmts
       expect(anno.target_uris.class).to eql Array
