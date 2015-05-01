@@ -43,10 +43,24 @@ module Triannon
         ldpw.delete_containers id
       end
     end
-
     class << self
       alias_method :delete_anno, :delete_container
     end
+
+    # @param [String] path the path part of the container url, after the ldp base url
+    # @return [Boolean] true if container already exists; false otherwise
+    def self.container_exist? path
+      base_url = Triannon.config[:ldp]['url']
+      separator = (base_url.end_with?('/') || path.start_with?('/')) ? "" : '/'
+      conn = Faraday.new url: base_url + separator + path
+      resp = conn.head
+      if resp.status.between?(400, 600)
+        false
+      else
+        true
+      end
+    end
+
 
     # @param [Triannon::Annotation] anno a Triannon::Annotation object
     # @param [String] id the unique id for the LDP container for the passed
