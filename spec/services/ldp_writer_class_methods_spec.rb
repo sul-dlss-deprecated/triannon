@@ -141,6 +141,49 @@ describe Triannon::LdpWriter, :vcr do
       end
     end
 
+    context '#container_exist?' do
+      it 'true for http status 200' do
+        resp = double()
+        allow(resp).to receive(:status).and_return(200)
+        conn = double()
+        allow(conn).to receive(:head).and_return(resp)
+        allow(Faraday).to receive(:new).and_return(conn)
+        expect(Triannon::LdpWriter.container_exist?('ignored')).to be true
+      end
+      it 'true for existing container' do
+        expect(Triannon::LdpWriter.container_exist?(Triannon.config[:ldp]['uber_container'])).to be true
+      end
+      it 'false for http status 404' do
+        resp = double()
+        allow(resp).to receive(:status).and_return(404)
+        conn = double()
+        allow(conn).to receive(:head).and_return(resp)
+        allow(Faraday).to receive(:new).and_return(conn)
+        expect(Triannon::LdpWriter.container_exist?('ignored')).to be false
+      end
+      it 'false for non-existent container' do
+        expect(Triannon::LdpWriter.container_exist?('zzzyyyxxx')).to be false
+      end
+      it 'appends the path param to config[:ldp]["url"]' do
+        path_param = "arbitrary"
+        expect(Faraday).to receive(:new).with(url: "#{Triannon.config[:ldp]['url']}/#{path_param}").and_call_original
+        Triannon::LdpWriter.container_exist?(path_param)
+      end
+      it 'avoids double slash if slash at end of ldp base url' do
+        url_ends_w_slash = "http://somewhere.org/"
+        config = { ldp: {'url' => url_ends_w_slash} }
+        allow(Triannon).to receive(:config).and_return(config)
+        path_param = "arbitrary"
+        expect(Faraday).to receive(:new).with(url: "#{Triannon.config[:ldp]['url']}#{path_param}").and_call_original
+        Triannon::LdpWriter.container_exist?(path_param)
+      end
+      it 'avoids double slash if slash at beginning of path' do
+        path_param = "/arbitrary"
+        expect(Faraday).to receive(:new).with(url: "#{Triannon.config[:ldp]['url']}#{path_param}").and_call_original
+        Triannon::LdpWriter.container_exist?(path_param)
+      end
+    end
+
   end # class methods
 
 end
