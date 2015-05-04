@@ -38,7 +38,7 @@ Set up caching for jsonld context documents:
 
 * by using Rack::Cache for RestClient:
 
-** add to Gemfile:
+  * add to Gemfile:
 
 ```ruby
 gem 'rest-client'
@@ -46,8 +46,9 @@ gem 'rack-cache'
 gem 'rest-client-components'
 ```
 
-*** bundle install
-** create a  config/initializers/rest_client.rb
+    * bundle install
+
+  * create a  config/initializers/rest_client.rb
 
 ```ruby
 require 'restclient/components'
@@ -143,9 +144,15 @@ There is a bundled rake task for running triannon in a test rails application, b
 ```console
 $ rake jetty:download
 $ rake jetty:unzip
+$ rake jetty:environment
 ```
 
-### Set up a Triannon flavored Solr
+### Turn off basic authorization in local Fedora4
+```console
+rake triannon:disable_fedora_auth_in_jetty
+```
+
+### Set up a local Triannon flavored Solr
 ```console
 rake triannon:solr_jetty_setup
 ```
@@ -172,13 +179,14 @@ well, try:
 ```console
 $ rake jetty:stop
 $ rake triannon:solr_jetty_setup
+$ rake triannon:disable_fedora_auth_in_jetty
 $ rake jetty:start
 ```
 
 and then check again.
 
 
-#### Check if Fedora is up
+#### Check if Fedora4 is up
 Go to http://localhost:8983/fedora/rest/
 
 If all is well, you will not get an error message.  If all is not well, try:
@@ -187,6 +195,7 @@ If all is well, you will not get an error message.  If all is not well, try:
 $ rake jetty:stop
 $ rake jetty:clean
 $ rake triannon:solr_jetty_startup
+$ rake triannon:disable_fedora_auth_in_jetty
 $ rake jetty:start
 ```
 
@@ -202,7 +211,7 @@ $ cd ../..
 ```
 
 #### Configure spec/internal/config/triannon.yml as specified above
-You might not need to change the file.
+You probably won't need to change this file.
 ```console
 $ vi spec/internal/config/triannon.yml
 ```
