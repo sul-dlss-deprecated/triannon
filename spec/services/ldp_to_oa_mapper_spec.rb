@@ -22,7 +22,7 @@ describe Triannon::LdpToOaMapper, :vcr do
 
       expect(oa_graph).to be_a OA::Graph
       resp = oa_graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
-      expect(resp.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/deb27887-1241-4ccc-a09c-439293d73fbb"
+      expect(resp.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec"
     end
     it "calls #extract_base" do
       expect_any_instance_of(Triannon::LdpToOaMapper).to receive(:extract_base)
@@ -43,13 +43,13 @@ describe Triannon::LdpToOaMapper, :vcr do
 
     it "extracts the id from the root subject" do
       mapper.extract_base
-      expect(mapper.id).to eq 'deb27887-1241-4ccc-a09c-439293d73fbb'
+      expect(mapper.id).to eq 'f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec'
     end
 
     it "builds the base identifier from the triannon.yml triannon_base_url and @id" do
       mapper.extract_base
       soln = mapper.oa_graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
-      expect(soln.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/deb27887-1241-4ccc-a09c-439293d73fbb"
+      expect(soln.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec"
     end
 
     it "base identifier doesn't have double slash before id if triannon_base_url ends in slash" do
@@ -57,11 +57,11 @@ describe Triannon::LdpToOaMapper, :vcr do
       Triannon.config[:triannon_base_url] = "http://mine.com/annotations/"  # with trailing slash
       mapper.extract_base
       soln = mapper.oa_graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
-      expect(soln.first.subject.to_s).to match "http://mine.com/annotations/deb27887-1241-4ccc-a09c-439293d73fbb"
+      expect(soln.first.subject.to_s).to match "http://mine.com/annotations/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec"
       Triannon.config[:triannon_base_url] = "http://mine.com/annotations"  # without trailing slash
       mapper.extract_base
       soln = mapper.oa_graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
-      expect(soln.first.subject.to_s).to match "http://mine.com/annotations/deb27887-1241-4ccc-a09c-439293d73fbb"
+      expect(soln.first.subject.to_s).to match "http://mine.com/annotations/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec"
       Triannon.config[:triannon_base_url] = orig_val
     end
 
@@ -565,7 +565,7 @@ describe Triannon::LdpToOaMapper, :vcr do
     end
     it "start and end in TextPositionSelector have type nonNegativeIntegers" do
       # See https://github.com/sul-dlss/triannon/issues/78
-      skip 'converting returned xsd:long to xsd:nonNegativeInteger not yet implemented'
+      fail 'this spec is now ready to be written'
     end
     it "TextQuoteSelector" do
       stored_target_obj_url = "#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1"

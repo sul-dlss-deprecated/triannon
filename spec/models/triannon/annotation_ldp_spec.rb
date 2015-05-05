@@ -16,7 +16,7 @@ describe Triannon::AnnotationLdp, :vcr do
   describe "#base_uri" do
     it "returns the URI to the annotation's main root-level subject" do
       anno.load_statements_into_graph base_stmts
-      expect(anno.base_uri.path).to match /deb27887-1241-4ccc-a09c-439293d73fbb/
+      expect(anno.base_uri.path).to match %r{/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec$}
     end
   end
 
@@ -122,7 +122,7 @@ describe Triannon::AnnotationLdp, :vcr do
       anno.load_statements_into_graph stmts
       solns = anno.graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
       expect(solns.size).to eq 1
-      expect(solns.first.subject.path).to match /\/deb27887-1241-4ccc-a09c-439293d73fbb$/
+      expect(solns.first.subject.path).to match %r{/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec}
     end
     it 'adds statements to existing graph' do
       stmts = RDF::Graph.new.from_ttl(anno_ttl).statements
@@ -158,13 +158,13 @@ describe Triannon::AnnotationLdp, :vcr do
     end
     it 'has no fedora triples' do
       anno.load_statements_into_graph base_stmts
-      result = anno.graph.query [nil, RDF.type, RDF::URI.new("http://fedora.info/definitions/v4/rest-api#resource")]
+      result = anno.graph.query [nil, RDF.type, RDF::URI.new("http://fedora.info/definitions/v4/repository#Resource")]
       expect(result.size).to eql 1
       result = anno.graph.query [nil, RDF.type, RDF::URI.new("http://www.jcp.org/jcr/nt/1.0base")]
       expect(result.size).to eql 1
       result = anno.graph.query [nil, RDF::URI.new("http://fedora.info/definitions/v4/repository#lastModifiedBy"), nil]
       expect(result.size).to eql 1
-      result = anno.graph.query [nil, RDF::URI.new("http://fedora.info/definitions/v4/rest-api#writable"), nil]
+      result = anno.graph.query [nil, RDF::URI.new("http://fedora.info/definitions/v4/repository#writable"), nil]
       expect(result.size).to eql 1
       result = anno.graph.query [RDF::URI.new("http://fedora.info/definitions/v4/repository#jcr/xml"), nil, nil]
       expect(result.size).to eql 1
@@ -172,13 +172,13 @@ describe Triannon::AnnotationLdp, :vcr do
       expect(result.size).to eql 1
 
       stripped_graph = anno.stripped_graph
-      result = stripped_graph.query [nil, RDF.type, RDF::URI.new("http://fedora.info/definitions/v4/rest-api#resource")]
+      result = stripped_graph.query [nil, RDF.type, RDF::URI.new("http://fedora.info/definitions/v4/repository#Resource")]
       expect(result.size).to eql 0
       result = stripped_graph.query [nil, RDF.type, RDF::URI.new("http://www.jcp.org/jcr/nt/1.0base")]
       expect(result.size).to eql 0
       result = stripped_graph.query [nil, RDF::URI.new("http://fedora.info/definitions/v4/repository#lastModifiedBy"), nil]
       expect(result.size).to eql 0
-      result = stripped_graph.query [nil, RDF::URI.new("http://fedora.info/definitions/v4/rest-api#writable"), nil]
+      result = stripped_graph.query [nil, RDF::URI.new("http://fedora.info/definitions/v4/repository#writable"), nil]
       expect(result.size).to eql 0
       result = stripped_graph.query [RDF::URI.new("http://fedora.info/definitions/v4/repository#jcr/xml"), nil, nil]
       expect(result.size).to eql 0
