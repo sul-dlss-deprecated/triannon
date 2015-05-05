@@ -28,23 +28,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"9762a45bde57f142d0fe1b54f1fad2375ada28ba"'
+      - '"1b419e637707f9228e05df765525df283ce18a0d"'
       Last-Modified:
-      - Mon, 27 Apr 2015 19:05:20 GMT
+      - Tue, 05 May 2015 00:47:08 GMT
       Content-Length:
-      - '75'
+      - '87'
       Location:
-      - http://localhost:8983/fedora/rest/anno/40231943-0ee9-4f84-a56e-6681554f173c
+      - http://localhost:8983/fedora/rest/anno/5f/56/95/02/5f569502-aafa-4682-aa0e-7a294b12dd75
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/40231943-0ee9-4f84-a56e-6681554f173c
+      string: http://localhost:8983/fedora/rest/anno/5f/56/95/02/5f569502-aafa-4682-aa0e-7a294b12dd75
     http_version: 
-  recorded_at: Mon, 27 Apr 2015 19:05:20 GMT
+  recorded_at: Tue, 05 May 2015 00:47:08 GMT
 - request:
     method: get
-    uri: http://localhost:8983/fedora/rest/anno/40231943-0ee9-4f84-a56e-6681554f173c
+    uri: http://localhost:8983/fedora/rest/anno/5f/56/95/02/5f569502-aafa-4682-aa0e-7a294b12dd75
     body:
       encoding: US-ASCII
       string: ''
@@ -63,16 +63,17 @@ http_interactions:
       message: OK
     headers:
       Etag:
-      - '"9762a45bde57f142d0fe1b54f1fad2375ada28ba"'
+      - '"1b419e637707f9228e05df765525df283ce18a0d"'
       Last-Modified:
-      - Mon, 27 Apr 2015 19:05:20 GMT
+      - Tue, 05 May 2015 00:47:08 GMT
       Link:
-      - <http://www.w3.org/ns/ldp#DirectContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Container>;rel="type"
       - <http://www.w3.org/ns/ldp#Resource>;rel="type"
       Accept-Patch:
       - application/sparql-update
       Accept-Post:
-      - text/turtle,text/rdf+n3,application/n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      - text/turtle,text/rdf+n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
       Allow:
       - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
       Preference-Applied:
@@ -81,26 +82,26 @@ http_interactions:
       - Accept, Range, Accept-Encoding, Accept-Language
       - Prefer
       Content-Length:
-      - '1343'
+      - '1309'
       Content-Type:
       - application/x-turtle
     body:
       encoding: UTF-8
-      string: "@prefix premis: <http://www.loc.gov/premis/rdf/v1#> .\n@prefix fedorarelsext:
-        <http://fedora.info/definitions/v4/rels-ext#> .\n@prefix nt: <http://www.jcp.org/jcr/nt/1.0>
-        .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n@prefix xsi: <http://www.w3.org/2001/XMLSchema-instance>
-        .\n@prefix mode: <http://www.modeshape.org/1.0> .\n@prefix oa: <http://www.w3.org/ns/oa#>
-        .\n@prefix xml: <http://www.w3.org/XML/1998/namespace> .\n@prefix fcrepo:
-        <http://fedora.info/definitions/v4/repository#> .\n@prefix fedoraconfig: <http://fedora.info/definitions/v4/config#>
-        .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0> .\n@prefix foaf: <http://xmlns.com/foaf/0.1/>
-        .\n@prefix image: <http://www.modeshape.org/images/1.0> .\n@prefix sv: <http://www.jcp.org/jcr/sv/1.0>
-        .\n@prefix test: <info:fedora/test/> .\n@prefix cnt: <http://www.w3.org/2011/content#>
-        .\n@prefix dcmitype: <http://purl.org/dc/dcmitype/> .\n@prefix triannon: <http://triannon.stanford.edu/ns/>
+      string: "@prefix premis: <http://www.loc.gov/premis/rdf/v1#> .\n@prefix nt:
+        <http://www.jcp.org/jcr/nt/1.0> .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        .\n@prefix xsi: <http://www.w3.org/2001/XMLSchema-instance> .\n@prefix mode:
+        <http://www.modeshape.org/1.0> .\n@prefix oa: <http://www.w3.org/ns/oa#> .\n@prefix
+        xml: <http://www.w3.org/XML/1998/namespace> .\n@prefix fedoraconfig: <http://fedora.info/definitions/v4/config#>
+        .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0> .\n@prefix prov: <http://www.w3.org/ns/prov#>
+        .\n@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n@prefix image: <http://www.modeshape.org/images/1.0>
+        .\n@prefix sv: <http://www.jcp.org/jcr/sv/1.0> .\n@prefix test: <info:fedora/test/>
+        .\n@prefix cnt: <http://www.w3.org/2011/content#> .\n@prefix dcmitype: <http://purl.org/dc/dcmitype/>
+        .\n@prefix dc11: <http://purl.org/dc/elements/1.1/> .\n@prefix triannon: <http://triannon.stanford.edu/ns/>
         .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n@prefix fedora:
-        <http://fedora.info/definitions/v4/rest-api#> .\n@prefix ldp: <http://www.w3.org/ns/ldp#>
-        .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix dc: <http://purl.org/dc/elements/1.1/>
-        .\n\n\n<http://localhost:8983/fedora/rest/anno/40231943-0ee9-4f84-a56e-6681554f173c>
+        <http://fedora.info/definitions/v4/repository#> .\n@prefix ldp: <http://www.w3.org/ns/ldp#>
+        .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix dc: <http://purl.org/dc/terms/>
+        .\n\n\n<http://localhost:8983/fedora/rest/anno/5f/56/95/02/5f569502-aafa-4682-aa0e-7a294b12dd75>
         a oa:Annotation ;\n\toa:motivatedBy oa:commenting .\n"
     http_version: 
-  recorded_at: Mon, 27 Apr 2015 19:05:20 GMT
+  recorded_at: Tue, 05 May 2015 00:47:08 GMT
 recorded_with: VCR 2.9.3
