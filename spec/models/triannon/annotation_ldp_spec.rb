@@ -27,7 +27,7 @@ describe Triannon::AnnotationLdp, :vcr do
       expect(anno.body_uris.size).to eq 1
       body_uri = anno.body_uris.first
       expect(body_uri.class).to eql RDF::URI
-      expect(body_uri.path).to match "#{anno.base_uri.path}/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23"
+      expect(body_uri.path).to match "#{anno.base_uri.path}/b/75/18/5b/af/75185baf-7057-4762-bfb2-432e88221810"
     end
     it 'returns an Array of body object ids as URIs - 2 bodies' do
       body_url1 = "http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2/b/14788e2d-fe2a-424b-89b3-f73e77d81c62"
@@ -75,7 +75,7 @@ describe Triannon::AnnotationLdp, :vcr do
       expect(anno.target_uris.size).to eq 1
       target_uri = anno.target_uris.first
       expect(target_uri.class).to eql RDF::URI
-      expect(target_uri.path).to match "#{anno.base_uri.path}/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1"
+      expect(target_uri.path).to match "#{anno.base_uri.path}/t/07/1b/94/c0/071b94c0-953e-46aa-b21c-2bb201c5ff59"
     end
     it 'returns an Array of target object ids as URIs - 2 targets' do
       target_url1 = "http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2/t/14788e2d-fe2a-424b-89b3-f73e77d81c62"
