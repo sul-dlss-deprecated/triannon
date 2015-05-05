@@ -1,6 +1,9 @@
 require_relative '../../app/services/triannon/root_annotation_creator'
 
 namespace :triannon do
+  desc "set up jetty for triannon"
+  task :jetty_setup => [:solr_jetty_setup, :disable_fedora_auth_in_jetty]
+
   desc "set up triannon Solr in jetty"
   task :solr_jetty_setup do
     `cp -r config/solr/triannon-core jetty/solr`

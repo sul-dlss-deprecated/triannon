@@ -145,17 +145,12 @@ There is a bundled rake task for running triannon in a test rails application, b
 $ rake jetty:download
 $ rake jetty:unzip
 $ rake jetty:environment
+$ rake triannon:jetty_setup
 ```
 
-### Turn off basic authorization in local Fedora4
-```console
-rake triannon:disable_fedora_auth_in_jetty
-```
-
-### Set up a local Triannon flavored Solr
-```console
-rake triannon:solr_jetty_setup
-```
+triannon:jetty_setup task does the following:
+* turns off basic authorization in Fedora4
+* sets up a Triannon flavored Solr
 
 ### Set up the testing Rails app that uses triannon gem
 ```console
@@ -178,8 +173,7 @@ well, try:
 
 ```console
 $ rake jetty:stop
-$ rake triannon:solr_jetty_setup
-$ rake triannon:disable_fedora_auth_in_jetty
+$ rake triannon:jetty_setup
 $ rake jetty:start
 ```
 
@@ -194,8 +188,7 @@ If all is well, you will not get an error message.  If all is not well, try:
 ```console
 $ rake jetty:stop
 $ rake jetty:clean
-$ rake triannon:solr_jetty_startup
-$ rake triannon:disable_fedora_auth_in_jetty
+$ rake triannon:jetty_startup
 $ rake jetty:start
 ```
 
