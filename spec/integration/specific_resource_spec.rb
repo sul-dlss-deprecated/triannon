@@ -219,14 +219,12 @@ describe "integration tests for SpecificResource", :vcr do
     expect(start_obj_solns.count).to eq 1
     start_obj = start_obj_solns.first.object
     expect(start_obj.to_s).to eql "0"
-# FIXME:  these should be converted back to nonNegativeInteger, per OA spec
-# See https://github.com/sul-dlss/triannon/issues/78
-    expect(start_obj.datatype).to eql RDF::XSD.long
+    expect(start_obj.datatype).to eql RDF::XSD.nonNegativeInteger
     end_obj_solns = h.query [selector_blank_node, RDF::Vocab::OA.end, nil]
     expect(end_obj_solns.count).to eq 1
     end_obj = end_obj_solns.first.object
     expect(end_obj.to_s).to eql "66"
-    expect(end_obj.datatype).to eql RDF::XSD.long
+    expect(end_obj.datatype).to eql RDF::XSD.nonNegativeInteger
   end
   it "body is TextPositionSelector" do
     target_url = "http://dbpedia.org/resource/Otto_Ege"
@@ -305,14 +303,12 @@ describe "integration tests for SpecificResource", :vcr do
     expect(start_obj_solns.count).to eq 1
     start_obj = start_obj_solns.first.object
     expect(start_obj.to_s).to eql "0"
-# FIXME:  these should be converted back to nonNegativeInteger, per OA spec
-# See https://github.com/sul-dlss/triannon/issues/78
-    expect(start_obj.datatype).to eql RDF::XSD.long
+    expect(start_obj.datatype).to eql RDF::XSD.nonNegativeInteger
     end_obj_solns = h.query [selector_blank_node, RDF::Vocab::OA.end, nil]
     expect(end_obj_solns.count).to eq 1
     end_obj = end_obj_solns.first.object
     expect(end_obj.to_s).to eql "66"
-    expect(end_obj.datatype).to eql RDF::XSD.long
+    expect(end_obj.datatype).to eql RDF::XSD.nonNegativeInteger
   end
 
   it "target is TextQuoteSelector" do
