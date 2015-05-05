@@ -22,7 +22,16 @@ module Triannon
     def extract_base
       root_subject_solns = @ldp_anno_graph.query OA::Graph.anno_query
       if root_subject_solns.count == 1
-        @id = root_subject_solns[0].s.to_s.split('/').last
+        stored_url = Triannon.config[:ldp]['url'].strip
+        stored_url.chop! if stored_url.end_with?('/')
+        container_path = Triannon.config[:ldp]['uber_container']
+        if container_path
+          container_path.strip!
+          container_path = container_path[1..-1] if container_path.start_with?('/')
+          container_path.chop! if container_path.end_with?('/')
+          stored_url = "#{stored_url}/#{container_path}"
+        end
+        @id = root_subject_solns[0].s.to_s.split("#{stored_url}/").last
         base_url = Triannon.config[:triannon_base_url]
         base_url.strip!
         base_url.chop! if base_url[-1] == '/'
