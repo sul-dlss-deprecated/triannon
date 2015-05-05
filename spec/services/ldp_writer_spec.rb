@@ -113,9 +113,10 @@ describe Triannon::LdpWriter, :vcr do
       full_url = "#{triannon_anno_container}/#{new_pid}"
       expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
       expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.annotatedAt, "2014-09-03T17:16:13Z"]).size).to eql 1
+      xsd_dt_literal_opts = {datatype: RDF::XSD.dateTimeStamp}
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.annotatedAt, RDF::Literal.new("2014-09-03T17:16:13Z", xsd_dt_literal_opts)]).size).to eql 1
       expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.annotatedBy, nil]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.serializedAt, "2014-09-03T17:16:13Z"]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.serializedAt, RDF::Literal.new("2014-09-03T17:16:13Z", xsd_dt_literal_opts)]).size).to eql 1
       expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.serializedBy, nil]).size).to eql 1
     end
     it "raises Triannon::ExternalReferenceError if incoming anno graph contains RDF::Triannon.externalReference in target" do
@@ -312,7 +313,6 @@ describe Triannon::LdpWriter, :vcr do
     end
     it 'deletes all child containers, recursively' do
       ldp_id = Triannon::LdpWriter.create_anno anno
-      ldpw = Triannon::LdpWriter.new(nil)
 
       l = Triannon::LdpLoader.new ldp_id
       l.load_anno_container
@@ -320,6 +320,7 @@ describe Triannon::LdpWriter, :vcr do
       expect(body_uris.size).to be > 0
 
       # delete body container
+      ldpw = Triannon::LdpWriter.new(nil)
       ldpw.delete_containers "#{ldp_id}/b"
 
       # ensure no body objects still exist
@@ -328,7 +329,7 @@ describe Triannon::LdpWriter, :vcr do
         resp = conn.get do |req|
           req.url body_ldp_uri
         end
-        expect(resp.status).to eq 404
+        expect(resp.status == 404 || resp.status == 410).to be true
       }
     end
 
