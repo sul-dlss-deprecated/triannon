@@ -17,10 +17,12 @@ describe Triannon::LdpWriter, :vcr do
 
   context '#create_resource' do
     it "returns the last part of the url of the newly created resource, derived from Location header" do
+      config = { ldp: {'url' => "http://ldpstore.org", 'uber_container' => "ldpcontainer"} }
+      allow(Triannon).to receive(:config).and_return(config)
       resp = double()
       allow(resp).to receive(:status).and_return(201)
       allow(resp).to receive(:body)
-      allow(resp).to receive(:headers).and_return("Location" => "http://ldpstore.org/ldpcontainter/id")
+      allow(resp).to receive(:headers).and_return("Location" => "http://ldpstore.org/ldpcontainer/id")
       my_conn = double()
       allow(my_conn).to receive(:post).and_return(resp)
       my_svc = Triannon::LdpWriter.new anno

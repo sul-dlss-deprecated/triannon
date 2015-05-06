@@ -4,7 +4,7 @@ rescue LoadError
   puts 'You must `gem install bundler` and `bundle install` to run rake tasks'
 end
 
-ZIP_URL = "https://github.com/sul-dlss/hydra-jetty/archive/fedora-4/edge.zip"
+ZIP_URL = "https://github.com/projecthydra/hydra-jetty/archive/v8.3.1.zip"
 
 require 'active_support/benchmarkable'
 require 'jettywrapper'
@@ -15,6 +15,17 @@ task :ci => 'engine_cart:generate' do
   RAILS_ENV = 'test'
   Rake::Task['spec'].invoke
 end
+
+load 'rails/tasks/statistics.rake'
+
+require 'rspec/core/rake_task'
+
+RSpec::Core::RakeTask.new(:spec)
+
+task :default => :ci
+
+
+Dir.glob('lib/tasks/*.rake').each { |r| load r}
 
 namespace :triannon do
   desc 'run test rails app w triannon and jetty'
@@ -55,22 +66,7 @@ namespace :triannon do
   desc 'run test rails console w triannon but no jetty'
   task :console => :console_no_jetty
 
-
-  desc "set up triannon solr in test jetty"
-  task :solr_jetty_setup do
-    `cp -r config/solr/triannon-core jetty/solr`
-    `cp config/solr/solr.xml jetty/solr`
-  end
-end
-
-
-load 'rails/tasks/statistics.rake'
-
-require 'rspec/core/rake_task'
-
-RSpec::Core::RakeTask.new(:spec)
-
-task :default => :ci
+end # namespace triannon
 
 
 desc "Generate RDoc with YARD"
@@ -101,4 +97,5 @@ namespace :doc do
     rm_r 'rdoc' if File.exist?('rdoc')
   end
 end
+
 Bundler::GemHelper.install_tasks

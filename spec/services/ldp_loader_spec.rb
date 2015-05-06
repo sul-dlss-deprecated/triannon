@@ -110,7 +110,7 @@ describe Triannon::LdpLoader, :vcr do
       loader.load_bodies
       body_uri = loader.ldp_annotation.body_uris.first
       result = loader.ldp_annotation.graph.query [body_uri, RDF::Vocab::CNT.chars, nil]
-      expect(result.first.object.to_s).to match /I love this/
+      expect(result.first.object.to_s).to eq "Solr integration test"
     end
     it "retrieves triples about external refs" do
       loader = Triannon::LdpLoader.new 'somekey'
@@ -157,7 +157,7 @@ describe Triannon::LdpLoader, :vcr do
       loader.load_targets
       target_uri = loader.ldp_annotation.target_uris.first
       result = loader.ldp_annotation.graph.query [target_uri, RDF::Triannon.externalReference, nil]
-      expect(result.first.object.to_s).to match /kq131cs7229/
+      expect(result.first.object.to_s).to eq "http://example.com/solr-integration-test"
     end
     it "retrieves triples about external refs" do
       loader = Triannon::LdpLoader.new 'somekey'

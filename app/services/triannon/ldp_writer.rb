@@ -153,10 +153,19 @@ module Triannon
     #   also be (anno_id)/t  for a target resource (inside the target container
     #   of anno_id) or (anno_id)/b for a body resource (inside the body
     #   container of anno_id)
-    # @return [String] uuid representing the unique id of the newly created LDP
+    # @return [String] path_id representing the unique path of the newly created LDP
     #   container
     def create_resource ttl, parent_path = nil
       return if !ttl || ttl.empty?
+
+      base_url = @base_uri.strip
+      base_url.chop! if base_url.end_with?('/')
+      if parent_path
+        parent_path.strip!
+        parent_path = parent_path[1..-1] if parent_path.start_with?('/')
+        parent_path.chop! if parent_path.end_with?('/')
+      end
+
       resp = conn.post do |req|
         req.url parent_path if parent_path
         req.headers['Content-Type'] = 'application/x-turtle'
@@ -166,12 +175,16 @@ module Triannon
         fail Triannon::LDPStorageError.new("Unable to create LDP resource in container #{parent_path}; RDF sent: #{ttl}", resp.status, resp.body)
       end
       new_url = resp.headers['Location'] ? resp.headers['Location'] : resp.headers['location']
-      new_url.split('/').last if new_url
+      if new_url
+        new_url = new_url.split(base_url + '/' + parent_path.to_s).last
+        new_url = new_url[1..-1] if new_url.start_with?('/')
+      end
+      new_url
     end
 
     # Creates an empty LDP DirectContainer in LDP Storage that is a member of
     #   the base container at @id and has the memberRelation per the
-    #   oa_vocab_term. The id of the created containter will be (base container
+    #   oa_vocab_term. The id of the created container will be (base container
     #   id)/b  if hasBody or  (base container id)/t  if hasTarget
     # @param [RDF::Vocabulary::Term] oa_vocab_term RDF::Vocab::OA.hasTarget or
     #   RDF::Vocab::OA.hasBody

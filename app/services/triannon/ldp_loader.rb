@@ -27,8 +27,17 @@ module Triannon
     # @param [String] id the unique id of the annotation.  Can include base_uri prefix or omit it.
     def initialize id = nil
       @id = id
-      @base_uri = "#{Triannon.config[:ldp]['url']}/#{Triannon.config[:ldp]['uber_container']}"
+      base_url = Triannon.config[:ldp]['url']
+      base_url.chop! if base_url.end_with?('/')
+      container_path = Triannon.config[:ldp]['uber_container']
+      if container_path
+        container_path.strip!
+        container_path = container_path[1..-1] if container_path.start_with?('/')
+        container_path.chop! if container_path.end_with?('/')
+      end
+      @base_uri = "#{base_url}/#{container_path}"
       @ldp_annotation = Triannon::AnnotationLdp.new
+
     end
 
     # load annotation container object into @ldp_annotation's (our Triannon::AnnotationLdp object) graph
@@ -63,6 +72,7 @@ module Triannon
       root_uri = RDF::URI.new @base_uri
       results = g.query [root_uri, RDF::Vocab::LDP.contains, nil]
       results.each do |stmt|
+        # FIXME:  can't be last with pair trees in fedora urls - leave broke as this method is deprecated
         id = stmt.object.to_s.split('/').last
         objs << Triannon::Annotation.new(:id => id)
       end

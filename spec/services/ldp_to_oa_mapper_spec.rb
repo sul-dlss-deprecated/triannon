@@ -4,10 +4,13 @@ describe Triannon::LdpToOaMapper, :vcr do
   let(:triannon_anno_container) {"#{Triannon.config[:ldp]['url']}/#{Triannon.config[:ldp]['uber_container']}"}
   let(:anno_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_base.ttl') }
   let(:base_stmts) { RDF::Graph.new.from_ttl(anno_ttl).statements }
+  let(:base_container_id) {"f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec"}
   let(:body_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_body.ttl') }
   let(:body_stmts) { RDF::Graph.new.from_ttl(body_ttl).statements }
+  let(:body_container_id) {"#{base_container_id}/b/75/18/5b/af/75185baf-7057-4762-bfb2-432e88221810"}
   let(:target_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_target.ttl') }
   let(:target_stmts) { RDF::Graph.new.from_ttl(target_ttl).statements }
+  let(:target_container_id) {"#{base_container_id}/t/07/1b/94/c0/071b94c0-953e-46aa-b21c-2bb201c5ff59"}
   let(:ldp_anno) {
     a = Triannon::AnnotationLdp.new
     a.load_statements_into_graph base_stmts
@@ -22,7 +25,7 @@ describe Triannon::LdpToOaMapper, :vcr do
 
       expect(oa_graph).to be_a OA::Graph
       resp = oa_graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
-      expect(resp.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/deb27887-1241-4ccc-a09c-439293d73fbb"
+      expect(resp.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/#{base_container_id}"
     end
     it "calls #extract_base" do
       expect_any_instance_of(Triannon::LdpToOaMapper).to receive(:extract_base)
@@ -43,13 +46,13 @@ describe Triannon::LdpToOaMapper, :vcr do
 
     it "extracts the id from the root subject" do
       mapper.extract_base
-      expect(mapper.id).to eq 'deb27887-1241-4ccc-a09c-439293d73fbb'
+      expect(mapper.id).to eq 'f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec'
     end
 
     it "builds the base identifier from the triannon.yml triannon_base_url and @id" do
       mapper.extract_base
       soln = mapper.oa_graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
-      expect(soln.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/deb27887-1241-4ccc-a09c-439293d73fbb"
+      expect(soln.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/#{base_container_id}"
     end
 
     it "base identifier doesn't have double slash before id if triannon_base_url ends in slash" do
@@ -57,11 +60,11 @@ describe Triannon::LdpToOaMapper, :vcr do
       Triannon.config[:triannon_base_url] = "http://mine.com/annotations/"  # with trailing slash
       mapper.extract_base
       soln = mapper.oa_graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
-      expect(soln.first.subject.to_s).to match "http://mine.com/annotations/deb27887-1241-4ccc-a09c-439293d73fbb"
+      expect(soln.first.subject.to_s).to match "http://mine.com/annotations/#{base_container_id}"
       Triannon.config[:triannon_base_url] = "http://mine.com/annotations"  # without trailing slash
       mapper.extract_base
       soln = mapper.oa_graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
-      expect(soln.first.subject.to_s).to match "http://mine.com/annotations/deb27887-1241-4ccc-a09c-439293d73fbb"
+      expect(soln.first.subject.to_s).to match "http://mine.com/annotations/#{base_container_id}"
       Triannon.config[:triannon_base_url] = orig_val
     end
 
@@ -84,14 +87,14 @@ describe Triannon::LdpToOaMapper, :vcr do
       my_mapper.extract_base
       soln = my_mapper.oa_graph.query [nil, RDF::Vocab::OA.annotatedAt, nil]
       expect(soln.count).to eq 1
-      expect(soln.first.object.to_s).to eq "2015-01-07T18:01:21Z"
+      expect(soln.first.object.to_s).to eq "2014-09-03T17:16:13Z"
     end
   end #extract_base
 
   describe "#extract_bodies" do
     it "calls #map_external_ref when body is an external ref" do
       body_ttl = "
-        <http://localhost:8983/fedora/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23>
+        <http://localhost:8983/fedora/rest/anno/#{body_container_id}>
         <http://triannon.stanford.edu/ns/externalReference> <http://some.external.ref> ."
       my_body_stmts = RDF::Graph.new.from_ttl(body_ttl).statements
       ldp_anno.load_statements_into_graph my_body_stmts
@@ -115,14 +118,14 @@ describe Triannon::LdpToOaMapper, :vcr do
       @prefix triannon: <http://triannon.stanford.edu/ns/> .
       @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-      <#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23> a ldp:Container,
+      <#{triannon_anno_container}/#{body_container_id}> a ldp:Container,
            ldp:DirectContainer,
            ldp:RDFSource,
            openannotation:SpecificResource;
          ldp:hasMemberRelation ldp:member;
-         ldp:membershipResource <#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23>;
+         ldp:membershipResource <#{triannon_anno_container}/#{body_container_id}>;
          openannotation:hasSelector <http://localhost:8983/fedora/rest/.well-known/genid/f875342e-d8d7-475a-8085-1e07f1f8b674>;
-         openannotation:hasSource <#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23#source> .
+         openannotation:hasSource <#{triannon_anno_container}/#{body_container_id}#source> .
       ").statements.to_a
       ldp_anno.load_statements_into_graph body_container_stmts
 
@@ -138,12 +141,12 @@ describe Triannon::LdpToOaMapper, :vcr do
       @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
       @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-      <#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23> a ldp:Container,
+      <#{triannon_anno_container}/#{body_container_id}> a ldp:Container,
            ldp:DirectContainer,
            ldp:RDFSource,
            openannotation:Choice;
          ldp:hasMemberRelation ldp:member;
-         ldp:membershipResource <#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23>;
+         ldp:membershipResource <#{triannon_anno_container}/#{body_container_id}>;
          openannotation:default <http://localhost:8983/fedora/rest/.well-known/genid/ea68448e-e50c-4274-a204-af477a0d8317>;
          openannotation:item <http://localhost:8983/fedora/rest/.well-known/genid/6051b00b-24e9-4a10-8b7d-0c44fa5fa469> .
       ").statements.to_a
@@ -171,14 +174,14 @@ describe Triannon::LdpToOaMapper, :vcr do
       @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
       @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-      <#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1> a ldp:Container,
+      <#{triannon_anno_container}/#{target_container_id}> a ldp:Container,
            ldp:DirectContainer,
            ldp:RDFSource,
            openannotation:SpecificResource;
          ldp:hasMemberRelation ldp:member;
-         ldp:membershipResource <#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1>;
+         ldp:membershipResource <#{triannon_anno_container}/#{target_container_id}>;
          openannotation:hasSelector <http://localhost:8983/fedora/rest/.well-known/genid/f875342e-d8d7-475a-8085-1e07f1f8b674>;
-         openannotation:hasSource <#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1#source> .
+         openannotation:hasSource <#{triannon_anno_container}/#{target_container_id}#source> .
       ").statements.to_a
       ldp_anno.load_statements_into_graph target_container_stmts
 
@@ -194,12 +197,12 @@ describe Triannon::LdpToOaMapper, :vcr do
       @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
       @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-      <#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1> a ldp:Container,
+      <#{triannon_anno_container}/#{target_container_id}> a ldp:Container,
            ldp:DirectContainer,
            ldp:RDFSource,
            openannotation:Choice;
          ldp:hasMemberRelation ldp:member;
-         ldp:membershipResource <#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1>;
+         ldp:membershipResource <#{triannon_anno_container}/#{target_container_id}>;
          openannotation:default <http://localhost:8983/fedora/rest/.well-known/genid/ea68448e-e50c-4274-a204-af477a0d8317>;
          openannotation:item <http://localhost:8983/fedora/rest/.well-known/genid/6051b00b-24e9-4a10-8b7d-0c44fa5fa469> .
       ").statements.to_a
@@ -213,7 +216,7 @@ describe Triannon::LdpToOaMapper, :vcr do
   end #extract_targets
 
   describe '#map_external_ref' do
-    let(:target_url) { "http://purl.stanford.edu/kq131cs7229" }
+    let(:target_url) { "http://example.com/solr-integration-test" }
     it "adds statement with external uri from externalReference statement to oa_graph" do
       ldp_anno.load_statements_into_graph target_stmts
       target_uri = ldp_anno.target_uris.first
@@ -263,7 +266,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       target_url1 = target_url
       target_url2 = "http://purl.stanford.edu/ab123cd4567"
       target_ttl = "
-        <http://localhost:8983/fedora/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1>
+        <http://localhost:8983/fedora/rest/anno/#{target_container_id}>
         <http://triannon.stanford.edu/ns/externalReference> <#{target_url1}>, <#{target_url2}>; ."
       my_target_stmts = RDF::Graph.new.from_ttl(target_ttl).statements
       ldp_anno.load_statements_into_graph my_target_stmts
@@ -279,7 +282,7 @@ describe Triannon::LdpToOaMapper, :vcr do
     end
     it "includes SemanticTags when present" do
       body_ext_url = "http://some.external.ref"
-      stored_body_obj_url = "#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23"
+      stored_body_obj_url = "#{triannon_anno_container}/#{body_container_id}"
       body_ttl = "
       @prefix openannotation: <http://www.w3.org/ns/oa#> .
       @prefix triannon: <http://triannon.stanford.edu/ns/> .
@@ -304,7 +307,7 @@ describe Triannon::LdpToOaMapper, :vcr do
     it "includes additional metadata when present" do
       body_ext_url = "http://some.external.ref"
       body_format = "audio/mpeg3"
-      stored_body_obj_url = "#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23"
+      stored_body_obj_url = "#{triannon_anno_container}/#{body_container_id}"
       body_ttl = "
       @prefix openannotation: <http://www.w3.org/ns/oa#> .
       @prefix triannon: <http://triannon.stanford.edu/ns/> .
@@ -332,7 +335,7 @@ describe Triannon::LdpToOaMapper, :vcr do
     end
     it "attaches external ref to passed param for subject" do
       body_ext_url = "http://some.external.ref"
-      stored_body_obj_url = "#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23"
+      stored_body_obj_url = "#{triannon_anno_container}/#{body_container_id}"
       body_ttl = "
       @prefix openannotation: <http://www.w3.org/ns/oa#> .
       @prefix triannon: <http://triannon.stanford.edu/ns/> .
@@ -394,10 +397,10 @@ describe Triannon::LdpToOaMapper, :vcr do
       expect(blank_node_solns.count).to eq 3
       expect(blank_node_solns).to include [blank_node, RDF.type, RDF::Vocab::CNT.ContentAsText]
       expect(blank_node_solns).to include [blank_node, RDF.type, RDF::Vocab::DCMIType.Text]
-      expect(blank_node_solns).to include [blank_node, RDF::Vocab::CNT.chars, "I love this!"]
+      expect(blank_node_solns).to include [blank_node, RDF::Vocab::CNT.chars, "Solr integration test"]
     end
     it "adds all relevant statements in skolemized blank node to @oa_graph" do
-      body_container_stmts = RDF::Turtle::Reader.new('
+      body_container_stmts = RDF::Turtle::Reader.new("
       @prefix content: <http://www.w3.org/2011/content#> .
       @prefix dc11: <http://purl.org/dc/elements/1.1/> .
       @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
@@ -405,17 +408,17 @@ describe Triannon::LdpToOaMapper, :vcr do
       @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
       @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-      <http://localhost:8983/fedora/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23> a ldp:Container,
+      <http://localhost:8983/fedora/rest/anno/#{body_container_id}> a ldp:Container,
            ldp:DirectContainer,
            ldp:RDFSource,
            dcmitype:Text,
            content:ContentAsText;
-         dc11:format "text/plain";
-         dc11:language "en";
-         content:chars "I love this!";
+         dc11:format \"text/plain\";
+         dc11:language \"en\";
+         content:chars \"I love this!\";
          ldp:hasMemberRelation ldp:member;
-         ldp:membershipResource <http://localhost:8983/fedora/rest/anno/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23> .
-      ').statements.to_a
+         ldp:membershipResource <http://localhost:8983/fedora/rest/anno/#{body_container_id}> .
+      ").statements.to_a
       ldp_anno.load_statements_into_graph body_container_stmts
       body_uri = ldp_anno.body_uris.first
 
@@ -460,7 +463,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       # see 'returns false if it doesn't change oa_graph'
     end
     it "attaches external ref to passed param for subject" do
-      stored_body_obj_url = "#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23"
+      stored_body_obj_url = "#{triannon_anno_container}/#{body_container_id}"
       ldp_anno.load_statements_into_graph body_stmts
       ldp_anno.load_statements_into_graph target_stmts
       target_uri = ldp_anno.target_uris.first
@@ -492,7 +495,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       # see fragment selector test
     end
     it "TextPositionSelector" do
-      stored_target_obj_url = "#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1"
+      stored_target_obj_url = "#{triannon_anno_container}/#{target_container_id}"
       stored_source_obj_url = "#{stored_target_obj_url}#source"
       stored_selector_obj_url = "http://localhost:8983/fedora/rest/.well-known/genid/f875342e-d8d7-475a-8085-1e07f1f8b674"
       source_url = "http://purl.stanford.edu/kq131cs7229.html"
@@ -516,8 +519,8 @@ describe Triannon::LdpToOaMapper, :vcr do
       <#{stored_source_obj_url}> triannon:externalReference <#{source_url}> .
 
       <#{stored_selector_obj_url}> a openannotation:TextPositionSelector;
-         openannotation:start \"0\"^^xsd:long;
-         openannotation:end \"66\"^^xsd:long .
+         openannotation:start \"0\"^^xsd:nonNegativeInteger;
+         openannotation:end \"66\"^^xsd:nonNegativeInteger .
       ").statements.to_a
       ldp_anno.load_statements_into_graph target_container_stmts
       target_uri = ldp_anno.target_uris.first
@@ -550,25 +553,19 @@ describe Triannon::LdpToOaMapper, :vcr do
       expect(start_obj_solns.count).to eq 1
       start_obj = start_obj_solns.first.object
       expect(start_obj.to_s).to eql "0"
-# FIXME:  these should be converted back to nonNegativeInteger, per OA spec
-# See https://github.com/sul-dlss/triannon/issues/78
-      expect(start_obj.datatype).to eql RDF::XSD.long
+      expect(start_obj.datatype).to eql RDF::XSD.nonNegativeInteger
       end_obj_solns = mapper.oa_graph.query [selector_blank_node, RDF::Vocab::OA.end, nil]
       expect(end_obj_solns.count).to eq 1
       end_obj = end_obj_solns.first.object
       expect(end_obj.to_s).to eql "66"
-      expect(end_obj.datatype).to eql RDF::XSD.long
+      expect(end_obj.datatype).to eql RDF::XSD.nonNegativeInteger
 
       # should get no triples with stored selector or source object urls
       expect(mapper.oa_graph.query([RDF::URI.new(stored_source_obj_url), nil, nil]).size).to eql 0
       expect(mapper.oa_graph.query([RDF::URI.new(stored_selector_obj_url), nil, nil]).size).to eql 0
     end
-    it "start and end in TextPositionSelector have type nonNegativeIntegers" do
-      # See https://github.com/sul-dlss/triannon/issues/78
-      skip 'converting returned xsd:long to xsd:nonNegativeInteger not yet implemented'
-    end
     it "TextQuoteSelector" do
-      stored_target_obj_url = "#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1"
+      stored_target_obj_url = "#{triannon_anno_container}/#{target_container_id}"
       stored_source_obj_url = "#{stored_target_obj_url}#source"
       stored_selector_obj_url = "http://localhost:8983/fedora/rest/.well-known/genid/f875342e-d8d7-475a-8085-1e07f1f8b674"
       source_url = "http://purl.stanford.edu/kq131cs7229.html"
@@ -635,7 +632,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       expect(mapper.oa_graph.query([RDF::URI.new(stored_selector_obj_url), nil, nil]).size).to eql 0
     end
     it "FragmentSelector" do
-      stored_target_obj_url = "#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1"
+      stored_target_obj_url = "#{triannon_anno_container}/#{target_container_id}"
       stored_source_obj_url = "#{stored_target_obj_url}#source"
       stored_selector_obj_url = "http://localhost:8983/fedora/rest/.well-known/genid/f875342e-d8d7-475a-8085-1e07f1f8b674"
       source_url = "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg"
@@ -716,14 +713,14 @@ describe Triannon::LdpToOaMapper, :vcr do
       @prefix triannon: <http://triannon.stanford.edu/ns/> .
       @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-      <#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1> a ldp:Container,
+      <#{triannon_anno_container}/#{target_container_id}> a ldp:Container,
            ldp:DirectContainer,
            ldp:RDFSource,
            openannotation:SpecificResource;
          ldp:hasMemberRelation ldp:member;
-         ldp:membershipResource <#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1>;
+         ldp:membershipResource <#{triannon_anno_container}/#{target_container_id}>;
          openannotation:hasSelector <http://localhost:8983/fedora/rest/.well-known/genid/f875342e-d8d7-475a-8085-1e07f1f8b674>;
-         openannotation:hasSource <#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1#source> .
+         openannotation:hasSource <#{triannon_anno_container}/#{target_container_id}#source> .
       ").statements.to_a
       ldp_anno.load_statements_into_graph target_container_stmts
       target_uri = ldp_anno.target_uris.first
@@ -752,7 +749,7 @@ describe Triannon::LdpToOaMapper, :vcr do
   end #map_specific_resource
 
   describe '#map_choice' do
-    let(:stored_body_obj_url) { "#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/b/e14b93b7-3a88-4eb5-9688-7dea7f482d23" }
+    let(:stored_body_obj_url) { "#{triannon_anno_container}/#{body_container_id}" }
     it "default, item both ContentAsText" do
       stored_default_url = "http://localhost:8983/fedora/rest/.well-known/genid/ea68448e-e50c-4274-a204-af477a0d8317"
       default_chars = "I love this Englishly!"
@@ -825,7 +822,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       expect(mapper.oa_graph.query([RDF::URI.new(stored_item_url), nil, nil]).size).to eql 0
     end
     it "default, item both external URIs (default w addl metadata)" do
-      stored_target_obj_url = "#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1"
+      stored_target_obj_url = "#{triannon_anno_container}/#{target_container_id}"
       stored_default_url = "http://localhost:8983/fedora/rest/.well-known/genid/ea68448e-e50c-4274-a204-af477a0d8317"
       default_url = "http://some.external.ref/default"
       stored_item_url = "http://localhost:8983/fedora/rest/.well-known/genid/6051b00b-24e9-4a10-8b7d-0c44fa5fa469"
@@ -879,7 +876,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       expect(mapper.oa_graph.query([RDF::URI.new(stored_item_url), nil, nil]).size).to eql 0
     end
     it "three images" do
-      stored_target_obj_url = "#{triannon_anno_container}/deb27887-1241-4ccc-a09c-439293d73fbb/t/ee774031-74d9-4f5a-9b03-cdd21267e4e1"
+      stored_target_obj_url = "#{triannon_anno_container}/#{target_container_id}"
       stored_default_url = "#{stored_target_obj_url}#default"
       stored_item1_url = "#{stored_target_obj_url}#item1"
       stored_item2_url = "#{stored_target_obj_url}#item2"
