@@ -28,7 +28,7 @@ module OA
         fedora_props = RDF::Vocab::Fcrepo4.properties.map {|p| p.to_s}
         fedora_ns = "http://fedora.info/definitions"
         modeshape_ns = "http://www.jcp.org/jcr"
-         # this is the old way, but just in case ...
+         # describable predates Fedora 4.1.1, but just in case ...
         fedora_describable = "http://purl.org/dc/elements/1.1/describable"
         graph.each { |stmt|
           no_fedora_graph << stmt unless fedora_props.include?(stmt.predicate.to_s) ||
