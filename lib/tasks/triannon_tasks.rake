@@ -1,4 +1,4 @@
-require_relative '../../app/services/triannon/root_annotation_creator'
+require_relative '../../app/services/triannon/ldp_writer'
 
 namespace :triannon do
   desc "set up jetty for triannon"
@@ -15,11 +15,11 @@ namespace :triannon do
     `cp config/jetty/etc/* jetty/etc`
   end
 
-  desc 'Create the root annotation container'
-  task :create_root_container do
+  desc 'Create the uber root annotation container'
+  task :create_uber_root_container do
     unless File.exist? Triannon.triannon_file
       puts "Triannon config file missing: #{Triannon.triannon_file}"
     end
-    Triannon::RootAnnotationCreator.create
+    Triannon::LdpWriter.create_basic_container(nil, Triannon.config[:ldp]['uber_container'])
   end
 end

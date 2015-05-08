@@ -63,7 +63,7 @@ describe Triannon::LdpWriter, :vcr do
       cont_url = "#{id}/t"
       resp = conn.get do |req|
         req.url cont_url
-        req.headers['Accept'] = 'text/turtle'
+        req.headers['Accept'] = 'application/x-turtle'
       end
       g = RDF::Graph.new.from_ttl(resp.body)
       full_cont_url = "#{triannon_anno_container}/#{cont_url}"
@@ -80,7 +80,7 @@ describe Triannon::LdpWriter, :vcr do
       ldpw.send(:create_direct_container, RDF::Vocab::OA.hasBody)
       resp = conn.get do |req|
         req.url "#{id}/b"
-        req.headers['Accept'] = 'text/turtle'
+        req.headers['Accept'] = 'application/x-turtle'
       end
       g = RDF::Graph.new.from_ttl(resp.body)
       full_cont_url = "#{triannon_anno_container}/#{id}/b"
