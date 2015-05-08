@@ -194,14 +194,22 @@ describe Triannon::LdpWriter, :vcr do
         @uber_cont = @uber_cont[1..-1] if @uber_cont.start_with?('/')
         @uber_cont.chop! if @uber_cont.end_with?('/')
         @created_before_slug = 'created_before'
-        Triannon::LdpWriter.create_basic_container(@uber_cont, @created_before_slug)
+        begin
+          Triannon::LdpWriter.create_basic_container(@uber_cont, @created_before_slug)
+        rescue Faraday::ConnectionFailed
+          # probably here due to vcr cassette
+        end
         @cont_urls_to_delete_after_testing << "#{@ldp_url}/#{@uber_cont}/#{@created_before_slug}"
       end
       after(:all) do
         @cont_urls_to_delete_after_testing.each { |cont_url|
-          if Triannon::LdpWriter.container_exist?(cont_url.split(@ldp_url).last)
-            Triannon::LdpWriter.delete_container cont_url
-            Faraday.new(url: "#{cont_url}/fcr:tombstone").delete
+          begin
+            if Triannon::LdpWriter.container_exist?(cont_url.split(@ldp_url).last)
+              Triannon::LdpWriter.delete_container cont_url
+              Faraday.new(url: "#{cont_url}/fcr:tombstone").delete
+            end
+          rescue Faraday::ConnectionFailed
+            # probably here due to vcr cassette
           end
         }
       end
