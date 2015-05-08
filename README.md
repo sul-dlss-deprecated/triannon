@@ -24,7 +24,10 @@ $ rails g triannon:install
 
 Edit the `config/triannon.yml` file:
 
-* `ldp_url:` Points to the root annotations container on your LDP server
+* `ldp:` Properties of LDP server
+  * `url:` the baseurl of LDP server
+  * `uber_container:` name of an LDP Basic Container holding specific anno containers
+  * `anno_containers:`  (Future: the names of LDP Basic Containers holding individual annos)
 * `solr_url:` Points to the baseurl of Solr instance configured for Triannon
 * `triannon_base_url:` Used as the base url for all annotations hosted by your Triannon server.  Identifiers from the LDP server will be appended to this base-url.  Generally something like "https://your-triannon-rails-box/annotations", as "/annotations" is added to the path by the Triannon gem
 
