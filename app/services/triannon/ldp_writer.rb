@@ -50,7 +50,8 @@ module Triannon
     # @param [String] path the path part of the container url, after the ldp base url
     # @return [Boolean] true if container already exists; false otherwise
     def self.container_exist? path
-      base_url = Triannon.config[:ldp]['url']
+      base_url = Triannon.config[:ldp]['url'].strip
+      path.strip!
       separator = (base_url.end_with?('/') || path.start_with?('/')) ? "" : '/'
       conn = Faraday.new url: base_url + separator + path
       resp = conn.head
@@ -61,6 +62,68 @@ module Triannon
       end
     end
 
+    # Creates an empty LDP BasicContainer in LDP Storage
+    # @param [String] parent_path the path part, after the ldp base url -- in
+    #   essence, the LDP BasicContainer that will be the parent of the
+    #   to-be-created BasicContainer.
+    # @param [String] slug the value to send in Http Header 'Slug' -- this is
+    #   appended to the parent container's path to become the id of the newly
+    #   created BasicContainer
+    # @return [Boolean] true if the container was created; false otherwise
+    def self.create_basic_container parent_path, slug
+      if slug.blank?
+        puts "create_basic_container called with nil or empty slug, parent_path '#{parent_path}'"
+        return false
+      end
+      base_url = Triannon.config[:ldp]['url'].strip
+      base_url.chop! if base_url.end_with?('/')
+      slug.strip!
+      slug = slug[1..-1] if slug.start_with?('/')
+      if parent_path
+        parent_path.strip!
+        parent_path = parent_path[1..-1] if parent_path.start_with?('/')
+        parent_path.chop! if parent_path.end_with?('/')
+      end
+
+      full_path = (parent_path ? parent_path + '/' : "") + slug
+      full_url = base_url + '/' + full_path
+
+      if container_exist? full_path
+        puts "Container #{full_url} already exists."
+        false
+      else
+        g = RDF::Graph.new
+        null_rel_uri = RDF::URI.new
+        g << [null_rel_uri, RDF.type, RDF::Vocab::LDP.BasicContainer]
+        conn = Faraday.new url: base_url + (parent_path ? '/' + parent_path : "")
+        resp = conn.post do |req|
+          # Note from Fcrepo docs:
+          #  https://wiki.duraspace.org/display/FEDORA41/RESTful+HTTP+API+-+Containers#RESTfulHTTPAPI-Containers-BluePOSTCreatenewresourceswithinaLDPcontainer
+          #   "If the MIME type corresponds to a supported RDF format or SPARQL-Update, the uploaded content will be
+          #   parsed as RDF and used to populate the child node properties.  RDF will be interpreted using the current
+          #   resource as the base URI (e.g. <> will be expanded to the current URI)."
+          # Thus, the next line is needed even if the body of this POST is empty
+          req.headers['Content-Type'] = 'text/turtle'
+          req.headers['Slug'] = slug
+          req.body = g.to_ttl
+        end
+
+        if resp.status == 201
+          new_url = resp.headers['Location'] ? resp.headers['Location'] : resp.headers['location']
+          if new_url == full_url
+            puts "Created Basic Container #{new_url}"
+            true
+          else
+            puts "Created Basic Container #{new_url} instead of #{full_url}"
+            false
+          end
+        else
+          puts "Unable to create Basic Container #{full_url}:  LDP Storage response status #{resp.status}; body #{resp.body}"
+          false
+        end
+      end
+    end
+
 
     # @param [Triannon::Annotation] anno a Triannon::Annotation object
     # @param [String] id the unique id for the LDP container for the passed
@@ -68,7 +131,15 @@ module Triannon
     def initialize(anno, id = nil)
       @anno = anno
       @id = id
-      @base_uri = "#{Triannon.config[:ldp]['url']}/#{Triannon.config[:ldp]['uber_container']}"
+      base_url = Triannon.config[:ldp]['url'].strip
+      base_url.chop! if base_url.end_with?('/')
+      container_path = Triannon.config[:ldp]['uber_container']
+      if container_path
+        container_path.strip!
+        container_path = container_path[1..-1] if container_path.start_with?('/')
+        container_path.chop! if container_path.end_with?('/')
+      end
+      @base_uri = "#{base_url}/#{container_path}"
     end
 
     # creates a stored LDP container for this object's Annotation, without its
