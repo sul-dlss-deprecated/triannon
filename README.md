@@ -143,6 +143,11 @@ There is a bundled rake task for running triannon in a test rails application, b
 
 ## One time setup
 
+### Set up the testing Rails app that uses triannon gem
+```console
+$ rake engine_cart:generate # (first run only)
+```
+
 ### Set up a local instance of Fedora4
 ```console
 $ rake jetty:download
@@ -155,11 +160,6 @@ triannon:jetty_setup task does the following:
 * turns off basic authorization in Fedora4
 * sets up a Triannon flavored Solr
 
-### Set up the testing Rails app that uses triannon gem
-```console
-$ rake engine_cart:generate # (first run only)
-```
-
 ### Start jetty
 ```console
 $ rake jetty:start
@@ -171,8 +171,7 @@ Note that jetty can be very sloooooooow to start up with Fedora and Solr.
 Go to http://localhost:8983/solr/#/triannon
 or to http://localhost:8983/solr/triannon/select
 
-If all is well, you will not get an error message; the triannon core exists in Solr.  If all is not
-well, try:
+If all is well, you will not get an error message; the triannon core exists in Solr.  If all is not well, try:
 
 ```console
 $ rake jetty:stop
