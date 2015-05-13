@@ -50,7 +50,7 @@ describe Triannon::LdpWriter, :vcr do
       g = RDF::Graph.new.from_ttl(resp.body)
       full_url = "#{triannon_anno_container}/#{base_pid}"
       expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
-      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.motivatedBy, RDF::IIIFPresentation.painting]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.motivatedBy, RDF::Vocab::IIIF.painting]).size).to eql 1
     end
     it 'keeps multiple motivations if present' do
       my_anno = Triannon::Annotation.new data: '{
