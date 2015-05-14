@@ -167,6 +167,7 @@ module Triannon
       g = OA::Graph.new(g)
       g.remove_non_base_statements
       g.make_null_relative_uri_out_of_blank_node
+      g << [RDF::URI.new, RDF.type, RDF::Vocab::LDP.BasicContainer]
 
       @id = create_resource g.to_ttl
     end

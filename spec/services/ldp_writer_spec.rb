@@ -16,7 +16,7 @@ describe Triannon::LdpWriter, :vcr do
   let(:conn) { Faraday.new(url: triannon_anno_container) }
 
   context "#create_base" do
-    it 'LDP store creates retrievable object representing the annotation and returns id' do
+    it 'LDP store creates Basic Container for the annotation and returns id' do
       new_pid = ldpw.create_base
       resp = conn.get do |req|
         req.url new_pid
@@ -25,6 +25,7 @@ describe Triannon::LdpWriter, :vcr do
       g = RDF::Graph.new.from_ttl(resp.body)
       full_url = "#{triannon_anno_container}/#{new_pid}"
       expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::Vocab::OA.Annotation]).size).to eql 1
+      expect(g.query([RDF::URI.new(full_url), RDF.type, RDF::Vocab::LDP.BasicContainer]).size).to eql 1
       expect(g.query([RDF::URI.new(full_url), RDF::Vocab::OA.motivatedBy, RDF::Vocab::OA.commenting]).size).to eql 1
     end
     it 'IIIF anno has sc:painting motivation' do
