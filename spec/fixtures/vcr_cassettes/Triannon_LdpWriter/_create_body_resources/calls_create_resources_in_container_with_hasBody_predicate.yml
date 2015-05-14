@@ -6,10 +6,12 @@ http_interactions:
     body:
       encoding: UTF-8
       string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
         @prefix oa: <http://www.w3.org/ns/oa#> .
         @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
-        <> a oa:Annotation;
+        <> a oa:Annotation,
+             ldp:BasicContainer;
            oa:motivatedBy oa:commenting .
     headers:
       User-Agent:
@@ -28,23 +30,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"66d246ddc25765be826307fc510c12e8888309b1"'
+      - '"084d3f699f95067409fd3e668da8f4e257c5c006"'
       Last-Modified:
-      - Tue, 05 May 2015 00:48:22 GMT
+      - Thu, 14 May 2015 23:13:25 GMT
       Content-Length:
       - '87'
       Location:
-      - http://localhost:8983/fedora/rest/anno/3b/72/1f/13/3b721f13-9334-4d87-9aa9-502ae9bf9ac5
+      - http://localhost:8983/fedora/rest/anno/bc/ef/e0/74/bcefe074-b6de-425d-9d21-e4e7bae47496
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/3b/72/1f/13/3b721f13-9334-4d87-9aa9-502ae9bf9ac5
+      string: http://localhost:8983/fedora/rest/anno/bc/ef/e0/74/bcefe074-b6de-425d-9d21-e4e7bae47496
     http_version: 
-  recorded_at: Tue, 05 May 2015 00:48:22 GMT
+  recorded_at: Thu, 14 May 2015 23:13:25 GMT
 - request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno/3b/72/1f/13/3b721f13-9334-4d87-9aa9-502ae9bf9ac5
+    uri: http://localhost:8983/fedora/rest/anno/bc/ef/e0/74/bcefe074-b6de-425d-9d21-e4e7bae47496
     body:
       encoding: UTF-8
       string: |
@@ -54,7 +56,7 @@ http_interactions:
 
         <> a ldp:DirectContainer;
            ldp:hasMemberRelation oa:hasBody;
-           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/3b/72/1f/13/3b721f13-9334-4d87-9aa9-502ae9bf9ac5> .
+           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/bc/ef/e0/74/bcefe074-b6de-425d-9d21-e4e7bae47496> .
     headers:
       User-Agent:
       - Faraday v0.9.1
@@ -74,18 +76,18 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"83255ccea4f38b80240c1eb8cb239837a423c228"'
+      - '"4793075c79ef505089e3e3f6ec1a7637ca54411e"'
       Last-Modified:
-      - Tue, 05 May 2015 00:48:22 GMT
+      - Thu, 14 May 2015 23:13:25 GMT
       Content-Length:
       - '89'
       Location:
-      - http://localhost:8983/fedora/rest/anno/3b/72/1f/13/3b721f13-9334-4d87-9aa9-502ae9bf9ac5/b
+      - http://localhost:8983/fedora/rest/anno/bc/ef/e0/74/bcefe074-b6de-425d-9d21-e4e7bae47496/b
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/3b/72/1f/13/3b721f13-9334-4d87-9aa9-502ae9bf9ac5/b
+      string: http://localhost:8983/fedora/rest/anno/bc/ef/e0/74/bcefe074-b6de-425d-9d21-e4e7bae47496/b
     http_version: 
-  recorded_at: Tue, 05 May 2015 00:48:22 GMT
+  recorded_at: Thu, 14 May 2015 23:13:25 GMT
 recorded_with: VCR 2.9.3

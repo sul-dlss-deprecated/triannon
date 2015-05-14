@@ -215,18 +215,17 @@ module Triannon
 
   protected
 
-    # POSTS a ttl representation of a graph to an existing LDP container in the
-    #   LDP store
-    # @param [String] ttl a turtle representation of RDF data to be put in the
-    #   LDP container
-    # @param [String] parent_path the path portion of the url for the LDP parent
-    #   container for this resource if no path is supplied, then the resource
-    #   will be created as a child of the root annotation; expected paths would
-    #   also be (anno_id)/t  for a target resource (inside the target container
-    #   of anno_id) or (anno_id)/b for a body resource (inside the body
-    #   container of anno_id)
-    # @return [String] path_id representing the unique path of the newly created LDP
-    #   container
+    # POSTS a ttl representation of a graph to an existing LDP container in the LDP store,
+    #   which will cause the LDP store to create a new container that is a child of
+    #   the existing container.
+    # @param [String] ttl a turtle representation of RDF data to be put in the newly created LDP container
+    # @param [String] parent_path the path portion of the url for the LDP parent container for this resource.
+    #   if no path is supplied, then the resource will be created as a child of the root annotation;
+    #   expected paths would also be
+    #     (anno_id)/t  for a target resource (new container to be created inside the target container of anno_id)
+    #     or
+    #     (anno_id)/b for a body resource (new container to be created inside the body container of anno_id)
+    # @return [String] path_id representing the unique path of the newly created LDP container
     def create_resource ttl, parent_path = nil
       return if !ttl || ttl.empty?
 
@@ -289,6 +288,7 @@ module Triannon
       resource_ids = []
       predicate_solns.each { |predicate_stmt |
         graph_for_resource = RDF::Graph.new
+        graph_for_resource << [RDF::URI.new, RDF.type, RDF::Vocab::LDP.BasicContainer]
         predicate_obj = predicate_stmt.object
         if predicate_obj.is_a?(RDF::Node)
           # we need to use the null relative URI representation of blank nodes
@@ -385,6 +385,7 @@ module Triannon
             graph_for_resource.delete(s)
           }
         }
+
         if (predicate == RDF::Vocab::OA.hasTarget)
           resource_ids << create_resource(graph_for_resource.to_ttl, "#{@id}/t")
         else
