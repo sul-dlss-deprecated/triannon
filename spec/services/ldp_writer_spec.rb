@@ -207,6 +207,8 @@ describe Triannon::LdpWriter, :vcr do
     end
     context "after create_resources_in_container" do
       before(:all) do
+        @cassette_name = "Triannon_LdpWriter/after_create_body_resources"
+        VCR.insert_cassette(@cassette_name)
         my_ldpw = Triannon::LdpWriter.new @anno
         @anno_id = my_ldpw.create_base
         my_ldpw.create_body_container
@@ -215,6 +217,9 @@ describe Triannon::LdpWriter, :vcr do
         @body_child_path = "#{@anno_id}/b/#{body_uuids[0]}"
         @body_child_url = "#{@root_anno_url}/#{@body_child_path}"
       end 
+      after(:all) do
+        VCR.eject_cassette(@cassette_name)
+      end
       it 'correct body content in new body child container' do
         resp = conn.get do |req|
           req.url @body_child_path
@@ -257,6 +262,8 @@ describe Triannon::LdpWriter, :vcr do
     end
     context "after create_resources_in_container" do
       before(:all) do
+        @cassette_name = "Triannon_LdpWriter/after_create_target_resources"
+        VCR.insert_cassette(@cassette_name)
         my_ldpw = Triannon::LdpWriter.new @anno
         @anno_id = my_ldpw.create_base
         my_ldpw.create_target_container
@@ -264,6 +271,9 @@ describe Triannon::LdpWriter, :vcr do
         expect(target_uuids.size).to eql 1
         @target_child_path = "#{@anno_id}/t/#{target_uuids[0]}"
         @target_child_url = "#{@root_anno_url}/#{@target_child_path}"
+      end
+      after(:all) do
+        VCR.eject_cassette(@cassette_name)
       end
       it 'correct target content in new target child container' do
         resp = conn.get do |req|
