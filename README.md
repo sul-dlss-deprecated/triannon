@@ -4,7 +4,7 @@
 
 Store Open Annotation in Fedora4 to support the Linked Data for Libraries use cases.
 
-## Installation into Your Rails Application
+## Installation into Your Existing Rails Application
 
 Add this line to your Rails application's Gemfile
 
@@ -12,12 +12,14 @@ Add this line to your Rails application's Gemfile
 gem 'triannon'
 ```
 
-Then execute:
+Then install the gems:
+
 ```console
 $ bundle install
 ```
 
 Then run the triannon generator:
+
 ```console
 $ rails g triannon:install
 ```
@@ -49,9 +51,9 @@ gem 'rack-cache'
 gem 'rest-client-components'
 ```
 
-    * bundle install
+  * bundle install
 
-  * create a  config/initializers/rest_client.rb
+  * create config/initializers/rest_client.rb
 
 ```ruby
 require 'restclient/components'
@@ -144,60 +146,53 @@ There is a bundled rake task for running triannon in a test rails application, b
 ## One time setup
 
 ### Set up the testing Rails app that uses triannon gem
+
 ```console
 $ rake engine_cart:generate # (first run only)
 ```
 
-### Set up a local instance of Fedora4
+### Set up a local instance of Fedora4 and Solr
+
 ```console
 $ rake jetty:download
 $ rake jetty:unzip
 $ rake jetty:environment
-$ rake triannon:jetty_setup
+$ rake triannon:jetty_config
 ```
 
-triannon:jetty_setup task does the following:
+triannon:jetty_config task does the following:
 * turns off basic authorization in Fedora4
-* sets up a Triannon flavored Solr
+* sets up a Triannon flavored Solr core
 
 ### Start jetty
+
 ```console
 $ rake jetty:start
 ```
 
 Note that jetty can be very sloooooooow to start up with Fedora and Solr.
 
-#### Check if Solr is up
-Go to http://localhost:8983/solr/#/triannon
-or to http://localhost:8983/solr/triannon/select
+#### Check if Solr and Fedora are up
+Go to 
+* http://localhost:8983/solr/#/triannon - Solr admin GUI page, you should not see any error text in your browser 
+* http://localhost:8983/solr/triannon/select - actual Solr query; should give http status other than 200 if there is a problem
 
-If all is well, you will not get an error message; the triannon core exists in Solr.  If all is not well, try:
+Go to 
+* http://localhost:8983/fedora/rest/ - you should see a fedora object.
 
-```console
-$ rake jetty:stop
-$ rake triannon:jetty_setup
-$ rake jetty:start
-```
-
-and then check again.
-
-
-#### Check if Fedora4 is up
-Go to http://localhost:8983/fedora/rest/
-
-If all is well, you will not get an error message.  If all is not well, try:
+If all is not well for Fedora or Solr, try:
 
 ```console
-$ rake jetty:stop
-$ rake jetty:clean
-$ rake triannon:jetty_startup
-$ rake jetty:start
+$ rake triannon:jetty_reset
 ```
 
-and check for Solr and Fedora again.
+This stops jetty, cleans out the jetty directory, recreates it anew from the download, configures jetty for Triannon, and starts jetty.
 
-#### Generate uber root annotations container
-After you ensure that Fedora4 is running:
+Then check the Solr and Fedora urls again.
+
+
+#### Generate uber root annotations container in Fedora
+After you ensure that Fedora is running, you need to create the root anno container using the configuration of test rails app created by engine_cart:
 
 ```console
 $ cd spec/internal
@@ -206,7 +201,8 @@ $ cd ../..
 ```
 
 #### Configure spec/internal/config/triannon.yml as specified above
-You probably won't need to change this file.
+NOTE:  You probably won't need to change this file - it will work with the jetty setup provided.
+
 ```console
 $ vi spec/internal/config/triannon.yml
 ```
