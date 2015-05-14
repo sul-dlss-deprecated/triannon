@@ -1,16 +1,21 @@
 require_relative '../../app/services/triannon/ldp_writer'
 
 namespace :triannon do
-  desc "set up jetty for triannon"
-  task :jetty_setup => [:solr_jetty_setup, :disable_fedora_auth_in_jetty]
+  desc "clean out then reset jetty from scratch for Triannon - starts jetty"
+  task :jetty_reset => ['jetty:stop', 'jetty:clean', 'jetty:environment', :jetty_config, 'jetty:start']
 
-  desc "set up triannon Solr in jetty"
-  task :solr_jetty_setup do
+  desc "configure Fedora and Solr in jetty for triannon"
+  task :jetty_config => [:solr_jetty_config, :disable_fedora_auth_in_jetty]
+
+# don't display this in rake -T
+#  desc "set up triannon core in jetty Solr"
+  task :solr_jetty_config do
     `cp -r config/solr/triannon-core jetty/solr`
     `cp config/solr/solr.xml jetty/solr`
   end
 
-  desc "disable fedora basic authorization in jetty"
+# don't display this in rake -T
+#  desc "disable fedora basic authorization in jetty"
   task :disable_fedora_auth_in_jetty do
     `cp config/jetty/etc/* jetty/etc`
   end
