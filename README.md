@@ -4,7 +4,7 @@
 
 Store Open Annotation in Fedora4 to support the Linked Data for Libraries use cases.
 
-## Installation into Your Rails Application
+## Installation into Your Existing Rails Application
 
 Add this line to your Rails application's Gemfile
 
@@ -12,12 +12,14 @@ Add this line to your Rails application's Gemfile
 gem 'triannon'
 ```
 
-Then execute:
+Then install the gems:
+
 ```console
 $ bundle install
 ```
 
 Then run the triannon generator:
+
 ```console
 $ rails g triannon:install
 ```
@@ -49,9 +51,9 @@ gem 'rack-cache'
 gem 'rest-client-components'
 ```
 
-    * bundle install
+  * bundle install
 
-  * create a  config/initializers/rest_client.rb
+  * create config/initializers/rest_client.rb
 
 ```ruby
 require 'restclient/components'
@@ -144,11 +146,13 @@ There is a bundled rake task for running triannon in a test rails application, b
 ## One time setup
 
 ### Set up the testing Rails app that uses triannon gem
+
 ```console
 $ rake engine_cart:generate # (first run only)
 ```
 
 ### Set up a local instance of Fedora4 and Solr
+
 ```console
 $ rake jetty:download
 $ rake jetty:unzip
@@ -161,6 +165,7 @@ triannon:jetty_config task does the following:
 * sets up a Triannon flavored Solr core
 
 ### Start jetty
+
 ```console
 $ rake jetty:start
 ```
@@ -186,8 +191,8 @@ This stops jetty, cleans out the jetty directory, recreates it anew from the dow
 Then check the Solr and Fedora urls again.
 
 
-#### Generate uber root annotations container
-After you ensure that Fedora4 is running:
+#### Generate uber root annotations container in Fedora
+After you ensure that Fedora is running, you need to create the root anno container using the configuration of test rails app created by engine_cart:
 
 ```console
 $ cd spec/internal
@@ -196,7 +201,8 @@ $ cd ../..
 ```
 
 #### Configure spec/internal/config/triannon.yml as specified above
-NOTE:  You probably won't need to change this file for development purposes
+NOTE:  You probably won't need to change this file - it will work with the jetty setup provided.
+
 ```console
 $ vi spec/internal/config/triannon.yml
 ```
