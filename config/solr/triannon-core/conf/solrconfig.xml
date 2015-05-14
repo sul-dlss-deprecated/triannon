@@ -4,11 +4,15 @@
      this file, see http://wiki.apache.org/solr/SolrConfigXml. 
 -->
 <config>
-  <luceneMatchVersion>4.7</luceneMatchVersion>
+  <luceneMatchVersion>4.10.4</luceneMatchVersion>
+
+  <!-- solr lib dirs -->
+  <lib dir="../lib/contrib/analysis-extras/lib" />
+  <lib dir="../lib/contrib/analysis-extras/lucene-libs" />
 
   <dataDir>${solr.data.dir:}</dataDir>
 
-  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.NRTCachingDirectoryFactory}"/>
+  <directoryFactory name="DirectoryFactory" class="${solr.directoryFactory:solr.StandardDirectoryFactory}"/>
   <codecFactory class="solr.SchemaCodecFactory"/>
   <schemaFactory class="ClassicIndexSchemaFactory"/>
 
@@ -42,21 +46,21 @@
          It should only have the most common facets -->
     <listener event="newSearcher" class="solr.QuerySenderListener">
       <arr name="queries">
-		<lst>
+        <lst>
           <!-- default query for all objects: populate facet caches -->
           <int name="rows">0</int>
           <str name="fl">score</str>
           <bool name="facet">true</bool>
           <int name="facet.mincount">1</int>
           <str name="facet.field">motivation</str>
-		    <str name="f.motivation.facet.method">enum</str>
+            <str name="f.motivation.facet.method">enum</str>
           <str name="facet.field">target_type</str>
             <str name="f.target_type.facet.method">enum</str>
           <str name="facet.field">body_type</str>
             <str name="f.body_type.facet.method">enum</str>
           <str name="facet.field">annotated_at_tdate</str>
         </lst>
-		<lst>
+        <lst>
           <!-- single object query: populate filter and fieldValue caches -->
           <str name="q">id:a*</str>
           <str name="defType">lucene</str>
@@ -68,7 +72,7 @@
             <str name="f.motivation.facet.method">enum</str>
           <str name="facet.field">target_type</str>
             <str name="f.target_type.facet.method">enum</str>
-		  <str name="facet.field">body_type</str>
+          <str name="facet.field">body_type</str>
             <str name="f.body_type.facet.method">enum</str>
           <str name="facet.field">annotated_at_tdate</str>
         </lst>
@@ -78,7 +82,7 @@
     <!-- A First Searcher is opened when there is _no_ existing (current) Searcher. ("fast warmup") -->
     <listener event="firstSearcher" class="solr.QuerySenderListener">
       <arr name="queries">
-		<lst>
+        <lst>
           <!-- default query for all objects: populate facet caches -->
           <int name="rows">0</int>
           <str name="fl">score</str>
@@ -88,10 +92,10 @@
             <str name="f.motivation.facet.method">enum</str>
           <str name="facet.field">target_type</str>
             <str name="f.target_type.facet.method">enum</str>
-		  <str name="facet.field">body_type</str>
+          <str name="facet.field">body_type</str>
             <str name="f.body_type.facet.method">enum</str>
         </lst>
-		<lst>
+        <lst>
           <!-- single object query: populate filter and fieldValue caches -->
           <str name="q">id:a*</str>
           <str name="defType">lucene</str>
@@ -103,7 +107,7 @@
             <str name="f.motivation.facet.method">enum</str>
           <str name="facet.field">target_type</str>
             <str name="f.target_type.facet.method">enum</str>
-		  <str name="facet.field">body_type</str>
+          <str name="facet.field">body_type</str>
             <str name="f.body_type.facet.method">enum</str>
         </lst>
       </arr>
@@ -123,9 +127,9 @@
   <requestHandler name="/select" class="solr.SearchHandler" default="true">
     <lst name="defaults">
       <str name="echoParams">explicit</str>
-	  <str name="sort">score desc, annotated_at_tdate desc</str>
+      <str name="sort">score desc, annotated_at_tdate desc</str>
       <int name="rows">2500</int>
-	  <str name="fl">* score</str>
+      <str name="fl">* score</str>
       <str name="wt">ruby</str>
       <str name="indent">true</str>
 	  
@@ -140,46 +144,46 @@
       <str name="df">anno_jsonld</str>
       <str name="q.op">AND</str>
 	  
-	  <str name="qf">
+      <str name="qf">
   	    body_chars_exact^3
   	    body_chars_unstem^2
   	    body_chars_stem
-	    annotated_by_unstem^2
-	    annotated_by_stem
-	    target_url
-	    body_url
-	    motivation
-	    id
-	  </str>
-	  <str name="pf"> <!-- (phrase boost within result set) -->
-    	body_chars_exact^15
+        annotated_by_unstem^2
+        annotated_by_stem
+        target_url
+        body_url
+        motivation
+        id
+      </str>
+      <str name="pf"> <!-- (phrase boost within result set) -->
+        body_chars_exact^15
         body_chars_unstem^10
         body_chars_stem^5
   	    annotated_by_unstem^10
   	    annotated_by_stem^5
-	  </str>
-	  <str name="pf3">  <!-- (token trigrams boost within result set) -->
+      </str>
+      <str name="pf3">  <!-- (token trigrams boost within result set) -->
       	body_chars_exact^9
         body_chars_unstem^6
         body_chars_stem^3
         annotated_by_unstem^6
         annotated_by_stem^3
-	  </str>
-	  <str name="pf2"> <!--(token bigrams boost within result set) -->
+      </str>
+      <str name="pf2"> <!--(token bigrams boost within result set) -->
       	body_chars_exact^6
         body_chars_unstem^4
         body_chars_stem^2
         annotated_by_unstem^4
         annotated_by_stem^2
-	  </str>
+      </str>
       
-	  <bool name="facet">true</bool>
+      <bool name="facet">true</bool>
       <int name="facet.mincount">1</int>
       <str name="facet.field">motivation</str>
         <str name="f.motivation.facet.method">enum</str>
       <str name="facet.field">target_type</str>
         <str name="f.target_type.facet.method">enum</str>
-	  <str name="facet.field">body_type</str>
+      <str name="facet.field">body_type</str>
         <str name="f.body_type.facet.method">enum</str>
       <str name="facet.field">annotated_at_tdate</str>
 	  
@@ -236,4 +240,3 @@
   </admin>
 
 </config>
-
