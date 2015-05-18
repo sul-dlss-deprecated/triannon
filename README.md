@@ -33,10 +33,10 @@ Edit the `config/triannon.yml` file:
 * `solr_url:` Points to the baseurl of Solr instance configured for Triannon
 * `triannon_base_url:` Used as the base url for all annotations hosted by your Triannon server.  Identifiers from the LDP server will be appended to this base-url.  Generally something like "https://your-triannon-rails-box/annotations", as "/annotations" is added to the path by the Triannon gem
 
-Generate the uber root annotations container on your LDP server:
+Generate the root annotations containers on your LDP server:
 
 ```console
-$ rake triannon:create_uber_root_container
+$ rake triannon:create_root_containers
 ```
 
 Set up caching for jsonld context documents:
@@ -191,12 +191,12 @@ This stops jetty, cleans out the jetty directory, recreates it anew from the dow
 Then check the Solr and Fedora urls again.
 
 
-#### Generate uber root annotations container in Fedora
+#### Generate root annotations containers in Fedora
 After you ensure that Fedora is running, you need to create the root anno container using the configuration of test rails app created by engine_cart:
 
 ```console
 $ cd spec/internal
-$ rake triannon:create_uber_root_container
+$ rake triannon:create_root_containers
 $ cd ../..
 ```
 

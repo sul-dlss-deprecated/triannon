@@ -7,24 +7,38 @@ namespace :triannon do
   desc "configure Fedora and Solr in jetty for triannon"
   task :jetty_config => [:solr_jetty_config, :disable_fedora_auth_in_jetty]
 
-# don't display this in rake -T
-#  desc "set up triannon core in jetty Solr"
+	# don't display this in rake -T
+	#desc "set up triannon core in jetty Solr"
   task :solr_jetty_config do
     `cp -r config/solr/triannon-core jetty/solr`
     `cp config/solr/solr.xml jetty/solr`
   end
 
-# don't display this in rake -T
-#  desc "disable fedora basic authorization in jetty"
+	# don't display this in rake -T
+	#desc "disable fedora basic authorization in jetty"
   task :disable_fedora_auth_in_jetty do
     `cp config/jetty/etc/* jetty/etc`
   end
 
-  desc 'Create the uber root annotation container'
+
+  # ------- root container tasks ----------
+
+  # don't display this in rake -T
+  #desc 'ONLY WORKS WITHIN RAILS APP: Create the uber root annotation container per triannon.yml'
   task :create_uber_root_container do
     unless File.exist? Triannon.triannon_file
-      puts "Triannon config file missing: #{Triannon.triannon_file}"
+      raise "Triannon config file missing: #{Triannon.triannon_file}"
     end
     Triannon::LdpWriter.create_basic_container(nil, Triannon.config[:ldp]['uber_container'])
   end
-end
+
+  desc "ONLY WORKS WITHIN RAILS APP: Create root anno containers per triannon.yml"
+  task :create_root_containers => :create_uber_root_container do
+    unless File.exist? Triannon.triannon_file
+      raise "Triannon config file missing: #{Triannon.triannon_file}"
+    end
+    Triannon.config[:ldp]['anno_containers'].each { |container_name|
+	    Triannon::LdpWriter.create_basic_container(Triannon.config[:ldp]['uber_container'], container_name)
+    }
+  end
+end # namespace triannon
