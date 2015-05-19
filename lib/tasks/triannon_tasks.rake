@@ -27,6 +27,7 @@ namespace :triannon do
   #desc 'ONLY WORKS WITHIN RAILS APP: Create the uber root annotation container per triannon.yml'
   task :create_uber_root_container do
     unless File.exist? Triannon.triannon_file
+      puts "ERROR:  Triannon config file missing: #{Triannon.triannon_file} - are you in the rails app root directory?"
       raise "Triannon config file missing: #{Triannon.triannon_file}"
     end
     Triannon::LdpWriter.create_basic_container(nil, Triannon.config[:ldp]['uber_container'])
@@ -35,6 +36,7 @@ namespace :triannon do
   desc "ONLY WORKS WITHIN RAILS APP: Create root anno containers per triannon.yml"
   task :create_root_containers => :create_uber_root_container do
     unless File.exist? Triannon.triannon_file
+      puts "ERROR:  Triannon config file missing: #{Triannon.triannon_file} - are you in the rails app root directory?"
       raise "Triannon config file missing: #{Triannon.triannon_file}"
     end
     Triannon.config[:ldp]['anno_containers'].each { |container_name|
