@@ -1,15 +1,56 @@
 ---
 http_interactions:
 - request:
+    method: head
+    uri: http://localhost:8983/fedora/rest/anno/joy
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Etag:
+      - '"0d918d674affd48c144124feb87030b6176de0d9"'
+      Last-Modified:
+      - Fri, 22 May 2015 19:38:54 GMT
+      Link:
+      - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Container>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      Accept-Patch:
+      - application/sparql-update
+      Accept-Post:
+      - text/turtle,text/rdf+n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      Allow:
+      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
+      Content-Type:
+      - text/tab-separated-values
+      Content-Length:
+      - '0'
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Fri, 22 May 2015 19:47:51 GMT
+- request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno
+    uri: http://localhost:8983/fedora/rest/anno/joy
     body:
       encoding: UTF-8
       string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
         @prefix oa: <http://www.w3.org/ns/oa#> .
         @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
-        <> a oa:Annotation;
+        <> a oa:Annotation,
+             ldp:BasicContainer;
            oa:motivatedBy oa:commenting .
     headers:
       User-Agent:
@@ -28,23 +69,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"66b57bfe7113bcb35a4725f826bc1d6983a97776"'
+      - '"859e1a7163fb3c62b6ecceab3f0e2feee73619cc"'
       Last-Modified:
-      - Tue, 05 May 2015 00:48:23 GMT
+      - Fri, 22 May 2015 19:47:51 GMT
       Content-Length:
-      - '87'
+      - '91'
       Location:
-      - http://localhost:8983/fedora/rest/anno/e6/85/4c/97/e6854c97-3b85-4108-8b08-589b03c8a510
+      - http://localhost:8983/fedora/rest/anno/joy/3c/9b/ab/56/3c9bab56-df7d-4fe3-8165-34f10462358d
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/e6/85/4c/97/e6854c97-3b85-4108-8b08-589b03c8a510
+      string: http://localhost:8983/fedora/rest/anno/joy/3c/9b/ab/56/3c9bab56-df7d-4fe3-8165-34f10462358d
     http_version: 
-  recorded_at: Tue, 05 May 2015 00:48:23 GMT
+  recorded_at: Fri, 22 May 2015 19:47:51 GMT
 - request:
     method: delete
-    uri: http://localhost:8983/fedora/rest/anno/e6/85/4c/97/e6854c97-3b85-4108-8b08-589b03c8a510
+    uri: http://localhost:8983/fedora/rest/anno/joy/3c/9b/ab/56/3c9bab56-df7d-4fe3-8165-34f10462358d
     body:
       encoding: US-ASCII
       string: ''
@@ -66,10 +107,10 @@ http_interactions:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Tue, 05 May 2015 00:48:23 GMT
+  recorded_at: Fri, 22 May 2015 19:47:51 GMT
 - request:
     method: get
-    uri: http://localhost:8983/fedora/rest/anno/e6/85/4c/97/e6854c97-3b85-4108-8b08-589b03c8a510
+    uri: http://localhost:8983/fedora/rest/anno/joy/3c/9b/ab/56/3c9bab56-df7d-4fe3-8165-34f10462358d
     body:
       encoding: US-ASCII
       string: ''
@@ -86,16 +127,155 @@ http_interactions:
       message: Gone
     headers:
       Content-Length:
-      - '192'
+      - '196'
       Link:
-      - <http://localhost:8983/fedora/rest/anno/e6/85/4c/97/e6854c97-3b85-4108-8b08-589b03c8a510/fcr:tombstone>;
+      - <http://localhost:8983/fedora/rest/anno/joy/3c/9b/ab/56/3c9bab56-df7d-4fe3-8165-34f10462358d/fcr:tombstone>;
         rel="hasTombstone"
       Content-Type:
       - text/turtle
     body:
       encoding: UTF-8
-      string: Discovered tombstone resource at /anno/e6/85/4c/97/e6854c97-3b85-4108-8b08-589b03c8a510
-        {jcr:createdBy=bypassAdmin, jcr:primaryType=fedora:Tombstone, jcr:created=2015-05-04T17:48:23.131-07:00}
+      string: Discovered tombstone resource at /anno/joy/3c/9b/ab/56/3c9bab56-df7d-4fe3-8165-34f10462358d
+        {jcr:createdBy=bypassAdmin, jcr:primaryType=fedora:Tombstone, jcr:created=2015-05-22T12:47:51.730-07:00}
     http_version: 
-  recorded_at: Tue, 05 May 2015 00:48:23 GMT
+  recorded_at: Fri, 22 May 2015 19:47:51 GMT
+- request:
+    method: head
+    uri: http://localhost:8983/fedora/rest/anno/ldpw_spec
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Etag:
+      - '"4e230bbfc829e614e0e17f56c2acc446314f9c50"'
+      Last-Modified:
+      - Fri, 22 May 2015 20:08:24 GMT
+      Link:
+      - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Container>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      Accept-Patch:
+      - application/sparql-update
+      Accept-Post:
+      - text/turtle,text/rdf+n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      Allow:
+      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
+      Content-Type:
+      - text/tab-separated-values
+      Content-Length:
+      - '0'
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Fri, 22 May 2015 20:08:24 GMT
+- request:
+    method: post
+    uri: http://localhost:8983/fedora/rest/anno/ldpw_spec
+    body:
+      encoding: UTF-8
+      string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix oa: <http://www.w3.org/ns/oa#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+        <> a oa:Annotation,
+             ldp:BasicContainer;
+           oa:motivatedBy oa:commenting .
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Prefer:
+      - return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"
+      Content-Type:
+      - application/x-turtle
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - '"5e0050ca58c1f01f3f58b42743d9fec1843268c3"'
+      Last-Modified:
+      - Fri, 22 May 2015 20:08:24 GMT
+      Content-Length:
+      - '97'
+      Location:
+      - http://localhost:8983/fedora/rest/anno/ldpw_spec/46/bb/fe/7d/46bbfe7d-f6e1-41f9-a0fe-d75742e7718e
+      Content-Type:
+      - text/plain
+    body:
+      encoding: UTF-8
+      string: http://localhost:8983/fedora/rest/anno/ldpw_spec/46/bb/fe/7d/46bbfe7d-f6e1-41f9-a0fe-d75742e7718e
+    http_version: 
+  recorded_at: Fri, 22 May 2015 20:08:24 GMT
+- request:
+    method: delete
+    uri: http://localhost:8983/fedora/rest/anno/ldpw_spec/46/bb/fe/7d/46bbfe7d-f6e1-41f9-a0fe-d75742e7718e
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Prefer:
+      - return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 204
+      message: No Content
+    headers: {}
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Fri, 22 May 2015 20:08:24 GMT
+- request:
+    method: get
+    uri: http://localhost:8983/fedora/rest/anno/ldpw_spec/46/bb/fe/7d/46bbfe7d-f6e1-41f9-a0fe-d75742e7718e
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 410
+      message: Gone
+    headers:
+      Content-Length:
+      - '202'
+      Link:
+      - <http://localhost:8983/fedora/rest/anno/ldpw_spec/46/bb/fe/7d/46bbfe7d-f6e1-41f9-a0fe-d75742e7718e/fcr:tombstone>;
+        rel="hasTombstone"
+      Content-Type:
+      - text/turtle
+    body:
+      encoding: UTF-8
+      string: Discovered tombstone resource at /anno/ldpw_spec/46/bb/fe/7d/46bbfe7d-f6e1-41f9-a0fe-d75742e7718e
+        {jcr:createdBy=bypassAdmin, jcr:primaryType=fedora:Tombstone, jcr:created=2015-05-22T13:08:24.757-07:00}
+    http_version: 
+  recorded_at: Fri, 22 May 2015 20:08:24 GMT
 recorded_with: VCR 2.9.3

@@ -1,0 +1,584 @@
+---
+http_interactions:
+- request:
+    method: head
+    uri: http://localhost:8983/fedora/rest/anno/joy
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Etag:
+      - '"0d918d674affd48c144124feb87030b6176de0d9"'
+      Last-Modified:
+      - Fri, 22 May 2015 19:38:54 GMT
+      Link:
+      - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Container>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      Accept-Patch:
+      - application/sparql-update
+      Accept-Post:
+      - text/turtle,text/rdf+n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      Allow:
+      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
+      Content-Type:
+      - text/tab-separated-values
+      Content-Length:
+      - '0'
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Fri, 22 May 2015 19:47:45 GMT
+- request:
+    method: post
+    uri: http://localhost:8983/fedora/rest/anno/joy
+    body:
+      encoding: UTF-8
+      string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix oa: <http://www.w3.org/ns/oa#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+        <> a oa:Annotation,
+             ldp:BasicContainer;
+           oa:motivatedBy oa:commenting .
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Prefer:
+      - return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"
+      Content-Type:
+      - application/x-turtle
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - '"5f6c1d110c362adba4ef846230d6381bd379eb5b"'
+      Last-Modified:
+      - Fri, 22 May 2015 19:47:45 GMT
+      Content-Length:
+      - '91'
+      Location:
+      - http://localhost:8983/fedora/rest/anno/joy/f1/f3/9f/4d/f1f39f4d-616e-45d1-8804-a36c7026afc8
+      Content-Type:
+      - text/plain
+    body:
+      encoding: UTF-8
+      string: http://localhost:8983/fedora/rest/anno/joy/f1/f3/9f/4d/f1f39f4d-616e-45d1-8804-a36c7026afc8
+    http_version: 
+  recorded_at: Fri, 22 May 2015 19:47:45 GMT
+- request:
+    method: get
+    uri: http://localhost:8983/fedora/rest/anno/joy
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Accept:
+      - application/x-turtle
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Etag:
+      - '"0d918d674affd48c144124feb87030b6176de0d9"'
+      Last-Modified:
+      - Fri, 22 May 2015 19:38:54 GMT
+      Link:
+      - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Container>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      Accept-Patch:
+      - application/sparql-update
+      Accept-Post:
+      - text/turtle,text/rdf+n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      Allow:
+      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
+      Preference-Applied:
+      - return=representation
+      Vary:
+      - Accept, Range, Accept-Encoding, Accept-Language
+      - Prefer
+      Content-Type:
+      - application/x-turtle
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: "@prefix premis: <http://www.loc.gov/premis/rdf/v1#> .\n@prefix image:
+        <http://www.modeshape.org/images/1.0> .\n@prefix sv: <http://www.jcp.org/jcr/sv/1.0>
+        .\n@prefix test: <info:fedora/test/> .\n@prefix nt: <http://www.jcp.org/jcr/nt/1.0>
+        .\n@prefix cnt: <http://www.w3.org/2011/content#> .\n@prefix dcmitype: <http://purl.org/dc/dcmitype/>
+        .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n@prefix xsi: <http://www.w3.org/2001/XMLSchema-instance>
+        .\n@prefix mode: <http://www.modeshape.org/1.0> .\n@prefix oa: <http://www.w3.org/ns/oa#>
+        .\n@prefix triannon: <http://triannon.stanford.edu/ns/> .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        .\n@prefix fedora: <http://fedora.info/definitions/v4/repository#> .\n@prefix
+        xml: <http://www.w3.org/XML/1998/namespace> .\n@prefix ldp: <http://www.w3.org/ns/ldp#>
+        .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix fedoraconfig:
+        <http://fedora.info/definitions/v4/config#> .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0>
+        .\n@prefix prov: <http://www.w3.org/ns/prov#> .\n@prefix foaf: <http://xmlns.com/foaf/0.1/>
+        .\n@prefix dc: <http://purl.org/dc/elements/1.1/> .\n\n\n<http://localhost:8983/fedora/rest/anno/joy>
+        a ldp:RDFSource , ldp:Container , <http://www.jcp.org/jcr/nt/1.0folder> ,
+        <http://www.jcp.org/jcr/nt/1.0hierarchyNode> , <http://www.jcp.org/jcr/nt/1.0base>
+        , <http://www.jcp.org/jcr/mix/1.0created> , fedora:Container , fedora:Resource
+        , ldp:BasicContainer , fedora:Resource , <http://www.jcp.org/jcr/mix/1.0created>
+        , <http://www.jcp.org/jcr/mix/1.0lastModified> , <http://www.jcp.org/jcr/mix/1.0referenceable>
+        , fedora:Container ;\n\tfedora:lastModifiedBy \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfedora:uuid \"0c37072f-477c-4e01-8681-a4c9fd822102\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfedora:createdBy \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfedora:primaryType \"nt:folder\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfedora:created \"2015-05-20T00:39:01.082Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\tfedora:mixinTypes \"fedora:Container\"^^<http://www.w3.org/2001/XMLSchema#string>
+        , \"fedora:Resource\"^^<http://www.w3.org/2001/XMLSchema#string> , \"ldp:BasicContainer\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfedora:lastModified \"2015-05-22T19:38:54.485Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\tfedora:writable \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>
+        ;\n\tfedora:hasParent <http://localhost:8983/fedora/rest/anno> ;\n\tldp:contains
+        <http://localhost:8983/fedora/rest/anno/joy/b6/2b/0d/e4/b62b0de4-6a25-454d-a633-4f2abfe62191>
+        , <http://localhost:8983/fedora/rest/anno/joy/b6/40/64/69/b6406469-3332-4123-8169-e559bca14ec7>
+        , <http://localhost:8983/fedora/rest/anno/joy/ce/b3/5b/38/ceb35b38-10c5-4924-895c-61a480ab5488>
+        , <http://localhost:8983/fedora/rest/anno/joy/ce/27/a3/28/ce27a328-18b7-4153-90db-2b7e6ea5a9b6>
+        , <http://localhost:8983/fedora/rest/anno/joy/ce/55/d6/9f/ce55d69f-b8bd-4617-aa76-35ce5ba80159>
+        , <http://localhost:8983/fedora/rest/anno/joy/ce/3d/fa/81/ce3dfa81-a1ce-4763-ba5c-8b8bf4805c63>
+        , <http://localhost:8983/fedora/rest/anno/joy/af/b5/e4/6c/afb5e46c-9af3-45fa-bf4e-77fd2c973bb1>
+        , <http://localhost:8983/fedora/rest/anno/joy/6a/66/1b/f8/6a661bf8-2841-4b08-abe4-e09de9e38e75>
+        , <http://localhost:8983/fedora/rest/anno/joy/6f/5b/c0/02/6f5bc002-182f-488e-b30e-7a56b0ad3a6b>
+        , <http://localhost:8983/fedora/rest/anno/joy/6f/84/9a/41/6f849a41-5cb1-438a-8f94-9649f0686aa1>
+        , <http://localhost:8983/fedora/rest/anno/joy/6f/c4/9b/e0/6fc49be0-3c2b-487d-94eb-ae00664b6ef9>
+        , <http://localhost:8983/fedora/rest/anno/joy/6f/37/2e/2d/6f372e2d-93c3-48e7-8ea9-1190753d6c10>
+        , <http://localhost:8983/fedora/rest/anno/joy/b7/90/0a/10/b7900a10-5e77-4e7c-97e6-5812cfd8215e>
+        , <http://localhost:8983/fedora/rest/anno/joy/7a/0c/28/43/7a0c2843-f8d0-42a8-8517-bfb376b980ff>
+        , <http://localhost:8983/fedora/rest/anno/joy/86/b1/a6/68/86b1a668-2d66-4c69-923b-325014849d93>
+        , <http://localhost:8983/fedora/rest/anno/joy/86/b2/e5/88/86b2e588-4b69-4c6d-9c3f-4e87ec77ea46>
+        , <http://localhost:8983/fedora/rest/anno/joy/86/8f/21/93/868f2193-8946-42dd-adfc-084fae390ea5>
+        , <http://localhost:8983/fedora/rest/anno/joy/86/59/c4/87/8659c487-0a17-42e5-9604-810e563e732e>
+        , <http://localhost:8983/fedora/rest/anno/joy/bf/a2/9a/3e/bfa29a3e-253d-4421-97e8-b42f9e5ad3a8>
+        , <http://localhost:8983/fedora/rest/anno/joy/74/11/a6/c6/7411a6c6-dcde-4381-8648-f7e03e05356f>
+        , <http://localhost:8983/fedora/rest/anno/joy/74/52/83/51/74528351-ab93-4f57-94a8-1b3f507d4b78>
+        , <http://localhost:8983/fedora/rest/anno/joy/74/8a/c2/b3/748ac2b3-4622-4bbe-83df-9944ca25fb1a>
+        , <http://localhost:8983/fedora/rest/anno/joy/72/a5/28/8e/72a5288e-6575-44ab-83a6-837f7d1fb326>
+        , <http://localhost:8983/fedora/rest/anno/joy/8c/3d/38/35/8c3d3835-3760-4039-8861-49c3d0ab4d7a>
+        , <http://localhost:8983/fedora/rest/anno/joy/dd/c3/55/c5/ddc355c5-ebb3-45fa-9297-bad7c1afdff8>
+        , <http://localhost:8983/fedora/rest/anno/joy/c0/b5/50/c8/c0b550c8-19e0-4400-8849-2b8d3ece9b50>
+        , <http://localhost:8983/fedora/rest/anno/joy/3e/e4/4c/fe/3ee44cfe-d33b-4fc2-972f-bb2c29e54408>
+        , <http://localhost:8983/fedora/rest/anno/joy/89/02/7e/e1/89027ee1-6b22-4f5c-a860-6a63a27fc3d2>
+        , <http://localhost:8983/fedora/rest/anno/joy/89/93/d4/21/8993d421-052c-433e-b713-72ac836d879f>
+        , <http://localhost:8983/fedora/rest/anno/joy/33/04/31/6a/3304316a-7cb8-43b5-8a57-555f3b2e7b92>
+        , <http://localhost:8983/fedora/rest/anno/joy/33/eb/34/f5/33eb34f5-0497-4e50-ab65-0c712c87c42b>
+        , <http://localhost:8983/fedora/rest/anno/joy/33/93/b7/e6/3393b7e6-941d-47c1-84d3-a5eaf88b33ed>
+        , <http://localhost:8983/fedora/rest/anno/joy/33/ac/46/ad/33ac46ad-af95-4ad0-a1fd-310d7fafd280>
+        , <http://localhost:8983/fedora/rest/anno/joy/22/3e/5c/f7/223e5cf7-894e-4f8c-8cce-f06bad000b24>
+        , <http://localhost:8983/fedora/rest/anno/joy/22/73/7a/05/22737a05-8984-40ea-8ba6-0bc842eb9572>
+        , <http://localhost:8983/fedora/rest/anno/joy/22/99/6e/d2/22996ed2-2021-44a2-a82b-d4fe2c13be39>
+        , <http://localhost:8983/fedora/rest/anno/joy/0f/fe/14/22/0ffe1422-632e-472e-99f4-165abd5cfd55>
+        , <http://localhost:8983/fedora/rest/anno/joy/0f/f3/37/aa/0ff337aa-03e5-491d-80ee-258ec02d1853>
+        , <http://localhost:8983/fedora/rest/anno/joy/17/51/22/cc/175122cc-2c48-4557-8000-abe066219576>
+        , <http://localhost:8983/fedora/rest/anno/joy/17/ae/ba/e4/17aebae4-b9ba-4e60-bb57-9c06a521d545>
+        , <http://localhost:8983/fedora/rest/anno/joy/28/2f/17/c5/282f17c5-6b28-449c-a078-b37398e574e3>
+        , <http://localhost:8983/fedora/rest/anno/joy/28/cd/97/5d/28cd975d-2f2d-49ba-93b8-8b002fcb9f8d>
+        , <http://localhost:8983/fedora/rest/anno/joy/c9/be/2b/b6/c9be2bb6-edcb-42f3-a82b-525988c5abd5>
+        , <http://localhost:8983/fedora/rest/anno/joy/c9/d3/3c/1c/c9d33c1c-f17c-4e29-bfd3-96344073f6e6>
+        , <http://localhost:8983/fedora/rest/anno/joy/c9/cc/e3/da/c9cce3da-5ade-46c7-b9cf-c6fe01d7cb1c>
+        , <http://localhost:8983/fedora/rest/anno/joy/0a/c5/4f/2e/0ac54f2e-8c13-447d-8e76-c4be8dcd6ec9>
+        , <http://localhost:8983/fedora/rest/anno/joy/0a/31/de/ec/0a31deec-6826-4f7c-b551-4edeea7334a4>
+        , <http://localhost:8983/fedora/rest/anno/joy/2e/bf/fc/4e/2ebffc4e-bca9-4ff9-971f-add45b510b81>
+        , <http://localhost:8983/fedora/rest/anno/joy/2e/b1/69/ab/2eb169ab-3b4b-4071-9cd3-ac977ecc81fc>
+        , <http://localhost:8983/fedora/rest/anno/joy/2e/da/ec/0d/2edaec0d-9ae2-4186-919e-fc52ee6a6ced>
+        , <http://localhost:8983/fedora/rest/anno/joy/2e/7a/df/b2/2e7adfb2-a10a-4939-9b7f-0572426bf470>
+        , <http://localhost:8983/fedora/rest/anno/joy/2e/9e/d4/c8/2e9ed4c8-6a46-4fa0-9eed-361507af4ede>
+        , <http://localhost:8983/fedora/rest/anno/joy/2e/31/8b/da/2e318bda-b895-4f75-a4e1-77df0b17b60d>
+        , <http://localhost:8983/fedora/rest/anno/joy/93/43/72/7a/9343727a-257a-4454-94a6-f67d1859c783>
+        , <http://localhost:8983/fedora/rest/anno/joy/93/e3/ac/e4/93e3ace4-cc52-477f-8faf-ba5a1ad6f6ca>
+        , <http://localhost:8983/fedora/rest/anno/joy/a6/ba/f7/cd/a6baf7cd-32f5-4e7b-8e6a-d48362630078>
+        , <http://localhost:8983/fedora/rest/anno/joy/45/50/7b/45/45507b45-df57-4d5f-9b59-6cae36d9b95b>
+        , <http://localhost:8983/fedora/rest/anno/joy/45/f9/9a/c4/45f99ac4-dffe-4741-a23a-4d3cfc799350>
+        , <http://localhost:8983/fedora/rest/anno/joy/a2/91/70/46/a2917046-ea8a-4eb0-83b7-611763742921>
+        , <http://localhost:8983/fedora/rest/anno/joy/dc/95/4b/d4/dc954bd4-57c3-4c3e-b85e-f352b98fc689>
+        , <http://localhost:8983/fedora/rest/anno/joy/dc/0b/c9/a8/dc0bc9a8-535c-4850-8121-f43f38a39bac>
+        , <http://localhost:8983/fedora/rest/anno/joy/40/f9/a4/0d/40f9a40d-dcbf-48d7-a4b5-36e8d0317fd7>
+        , <http://localhost:8983/fedora/rest/anno/joy/40/c5/7c/44/40c57c44-0139-4eec-89f4-255d0c0df0fe>
+        , <http://localhost:8983/fedora/rest/anno/joy/07/f4/6c/12/07f46c12-3cb4-4ee5-99a3-8a8f8d898bb9>
+        , <http://localhost:8983/fedora/rest/anno/joy/b9/64/14/d7/b96414d7-1930-4b17-ba8b-102f321500bd>
+        , <http://localhost:8983/fedora/rest/anno/joy/b9/b5/d9/82/b9b5d982-16f6-4cc1-acac-17969c255826>
+        , <http://localhost:8983/fedora/rest/anno/joy/b9/80/a4/eb/b980a4eb-e84c-4bed-898b-6a5a4cf566b6>
+        , <http://localhost:8983/fedora/rest/anno/joy/b9/09/6f/61/b9096f61-1804-4c4d-b622-6ef756f14b53>
+        , <http://localhost:8983/fedora/rest/anno/joy/b9/d8/e4/e3/b9d8e4e3-6fa6-4ae8-aa26-4068db868b50>
+        , <http://localhost:8983/fedora/rest/anno/joy/b9/da/74/61/b9da7461-2b92-49c5-a72f-5f4beed53fcb>
+        , <http://localhost:8983/fedora/rest/anno/joy/73/f1/6b/c7/73f16bc7-d460-4911-9640-74bdb146ad6d>
+        , <http://localhost:8983/fedora/rest/anno/joy/ad/5d/ea/7f/ad5dea7f-d840-4423-8da9-c9210475fa2c>
+        , <http://localhost:8983/fedora/rest/anno/joy/12/e2/9c/07/12e29c07-6927-4784-8725-65d5e7a537a0>
+        , <http://localhost:8983/fedora/rest/anno/joy/60/35/bb/5d/6035bb5d-c518-4fd9-a988-3a3a1c0a73c5>
+        , <http://localhost:8983/fedora/rest/anno/joy/60/4c/83/1b/604c831b-78db-45a1-837a-e6e0238c28e3>
+        , <http://localhost:8983/fedora/rest/anno/joy/60/f8/23/82/60f82382-db83-4de3-8aa8-f4945000c148>
+        , <http://localhost:8983/fedora/rest/anno/joy/48/79/90/18/48799018-1b74-4760-955c-e3a036e5950b>
+        , <http://localhost:8983/fedora/rest/anno/joy/ab/20/8d/e7/ab208de7-b920-45e2-b42a-06941c3b874b>
+        , <http://localhost:8983/fedora/rest/anno/joy/0b/ad/02/d3/0bad02d3-281c-4de0-9da2-8d87c6cd3b6d>
+        , <http://localhost:8983/fedora/rest/anno/joy/0b/2a/27/ea/0b2a27ea-1950-43d1-9ae9-a808ecceb8f1>
+        , <http://localhost:8983/fedora/rest/anno/joy/0b/2e/d4/f9/0b2ed4f9-1d3a-4279-81c1-79c15e96c9df>
+        , <http://localhost:8983/fedora/rest/anno/joy/29/1b/ce/32/291bce32-f571-4870-a438-45543a0476cb>
+        , <http://localhost:8983/fedora/rest/anno/joy/29/72/03/2b/2972032b-bc42-4ff4-9a25-7c597ba54b03>
+        , <http://localhost:8983/fedora/rest/anno/joy/03/ba/32/e3/03ba32e3-6111-46c6-9292-b45c2565f420>
+        , <http://localhost:8983/fedora/rest/anno/joy/7e/32/75/3c/7e32753c-63ae-4a43-8254-c4b8d95f2512>
+        , <http://localhost:8983/fedora/rest/anno/joy/84/b0/8a/0b/84b08a0b-c6c7-45a0-86cf-8877d3ff9e4e>
+        , <http://localhost:8983/fedora/rest/anno/joy/84/76/99/78/84769978-7825-4034-97e5-501ff0d0ab71>
+        , <http://localhost:8983/fedora/rest/anno/joy/8d/83/79/eb/8d8379eb-8bdc-4083-a375-4d76d4de520a>
+        , <http://localhost:8983/fedora/rest/anno/joy/8d/57/11/33/8d571133-a9eb-4b30-ad3b-c8910298316b>
+        , <http://localhost:8983/fedora/rest/anno/joy/68/14/03/ed/681403ed-ea34-43b5-bece-abcc6b960de0>
+        , <http://localhost:8983/fedora/rest/anno/joy/68/82/4d/fa/68824dfa-c265-4722-832f-88894dcfd55e>
+        , <http://localhost:8983/fedora/rest/anno/joy/91/4b/c4/98/914bc498-1796-4a7c-a1c1-b52cfa970595>
+        , <http://localhost:8983/fedora/rest/anno/joy/91/f6/91/2b/91f6912b-d734-46a0-8c2f-8bf3fc8f6e6b>
+        , <http://localhost:8983/fedora/rest/anno/joy/25/85/1d/ee/25851dee-a820-4456-9cde-4ce631f1acb5>
+        , <http://localhost:8983/fedora/rest/anno/joy/25/85/ea/8f/2585ea8f-918c-4f54-86ab-9ad64ae5a1fb>
+        , <http://localhost:8983/fedora/rest/anno/joy/ee/e5/2f/4e/eee52f4e-df72-4f03-98ef-d280f91bbfa4>
+        , <http://localhost:8983/fedora/rest/anno/joy/ee/5b/f0/95/ee5bf095-81f2-479d-a4c9-8d55b64de232>
+        , <http://localhost:8983/fedora/rest/anno/joy/e5/50/92/fc/e55092fc-26f0-4cd4-b59e-2de9aad6171a>
+        , <http://localhost:8983/fedora/rest/anno/joy/e5/e9/c8/ea/e5e9c8ea-3df5-4a1c-95ef-f2837652268c>
+        , <http://localhost:8983/fedora/rest/anno/joy/e5/f6/ab/f3/e5f6abf3-71da-48a4-9bb4-f47d168849f0>
+        , <http://localhost:8983/fedora/rest/anno/joy/b1/72/c6/93/b172c693-77ac-4580-b64a-1ee4af671821>
+        , <http://localhost:8983/fedora/rest/anno/joy/b1/5b/ea/af/b15beaaf-6242-4f23-9ae7-69a0821c6c60>
+        , <http://localhost:8983/fedora/rest/anno/joy/9d/dc/d6/fc/9ddcd6fc-0176-4089-850a-4cb4a604e256>
+        , <http://localhost:8983/fedora/rest/anno/joy/9d/91/cd/a4/9d91cda4-c5bd-4564-a793-0d2777d270a6>
+        , <http://localhost:8983/fedora/rest/anno/joy/be/c2/ec/1f/bec2ec1f-48f0-47bc-a522-3bf10fca3739>
+        , <http://localhost:8983/fedora/rest/anno/joy/51/e7/8a/d0/51e78ad0-64e4-4062-b4fd-245f22fdf3cf>
+        , <http://localhost:8983/fedora/rest/anno/joy/67/0a/cc/0f/670acc0f-ddb5-4854-8b6f-f678c3ec761f>
+        , <http://localhost:8983/fedora/rest/anno/joy/67/84/a7/a7/6784a7a7-2722-4118-8a96-973cd2be3411>
+        , <http://localhost:8983/fedora/rest/anno/joy/8a/c4/5c/a1/8ac45ca1-0c2e-4775-8c79-86bbd275028c>
+        , <http://localhost:8983/fedora/rest/anno/joy/8a/33/51/a9/8a3351a9-554c-4c5c-bbcd-8d7190944808>
+        , <http://localhost:8983/fedora/rest/anno/joy/79/61/b5/29/7961b529-1a5b-4dc3-9a7f-fef75cb9ce19>
+        , <http://localhost:8983/fedora/rest/anno/joy/79/80/12/fa/798012fa-81b9-4c80-90e5-5421310d3986>
+        , <http://localhost:8983/fedora/rest/anno/joy/9a/92/f4/ba/9a92f4ba-157f-4f36-b57b-76b275a06e60>
+        , <http://localhost:8983/fedora/rest/anno/joy/9a/45/ba/85/9a45ba85-ea3f-4c94-947e-f0e461b8ef7e>
+        , <http://localhost:8983/fedora/rest/anno/joy/9a/8a/45/ce/9a8a45ce-373f-4bf2-8ee8-ccd9998443ee>
+        , <http://localhost:8983/fedora/rest/anno/joy/9a/f8/ee/06/9af8ee06-5479-4839-9137-7d6da174f466>
+        , <http://localhost:8983/fedora/rest/anno/joy/e3/c1/d7/fc/e3c1d7fc-40a1-4b2f-923a-2c78b11a5996>
+        , <http://localhost:8983/fedora/rest/anno/joy/e3/4a/57/07/e34a5707-e92b-4d95-8c96-8d48de5e8f06>
+        , <http://localhost:8983/fedora/rest/anno/joy/d2/dd/9d/c1/d2dd9dc1-e836-491e-8ee4-e700360ba3d6>
+        , <http://localhost:8983/fedora/rest/anno/joy/d2/aa/c3/6f/d2aac36f-7dce-4eb2-aced-ea891586a8ab>
+        , <http://localhost:8983/fedora/rest/anno/joy/00/26/ee/d6/0026eed6-d4f6-4280-9233-c313879e84e4>
+        , <http://localhost:8983/fedora/rest/anno/joy/1d/0c/54/b1/1d0c54b1-7f63-4f38-a140-7520a375254f>
+        , <http://localhost:8983/fedora/rest/anno/joy/1d/3d/0f/1c/1d3d0f1c-6413-4e07-9e57-e9e8b6f1a18f>
+        , <http://localhost:8983/fedora/rest/anno/joy/1d/3b/79/3a/1d3b793a-dddf-41a4-b6dd-4253e2c8bc0d>
+        , <http://localhost:8983/fedora/rest/anno/joy/27/c1/db/f3/27c1dbf3-3e01-4c86-8415-bae251eb7f80>
+        , <http://localhost:8983/fedora/rest/anno/joy/27/fe/2b/4e/27fe2b4e-8e0c-45ac-b4ae-e845a26d3bba>
+        , <http://localhost:8983/fedora/rest/anno/joy/f8/b0/5a/2a/f8b05a2a-ff44-473f-9b1a-393b97766658>
+        , <http://localhost:8983/fedora/rest/anno/joy/e9/f7/f7/86/e9f7f786-12c3-4464-9663-79fe14bbc29a>
+        , <http://localhost:8983/fedora/rest/anno/joy/e9/66/1f/62/e9661f62-7edd-42a9-8ce6-7a10342f5680>
+        , <http://localhost:8983/fedora/rest/anno/joy/fb/c6/54/19/fbc65419-f603-4bd9-8d19-e7b52225cc5f>
+        , <http://localhost:8983/fedora/rest/anno/joy/fb/36/f6/a5/fb36f6a5-510b-4d7f-b78d-5e3ed6286c80>
+        , <http://localhost:8983/fedora/rest/anno/joy/e1/dd/65/25/e1dd6525-4de1-4bfe-8750-95bdfbb7c6b7>
+        , <http://localhost:8983/fedora/rest/anno/joy/e1/ce/bc/ec/e1cebcec-ce63-41d7-9b4e-f1df36fe2587>
+        , <http://localhost:8983/fedora/rest/anno/joy/5c/df/57/02/5cdf5702-ae73-4e39-bc9a-13f1cf95198a>
+        , <http://localhost:8983/fedora/rest/anno/joy/bb/69/f0/c7/bb69f0c7-8438-4b4d-9f61-80c81f90f640>
+        , <http://localhost:8983/fedora/rest/anno/joy/de/2f/e9/af/de2fe9af-9868-4a20-b030-3aa9986c42c1>
+        , <http://localhost:8983/fedora/rest/anno/joy/de/a3/e6/64/dea3e664-1946-434d-b024-519a582b6fd2>
+        , <http://localhost:8983/fedora/rest/anno/joy/54/d5/cb/60/54d5cb60-f679-42d4-9697-6b2a0558ab7a>
+        , <http://localhost:8983/fedora/rest/anno/joy/b0/1b/23/6e/b01b236e-3367-466f-b557-79d4aca9bdfa>
+        , <http://localhost:8983/fedora/rest/anno/joy/a4/46/84/68/a4468468-9749-4cd8-8db7-406ce9b48224>
+        , <http://localhost:8983/fedora/rest/anno/joy/bd/c7/a3/d4/bdc7a3d4-d60e-4bea-ad6e-7453b93d9aeb>
+        , <http://localhost:8983/fedora/rest/anno/joy/15/ce/fc/22/15cefc22-7afb-4a9e-b452-dee4f3853024>
+        , <http://localhost:8983/fedora/rest/anno/joy/d4/68/03/c8/d46803c8-0216-4368-be2a-d3a9ed6827c8>
+        , <http://localhost:8983/fedora/rest/anno/joy/f2/74/57/6d/f274576d-d8f1-4e87-bcd7-8635eeb2e274>
+        , <http://localhost:8983/fedora/rest/anno/joy/01/8a/5d/8b/018a5d8b-dc15-45c9-afc5-ad818c714d73>
+        , <http://localhost:8983/fedora/rest/anno/joy/a5/d7/58/d5/a5d758d5-b70d-4038-a571-3a9a42f93cc3>
+        , <http://localhost:8983/fedora/rest/anno/joy/a5/92/a5/50/a592a550-0cdf-4fac-8fe5-3e1511ec3776>
+        , <http://localhost:8983/fedora/rest/anno/joy/5d/72/24/86/5d722486-06d1-40e0-ad48-816aa4fa7ff3>
+        , <http://localhost:8983/fedora/rest/anno/joy/8e/d5/52/9d/8ed5529d-403b-4032-8a38-809cd972a1f6>
+        , <http://localhost:8983/fedora/rest/anno/joy/a8/ab/e2/9b/a8abe29b-e047-4d0f-9201-54bb3ecfbea3>
+        , <http://localhost:8983/fedora/rest/anno/joy/7d/36/13/99/7d361399-fb72-44b0-a45f-6e545c24d860>
+        , <http://localhost:8983/fedora/rest/anno/joy/7d/4e/50/73/7d4e5073-a410-45ad-8dae-64bb320cb804>
+        , <http://localhost:8983/fedora/rest/anno/joy/7d/fd/35/d6/7dfd35d6-3f23-45d6-bc7c-7ef61df66565>
+        , <http://localhost:8983/fedora/rest/anno/joy/9f/62/7b/5e/9f627b5e-360a-4dc5-aee5-529e01246f49>
+        , <http://localhost:8983/fedora/rest/anno/joy/9f/0c/8b/ce/9f0c8bce-4b92-4375-bc69-0de919c0c44f>
+        , <http://localhost:8983/fedora/rest/anno/joy/5a/95/f1/6b/5a95f16b-1795-4b40-a3b8-80fb9eb8ebaf>
+        , <http://localhost:8983/fedora/rest/anno/joy/5a/b5/47/15/5ab54715-329c-4663-8ba1-fcc2b87c43d3>
+        , <http://localhost:8983/fedora/rest/anno/joy/7b/04/9b/53/7b049b53-c9b9-4bc5-b292-d75a80bedb62>
+        , <http://localhost:8983/fedora/rest/anno/joy/ca/d3/94/6e/cad3946e-1c9d-455c-b295-89a08ba42bac>
+        , <http://localhost:8983/fedora/rest/anno/joy/3b/7d/fd/9f/3b7dfd9f-e9a7-47fb-b754-1733931908da>
+        , <http://localhost:8983/fedora/rest/anno/joy/3b/97/9c/4b/3b979c4b-17ed-4ab2-a443-4a6562a1f108>
+        , <http://localhost:8983/fedora/rest/anno/joy/77/ff/5b/9d/77ff5b9d-d31a-4c84-9e1b-d3626bb1e261>
+        , <http://localhost:8983/fedora/rest/anno/joy/75/e3/f1/66/75e3f166-fd7b-4350-a8b2-6033c258afd9>
+        , <http://localhost:8983/fedora/rest/anno/joy/90/69/32/9c/9069329c-875c-44e4-aacd-a759d701d4e8>
+        , <http://localhost:8983/fedora/rest/anno/joy/90/81/46/eb/908146eb-9a6f-4b9d-91bf-52ab1897166c>
+        , <http://localhost:8983/fedora/rest/anno/joy/90/01/c7/e1/9001c7e1-b640-4ad1-bdac-849afeb09af8>
+        , <http://localhost:8983/fedora/rest/anno/joy/32/6d/5c/63/326d5c63-e999-4a62-aa92-99aad5315c53>
+        , <http://localhost:8983/fedora/rest/anno/joy/b2/6d/97/d1/b26d97d1-1296-4c2f-8f81-8b823b6b36bb>
+        , <http://localhost:8983/fedora/rest/anno/joy/b4/14/57/b6/b41457b6-fbc5-41f7-9548-96296bd46a9c>
+        , <http://localhost:8983/fedora/rest/anno/joy/b4/2a/6d/a8/b42a6da8-1b01-418c-902b-c38cb93e08b3>
+        , <http://localhost:8983/fedora/rest/anno/joy/b4/db/5b/1d/b4db5b1d-5eff-47c7-9feb-d5fe55d4e6b6>
+        , <http://localhost:8983/fedora/rest/anno/joy/ae/3a/60/6b/ae3a606b-897f-43fe-b78d-1e35f2e2637e>
+        , <http://localhost:8983/fedora/rest/anno/joy/0d/50/cf/48/0d50cf48-a72b-42b2-90b5-c49570618259>
+        , <http://localhost:8983/fedora/rest/anno/joy/0d/62/4e/b3/0d624eb3-3819-4cb2-b43c-ff3acd9c540f>
+        , <http://localhost:8983/fedora/rest/anno/joy/cd/a1/8a/20/cda18a20-5088-4583-9420-c06fcd1e02d6>
+        , <http://localhost:8983/fedora/rest/anno/joy/cd/2a/55/b9/cd2a55b9-4a36-4bc5-9a81-df6e4eb12722>
+        , <http://localhost:8983/fedora/rest/anno/joy/c5/e5/34/0a/c5e5340a-9f80-4f63-a533-6d1cf4aaeaaa>
+        , <http://localhost:8983/fedora/rest/anno/joy/c5/49/a7/c3/c549a7c3-7e44-4990-9c7a-1ae7c8526536>
+        , <http://localhost:8983/fedora/rest/anno/joy/c5/f2/2a/e8/c5f22ae8-df01-4f1e-8729-369cdd9b7e61>
+        , <http://localhost:8983/fedora/rest/anno/joy/c5/f8/1a/b6/c5f81ab6-fac9-49d8-aa7d-14c70ec82af3>
+        , <http://localhost:8983/fedora/rest/anno/joy/c8/d2/7e/f7/c8d27ef7-7835-48a2-b84d-e9f54b73921e>
+        , <http://localhost:8983/fedora/rest/anno/joy/e6/46/3e/91/e6463e91-ba5c-4c26-bd95-281768fc4e8c>
+        , <http://localhost:8983/fedora/rest/anno/joy/1a/5e/24/7d/1a5e247d-f6a2-44b9-a404-d77e3fccfe1b>
+        , <http://localhost:8983/fedora/rest/anno/joy/b8/34/d3/0a/b834d30a-1381-4207-900a-1dccb2262d17>
+        , <http://localhost:8983/fedora/rest/anno/joy/b8/45/0f/36/b8450f36-c3e0-4cc7-9510-5f5b87007845>
+        , <http://localhost:8983/fedora/rest/anno/joy/ac/15/f1/f4/ac15f1f4-c3b2-4ed4-b5bb-78380cd12736>
+        , <http://localhost:8983/fedora/rest/anno/joy/d5/83/bb/29/d583bb29-1cdd-409c-bf82-11c216b0cff8>
+        , <http://localhost:8983/fedora/rest/anno/joy/ec/de/b7/92/ecdeb792-39bf-4796-8266-8486df179b6a>
+        , <http://localhost:8983/fedora/rest/anno/joy/ec/1d/a4/f8/ec1da4f8-98b8-45e9-9110-5ff4b663458b>
+        , <http://localhost:8983/fedora/rest/anno/joy/0e/17/22/99/0e172299-12bd-41ce-bc76-b0c25ee1d1a0>
+        , <http://localhost:8983/fedora/rest/anno/joy/0e/a7/4e/aa/0ea74eaa-4c84-49ee-9916-a6430bcb0f60>
+        , <http://localhost:8983/fedora/rest/anno/joy/e7/3a/78/af/e73a78af-4805-4622-940b-f99300c940b8>
+        , <http://localhost:8983/fedora/rest/anno/joy/cf/4c/02/c6/cf4c02c6-7f72-4d69-a0c6-40318908544c>
+        , <http://localhost:8983/fedora/rest/anno/joy/21/97/b5/56/2197b556-d005-4a21-a416-5294725d3f7c>
+        , <http://localhost:8983/fedora/rest/anno/joy/c3/b6/5f/81/c3b65f81-691e-4721-a0c1-70efe1adc855>
+        , <http://localhost:8983/fedora/rest/anno/joy/c3/62/bb/b3/c362bbb3-6bf9-4a50-a2a7-b1dab1b23a9a>
+        , <http://localhost:8983/fedora/rest/anno/joy/95/0e/8d/50/950e8d50-5e33-47fe-a29c-6f3e66cacee4>
+        , <http://localhost:8983/fedora/rest/anno/joy/95/ed/b3/96/95edb396-debc-4d57-9fe7-fd2714f2619d>
+        , <http://localhost:8983/fedora/rest/anno/joy/3c/97/71/a3/3c9771a3-0d1f-4cc4-a570-7a771bc7ba73>
+        , <http://localhost:8983/fedora/rest/anno/joy/3c/69/0f/c7/3c690fc7-4a4c-4bdd-a3e8-e2d2be661637>
+        , <http://localhost:8983/fedora/rest/anno/joy/13/3a/ce/cc/133acecc-e1cf-4313-b034-855911fa4f19>
+        , <http://localhost:8983/fedora/rest/anno/joy/a0/5b/78/28/a05b7828-2a84-44d8-af29-5d7d0e6f2c60>
+        , <http://localhost:8983/fedora/rest/anno/joy/37/e7/e5/02/37e7e502-6938-474e-83a1-04750dbf0759>
+        , <http://localhost:8983/fedora/rest/anno/joy/96/28/e1/68/9628e168-4cf2-410b-b4b4-6530787a0f1f>
+        , <http://localhost:8983/fedora/rest/anno/joy/ef/3e/4d/79/ef3e4d79-d7c1-4aa8-bef5-af31d5d2496b>
+        , <http://localhost:8983/fedora/rest/anno/joy/ef/fe/ac/5f/effeac5f-85e4-42a5-b0cb-61e995be5567>
+        , <http://localhost:8983/fedora/rest/anno/joy/57/1a/ac/ef/571aacef-13db-4afe-948d-4ae044a2af56>
+        , <http://localhost:8983/fedora/rest/anno/joy/1f/ae/89/12/1fae8912-2dca-4f02-80a2-7ded6c30d487>
+        , <http://localhost:8983/fedora/rest/anno/joy/b3/ea/8e/b5/b3ea8eb5-1a46-40fa-bcf2-603358f200d5>
+        , <http://localhost:8983/fedora/rest/anno/joy/b3/06/17/f6/b30617f6-ab0c-4373-bf00-2d8ebb5a8a7b>
+        , <http://localhost:8983/fedora/rest/anno/joy/78/e4/13/2e/78e4132e-c17f-4346-a46c-6d546b40ab0c>
+        , <http://localhost:8983/fedora/rest/anno/joy/78/90/21/82/78902182-8b3a-4a35-aa4b-b26e5e1027d7>
+        , <http://localhost:8983/fedora/rest/anno/joy/87/c3/57/53/87c35753-7122-4b43-aec9-3ed98270afdf>
+        , <http://localhost:8983/fedora/rest/anno/joy/f9/8e/cd/69/f98ecd69-0d3f-4dfe-a32e-616196eb526b>
+        , <http://localhost:8983/fedora/rest/anno/joy/1e/35/75/40/1e357540-369e-4b6a-a910-b0b1b301a162>
+        , <http://localhost:8983/fedora/rest/anno/joy/36/09/91/cc/360991cc-3ad7-4196-b77b-c00dda7e07b1>
+        , <http://localhost:8983/fedora/rest/anno/joy/fd/bb/2a/27/fdbb2a27-3f12-4811-924b-cc11a64a1e0f>
+        , <http://localhost:8983/fedora/rest/anno/joy/1b/84/6c/69/1b846c69-3970-4893-bf7d-fa95a0110e9e>
+        , <http://localhost:8983/fedora/rest/anno/joy/3f/b4/7e/fc/3fb47efc-bd6d-4873-868c-3919afd1c5f3>
+        , <http://localhost:8983/fedora/rest/anno/joy/71/0b/4d/76/710b4d76-c91b-45bb-87c9-565950777d69>
+        , <http://localhost:8983/fedora/rest/anno/joy/df/36/e9/da/df36e9da-ec2b-4f19-a8ff-a65e7188fbf3>
+        , <http://localhost:8983/fedora/rest/anno/joy/6e/6d/c6/db/6e6dc6db-e36c-4429-9ef9-f9e9d6d2ad7a>
+        , <http://localhost:8983/fedora/rest/anno/joy/a9/16/c9/b0/a916c9b0-e401-4335-8cee-be84770ae6fb>
+        , <http://localhost:8983/fedora/rest/anno/joy/39/a8/c5/66/39a8c566-e152-4baf-b5e0-931335e72cf0>
+        , <http://localhost:8983/fedora/rest/anno/joy/8b/52/6f/b0/8b526fb0-9c2c-4192-adfe-8545bdd321c0>
+        , <http://localhost:8983/fedora/rest/anno/joy/d3/a3/4c/37/d3a34c37-b508-498e-824b-833525cea0de>
+        , <http://localhost:8983/fedora/rest/anno/joy/9e/2a/78/53/9e2a7853-a24a-4109-a9d8-dad3401f9607>
+        , <http://localhost:8983/fedora/rest/anno/joy/8f/56/0e/8a/8f560e8a-3f86-49cb-8cbf-45078d9767f9>
+        , <http://localhost:8983/fedora/rest/anno/joy/a1/24/c0/f9/a124c0f9-e25c-444d-813d-a7d7378f0de6>
+        , <http://localhost:8983/fedora/rest/anno/joy/6c/dc/31/50/6cdc3150-f94f-4e90-bc57-0b3dcf34858f>
+        , <http://localhost:8983/fedora/rest/anno/joy/4b/49/d6/aa/4b49d6aa-6761-4359-b71f-8388fd5d7a3d>
+        , <http://localhost:8983/fedora/rest/anno/joy/56/d8/b3/69/56d8b369-90f7-48ee-a813-d4741e779a4d>
+        , <http://localhost:8983/fedora/rest/anno/joy/56/90/b3/f2/5690b3f2-0cfd-4da4-b277-139d95f4abf9>
+        , <http://localhost:8983/fedora/rest/anno/joy/ba/55/32/8e/ba55328e-fa83-4256-a01e-81e0f21b7c1d>
+        , <http://localhost:8983/fedora/rest/anno/joy/ed/92/e1/1c/ed92e11c-5641-481c-a95a-051dda69a649>
+        , <http://localhost:8983/fedora/rest/anno/joy/18/25/85/e8/182585e8-587c-4654-b916-a2ee5300743a>
+        , <http://localhost:8983/fedora/rest/anno/joy/fc/da/5f/08/fcda5f08-ec13-404d-b656-41c3cfc417f8>
+        , <http://localhost:8983/fedora/rest/anno/joy/99/eb/4b/a7/99eb4ba7-5bae-407d-9c5a-b7f9b3210b03>
+        , <http://localhost:8983/fedora/rest/anno/joy/c4/15/af/80/c415af80-b6f6-40b4-bfd2-3367ca9a21aa>
+        , <http://localhost:8983/fedora/rest/anno/joy/f3/19/af/b0/f319afb0-e3a8-413f-949c-d8efa1a64b5e>
+        , <http://localhost:8983/fedora/rest/anno/joy/3a/e1/63/e5/3ae163e5-f910-4396-9df3-75321213740f>
+        , <http://localhost:8983/fedora/rest/anno/joy/e4/0e/c2/78/e40ec278-3765-489b-8190-fd61b322e0f8>
+        , <http://localhost:8983/fedora/rest/anno/joy/4d/90/9a/93/4d909a93-246f-4a34-9ffe-7d0e62290eb0>
+        , <http://localhost:8983/fedora/rest/anno/joy/85/e9/af/35/85e9af35-b9c5-4ac0-8547-ebcf4c251638>
+        , <http://localhost:8983/fedora/rest/anno/joy/9c/93/37/17/9c933717-6545-430a-972d-9618189a7c6d>
+        , <http://localhost:8983/fedora/rest/anno/joy/f1/f6/ce/2e/f1f6ce2e-c858-410d-85dc-b583a6422457>
+        , <http://localhost:8983/fedora/rest/anno/joy/f1/f3/9f/4d/f1f39f4d-616e-45d1-8804-a36c7026afc8>
+        , <http://localhost:8983/fedora/rest/anno/joy/fa/7a/99/88/fa7a9988-029e-499b-afa0-dcbd3b56b0ce>
+        , <http://localhost:8983/fedora/rest/anno/joy/aa/b6/1a/0c/aab61a0c-69fd-4965-bbd7-266c4b654cfb>
+        , <http://localhost:8983/fedora/rest/anno/joy/08/f7/9b/1a/08f79b1a-fe2d-435a-a0a3-7a7fb6ba14c8>
+        , <http://localhost:8983/fedora/rest/anno/joy/f5/03/85/a9/f50385a9-f68a-411b-9187-59b211d5abd8>
+        , <http://localhost:8983/fedora/rest/anno/joy/10/26/7a/48/10267a48-ed73-4a30-bdb8-a0e0e470f9e4>
+        , <http://localhost:8983/fedora/rest/anno/joy/10/7c/9a/e3/107c9ae3-6f46-4352-a4b3-f9a03e5afb85>
+        , <http://localhost:8983/fedora/rest/anno/joy/ff/68/15/c0/ff6815c0-06a2-4c45-8eb8-b876be70200b>
+        , <http://localhost:8983/fedora/rest/anno/joy/7c/9e/4b/55/7c9e4b55-e928-4325-8d90-b624b047517a>
+        , <http://localhost:8983/fedora/rest/anno/joy/f7/d9/f4/da/f7d9f4da-cfae-4357-abfe-7f32a16e4fa9>
+        , <http://localhost:8983/fedora/rest/anno/joy/c7/b4/69/d3/c7b469d3-5872-4d53-b777-76baafbc561b>
+        , <http://localhost:8983/fedora/rest/anno/joy/7f/8d/cf/4f/7f8dcf4f-40e7-49ab-926b-621898dec8cf>
+        , <http://localhost:8983/fedora/rest/anno/joy/cc/2c/89/14/cc2c8914-49b4-4617-8ff4-774962406ca6>
+        ;\n\tfedora:exportsAs <http://localhost:8983/fedora/rest/anno/joy/fcr:export?format=jcr/xml>
+        .\n\n<http://localhost:8983/fedora/rest/anno/joy/fcr:export?format=jcr/xml>
+        dc:format <http://fedora.info/definitions/v4/repository#jcr/xml> .\n\n<http://fedora.info/definitions/v4/repository#jcr/xml>
+        rdfs:label \"jcr/xml\"^^<http://www.w3.org/2001/XMLSchema#string> .\n"
+    http_version: 
+  recorded_at: Fri, 22 May 2015 19:47:45 GMT
+- request:
+    method: head
+    uri: http://localhost:8983/fedora/rest/anno/ldpw_spec
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Etag:
+      - '"a1fccc9ceb882304310bf1895d9ad402982a2d15"'
+      Last-Modified:
+      - Fri, 22 May 2015 20:08:22 GMT
+      Link:
+      - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Container>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      Accept-Patch:
+      - application/sparql-update
+      Accept-Post:
+      - text/turtle,text/rdf+n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      Allow:
+      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
+      Content-Type:
+      - text/tab-separated-values
+      Content-Length:
+      - '0'
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Fri, 22 May 2015 20:08:22 GMT
+- request:
+    method: post
+    uri: http://localhost:8983/fedora/rest/anno/ldpw_spec
+    body:
+      encoding: UTF-8
+      string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix oa: <http://www.w3.org/ns/oa#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+        <> a oa:Annotation,
+             ldp:BasicContainer;
+           oa:motivatedBy oa:commenting .
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Prefer:
+      - return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"
+      Content-Type:
+      - application/x-turtle
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - '"a046f71ebbbdf2930d33e121bf613cc4bbc91afa"'
+      Last-Modified:
+      - Fri, 22 May 2015 20:08:22 GMT
+      Content-Length:
+      - '97'
+      Location:
+      - http://localhost:8983/fedora/rest/anno/ldpw_spec/85/31/b8/c6/8531b8c6-0c36-4776-8dd6-e034e946eba1
+      Content-Type:
+      - text/plain
+    body:
+      encoding: UTF-8
+      string: http://localhost:8983/fedora/rest/anno/ldpw_spec/85/31/b8/c6/8531b8c6-0c36-4776-8dd6-e034e946eba1
+    http_version: 
+  recorded_at: Fri, 22 May 2015 20:08:22 GMT
+- request:
+    method: get
+    uri: http://localhost:8983/fedora/rest/anno/ldpw_spec
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Accept:
+      - application/x-turtle
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Etag:
+      - '"7bdd0c06aac574f3090e405724654f8c2d23d0d1"'
+      Last-Modified:
+      - Fri, 22 May 2015 20:08:22 GMT
+      Link:
+      - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Container>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      Accept-Patch:
+      - application/sparql-update
+      Accept-Post:
+      - text/turtle,text/rdf+n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      Allow:
+      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
+      Preference-Applied:
+      - return=representation
+      Vary:
+      - Accept, Range, Accept-Encoding, Accept-Language
+      - Prefer
+      Content-Length:
+      - '3001'
+      Content-Type:
+      - application/x-turtle
+    body:
+      encoding: UTF-8
+      string: "@prefix premis: <http://www.loc.gov/premis/rdf/v1#> .\n@prefix image:
+        <http://www.modeshape.org/images/1.0> .\n@prefix sv: <http://www.jcp.org/jcr/sv/1.0>
+        .\n@prefix test: <info:fedora/test/> .\n@prefix nt: <http://www.jcp.org/jcr/nt/1.0>
+        .\n@prefix cnt: <http://www.w3.org/2011/content#> .\n@prefix dcmitype: <http://purl.org/dc/dcmitype/>
+        .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n@prefix xsi: <http://www.w3.org/2001/XMLSchema-instance>
+        .\n@prefix mode: <http://www.modeshape.org/1.0> .\n@prefix oa: <http://www.w3.org/ns/oa#>
+        .\n@prefix triannon: <http://triannon.stanford.edu/ns/> .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        .\n@prefix fedora: <http://fedora.info/definitions/v4/repository#> .\n@prefix
+        xml: <http://www.w3.org/XML/1998/namespace> .\n@prefix ldp: <http://www.w3.org/ns/ldp#>
+        .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix fedoraconfig:
+        <http://fedora.info/definitions/v4/config#> .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0>
+        .\n@prefix prov: <http://www.w3.org/ns/prov#> .\n@prefix foaf: <http://xmlns.com/foaf/0.1/>
+        .\n@prefix dc: <http://purl.org/dc/elements/1.1/> .\n\n\n<http://localhost:8983/fedora/rest/anno/ldpw_spec>
+        a ldp:RDFSource , ldp:Container , <http://www.jcp.org/jcr/nt/1.0folder> ,
+        <http://www.jcp.org/jcr/nt/1.0hierarchyNode> , <http://www.jcp.org/jcr/nt/1.0base>
+        , <http://www.jcp.org/jcr/mix/1.0created> , fedora:Container , fedora:Resource
+        , ldp:BasicContainer , fedora:Resource , <http://www.jcp.org/jcr/mix/1.0created>
+        , <http://www.jcp.org/jcr/mix/1.0lastModified> , <http://www.jcp.org/jcr/mix/1.0referenceable>
+        , fedora:Container ;\n\tfedora:lastModifiedBy \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfedora:uuid \"e21b119c-e4e7-449a-a363-bdf8147c9ddf\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfedora:createdBy \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfedora:primaryType \"nt:folder\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfedora:created \"2015-05-22T20:08:22.727Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\tfedora:mixinTypes \"fedora:Container\"^^<http://www.w3.org/2001/XMLSchema#string>
+        , \"fedora:Resource\"^^<http://www.w3.org/2001/XMLSchema#string> , \"ldp:BasicContainer\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfedora:lastModified \"2015-05-22T20:08:22.865Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\tfedora:writable \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>
+        ;\n\tfedora:hasParent <http://localhost:8983/fedora/rest/anno> ;\n\tldp:contains
+        <http://localhost:8983/fedora/rest/anno/ldpw_spec/85/31/b8/c6/8531b8c6-0c36-4776-8dd6-e034e946eba1>
+        .\n\n<http://localhost:8983/fedora/rest/anno/ldpw_spec/fcr:export?format=jcr/xml>
+        dc:format <http://fedora.info/definitions/v4/repository#jcr/xml> .\n\n<http://localhost:8983/fedora/rest/anno/ldpw_spec>
+        fedora:exportsAs <http://localhost:8983/fedora/rest/anno/ldpw_spec/fcr:export?format=jcr/xml>
+        .\n\n<http://fedora.info/definitions/v4/repository#jcr/xml> rdfs:label \"jcr/xml\"^^<http://www.w3.org/2001/XMLSchema#string>
+        .\n"
+    http_version: 
+  recorded_at: Fri, 22 May 2015 20:08:22 GMT
+recorded_with: VCR 2.9.3
