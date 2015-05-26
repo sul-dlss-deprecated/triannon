@@ -38,7 +38,7 @@ module Triannon
     #   the LDP store.
     def self.delete_container id
       if id && id.size > 0
-        ldpw = Triannon::LdpWriter.new nil
+        ldpw = Triannon::LdpWriter.new nil, nil
         ldpw.delete_containers id
       end
     end
@@ -207,7 +207,7 @@ module Triannon
       something_deleted = false
       ldp_container_uris.each { |uri|
         ldp_id = uri.to_s.split("#{@base_uri}/").last
-        ldp_id = "#{@root_container}/#{ldp_id}" unless ldp_id.match(@root_container)
+        ldp_id = "#{@root_container}/#{ldp_id}" unless @root_container.blank? || ldp_id.match(@root_container)
         resp = conn.delete { |req| req.url "#{ldp_id}" }
         if resp.status != 204
           fail Triannon::LDPStorageError.new("Unable to delete LDP container #{ldp_id}", resp.status, resp.body)
@@ -247,7 +247,7 @@ module Triannon
         req.body = ttl
       end
       if resp.status != 200 && resp.status != 201
-        fail Triannon::LDPStorageError.new("Unable to create LDP resource in container #{parent_path};\n#{resp.body}\nRDF sent: #{ttl}", resp.status, resp.body)
+        fail Triannon::LDPStorageError.new("Unable to create LDP resource in container #{parent_path};\nRDF sent: #{ttl}", resp.status, resp.body)
       end
       new_url = resp.headers['Location'] ? resp.headers['Location'] : resp.headers['location']
       if new_url
@@ -277,7 +277,7 @@ module Triannon
         req.body = g.to_ttl
       end
       if resp.status != 201
-        fail Triannon::LDPStorageError.new("Unable to create #{oa_vocab_term.fragment.sub('has', '')} LDP container for anno #{@root_container}/#{@id};\n#{resp.body}\nRDF sent: #{g.to_ttl}", resp.status, resp.body)
+        fail Triannon::LDPStorageError.new("Unable to create #{oa_vocab_term.fragment.sub('has', '')} LDP container for anno #{@root_container}/#{@id};\nRDF sent: #{g.to_ttl}", resp.status, resp.body)
       end
       resp
     end
