@@ -4,10 +4,10 @@ module Triannon
   # Loads an existing Annotation from the LDP server
   class LdpLoader
 
-
     # @param [String] id the unique id of the annotation.  Can include base_uri prefix or omit it.
-    def self.load id
-      l = Triannon::LdpLoader.new id
+    # @param [String] root_container the LDP parent container for the annotation
+    def self.load(id, root_container)
+      l = Triannon::LdpLoader.new(id, root_container)
       l.load_anno_container
       l.load_bodies
       l.load_targets
@@ -16,17 +16,16 @@ module Triannon
       oa_graph
     end
 
-    # @deprecated was needed by old annotations#index action, which now redirects to search (2015-04)
-    def self.find_all
-      l = Triannon::LdpLoader.new
-      l.find_all
-    end
-
     attr_accessor :ldp_annotation
 
     # @param [String] id the unique id of the annotation.  Can include base_uri prefix or omit it.
-    def initialize id = nil
+    # @param [String] root_container the LDP parent container for the annotation
+    def initialize(id = nil, root_container)
       @id = id
+      @root_container = root_container
+      if @root_container.blank?
+        fail Triannon::LDPContainerError, "Annotations must be in a root container."
+      end
       base_url = Triannon.config[:ldp]['url']
       base_url.chop! if base_url.end_with?('/')
       container_path = Triannon.config[:ldp]['uber_container']
@@ -37,18 +36,17 @@ module Triannon
       end
       @base_uri = "#{base_url}/#{container_path}"
       @ldp_annotation = Triannon::AnnotationLdp.new
-
     end
 
     # load annotation container object into @ldp_annotation's (our Triannon::AnnotationLdp object) graph
     def load_anno_container
-      load_object_into_annotation_graph(@id)
+      load_object_into_annotation_graph("#{@root_container}/#{@id}")
     end
 
     # load body objects into @ldp_annotation's (our Triannon::AnnotationLdp object) graph
     def load_bodies
       @ldp_annotation.body_uris.each { |body_uri|
-        body_obj_path = body_uri.to_s.split(@base_uri + '/').last
+        body_obj_path = body_uri.to_s.split("#{@base_uri}/#{@root_container}/").last
         load_object_into_annotation_graph(body_obj_path)
       }
     end
@@ -56,28 +54,9 @@ module Triannon
     # load target objects into @ldp_annotation's (our Triannon::AnnotationLdp object) graph
     def load_targets
       @ldp_annotation.target_uris.each { |target_uri|
-        target_obj_path = target_uri.to_s.split(@base_uri + '/').last
+        target_obj_path = target_uri.to_s.split("#{@base_uri}/#{@root_container}/").last
         load_object_into_annotation_graph(target_obj_path)
       }
-    end
-
-    # @return [Array<Triannon::Annotation>] an array of Triannon::Annotation objects with just the id set. Enough info to build the index page
-    # @deprecated was needed by old annotations#index action, which now redirects to search (2015-04).
-    def find_all
-      root_ttl = get_ttl
-      objs = []
-
-      g = RDF::Graph.new
-      g.from_ttl root_ttl
-      root_uri = RDF::URI.new @base_uri
-      results = g.query [root_uri, RDF::Vocab::LDP.contains, nil]
-      results.each do |stmt|
-        # FIXME:  can't be last with pair trees in fedora urls - leave broke as this method is deprecated
-        id = stmt.object.to_s.split('/').last
-        objs << Triannon::Annotation.new(:id => id)
-      end
-
-      objs
     end
 
     protected

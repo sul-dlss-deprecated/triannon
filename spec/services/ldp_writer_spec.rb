@@ -428,7 +428,7 @@ describe Triannon::LdpWriter, :vcr do
         ldpw = Triannon::LdpWriter.new(nil, @root_container)
 
         # delete the body resources
-        l = Triannon::LdpLoader.new ldp_id
+        l = Triannon::LdpLoader.new(ldp_id, @root_container)
         l.load_anno_container
         ldpw.delete_containers l.ldp_annotation.body_uris
 
@@ -443,7 +443,7 @@ describe Triannon::LdpWriter, :vcr do
         ldp_id = Triannon::LdpWriter.create_anno @anno, @root_container
         @cntnrs_to_delete_after_testing << "#{@root_container}/#{ldp_id}"
 
-        l = Triannon::LdpLoader.new ldp_id
+        l = Triannon::LdpLoader.new(ldp_id, @root_container)
         l.load_anno_container
         body_uris = l.ldp_annotation.body_uris
         expect(body_uris.size).to be > 0
@@ -456,7 +456,7 @@ describe Triannon::LdpWriter, :vcr do
         body_uris.each { |body_ldp_uri|
           # get the ids of the body resources
           resp = conn.get do |req|
-            req.url "#{@root_container}/#{body_ldp_uri}"
+            req.url body_ldp_uri
           end
           expect(resp.status == 404 || resp.status == 410).to be true
         }
