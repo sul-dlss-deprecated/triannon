@@ -12,7 +12,7 @@ module Triannon
       l.load_bodies
       l.load_targets
 
-      oa_graph = Triannon::LdpToOaMapper.ldp_to_oa l.ldp_annotation
+      oa_graph = Triannon::LdpToOaMapper.ldp_to_oa(l.ldp_annotation, root_container)
       oa_graph
     end
 

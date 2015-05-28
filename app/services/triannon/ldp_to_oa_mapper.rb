@@ -1,9 +1,11 @@
 module Triannon
   class LdpToOaMapper
 
-    # maps an AnnotationLdp to an OA RDF::Graph
-    def self.ldp_to_oa ldp_anno
-      mapper = Triannon::LdpToOaMapper.new ldp_anno
+    # maps a Triannon::AnnotationLdp to an OA RDF::Graph
+    # @param [Triannon::AnnotationLdp] ldp_anno
+    # @param [String] root_container the LDP parent container for the annotation
+    def self.ldp_to_oa(ldp_anno, root_container)
+      mapper = Triannon::LdpToOaMapper.new(ldp_anno, root_container)
       mapper.extract_base
       mapper.extract_bodies
       mapper.extract_targets
@@ -12,30 +14,32 @@ module Triannon
 
     attr_accessor :id, :oa_graph
 
-    def initialize ldp_anno
+    # @param [Triannon::AnnotationLdp] ldp_anno
+    # @param [String] root_container the LDP parent container for the annotation
+    def initialize(ldp_anno, root_container)
       @ldp_anno = ldp_anno
+      @root_container = root_container
       @ldp_anno_graph = ldp_anno.stripped_graph
       g = RDF::Graph.new
       @oa_graph = OA::Graph.new g
     end
 
+    # load statements from base anno container into @oa_graph
     def extract_base
       root_subject_solns = @ldp_anno_graph.query OA::Graph.anno_query
       if root_subject_solns.count == 1
         stored_url = Triannon.config[:ldp]['url'].strip
         stored_url.chop! if stored_url.end_with?('/')
-        container_path = Triannon.config[:ldp]['uber_container']
-        if container_path
-          container_path.strip!
-          container_path = container_path[1..-1] if container_path.start_with?('/')
-          container_path.chop! if container_path.end_with?('/')
-          stored_url = "#{stored_url}/#{container_path}"
+        uber_container = Triannon.config[:ldp]['uber_container'].strip
+        if uber_container
+          uber_container = uber_container[1..-1] if uber_container.start_with?('/')
+          uber_container.chop! if uber_container.end_with?('/')
+          stored_url = "#{stored_url}/#{uber_container}/#{@root_container}"
         end
         @id = root_subject_solns[0].s.to_s.split("#{stored_url}/").last
-        base_url = Triannon.config[:triannon_base_url]
-        base_url.strip!
+        base_url = Triannon.config[:triannon_base_url].strip
         base_url.chop! if base_url[-1] == '/'
-        @root_uri = RDF::URI.new(base_url + "/#{@id}")
+        @root_uri = RDF::URI.new(base_url + "/#{@root_container}/#{@id}")
       end
 
       @ldp_anno_graph.each_statement do |stmnt|
@@ -49,6 +53,7 @@ module Triannon
       end
     end
 
+    # load statements from anno body containers into @oa_graph
     def extract_bodies
       @ldp_anno.body_uris.each { |body_uri|
         if !map_external_ref(body_uri, RDF::Vocab::OA.hasBody) &&
@@ -59,6 +64,7 @@ module Triannon
       }
     end
 
+    # load statements from anno target containers into @oa_graph
     def extract_targets
       @ldp_anno.target_uris.each { |target_uri|
         if !map_external_ref(target_uri, RDF::Vocab::OA.hasTarget) &&

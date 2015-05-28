@@ -1,13 +1,15 @@
 require 'spec_helper'
 
 describe Triannon::LdpToOaMapper, :vcr do
-  let(:triannon_anno_container) {"#{Triannon.config[:ldp]['url']}/#{Triannon.config[:ldp]['uber_container']}"}
+  let(:uber_container_url) {"#{Triannon.config[:ldp]['url']}/#{Triannon.config[:ldp]['uber_container']}"}
+  let(:root_container) {'specs'}
   let(:anno_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_base.ttl') }
   let(:base_stmts) { RDF::Graph.new.from_ttl(anno_ttl).statements }
-  let(:base_container_id) {"f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec"}
+  let(:base_container_id) {"67/c0/18/9d/67c0189d-56d4-47fb-abea-1f995187b358"}
   let(:target_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_target.ttl') }
   let(:target_stmts) { RDF::Graph.new.from_ttl(target_ttl).statements }
-  let(:target_container_id) {"#{base_container_id}/t/07/1b/94/c0/071b94c0-953e-46aa-b21c-2bb201c5ff59"}
+  let(:target_container_id) {"#{base_container_id}/t/0a/b5/36/9d/0ab5369d-f872-4488-8f1e-3143819b94bf"}
+  let(:stored_target_obj_url) {"#{uber_container_url}/#{root_container}/#{target_container_id}"}
   let(:ldp_anno) {
     a = Triannon::AnnotationLdp.new
     a.load_statements_into_graph base_stmts
@@ -22,37 +24,29 @@ describe Triannon::LdpToOaMapper, :vcr do
       # see fragment selector test
     end
     it "TextPositionSelector" do
-      stored_target_obj_url = "#{triannon_anno_container}/#{target_container_id}"
       stored_source_obj_url = "#{stored_target_obj_url}#source"
       stored_selector_obj_url = "http://localhost:8983/fedora/rest/.well-known/genid/f875342e-d8d7-475a-8085-1e07f1f8b674"
       source_url = "http://purl.stanford.edu/kq131cs7229.html"
       # note that hash URIs (e.g. #source) and blank nodes (e.g. selector) are conveniently returned in the same container
       target_container_stmts =  RDF::Turtle::Reader.new("
-      @prefix ldp: <http://www.w3.org/ns/ldp#> .
-      @prefix openannotation: <http://www.w3.org/ns/oa#> .
-      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-      @prefix triannon: <http://triannon.stanford.edu/ns/> .
-      @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+	      @prefix oa: <http://www.w3.org/ns/oa#> .
+	      @prefix triannon: <http://triannon.stanford.edu/ns/> .
+	      @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-      <#{stored_target_obj_url}> a ldp:Container,
-           ldp:DirectContainer,
-           ldp:RDFSource,
-           openannotation:SpecificResource;
-         ldp:hasMemberRelation ldp:member;
-         ldp:membershipResource <#{stored_target_obj_url}>;
-         openannotation:hasSelector <#{stored_selector_obj_url}>;
-         openannotation:hasSource <#{stored_source_obj_url}> .
+	      <#{stored_target_obj_url}> a oa:SpecificResource;
+	         oa:hasSelector <#{stored_selector_obj_url}>;
+	         oa:hasSource <#{stored_source_obj_url}> .
 
-      <#{stored_source_obj_url}> triannon:externalReference <#{source_url}> .
+	      <#{stored_source_obj_url}> triannon:externalReference <#{source_url}> .
 
-      <#{stored_selector_obj_url}> a openannotation:TextPositionSelector;
-         openannotation:start \"0\"^^xsd:nonNegativeInteger;
-         openannotation:end \"66\"^^xsd:nonNegativeInteger .
+	      <#{stored_selector_obj_url}> a oa:TextPositionSelector;
+	         oa:start \"0\"^^xsd:nonNegativeInteger;
+	         oa:end \"66\"^^xsd:nonNegativeInteger .
       ").statements.to_a
       ldp_anno.load_statements_into_graph target_container_stmts
       target_uri = ldp_anno.target_uris.first
 
-      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper = Triannon::LdpToOaMapper.new(ldp_anno, root_container)
       mapper.extract_base
       mapper.map_specific_resource(target_uri, RDF::Vocab::OA.hasTarget)
 
@@ -92,7 +86,6 @@ describe Triannon::LdpToOaMapper, :vcr do
       expect(mapper.oa_graph.query([RDF::URI.new(stored_selector_obj_url), nil, nil]).size).to eql 0
     end
     it "TextQuoteSelector" do
-      stored_target_obj_url = "#{triannon_anno_container}/#{target_container_id}"
       stored_source_obj_url = "#{stored_target_obj_url}#source"
       stored_selector_obj_url = "http://localhost:8983/fedora/rest/.well-known/genid/f875342e-d8d7-475a-8085-1e07f1f8b674"
       source_url = "http://purl.stanford.edu/kq131cs7229.html"
@@ -101,32 +94,24 @@ describe Triannon::LdpToOaMapper, :vcr do
       prefix = "manuscript which comprised the "
       # note that hash URIs (e.g. #source) and blank nodes (e.g. selector) are conveniently returned in the same container
       target_container_stmts =  RDF::Turtle::Reader.new("
-      @prefix ldp: <http://www.w3.org/ns/ldp#> .
-      @prefix openannotation: <http://www.w3.org/ns/oa#> .
-      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-      @prefix triannon: <http://triannon.stanford.edu/ns/> .
-      @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+	      @prefix oa: <http://www.w3.org/ns/oa#> .
+	      @prefix triannon: <http://triannon.stanford.edu/ns/> .
 
-      <#{stored_target_obj_url}> a ldp:Container,
-           ldp:DirectContainer,
-           ldp:RDFSource,
-           openannotation:SpecificResource;
-         ldp:hasMemberRelation ldp:member;
-         ldp:membershipResource <#{stored_target_obj_url}>;
-         openannotation:hasSelector <#{stored_selector_obj_url}>;
-         openannotation:hasSource <#{stored_source_obj_url}> .
+	      <#{stored_target_obj_url}> a oa:SpecificResource;
+	         oa:hasSelector <#{stored_selector_obj_url}>;
+	         oa:hasSource <#{stored_source_obj_url}> .
 
-      <#{stored_source_obj_url}> triannon:externalReference <#{source_url}> .
+	      <#{stored_source_obj_url}> triannon:externalReference <#{source_url}> .
 
-      <#{stored_selector_obj_url}> a openannotation:TextQuoteSelector;
-         openannotation:suffix \"#{suffix}\";
-         openannotation:exact \"#{exact}\";
-         openannotation:prefix \"#{prefix}\" .
+	      <#{stored_selector_obj_url}> a oa:TextQuoteSelector;
+	         oa:suffix \"#{suffix}\";
+	         oa:exact \"#{exact}\";
+	         oa:prefix \"#{prefix}\" .
       ").statements.to_a
       ldp_anno.load_statements_into_graph target_container_stmts
       target_uri = ldp_anno.target_uris.first
 
-      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper = Triannon::LdpToOaMapper.new(ldp_anno, root_container)
       mapper.extract_base
       mapper.map_specific_resource(target_uri, RDF::Vocab::OA.hasTarget)
 
@@ -159,7 +144,6 @@ describe Triannon::LdpToOaMapper, :vcr do
       expect(mapper.oa_graph.query([RDF::URI.new(stored_selector_obj_url), nil, nil]).size).to eql 0
     end
     it "FragmentSelector" do
-      stored_target_obj_url = "#{triannon_anno_container}/#{target_container_id}"
       stored_source_obj_url = "#{stored_target_obj_url}#source"
       stored_selector_obj_url = "http://localhost:8983/fedora/rest/.well-known/genid/f875342e-d8d7-475a-8085-1e07f1f8b674"
       source_url = "https://stacks.stanford.edu/image/kq131cs7229/kq131cs7229_05_0032_large.jpg"
@@ -167,34 +151,27 @@ describe Triannon::LdpToOaMapper, :vcr do
       frag_value = "xywh=0,0,200,200"
       # note that hash URIs (e.g. #source) and blank nodes (e.g. selector) are conveniently returned in the same container
       target_container_stmts =  RDF::Turtle::Reader.new("
-      @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
-      @prefix dcterms: <http://purl.org/dc/terms/> .
-      @prefix ldp: <http://www.w3.org/ns/ldp#> .
-      @prefix openannotation: <http://www.w3.org/ns/oa#> .
-      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-      @prefix triannon: <http://triannon.stanford.edu/ns/> .
-      @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+	      @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+	      @prefix dcterms: <http://purl.org/dc/terms/> .
+	      @prefix oa: <http://www.w3.org/ns/oa#> .
+	      @prefix triannon: <http://triannon.stanford.edu/ns/> .
+	      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
-      <#{stored_target_obj_url}> a ldp:Container,
-           ldp:DirectContainer,
-           ldp:RDFSource,
-           openannotation:SpecificResource;
-         ldp:hasMemberRelation ldp:member;
-         ldp:membershipResource <#{stored_target_obj_url}>;
-         openannotation:hasSelector <#{stored_selector_obj_url}>;
-         openannotation:hasSource <#{stored_source_obj_url}> .
+	      <#{stored_target_obj_url}> a oa:SpecificResource;
+	         oa:hasSelector <#{stored_selector_obj_url}>;
+	         oa:hasSource <#{stored_source_obj_url}> .
 
-      <#{stored_source_obj_url}> a dcmitype:Image;
-         triannon:externalReference <#{source_url}> .
+	      <#{stored_source_obj_url}> a dcmitype:Image;
+	         triannon:externalReference <#{source_url}> .
 
-      <#{stored_selector_obj_url}> a openannotation:FragmentSelector;
-         rdf:value \"#{frag_value}\";
-         dcterms:conformsTo <#{conforms_to_url}> .
+	      <#{stored_selector_obj_url}> a oa:FragmentSelector;
+	         rdf:value \"#{frag_value}\";
+	         dcterms:conformsTo <#{conforms_to_url}> .
       ").statements.to_a
       ldp_anno.load_statements_into_graph target_container_stmts
       target_uri = ldp_anno.target_uris.first
 
-      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper = Triannon::LdpToOaMapper.new(ldp_anno, root_container)
       mapper.extract_base
       mapper.map_specific_resource(target_uri, RDF::Vocab::OA.hasTarget)
 
@@ -234,25 +211,17 @@ describe Triannon::LdpToOaMapper, :vcr do
     #end
     it "returns true if it adds statements to oa_graph" do
       target_container_stmts =  RDF::Turtle::Reader.new("
-      @prefix ldp: <http://www.w3.org/ns/ldp#> .
-      @prefix openannotation: <http://www.w3.org/ns/oa#> .
-      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-      @prefix triannon: <http://triannon.stanford.edu/ns/> .
-      @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+	      @prefix oa: <http://www.w3.org/ns/oa#> .
+	      @prefix triannon: <http://triannon.stanford.edu/ns/> .
 
-      <#{triannon_anno_container}/#{target_container_id}> a ldp:Container,
-           ldp:DirectContainer,
-           ldp:RDFSource,
-           openannotation:SpecificResource;
-         ldp:hasMemberRelation ldp:member;
-         ldp:membershipResource <#{triannon_anno_container}/#{target_container_id}>;
-         openannotation:hasSelector <http://localhost:8983/fedora/rest/.well-known/genid/f875342e-d8d7-475a-8085-1e07f1f8b674>;
-         openannotation:hasSource <#{triannon_anno_container}/#{target_container_id}#source> .
+	      <#{stored_target_obj_url}> a oa:SpecificResource;
+	         oa:hasSelector <http://localhost:8983/fedora/rest/.well-known/genid/f875342e-d8d7-475a-8085-1e07f1f8b674>;
+	         oa:hasSource <#{stored_target_obj_url}#source> .
       ").statements.to_a
       ldp_anno.load_statements_into_graph target_container_stmts
       target_uri = ldp_anno.target_uris.first
 
-      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper = Triannon::LdpToOaMapper.new(ldp_anno, root_container)
       mapper.extract_base
       orig_size = mapper.oa_graph.size
 
@@ -263,7 +232,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       ldp_anno.load_statements_into_graph target_stmts
       target_uri = ldp_anno.target_uris.first
 
-      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper = Triannon::LdpToOaMapper.new(ldp_anno, root_container)
       mapper.extract_base
       orig_size = mapper.oa_graph.size
 

@@ -29,7 +29,7 @@ describe Triannon::LdpLoader, :vcr do
       allow_any_instance_of(Triannon::LdpLoader).to receive(:load_anno_container)
       allow_any_instance_of(Triannon::LdpLoader).to receive(:load_bodies)
       allow_any_instance_of(Triannon::LdpLoader).to receive(:load_targets)
-      expect(Triannon::LdpToOaMapper).to receive(:ldp_to_oa).with(instance_of(Triannon::AnnotationLdp))
+      expect(Triannon::LdpToOaMapper).to receive(:ldp_to_oa).with(instance_of(Triannon::AnnotationLdp), 'someroot')
       Triannon::LdpLoader.load('somekey', 'someroot')
     end
   end
