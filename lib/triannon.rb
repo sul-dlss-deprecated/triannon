@@ -1,5 +1,6 @@
 require 'linkeddata'
 require 'oa/graph'
+require 'omniauth'
 require 'rdf/triannon_vocab'
 require 'bootstrap-sass'
 require 'faraday' # for writing to LDP store
