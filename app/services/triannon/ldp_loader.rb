@@ -46,7 +46,7 @@ module Triannon
     # load body objects into @ldp_annotation's (our Triannon::AnnotationLdp object) graph
     def load_bodies
       @ldp_annotation.body_uris.each { |body_uri|
-        body_obj_path = body_uri.to_s.split("#{@base_uri}/#{@root_container}/").last
+        body_obj_path = body_uri.to_s.split("#{@base_uri}/").last
         load_object_into_annotation_graph(body_obj_path)
       }
     end
@@ -54,7 +54,7 @@ module Triannon
     # load target objects into @ldp_annotation's (our Triannon::AnnotationLdp object) graph
     def load_targets
       @ldp_annotation.target_uris.each { |target_uri|
-        target_obj_path = target_uri.to_s.split("#{@base_uri}/#{@root_container}/").last
+        target_obj_path = target_uri.to_s.split("#{@base_uri}/").last
         load_object_into_annotation_graph(target_obj_path)
       }
     end
