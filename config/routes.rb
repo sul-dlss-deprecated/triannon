@@ -28,6 +28,13 @@ Triannon::Engine.routes.draw do
                           (jsonld_context =~ /^iiif$/ || jsonld_context =~ /^oa$/ ) && id !~ /^new$/
                  }
 
-  get '/auth/:provider/callback', to: 'sessions#create'
+  post '/auth/:provider/callback', :to => 'sessions#create'
+  get '/auth/failure', :to => 'sessions#failure'
+  get '/logout', :to => 'sessions#destroy', :as => 'logout'
+  # root :to => 'sessions#new'
+  # get 'sessions/new'
+  # get 'sessions/create'
+  # get 'sessions/destroy'
+  # get 'sessions/failure'
 
 end

@@ -30,6 +30,11 @@
           </ul>
         </div><!--/.nav-collapse -->
       </div><!--/.container-fluid -->
+      <div class="container-fluid">
+        <% flash.each do |name, msg| -%>
+          <%= content_tag :div, msg, class: name %>
+        <% end -%>
+      </div><!--/.container-fluid -->
     </div>
     <%= yield %>
   </div>
