@@ -24,39 +24,36 @@ module Triannon
       return JSON.dump(info)
     end
 
-    #
-    # TODO: replace this dummy login method with a secure login authentication
-    #
+    # HTTP basic authentication
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#login-service
-    # @param user [String] A URI parameter, ?user=<user>
-    # @param password [String] A URI parameter, ?password=<password>
-    # @param account [String] A cookie value containing '<user>:<password>'
     def login
       # The service must set a Cookie for the Access Token Service to retrieve
       # to determine the user information provided by the authentication system.
-      user = params[:user] || ''
-      pass = params[:password] || ''
-      account = cookie[:account] || "#{user}:#{pass}"
-      unless account.nil? || account.empty? || account == ':'
-        # TODO: check user credentials? (but Triannon has no user db)
-        cookie[:account] = nil
-        cookie[:login_user] = account
+      if user = authenticate_with_http_basic { |u, p| authorized_user(u, p) }
+        cookies[:login_user] = user
+        redirect_to root_url, notice: 'Successfully logged in.'
       else
-        err = {
-          error: 'User unauthorized',
-          errorDescription: 'No login details received',
-          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
-        }
-        response.body = JSON.dump(err)
-        response.content_type = 'application/json'
-        response.status = 401
+        respond_to do |format|
+          format.html {
+            request_http_basic_authentication
+          }
+          format.json {
+            err = {
+              error: '401 Unauthorized',
+              errorDescription: 'invalid login details received',
+              errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
+            }
+            response.status = 401
+            accept_return_type = mime_type_from_accept(["application/json", "text/x-json", "application/jsonrequest"])
+            render :json => err.to_json, content_type: accept_return_type
+          }
+        end
       end
     end
 
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#logout-service
     def logout
-      cookie[:account] = nil
-      cookie[:login_user] = nil
+      cookies[:login_user] = nil
       session[:client_identity] = nil
       session[:client_key] = nil
       session[:client_iv] = nil
@@ -167,6 +164,27 @@ module Triannon
 
     private
 
+    # --------------------------------------------------------------------
+    # User authentication
+    # TODO: replace this section with a fully-fledged user authentication
+
+    # Authenticates known users
+    # @param username [String]
+    # @param password [String]
+    def authorized_user(username, password)
+      username if authorized_users[username] == password
+    end
+
+    # Sets a hash of authorized user data key:value pairs that correspond to
+    # the login service parameters named 'username':'password';
+    # the data is provided by configuration.
+    def authorized_users
+      @authorized_users ||= Triannon.config[:authorized_users]
+    end
+
+
+    # --------------------------------------------------------------------
+    # Client authentication
 
     # Authenticates known clients
     # @param identity [Hash] with fields 'clientId' and 'clientSecret'
@@ -180,6 +198,10 @@ module Triannon
     def authorized_clients
       @authorized_clients ||= Triannon.config[:authorized_clients]
     end
+
+
+    # --------------------------------------------------------------------
+    # Authentication tokens
 
     # construct and encrypt an authorization code
     def auth_code_generate(identity)
@@ -217,6 +239,10 @@ module Triannon
       return false
     end
 
+
+    # --------------------------------------------------------------------
+    # Access tokens
+
     # construct and encrypt an authorization code
     def access_code_generate
       token = "#{SecureRandom.uuid};;;#{Time.now.to_i}"
@@ -247,6 +273,10 @@ module Triannon
       end
       return false
     end
+
+
+    # --------------------------------------------------------------------
+    # Service information data
 
     # return uri [String] the configured Triannon host URI
     def service_base_uri

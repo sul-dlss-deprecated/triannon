@@ -28,4 +28,11 @@ Triannon::Engine.routes.draw do
                           (jsonld_context =~ /^iiif$/ || jsonld_context =~ /^oa$/ ) && id !~ /^new$/
                  }
 
+
+  # Authentication routes
+  get '/auth/login',  to: 'auth#login'
+  get '/auth/logout', to: 'auth#logout'
+  get '/auth/access_token', to: 'auth#access_token'
+  post '/auth/client_identity', to: 'auth#client_identity'
+
 end
