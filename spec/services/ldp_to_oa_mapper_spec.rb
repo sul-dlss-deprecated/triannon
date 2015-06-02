@@ -19,6 +19,10 @@ describe Triannon::LdpToOaMapper, :vcr do
     a.load_statements_into_graph base_stmts
     a
   }
+  let(:base_url) {
+    base_url = Triannon.config[:triannon_base_url].strip
+    base_url.chop! if base_url.end_with?('/')
+  }
 
   describe ".ldp_to_oa" do
     it "maps an AnnotationLdp to an OA::Graph" do
@@ -28,7 +32,7 @@ describe Triannon::LdpToOaMapper, :vcr do
 
       expect(oa_graph).to be_a OA::Graph
       resp = oa_graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
-      expect(resp.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/#{root_container}/#{base_container_id}"
+      expect(resp.first.subject.to_s).to eq "#{base_url}/#{root_container}/#{base_container_id}"
     end
     it "calls #extract_base" do
       expect_any_instance_of(Triannon::LdpToOaMapper).to receive(:extract_base)
@@ -55,7 +59,7 @@ describe Triannon::LdpToOaMapper, :vcr do
     it "builds the base identifier from the triannon.yml triannon_base_url and @id" do
       mapper.extract_base
       soln = mapper.oa_graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
-      expect(soln.first.subject.to_s).to eq "#{Triannon.config[:triannon_base_url]}/#{root_container}/#{base_container_id}"
+      expect(soln.first.subject.to_s).to eq "#{base_url}/#{root_container}/#{base_container_id}"
     end
 
     it "base identifier doesn't have double slash before id if triannon_base_url ends in slash" do
