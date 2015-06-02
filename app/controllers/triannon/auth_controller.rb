@@ -8,9 +8,14 @@ module Triannon
   class AuthController < ApplicationController
     include RdfResponseFormats
 
+
+    AUTH_EXPIRY  =   60 # seconds
+    TOKEN_EXPIRY = 3600 # seconds
+
+
     # OPTIONS /auth
     def options
-      if session[:current_user]
+      if session[:login_user]
         info = service_info_logout
       else
         info = service_info_login
@@ -19,22 +24,39 @@ module Triannon
       return JSON.dump(info)
     end
 
+    #
+    # TODO: replace this dummy login method with a secure login authentication
+    #
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#login-service
+    # @param user [String] A URI parameter, ?user=<user>
+    # @param password [String] A URI parameter, ?password=<password>
+    # @param account [String] A cookie value containing '<user>:<password>'
     def login
       # The service must set a Cookie for the Access Token Service to retrieve
       # to determine the user information provided by the authentication system.
-      err = {
-        error: "login service to be implemented",
-        errorDescription: "",
-        errorUri: "http://image-auth.iiif.io/api/image/2.1/authentication.html"
-      }
-      response.body = JSON.dump(err)
-      response.content_type = 'application/json'
-      response.status = 500
+      user = params[:user] || ''
+      pass = params[:password] || ''
+      account = cookie[:account] || "#{user}:#{pass}"
+      unless account.nil? || account.empty? || account == ':'
+        # TODO: check user credentials? (but Triannon has no user db)
+        cookie[:account] = nil
+        cookie[:login_user] = account
+      else
+        err = {
+          error: 'User unauthorized',
+          errorDescription: 'No login details received',
+          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
+        }
+        response.body = JSON.dump(err)
+        response.content_type = 'application/json'
+        response.status = 401
+      end
     end
 
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#logout-service
     def logout
+      cookie[:account] = nil
+      cookie[:login_user] = nil
       session[:client_identity] = nil
       session[:client_key] = nil
       session[:client_iv] = nil
@@ -54,7 +76,8 @@ module Triannon
         }
         response.body = JSON.dump(err)
         response.content_type = 'application/json'
-        response.status = 403
+        response.headers.merge!(Allow: 'POST')
+        response.status = 405
       end
       # The request MUST carry a body with the following JSON template:
       # {
@@ -103,6 +126,42 @@ module Triannon
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#access-token-service
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#error-conditions
     def access_token
+      # The cookie established via the login service must be passed to this
+      # service. The service should delete the cookie from the login service
+      # and create a new cookie that allows the user to access the image
+      # content.
+      # TODO: replace the login cookie
+
+      # If an authorization code was obtained using the Client Identity
+      # Service, then this must be passed to the Access Token Service as well.
+      # The code is passed using a query parameter to the service called `code`
+      # with the authorization code as the value.
+      if params[:code]
+        if auth_code_valid?(params[:code])
+          token = access_code_generate
+          token = {
+            accessToken: token,
+            tokenType: "Bearer",
+            expiresIn: TOKEN_EXPIRY
+          }
+          response.body = JSON.dump(token)
+          response.content_type = 'application/json'
+          response.status = 200
+        else
+          err = {
+            error: "invalidClient",
+            errorDescription: "Unable to validate authorization code",
+            errorUri: ""
+          }
+          response.body = JSON.dump(err)
+          response.content_type = 'application/json'
+          response.status = 401
+        end
+      else
+        # Use login cookie?
+        # cookie[:login_user] = nil
+        #
+      end
     end
 
 
@@ -112,10 +171,14 @@ module Triannon
     # Authenticates known clients
     # @param identity [Hash] with fields 'clientId' and 'clientSecret'
     def authorized_client?(identity)
-      # TODO: use a configuration value to authenticate known clients
-      # @authorized_clients ||= JSON.parse(ENV['AUTHORIZED_CLIENTS'])
-      @authorized_clients ||= {'SearchWorks' => 'secret', 'Mirador' => 'secret'}
-      @authorized_clients[idenity['clientId']] == identity['clientSecret']
+      authorized_clients[identity['clientId']] == identity['clientSecret']
+    end
+
+    # Sets a hash of authorized client data key:value pairs that correspond to
+    # the client_identity service parameters named 'clientId':'clientSecret';
+    # the data is provided by configuration.
+    def authorized_clients
+      @authorized_clients ||= Triannon.config[:authorized_clients]
     end
 
     # construct and encrypt an authorization code
@@ -138,7 +201,7 @@ module Triannon
     end
 
     # decrypt, parse and validate authorization code
-    def auth_code_validate(code)
+    def auth_code_valid?(code)
       # http://stackoverflow.com/questions/4721423/native-ruby-methods-for-compressing-encrypt-strings
       c = OpenSSL::Cipher::Cipher.new("aes-256-cbc")
       c.decrypt
@@ -148,8 +211,39 @@ module Triannon
       d << c.final
       if d.include?(session[:client_identity]['clientId'])
         timestamp = d.split(';;;').last
-        elapsed = Time.now.to_i - timestamp # seconds since auth code was issued
-        return true if elapsed < 60 # allow 1 minute for authorization
+        elapsed = Time.now.to_i - timestamp  # sec since auth code was issued
+        return true if elapsed < AUTH_EXPIRY # allow 1 minute for authorization
+      end
+      return false
+    end
+
+    # construct and encrypt an authorization code
+    def access_code_generate
+      token = "#{SecureRandom.uuid};;;#{Time.now.to_i}"
+      session[:access_token] = token
+      # http://stackoverflow.com/questions/4721423/native-ruby-methods-for-compressing-encrypt-strings
+      c = OpenSSL::Cipher::Cipher.new("aes-256-cbc")
+      c.encrypt
+      c.key = session[:client_key]
+      c.iv = session[:client_iv]
+      e = c.update(token)
+      e << c.final
+      e
+    end
+
+    # decrypt, parse and validate access token
+    def access_code_valid?(code)
+      # http://stackoverflow.com/questions/4721423/native-ruby-methods-for-compressing-encrypt-strings
+      c = OpenSSL::Cipher::Cipher.new("aes-256-cbc")
+      c.decrypt
+      c.key = session[:client_key]
+      c.iv = session[:client_iv]
+      d = c.update(code)
+      d << c.final
+      if d.eql?(session[:access_token])
+        timestamp = d.split(';;;').last
+        elapsed = Time.now.to_i - timestamp  # sec since token was issued
+        return true if elapsed < TOKEN_EXPIRY
       end
       return false
     end
