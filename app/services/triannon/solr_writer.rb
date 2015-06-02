@@ -7,15 +7,18 @@ module Triannon
     # Convert a OA::Graph object into a Hash suitable for writing to Solr.
     #
     # @param [OA::Graph] triannon_graph a populated OA::Graph object for a *stored* anno
+    # @param [String] root_container the id of the LDP parent container for the annotation
     # @return [Hash] a hash to be written to Solr, populated appropriately
-    def self.solr_hash(triannon_graph)
+    def self.solr_hash(triannon_graph, root_container)
       doc_hash = {}
       triannon_id = triannon_graph.id_as_url
-      if triannon_id
+      if triannon_id && !root_container.blank?
         # chars in Solr/Lucene query syntax are a big pain in Solr id fields, so we only use
-        # the uuid portion of the Triannon anno id, not the full url
+        # the uuid portion of the Triannon anno id, not the full url or the pair tree
         solr_id = triannon_id.sub(Triannon.config[:triannon_base_url], "")
         doc_hash[:id] = solr_id.sub(/^\/*/, "") # remove first char slash(es) if present
+
+        doc_hash[:root] = root_container
 
         # use short strings for motivation field
         doc_hash[:motivation] = triannon_graph.motivated_by.map { |m| m.sub(RDF::Vocab::OA.to_s, "") }
@@ -60,8 +63,9 @@ module Triannon
     # Convert the OA::Graph to a Solr document hash, then call RSolr.add
     #  with the doc hash
     # @param [OA::Graph] tgraph anno represented as a OA::Graph
-    def write(tgraph)
-      doc_hash = self.class.solr_hash(tgraph) if tgraph && !tgraph.id_as_url.empty?
+    # @param [String] root the id of the LDP parent container for the annotation
+    def write(tgraph, root)
+      doc_hash = self.class.solr_hash(tgraph, root) if tgraph && !tgraph.id_as_url.empty? && !root.blank?
       add(doc_hash) if doc_hash && !doc_hash.empty?
     end
 
