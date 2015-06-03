@@ -12,10 +12,10 @@ describe Triannon::SolrWriter, :vcr do
   let(:root) {"solr_writer_spec_root"}
 
   context '#write' do
-    let(:uuid) {"814b0225-bd48-4de9-a724-a72a9fa86c18"}
+    let(:ldp_id) {"my_root/81/4b/02/25/814b0225-bd48-4de9-a724-a72a9fa86c18"}
     let(:base_url) {"https://triannon-dev.stanford.edu/annotations/"}
     let(:tg) {OA::Graph.new RDF::Graph.new.from_ttl "
-     <#{base_url}#{uuid}> a <http://www.w3.org/ns/oa#Annotation>;
+     <#{base_url}#{ldp_id}> a <http://www.w3.org/ns/oa#Annotation>;
        <http://www.w3.org/ns/oa#annotatedAt> \"2015-01-07T18:01:21Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
        <http://www.w3.org/ns/oa#hasTarget> <http://searchworks.stanford.edu/view/666>;
        <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#bookmarking> ." }
@@ -148,10 +148,10 @@ describe Triannon::SolrWriter, :vcr do
   end
 
   context '.solr_hash' do
-    let(:uuid) {"814b0225-bd48-4de9-a724-a72a9fa86c18"}
+    let(:ldp_id) {"my_root/81/4b/02/25/814b0225-bd48-4de9-a724-a72a9fa86c18"}
     let(:base_url) {"https://triannon-dev.stanford.edu/annotations/"}
     let(:tg) {OA::Graph.new RDF::Graph.new.from_ttl "
-     <#{base_url}#{uuid}> a <http://www.w3.org/ns/oa#Annotation>;
+     <#{base_url}#{ldp_id}> a <http://www.w3.org/ns/oa#Annotation>;
        <http://www.w3.org/ns/oa#annotatedAt> \"2015-01-07T18:01:21Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
        <http://www.w3.org/ns/oa#hasBody> [
          a <http://purl.org/dc/dcmitype/Text>,
@@ -171,20 +171,20 @@ describe Triannon::SolrWriter, :vcr do
       it "is a String" do
         expect(sw_solr_hash[:id]).to be_a String
       end
-      it "only the uuid, not the full url" do
-        expect(sw_solr_hash[:id]).to eq uuid
+      it "only the ldp_id, not the full url" do
+        expect(sw_solr_hash[:id]).to eq ldp_id
       end
       it "slash not part of base_url" do
         config = { :triannon_base_url =>  "https://triannon-dev.stanford.edu/annotations" }
         allow(Triannon).to receive(:config).and_return(config)
         my_tg = OA::Graph.new RDF::Graph.new.from_ttl "
-         <#{base_url}/#{uuid}> a <http://www.w3.org/ns/oa#Annotation>;
+         <#{base_url}/#{ldp_id}> a <http://www.w3.org/ns/oa#Annotation>;
            <http://www.w3.org/ns/oa#hasTarget> <http://searchworks.stanford.edu/view/666>;
            <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#tagging> ."
-        expect(Triannon::SolrWriter.solr_hash(my_tg, root)[:id]).to eq uuid
+        expect(Triannon::SolrWriter.solr_hash(my_tg, root)[:id]).to eq ldp_id
       end
       it "slash part of base_url" do
-        # see 'only the uuid, not the full url'
+        # see 'only the ldp_id, not the full url'
       end
       it "calls id_as_url in OA::Graph instance" do
         expect(tg).to receive(:id_as_url).and_call_original
@@ -199,7 +199,7 @@ describe Triannon::SolrWriter, :vcr do
       it 'is the same as the param passed in' do
         expect(sw_solr_hash[:root]).to eq root
         my_g = OA::Graph.new RDF::Graph.new.from_ttl "
-         <#{base_url}#{uuid}> a <http://www.w3.org/ns/oa#Annotation>;
+         <#{base_url}#{ldp_id}> a <http://www.w3.org/ns/oa#Annotation>;
            <http://www.w3.org/ns/oa#hasTarget> <http://searchworks.stanford.edu/view/666>;
            <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#tagging> ."
         expect(Triannon::SolrWriter.solr_hash(my_g, "foo")[:root]).to eq "foo"
@@ -306,7 +306,7 @@ describe Triannon::SolrWriter, :vcr do
       end
       it "strips the Strings" do
         my_ttl = "
-         <#{base_url}#{uuid}> a <http://www.w3.org/ns/oa#Annotation>;
+         <#{base_url}#{ldp_id}> a <http://www.w3.org/ns/oa#Annotation>;
            <http://www.w3.org/ns/oa#hasBody> [
              a <http://purl.org/dc/dcmitype/Text>,
                <http://www.w3.org/2011/content#ContentAsText>;

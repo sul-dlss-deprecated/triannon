@@ -38,9 +38,9 @@ describe Triannon::SolrSearcher, :vcr do
       @testing_ids = []
       base_url = Triannon.config[:triannon_base_url]
       root = "solr_searcher_spec"
-      uuid = "814b0225-bd48-4de9-a724-a72a9fa86c18"
+    	ldp_id = "my_root/81/4b/02/25/814b0225-bd48-4de9-a724-a72a9fa86c18"
       tg = OA::Graph.new RDF::Graph.new.from_ttl "
-        <#{base_url}/#{uuid}> a <http://www.w3.org/ns/oa#Annotation>;
+        <#{base_url}/#{ldp_id}> a <http://www.w3.org/ns/oa#Annotation>;
            <http://www.w3.org/ns/oa#hasTarget> <http://my.favorite.org>;
            <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#bookmarking> ."
       doc_hash = Triannon::SolrWriter.solr_hash(tg, root)

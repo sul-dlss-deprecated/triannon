@@ -13,8 +13,9 @@ module Triannon
       doc_hash = {}
       triannon_id = triannon_graph.id_as_url
       if triannon_id && !root_container.blank?
-        # chars in Solr/Lucene query syntax are a big pain in Solr id fields, so we only use
-        # the uuid portion of the Triannon anno id, not the full url or the pair tree
+        # we simplify the URL, removing the triannon base_url.  This will only be problematic if
+        #  two different LDP Stores had the same root-container/pair-tree/uuid format AND they were
+        #  both writing to the same Solr index.
         solr_id = triannon_id.sub(Triannon.config[:triannon_base_url], "")
         doc_hash[:id] = solr_id.sub(/^\/*/, "") # remove first char slash(es) if present
 
