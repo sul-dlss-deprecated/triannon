@@ -2,26 +2,9 @@ require 'spec_helper'
 
 describe Triannon::Annotation, :vcr do
 
-=begin
-  before(:all) do
-    @solr_ids_to_delete_after_testing = []
-    @solr_baseurl = Triannon.config[:solr_url]
-  end
-  after(:all) do
-    cassette_name = "Triannon_SolrWriter/after_spec"
-    VCR.insert_cassette(cassette_name)
-    rsolr_client = RSolr.connect :url => Triannon.config[:solr_url]
-      @solr_ids_to_delete_after_testing.uniq.each { |doc_id|
-      rsolr_client.delete_by_id(doc_id)
-    }
-    rsolr_client.commit
-    VCR.eject_cassette(cassette_name)
-  end
-=end
-
-
   before(:all) do
     @cntnrs_to_delete_after_testing = []
+    @solr_doc_ids_to_delete_after_testing = []
     @ldp_url = Triannon.config[:ldp]['url'].strip
     @ldp_url.chop! if @ldp_url.end_with?('/')
     @uber_cont = Triannon.config[:ldp]['uber_container'].strip
@@ -56,6 +39,11 @@ describe Triannon::Annotation, :vcr do
         # probably here due to vcr cassette
       end
     }
+    rsolr_client = RSolr.connect :url => Triannon.config[:solr_url]
+    @solr_doc_ids_to_delete_after_testing.each { |solr_doc_id|
+      rsolr_client.delete_by_id("#{@root_container}/#{solr_doc_id}")
+    }
+    rsolr_client.commit
     VCR.eject_cassette(cassette_name)
   end
   let(:bookmark_anno) {Triannon::Annotation.new(data: Triannon.annotation_fixture("bookmark.json"), root_container: @root_container)}
@@ -190,17 +178,20 @@ describe Triannon::Annotation, :vcr do
   context '#save' do
     it "sets anno id" do
       anno_id = bookmark_anno.save
+      @solr_doc_ids_to_delete_after_testing << anno_id
       expect(bookmark_anno.id).to eq anno_id
     end
     it "reloads graph from storage to ensure id is in the graph" do
       expect(Triannon::LdpLoader).to receive(:load).and_call_original
       anno_id = bookmark_anno.save
+      @solr_doc_ids_to_delete_after_testing << anno_id
       expect(bookmark_anno.graph.id_as_url).to match bookmark_anno.id
     end
     it "calls solr_save method after successful save to LDP Store" do
       # test to make sure callback logic implemented properly in model
       expect(bookmark_anno).to receive(:solr_save)
-      bookmark_anno.save
+      anno_id = bookmark_anno.save
+      @solr_doc_ids_to_delete_after_testing << anno_id
     end
     it "doesn't call solr_save method after unsuccessful save to LDP Store - nil returned" do
       # test to make sure callback logic implemented properly in model
@@ -235,6 +226,7 @@ describe Triannon::Annotation, :vcr do
     it "calls solr_delete method after successful destroy in LDP store" do
       # test to make sure callback logic implemented properly in model
       bookmark_anno.save
+      @solr_doc_ids_to_delete_after_testing << bookmark_anno.id
       expect(bookmark_anno).to receive(:solr_delete)
       bookmark_anno.destroy
     end
@@ -256,6 +248,7 @@ describe Triannon::Annotation, :vcr do
     let(:my_bookmark_anno) {
       # make sure we have id for anno
       id = bookmark_anno.save
+      @solr_doc_ids_to_delete_after_testing << id
       Triannon::Annotation.find(id, @root_container)
     }
     let(:solr_writer) { my_bookmark_anno.send(:solr_writer) }
@@ -298,6 +291,7 @@ describe Triannon::Annotation, :vcr do
     it "sets anno id" do
       anno = Triannon::Annotation.new(data: Triannon.annotation_fixture("body-chars.ttl"), root_container: @root_container)
       anno_id = anno.save
+      @solr_doc_ids_to_delete_after_testing << anno_id
       my_anno = Triannon::Annotation.find(anno_id, @root_container)
       expect(my_anno.id).to eq anno_id
     end
