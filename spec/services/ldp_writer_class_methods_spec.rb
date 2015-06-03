@@ -254,7 +254,7 @@ describe Triannon::LdpWriter, :vcr do
         slug = 'stdout-test'
         expect(STDOUT).to receive(:puts).with("Created Basic Container #{@ldp_url}/#{@uber_cont}/#{@root_container}/#{slug}")
         expect(Triannon::LdpWriter.create_basic_container("#{@uber_cont}/#{@root_container}", slug)).to be true
-        assert_basic_container(@uber_cont + '/' + slug)
+        assert_basic_container("#{@uber_cont}/#{@root_container}/#{slug}")
 
         @cntnrs_to_delete_after_testing << "#{@ldp_url}/#{@uber_cont}/#{@root_container}/#{slug}"
       end
