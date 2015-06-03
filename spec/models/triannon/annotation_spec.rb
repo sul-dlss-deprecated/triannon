@@ -1,6 +1,25 @@
 require 'spec_helper'
 
 describe Triannon::Annotation, :vcr do
+
+=begin
+  before(:all) do
+    @solr_ids_to_delete_after_testing = []
+    @solr_baseurl = Triannon.config[:solr_url]
+  end
+  after(:all) do
+    cassette_name = "Triannon_SolrWriter/after_spec"
+    VCR.insert_cassette(cassette_name)
+    rsolr_client = RSolr.connect :url => Triannon.config[:solr_url]
+      @solr_ids_to_delete_after_testing.uniq.each { |doc_id|
+      rsolr_client.delete_by_id(doc_id)
+    }
+    rsolr_client.commit
+    VCR.eject_cassette(cassette_name)
+  end
+=end
+
+
   before(:all) do
     @cntnrs_to_delete_after_testing = []
     @ldp_url = Triannon.config[:ldp]['url'].strip
@@ -241,7 +260,7 @@ describe Triannon::Annotation, :vcr do
     }
     let(:solr_writer) { my_bookmark_anno.send(:solr_writer) }
     it "calls SolrWriter write with triannon graph" do
-      expect(solr_writer).to receive(:write).with(my_bookmark_anno.graph)
+      expect(solr_writer).to receive(:write).with(my_bookmark_anno.graph, @root_container)
       my_bookmark_anno.send(:solr_save)
     end
     it "does NOT call SolrWriter write when graph is nil" do
