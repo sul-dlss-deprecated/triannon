@@ -1,0 +1,31 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: http://localhost:8983/solr/triannon/update?wt=ruby
+    body:
+      encoding: UTF-8
+      string: <?xml version="1.0" encoding="UTF-8"?><add commitWithin="500"><doc><field
+        name="id">814b0225-bd48-4de9-a724-a72a9fa86c18</field><field name="root">solr_searcher_spec</field><field
+        name="motivation">bookmarking</field><field name="target_url">http://my.favorite.org</field><field
+        name="target_type">external_URI</field><field name="body_type">no_body</field><field
+        name="anno_jsonld">{"@context":"http://www.w3.org/ns/oa-context-20130208.json","@id":"http://your.triannon-server.com/annotations//814b0225-bd48-4de9-a724-a72a9fa86c18","@type":"oa:Annotation","hasTarget":"http://my.favorite.org","motivatedBy":"oa:bookmarking"}</field></doc></add>
+    headers:
+      Content-Type:
+      - text/xml
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - text/plain;charset=UTF-8
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |
+        {'responseHeader'=>{'status'=>0,'QTime'=>2}}
+    http_version: 
+  recorded_at: Wed, 03 Jun 2015 21:19:52 GMT
+recorded_with: VCR 2.9.3

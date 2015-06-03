@@ -49,6 +49,12 @@ module Triannon
           when 'bodyexact'
             # no need to Solr escape value because it's in quotes
             q_terms_array << "body_chars_exact:\"#{v}\""
+          when 'bodykeyword'
+            solr_params_hash[:kqf] = 'body_chars_exact^3 body_chars_unstem^2 body_chars_stem'
+            solr_params_hash[:kpf] = 'body_chars_exact^15 body_chars_unstem^10 body_chars_stem^5'
+            solr_params_hash[:kpf3] = 'body_chars_exact^9 body_chars_unstem^6 body_chars_stem^3'
+            solr_params_hash[:kpf2] = 'body_chars_exact^6 body_chars_unstem^4 body_chars_stem^2'
+            q_terms_array << '_query_:"{!dismax qf=$kqf pf=$kpf pf3=$kpf3 pf2=$kpf2}' + RSolr.solr_escape(v) + '"'
           when 'motivatedby'
             case
               when v.include?('#')
@@ -60,12 +66,8 @@ module Triannon
               else
                 fq_terms_array << "motivation:#{RSolr.solr_escape(v)}"
             end
-          when 'bodykeyword'
-            solr_params_hash[:kqf] = 'body_chars_exact^3 body_chars_unstem^2 body_chars_stem'
-            solr_params_hash[:kpf] = 'body_chars_exact^15 body_chars_unstem^10 body_chars_stem^5'
-            solr_params_hash[:kpf3] = 'body_chars_exact^9 body_chars_unstem^6 body_chars_stem^3'
-            solr_params_hash[:kpf2] = 'body_chars_exact^6 body_chars_unstem^4 body_chars_stem^2'
-            q_terms_array << '_query_:"{!dismax qf=$kqf pf=$kpf pf3=$kpf3 pf2=$kpf2}' + RSolr.solr_escape(v) + '"'
+          when 'anno_root'
+            fq_terms_array << "root:#{RSolr.solr_escape(v)}"
 
           # TODO: add'l params to implement:
           # targetType - fq
