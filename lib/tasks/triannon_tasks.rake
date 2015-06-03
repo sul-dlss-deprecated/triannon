@@ -12,6 +12,7 @@ namespace :triannon do
   task :solr_jetty_config do
     `cp -r config/solr/triannon-core jetty/solr`
     `cp config/solr/solr.xml jetty/solr`
+    `cp config/solr/log4j.properties jetty/resources`
   end
 
 	# don't display this in rake -T
