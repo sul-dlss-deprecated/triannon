@@ -12,7 +12,7 @@ Triannon::Engine.routes.draw do
       anno_root = request.path_parameters[:anno_root]
       id = request.path_parameters[:id]
       anno_root !~ /^annotations$/ && anno_root !~ /^search$/ && anno_root !~ /^new$/ && id !~ /^search$/ && id !~ /^new$/
-   	}
+    }
 
   # get -> search controller find action
   get '/annotations/:anno_root/search', to: 'search#find'
@@ -35,7 +35,7 @@ Triannon::Engine.routes.draw do
       anno_root = request.path_parameters[:anno_root]
       id = request.path_parameters[:id]
       anno_root !~ /^annotations$/ && anno_root !~ /^search$/ && anno_root !~ /^new$/ && id !~ /^search$/ && id !~ /^new$/
-   	}
+    }
 
   # get no id -> index action
   get '/annotations/:anno_root', to: 'annotations#index',
