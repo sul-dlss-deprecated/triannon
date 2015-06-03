@@ -53,10 +53,8 @@ module Triannon
 
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#logout-service
     def logout
-      cookies[:login_user] = nil
-      session[:client_identity] = nil
-      session[:client_key] = nil
-      session[:client_iv] = nil
+      cookies.delete(:login_user)
+      reset_session
       redirect_to root_url, notice: 'Successfully logged out.'
     end
 
