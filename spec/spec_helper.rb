@@ -58,8 +58,21 @@ module Triannon
   end
 end
 
+# cache jsonld context documents
+require 'restclient/components'
+require 'rack/cache'
+RestClient.enable Rack::Cache,
+  metastore: "file:#{Rails.root}/tmp/rack-cache/meta",
+  entitystore: "file:#{Rails.root}/tmp/rack-cache/body",
+  default_ttl:  86400, # when to recheck, in seconds (daily = 60 x 60 x 24)
+  verbose: false
+
 require 'vcr'
 VCR.configure do |c|
+	# use rest client caching for jsonld context docs
+  c.ignore_request do |req|
+    req.uri == OA::Graph::OA_DATED_CONTEXT_URL || req.uri == OA::Graph::OA_CONTEXT_URL ||req.uri == OA::Graph::IIIF_CONTEXT_URL
+  end
   c.cassette_library_dir = 'spec/fixtures/vcr_cassettes'
   c.hook_into :webmock
   c.allow_http_connections_when_no_cassette = true
