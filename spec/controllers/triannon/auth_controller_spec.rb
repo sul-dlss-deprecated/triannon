@@ -13,15 +13,15 @@ describe Triannon::AuthController, :vcr, type: :controller do
 
   describe '/auth/login' do
 
-    describe 'only responds to GET requests' do
+    describe 'responds to GET and OPTIONS requests' do
       it 'GET has a route to /auth/login' do
         expect(:get => '/auth/login').to be_routable
       end
+      it 'OPTIONS has a route to /auth/login' do
+        expect(:options => '/auth/login').to be_routable
+      end
       it 'DELETE has no route to /auth/login' do
         expect(:delete => '/auth/login').not_to be_routable
-      end
-      it 'OPTIONS has no route to /auth/login' do
-        expect(:options => '/auth/login').not_to be_routable
       end
       it 'POST has no route to /auth/login' do
         expect(:post => '/auth/login').not_to be_routable
