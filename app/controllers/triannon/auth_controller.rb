@@ -21,7 +21,8 @@ module Triannon
         info = service_info_login
       end
       # TODO: include optional info, such as service_info_client_identity
-      return JSON.dump(info)
+      # accept_return_type = mime_type_from_accept(['application/json', 'text/x-json', 'application/jsonrequest'])
+      render :json => info.to_json, content_type: 'application/json' #accept_return_type
     end
 
     # HTTP basic authentication
