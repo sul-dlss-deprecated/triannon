@@ -7,6 +7,7 @@ module Triannon
     rescue_from Triannon::LDPStorageError, with: :ldp_storage_error
     rescue_from Triannon::ExternalReferenceError, with: :ext_ref_error
     rescue_from Triannon::SearchError, with: :search_error
+    # FIXME:  rescue LDPErrors
     before_action :default_format_jsonld, only: [:show]
     before_action :set_annotation, only: [:show, :update, :destroy]
 
@@ -126,13 +127,13 @@ module Triannon
     # DELETE /annotations/1
     def destroy
       @annotation.destroy
-      redirect_to annotations_url, status: 204, notice: 'Annotation was successfully destroyed.'
+      redirect_to "/annotations/#{params[:anno_root]}", status: 204, notice: 'Annotation was successfully destroyed.'
     end
 
 private
 
     def set_annotation
-      @annotation = Annotation.find(params[:id])
+      @annotation = Annotation.find(params[:id], params[:anno_root])
     end
 
     # render Triannon::ExternalReferenceError
