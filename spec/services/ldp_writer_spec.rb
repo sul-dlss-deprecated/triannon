@@ -3,14 +3,12 @@ require 'spec_helper'
 describe Triannon::LdpWriter, :vcr do
 
   before(:all) do
-    @cntnrs_to_delete_after_testing = []
-    @ldp_url = Triannon.config[:ldp]['url']
-    @ldp_url.chop! if @ldp_url.end_with?('/')
-    @uber_cont = Triannon.config[:ldp]['uber_container'].strip
-    @uber_cont = @uber_cont[1..-1] if @uber_cont.start_with?('/')
-    @uber_cont.chop! if @uber_cont.end_with?('/')
-    @uber_root_url = "#{@ldp_url}/#{@uber_cont}"
     @root_container = 'ldpwinstancespec'
+    @uber_root_url = "#{spec_ldp_url}/#{spec_uber_cont}"
+    @root_url = "#{@uber_root_url}/#{@root_container}"
+    @ldp_testing_container_urls = []
+    vcr_cassette_name = "Triannon_LdpWriter/instance_methods/before_ldp_writer_spec"
+    create_root_container(@root_container, vcr_cassette_name)
     @anno = Triannon::Annotation.new data: '
       <> a <http://www.w3.org/ns/oa#Annotation>;
          <http://www.w3.org/ns/oa#hasBody> [
@@ -21,34 +19,11 @@ describe Triannon::LdpWriter, :vcr do
          <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq666cs7229>;
          <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#commenting> .'
     @ldpw = Triannon::LdpWriter.new @anno, @root_container, 'foo'
-    @root_url = "#{@uber_root_url}/#{@root_container}"
-    cassette_name = "Triannon_LdpWriter/instance_methods/before_ldp_writer_spec"
-    VCR.insert_cassette(cassette_name)
-    begin
-      Triannon::LdpWriter.create_basic_container(nil, @uber_cont)
-      Triannon::LdpWriter.create_basic_container(@uber_cont, @root_container)
-    rescue Faraday::ConnectionFailed
-      # probably here due to vcr cassette
-    end
-    VCR.eject_cassette(cassette_name)
   end
   after(:all) do
-    cassette_name = "Triannon_LdpWriter/instance_methods/after_ldp_writer_spec"
-    VCR.insert_cassette(cassette_name)
-    @cntnrs_to_delete_after_testing << "#{@root_url}"
-    @cntnrs_to_delete_after_testing.uniq.each { |cont_url|
-      begin
-        if Triannon::LdpWriter.container_exist?(cont_url.split("#{@ldp_url}/").last)
-          Triannon::LdpWriter.delete_container cont_url
-          Faraday.new(url: "#{cont_url}/fcr:tombstone").delete
-        end
-      rescue Triannon::LDPStorageError => e
-        # probably here due to parent container being deleted first
-      rescue Faraday::ConnectionFailed
-        # probably here due to vcr cassette
-      end
-    }
-    VCR.eject_cassette(cassette_name)
+    @ldp_testing_container_urls << "#{@root_url}"
+    vcr_cassette_name = "Triannon_LdpWriter/instance_methods/after_ldp_writer_spec"
+    delete_test_objects(@ldp_testing_container_urls, [], @root_container, vcr_cassette_name)
   end
   let(:conn) { Faraday.new(url: @uber_root_url) }
 
@@ -56,7 +31,7 @@ describe Triannon::LdpWriter, :vcr do
     context "#create_base" do
       it 'creates new annotation as a child of anno_root_container' do
         anno_id = @ldpw.create_base
-        @cntnrs_to_delete_after_testing << "#{@root_container}/#{anno_id}"
+        @ldp_testing_container_urls << "#{@root_container}/#{anno_id}"
         resp = conn.get do |req|
           req.url "#{@root_container}"
           req.headers['Accept'] = 'application/x-turtle'
@@ -68,7 +43,7 @@ describe Triannon::LdpWriter, :vcr do
       end
       it 'LDP store creates Basic Container for the annotation and returns id' do
         anno_id = @ldpw.create_base
-        @cntnrs_to_delete_after_testing << "#{@root_container}/#{anno_id}"
+        @ldp_testing_container_urls << "#{@root_container}/#{anno_id}"
         resp = conn.get do |req|
           req.url "#{@root_container}/#{anno_id}"
           req.headers['Accept'] = 'application/x-turtle'
@@ -95,7 +70,7 @@ describe Triannon::LdpWriter, :vcr do
           }'
         my_ldpw = Triannon::LdpWriter.new iiif_anno, @root_container
         base_pid = my_ldpw.create_base
-        @cntnrs_to_delete_after_testing << "#{@root_container}/#{base_pid}"
+        @ldp_testing_container_urls << "#{@root_container}/#{base_pid}"
         resp = conn.get do |req|
           req.url "#{@root_container}/#{base_pid}"
           req.headers['Accept'] = 'application/x-turtle'
@@ -121,7 +96,7 @@ describe Triannon::LdpWriter, :vcr do
         }'
         my_ldpw = Triannon::LdpWriter.new my_anno, @root_container
         new_pid = my_ldpw.create_base
-        @cntnrs_to_delete_after_testing << "#{@root_container}/#{new_pid}"
+        @ldp_testing_container_urls << "#{@root_container}/#{new_pid}"
         resp = conn.get do |req|
           req.url "#{@root_container}/#{new_pid}"
           req.headers['Accept'] = 'application/x-turtle'
@@ -159,7 +134,7 @@ describe Triannon::LdpWriter, :vcr do
         }'
         my_ldpw = Triannon::LdpWriter.new my_anno, @root_container
         new_pid = my_ldpw.create_base
-        @cntnrs_to_delete_after_testing << "#{@root_container}/#{new_pid}"
+        @ldp_testing_container_urls << "#{@root_container}/#{new_pid}"
         resp = conn.get do |req|
           req.url "#{@root_container}/#{new_pid}"
           req.headers['Accept'] = 'application/x-turtle'
@@ -227,7 +202,7 @@ describe Triannon::LdpWriter, :vcr do
       it 'LDP store creates retrievable LDP DirectContainer with correct member relationships' do
         @ldpw = Triannon::LdpWriter.new @anno, @root_container
         id = @ldpw.create_base
-        @cntnrs_to_delete_after_testing << "#{@root_container}/#{id}"
+        @ldp_testing_container_urls << "#{@root_container}/#{id}"
         @ldpw.create_body_container
         resp = conn.get do |req|
           req.url "#{@root_container}/#{id}/b"
@@ -250,7 +225,7 @@ describe Triannon::LdpWriter, :vcr do
       it 'LDP store creates retrievable LDP DirectContainer with correct member relationships' do
         @ldpw = Triannon::LdpWriter.new @anno, @root_container
         id = @ldpw.create_base
-        @cntnrs_to_delete_after_testing << "#{@root_container}/#{id}"
+        @ldp_testing_container_urls << "#{@root_container}/#{id}"
         @ldpw.create_target_container
         resp = conn.get do |req|
           req.url "#{@root_container}/#{id}/t"
@@ -268,7 +243,7 @@ describe Triannon::LdpWriter, :vcr do
     context '#create_body_resources' do
       it "calls create_resources_in_container with hasBody predicate" do
         new_pid = @ldpw.create_base
-        @cntnrs_to_delete_after_testing << "#{@root_container}/#{new_pid}"
+        @ldp_testing_container_urls << "#{@root_container}/#{new_pid}"
         @ldpw.create_body_container
         expect(@ldpw).to receive(:create_resources_in_container).with(RDF::Vocab::OA.hasBody)
         body_uuids = @ldpw.create_body_resources
@@ -279,7 +254,7 @@ describe Triannon::LdpWriter, :vcr do
           VCR.insert_cassette(@cassette_name)
           my_ldpw = Triannon::LdpWriter.new @anno, @root_container
           @anno_id = my_ldpw.create_base
-          @cntnrs_to_delete_after_testing << "#{@root_container}/#{@anno_id}"
+          @ldp_testing_container_urls << "#{@root_container}/#{@anno_id}"
           my_ldpw.create_body_container
           body_uuids = my_ldpw.create_body_resources
           expect(body_uuids.size).to eql 1
@@ -325,7 +300,7 @@ describe Triannon::LdpWriter, :vcr do
     context '#create_target_resources' do
       it "calls create_resources_in_container with hasTarget predicate" do
         new_pid = @ldpw.create_base
-        @cntnrs_to_delete_after_testing << "#{@root_container}/#{new_pid}"
+        @ldp_testing_container_urls << "#{@root_container}/#{new_pid}"
         @ldpw.create_target_container
         expect(@ldpw).to receive(:create_resources_in_container).with(RDF::Vocab::OA.hasTarget)
         body_uuids = @ldpw.create_target_resources
@@ -336,7 +311,7 @@ describe Triannon::LdpWriter, :vcr do
           VCR.insert_cassette(@cassette_name)
           my_ldpw = Triannon::LdpWriter.new @anno, @root_container
           @anno_id = my_ldpw.create_base
-          @cntnrs_to_delete_after_testing << "#{@root_container}/#{@anno_id}"
+          @ldp_testing_container_urls << "#{@root_container}/#{@anno_id}"
           my_ldpw.create_target_container
           target_uuids = my_ldpw.create_target_resources
           expect(target_uuids.size).to eql 1
@@ -380,7 +355,7 @@ describe Triannon::LdpWriter, :vcr do
       it 'deletes the resource from the LDP store when id is full url' do
         ldpw = Triannon::LdpWriter.new @anno, @root_container
         ldp_id = ldpw.create_base
-        @cntnrs_to_delete_after_testing << "#{@root_container}/#{ldp_id}"
+        @ldp_testing_container_urls << "#{@root_container}/#{ldp_id}"
         
         expect(ldp_id).not_to match @root_url
         ldpw.delete_containers "#{@root_url}/#{ldp_id}"
@@ -393,7 +368,7 @@ describe Triannon::LdpWriter, :vcr do
       it 'works when id is just anno id' do
         ldpw = Triannon::LdpWriter.new @anno, @root_container
         ldp_id = ldpw.create_base
-        @cntnrs_to_delete_after_testing << "#{@root_container}/#{ldp_id}"
+        @ldp_testing_container_urls << "#{@root_container}/#{ldp_id}"
 
         ldpw.delete_containers ldp_id
 
@@ -405,7 +380,7 @@ describe Triannon::LdpWriter, :vcr do
       it 'works when id is anno root + anno id' do
         ldpw = Triannon::LdpWriter.new @anno, @root_container
         ldp_id = ldpw.create_base
-        @cntnrs_to_delete_after_testing << "#{@root_container}/#{ldp_id}"
+        @ldp_testing_container_urls << "#{@root_container}/#{ldp_id}"
 
         ldpw.delete_containers "#{@root_container}/#{ldp_id}"
 
@@ -424,7 +399,7 @@ describe Triannon::LdpWriter, :vcr do
 
       it "doesn't delete the parent container" do
         ldp_id = Triannon::LdpWriter.create_anno @anno, @root_container
-        @cntnrs_to_delete_after_testing << "#{@root_container}/#{ldp_id}"
+        @ldp_testing_container_urls << "#{@root_container}/#{ldp_id}"
         ldpw = Triannon::LdpWriter.new(nil, @root_container)
 
         # delete the body resources
@@ -441,7 +416,7 @@ describe Triannon::LdpWriter, :vcr do
       end
       it 'deletes all child containers, recursively' do
         ldp_id = Triannon::LdpWriter.create_anno @anno, @root_container
-        @cntnrs_to_delete_after_testing << "#{@root_container}/#{ldp_id}"
+        @ldp_testing_container_urls << "#{@root_container}/#{ldp_id}"
 
         l = Triannon::LdpLoader.new(ldp_id, @root_container)
         l.load_anno_container

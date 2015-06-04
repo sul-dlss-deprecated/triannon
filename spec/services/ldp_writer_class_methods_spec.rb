@@ -3,14 +3,12 @@ require 'spec_helper'
 describe Triannon::LdpWriter, :vcr do
 
   before(:all) do
-    @cntnrs_to_delete_after_testing = []
-    @ldp_url = Triannon.config[:ldp]['url']
-    @ldp_url.chop! if @ldp_url.end_with?('/')
-    @uber_cont = Triannon.config[:ldp]['uber_container'].strip
-    @uber_cont = @uber_cont[1..-1] if @uber_cont.start_with?('/')
-    @uber_cont.chop! if @uber_cont.end_with?('/')
-    @uber_root_url = "#{@ldp_url}/#{@uber_cont}"
     @root_container = 'ldpwclassspec'
+    @uber_root_url = "#{spec_ldp_url}/#{spec_uber_cont}"
+    @root_url = "#{@uber_root_url}/#{@root_container}"
+    @ldp_testing_container_urls = []
+    vcr_cassette_name = "Triannon_LdpWriter/class_methods/before_ldp_writer_spec"
+    create_root_container(@root_container, vcr_cassette_name)
     @anno = Triannon::Annotation.new data: '
       <> a <http://www.w3.org/ns/oa#Annotation>;
          <http://www.w3.org/ns/oa#hasBody> [
@@ -21,37 +19,13 @@ describe Triannon::LdpWriter, :vcr do
          <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq131cs7229>;
          <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#commenting> .'
     @ldpw = Triannon::LdpWriter.new @anno, @root_container, 'foo'
-    @root_url = "#{@uber_root_url}/#{@root_container}"
-    cassette_name = "Triannon_LdpWriter/class_methods/before_ldp_writer_spec"
-    VCR.insert_cassette(cassette_name)
-    begin
-      Triannon::LdpWriter.create_basic_container(nil, @uber_cont)
-      Triannon::LdpWriter.create_basic_container(@uber_cont, @root_container)
-    rescue Faraday::ConnectionFailed
-      # probably here due to vcr cassette
-    end
-    VCR.eject_cassette(cassette_name)
   end
   after(:all) do
-    cassette_name = "Triannon_LdpWriter/class_methods/after_ldp_writer_spec"
-    VCR.insert_cassette(cassette_name)
-    @cntnrs_to_delete_after_testing << "#{@root_url}"
-    @cntnrs_to_delete_after_testing.uniq.each { |cont_url|
-      begin
-        if Triannon::LdpWriter.container_exist?(cont_url.split("#{@ldp_url}/").last)
-          Triannon::LdpWriter.delete_container cont_url
-          Faraday.new(url: "#{cont_url}/fcr:tombstone").delete
-        end
-      rescue Triannon::LDPStorageError => e
-        # probably here due to parent container being deleted first
-      rescue Faraday::ConnectionFailed
-        # probably here due to vcr cassette
-      end
-    }
-    VCR.eject_cassette(cassette_name)
+    @ldp_testing_container_urls << @root_url
+    vcr_cassette_name = "Triannon_LdpWriter/class_methods/after_ldp_writer_spec"
+    delete_test_objects(@ldp_testing_container_urls, [], @root_container, vcr_cassette_name)
   end
   let(:conn) { Faraday.new(url: @uber_root_url) }
-
 
   context 'class methods' do
 
@@ -59,11 +33,11 @@ describe Triannon::LdpWriter, :vcr do
       it 'calls create_base' do
         expect_any_instance_of(Triannon::LdpWriter).to receive(:create_base).and_call_original
         id = Triannon::LdpWriter.create_anno(@anno, @root_container)
-        @cntnrs_to_delete_after_testing << "#{@uber_cont}/#{@root_container}/#{id}"
+        @ldp_testing_container_urls << "#{@root_url}/#{id}"
       end
       it 'returns the pid of the annotation container in LDP store' do
         id = Triannon::LdpWriter.create_anno(@anno, @root_container)
-        @cntnrs_to_delete_after_testing << "#{@uber_cont}/#{@root_container}/#{id}"
+        @ldp_testing_container_urls << "#{@root_url}/#{id}"
         expect(id).to be_a String
         expect(id.size).to be > 10
         resp = conn.get do |req|
@@ -82,11 +56,11 @@ describe Triannon::LdpWriter, :vcr do
         }'
         expect_any_instance_of(Triannon::LdpWriter).not_to receive(:create_body_container)
         id = Triannon::LdpWriter.create_anno(my_anno, @root_container)
-        @cntnrs_to_delete_after_testing << "#{@uber_cont}/#{@root_container}/#{id}"
+        @ldp_testing_container_urls << "#{@root_url}/#{id}"
       end
       it 'creates a LDP resource for bodies ldp container at (id)\/b' do
         pid = Triannon::LdpWriter.create_anno(@anno, @root_container)
-        @cntnrs_to_delete_after_testing << "#{@uber_cont}/#{@root_container}/#{pid}"
+        @ldp_testing_container_urls << "#{@root_url}/#{pid}"
         container_url = "#{@root_url}/#{pid}/b"
         container_resp = conn.get do |req|
           req.url container_url
@@ -99,7 +73,7 @@ describe Triannon::LdpWriter, :vcr do
         expect_any_instance_of(Triannon::LdpWriter).to receive(:create_body_container).and_call_original
         expect_any_instance_of(Triannon::LdpWriter).to receive(:create_body_resources)
         id = Triannon::LdpWriter.create_anno(@anno, @root_container)
-        @cntnrs_to_delete_after_testing << "#{@uber_cont}/#{@root_container}/#{id}"
+        @ldp_testing_container_urls << "#{@root_url}/#{id}"
       end
       it 'creates a single body container with multiple resources if there are multiple bodies' do
         my_anno = Triannon::Annotation.new data: '{
@@ -121,7 +95,7 @@ describe Triannon::LdpWriter, :vcr do
           ]
         }'
         id = Triannon::LdpWriter.create_anno(my_anno, @root_container)
-        @cntnrs_to_delete_after_testing << "#{@uber_cont}/#{@root_container}/#{id}"
+        @ldp_testing_container_urls << "#{@root_url}/#{id}"
         container_url = "#{@root_url}/#{id}/b"
         container_resp = conn.get do |req|
           req.url container_url
@@ -134,11 +108,11 @@ describe Triannon::LdpWriter, :vcr do
         expect_any_instance_of(Triannon::LdpWriter).to receive(:create_target_container).and_call_original
         expect_any_instance_of(Triannon::LdpWriter).to receive(:create_target_resources)
         id = Triannon::LdpWriter.create_anno(@anno, @root_container)
-        @cntnrs_to_delete_after_testing << "#{@uber_cont}/#{@root_container}/#{id}"
+        @ldp_testing_container_urls << "#{@root_url}/#{id}"
       end
       it 'creates a LDP resource for targets ldp container at (id)\/t' do
         pid = Triannon::LdpWriter.create_anno(@anno, @root_container)
-        @cntnrs_to_delete_after_testing << "#{@uber_cont}/#{@root_container}/#{pid}"
+        @ldp_testing_container_urls << "#{@root_url}/#{pid}"
         container_url = "#{@root_url}/#{pid}/t"
         container_resp = conn.get do |req|
           req.url container_url
@@ -157,7 +131,7 @@ describe Triannon::LdpWriter, :vcr do
           ]
         }'
         id = Triannon::LdpWriter.create_anno(my_anno, @root_container)
-        @cntnrs_to_delete_after_testing << "#{@uber_cont}/#{@root_container}/#{id}"
+        @ldp_testing_container_urls << "#{@root_url}/#{id}"
         container_url = "#{@root_url}/#{id}/t"
         container_resp = conn.get do |req|
           req.url container_url
@@ -236,31 +210,31 @@ describe Triannon::LdpWriter, :vcr do
       before(:all) do
         @created_before_slug = 'created_before'
         begin
-          Triannon::LdpWriter.create_basic_container(@uber_cont, @created_before_slug)
+          Triannon::LdpWriter.create_basic_container(spec_uber_cont, @created_before_slug)
         rescue Faraday::ConnectionFailed
           # probably here due to vcr cassette
         end
-        @cntnrs_to_delete_after_testing << "#{@ldp_url}/#{@uber_cont}/#{@created_before_slug}"
+        @ldp_testing_container_urls << "#{spec_ldp_url}/#{spec_uber_cont}/#{@created_before_slug}"
       end
       it "creates container if it doesn't already exist" do
         slug = 'whee'
         allow(STDOUT).to receive(:puts)
-        expect(Triannon::LdpWriter.create_basic_container("#{@uber_cont}/#{@root_container}", slug)).to eq true
-        assert_basic_container("#{@uber_cont}/#{@root_container}/#{slug}")
+        expect(Triannon::LdpWriter.create_basic_container("#{spec_uber_cont}/#{@root_container}", slug)).to eq true
+        assert_basic_container("#{spec_uber_cont}/#{@root_container}/#{slug}")
 
-        @cntnrs_to_delete_after_testing << "#{@ldp_url}/#{@uber_cont}/#{@root_container}/#{slug}"
+        @ldp_testing_container_urls << "#{spec_ldp_url}/#{spec_uber_cont}/#{@root_container}/#{slug}"
       end
       it 'returns true and prints a message to STDOUT if it creates container' do
         slug = 'stdout-test'
-        expect(STDOUT).to receive(:puts).with("Created Basic Container #{@ldp_url}/#{@uber_cont}/#{@root_container}/#{slug}")
-        expect(Triannon::LdpWriter.create_basic_container("#{@uber_cont}/#{@root_container}", slug)).to be true
-        assert_basic_container("#{@uber_cont}/#{@root_container}/#{slug}")
+        expect(STDOUT).to receive(:puts).with("Created Basic Container #{spec_ldp_url}/#{spec_uber_cont}/#{@root_container}/#{slug}")
+        expect(Triannon::LdpWriter.create_basic_container("#{spec_uber_cont}/#{@root_container}", slug)).to be true
+        assert_basic_container("#{spec_uber_cont}/#{@root_container}/#{slug}")
 
-        @cntnrs_to_delete_after_testing << "#{@ldp_url}/#{@uber_cont}/#{@root_container}/#{slug}"
+        @ldp_testing_container_urls << "#{spec_ldp_url}/#{spec_uber_cont}/#{@root_container}/#{slug}"
       end
       it 'returns false and prints a message if container already exists' do
-        expect(STDOUT).to receive(:puts).with("Container #{@ldp_url}/#{@uber_cont}/#{@created_before_slug} already exists.")
-        expect(Triannon::LdpWriter.create_basic_container(@uber_cont, @created_before_slug)).to be false
+        expect(STDOUT).to receive(:puts).with("Container #{spec_ldp_url}/#{spec_uber_cont}/#{@created_before_slug} already exists.")
+        expect(Triannon::LdpWriter.create_basic_container(spec_uber_cont, @created_before_slug)).to be false
       end
       it "prints message to STDOUT with err info if it doesn't create container" do
         allow(Triannon::LdpWriter).to receive(:container_exist?).and_return(false)
@@ -271,8 +245,8 @@ describe Triannon::LdpWriter, :vcr do
         allow(conn).to receive(:post).and_return(resp)
         allow(Faraday).to receive(:new).and_return(conn)
         slug = "ignored"
-        expect(STDOUT).to receive(:puts).with(a_string_starting_with("Unable to create Basic Container #{@ldp_url}/#{@uber_cont}/#{slug}"))
-        expect(Triannon::LdpWriter.create_basic_container(@uber_cont, slug)).to be false
+        expect(STDOUT).to receive(:puts).with(a_string_starting_with("Unable to create Basic Container #{spec_ldp_url}/#{spec_uber_cont}/#{slug}"))
+        expect(Triannon::LdpWriter.create_basic_container(spec_uber_cont, slug)).to be false
       end
       context "avoids double slash in url" do
         before(:each) do
@@ -297,7 +271,7 @@ describe Triannon::LdpWriter, :vcr do
         it 'parent path starts with slash' do
           parent_path = "/arbitrary"
           slug = "ignored"
-          expect(Faraday).to receive(:new).with(url: "#{@ldp_url}#{parent_path}").and_return(@fday)
+          expect(Faraday).to receive(:new).with(url: "#{spec_ldp_url}#{parent_path}").and_return(@fday)
           allow(Triannon::LdpWriter).to receive(:container_exist?).and_return(false)
           allow(STDOUT).to receive(:puts)
           Triannon::LdpWriter.create_basic_container(parent_path, slug)
@@ -305,7 +279,7 @@ describe Triannon::LdpWriter, :vcr do
         it 'parent path ends with slash' do
           parent_path = "arbitrary/"
           slug = "ignored"
-          expect(Faraday).to receive(:new).with(url: "#{@ldp_url}/#{parent_path.chop}").and_return(@fday)
+          expect(Faraday).to receive(:new).with(url: "#{spec_ldp_url}/#{parent_path.chop}").and_return(@fday)
           allow(Triannon::LdpWriter).to receive(:container_exist?).and_return(false)
           allow(STDOUT).to receive(:puts)
           Triannon::LdpWriter.create_basic_container(parent_path, slug)
@@ -313,11 +287,11 @@ describe Triannon::LdpWriter, :vcr do
         it 'slug starts with slash' do
           slug = "/initial_slash"
           allow(STDOUT).to receive(:puts)
-          Triannon::LdpWriter.create_basic_container(@uber_cont, slug)
-          assert_basic_container(@uber_cont + slug)
-          expect(Triannon::LdpWriter.container_exist?("#{@uber_cont}/#{slug}")).to be false
+          Triannon::LdpWriter.create_basic_container(spec_uber_cont, slug)
+          assert_basic_container(spec_uber_cont + slug)
+          expect(Triannon::LdpWriter.container_exist?("#{spec_uber_cont}/#{slug}")).to be false
 
-          @cntnrs_to_delete_after_testing << "#{@ldp_url}/#{@uber_cont}#{slug}"
+          @ldp_testing_container_urls << "#{spec_ldp_url}/#{spec_uber_cont}#{slug}"
         end
       end
       it 'parent path missing nil or empty:  creates container directly under ldp base url' do
@@ -325,9 +299,9 @@ describe Triannon::LdpWriter, :vcr do
         allow(STDOUT).to receive(:puts)
         Triannon::LdpWriter.create_basic_container(nil, slug)
         assert_basic_container(slug)
-        expect(Triannon::LdpWriter.container_exist?("#{@uber_cont}/#{slug}")).to be false
+        expect(Triannon::LdpWriter.container_exist?("#{spec_uber_cont}/#{slug}")).to be false
 
-        @cntnrs_to_delete_after_testing << "#{@ldp_url}/#{slug}"
+        @ldp_testing_container_urls << "#{spec_ldp_url}/#{slug}"
       end
       it 'slug is nil' do
         allow(STDOUT).to receive(:puts).with("create_basic_container called with nil or empty slug, parent_path 'ignored'")

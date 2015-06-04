@@ -3,48 +3,15 @@ require 'spec_helper'
 describe Triannon::Annotation, :vcr do
 
   before(:all) do
-    @cntnrs_to_delete_after_testing = []
-    @solr_doc_ids_to_delete_after_testing = []
-    @ldp_url = Triannon.config[:ldp]['url'].strip
-    @ldp_url.chop! if @ldp_url.end_with?('/')
-    @uber_cont = Triannon.config[:ldp]['uber_container'].strip
-    @uber_cont = @uber_cont[1..-1] if @uber_cont.start_with?('/')
-    @uber_cont.chop! if @uber_cont.end_with?('/')
-    @uber_root_url = "#{@ldp_url}/#{@uber_cont}"
     @root_container = 'annomodelspecs'
-    @root_url = "#{@uber_root_url}/#{@root_container}"
-    cassette_name = "Triannon_Annotation/before_spec"
-    VCR.insert_cassette(cassette_name)
-    begin
-      Triannon::LdpWriter.create_basic_container(nil, @uber_cont)
-      Triannon::LdpWriter.create_basic_container(@uber_cont, @root_container)
-    rescue Faraday::ConnectionFailed
-      # probably here due to vcr cassette
-    end
-    VCR.eject_cassette(cassette_name)
+    vcr_cassette_name = "Triannon_Annotation/before_spec"
+    create_root_container(@root_container, vcr_cassette_name)
+    @solr_doc_ids = []
   end
   after(:all) do
-    cassette_name = "Triannon_Annotation/after_spec"
-    VCR.insert_cassette(cassette_name)
-    @cntnrs_to_delete_after_testing << "#{@root_url}"
-    @cntnrs_to_delete_after_testing.uniq.each { |cont_url|
-      begin
-        if Triannon::LdpWriter.container_exist?(cont_url.split("#{@ldp_url}/").last)
-          Triannon::LdpWriter.delete_container cont_url
-          Faraday.new(url: "#{cont_url}/fcr:tombstone").delete
-        end
-      rescue Triannon::LDPStorageError => e
-        # probably here due to parent container being deleted first
-      rescue Faraday::ConnectionFailed
-        # probably here due to vcr cassette
-      end
-    }
-    rsolr_client = RSolr.connect :url => Triannon.config[:solr_url]
-    @solr_doc_ids_to_delete_after_testing.each { |solr_doc_id|
-      rsolr_client.delete_by_id("#{@root_container}/#{solr_doc_id}")
-    }
-    rsolr_client.commit
-    VCR.eject_cassette(cassette_name)
+    ldp_testing_container_urls = ["#{spec_ldp_url}/#{spec_uber_cont}/#{@root_container}"]
+    vcr_cassette_name = "Triannon_Annotation/after_spec"
+    delete_test_objects(ldp_testing_container_urls, @solr_doc_ids, @root_container, vcr_cassette_name)
   end
   let(:bookmark_anno) {Triannon::Annotation.new(data: Triannon.annotation_fixture("bookmark.json"), root_container: @root_container)}
 
@@ -178,20 +145,20 @@ describe Triannon::Annotation, :vcr do
   context '#save' do
     it "sets anno id" do
       anno_id = bookmark_anno.save
-      @solr_doc_ids_to_delete_after_testing << anno_id
+      @solr_doc_ids << anno_id
       expect(bookmark_anno.id).to eq anno_id
     end
     it "reloads graph from storage to ensure id is in the graph" do
       expect(Triannon::LdpLoader).to receive(:load).and_call_original
       anno_id = bookmark_anno.save
-      @solr_doc_ids_to_delete_after_testing << anno_id
+      @solr_doc_ids << anno_id
       expect(bookmark_anno.graph.id_as_url).to match bookmark_anno.id
     end
     it "calls solr_save method after successful save to LDP Store" do
       # test to make sure callback logic implemented properly in model
       expect(bookmark_anno).to receive(:solr_save)
       anno_id = bookmark_anno.save
-      @solr_doc_ids_to_delete_after_testing << anno_id
+      @solr_doc_ids << anno_id
     end
     it "doesn't call solr_save method after unsuccessful save to LDP Store - nil returned" do
       # test to make sure callback logic implemented properly in model
@@ -226,7 +193,7 @@ describe Triannon::Annotation, :vcr do
     it "calls solr_delete method after successful destroy in LDP store" do
       # test to make sure callback logic implemented properly in model
       bookmark_anno.save
-      @solr_doc_ids_to_delete_after_testing << bookmark_anno.id
+      @solr_doc_ids << bookmark_anno.id
       expect(bookmark_anno).to receive(:solr_delete)
       bookmark_anno.destroy
     end
@@ -248,7 +215,7 @@ describe Triannon::Annotation, :vcr do
     let(:my_bookmark_anno) {
       # make sure we have id for anno
       id = bookmark_anno.save
-      @solr_doc_ids_to_delete_after_testing << id
+      @solr_doc_ids << id
       Triannon::Annotation.find(id, @root_container)
     }
     let(:solr_writer) { my_bookmark_anno.send(:solr_writer) }
@@ -291,7 +258,7 @@ describe Triannon::Annotation, :vcr do
     it "sets anno id" do
       anno = Triannon::Annotation.new(data: Triannon.annotation_fixture("body-chars.ttl"), root_container: @root_container)
       anno_id = anno.save
-      @solr_doc_ids_to_delete_after_testing << anno_id
+      @solr_doc_ids << anno_id
       my_anno = Triannon::Annotation.find(anno_id, @root_container)
       expect(my_anno.id).to eq anno_id
     end

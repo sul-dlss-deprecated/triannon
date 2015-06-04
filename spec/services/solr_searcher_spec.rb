@@ -35,7 +35,6 @@ describe Triannon::SolrSearcher, :vcr do
 
   context '#search' do
     before(:all) do
-      @testing_ids = []
       base_url = Triannon.config[:triannon_base_url]
       root = "solr_searcher_spec"
     	ldp_id = "my_root/81/4b/02/25/814b0225-bd48-4de9-a724-a72a9fa86c18"
@@ -44,7 +43,7 @@ describe Triannon::SolrSearcher, :vcr do
            <http://www.w3.org/ns/oa#hasTarget> <http://my.favorite.org>;
            <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#bookmarking> ."
       doc_hash = Triannon::SolrWriter.solr_hash(tg, root)
-      @testing_ids << doc_hash[:id]
+      @testing_ids = [doc_hash[:id]]
       cassette_name = "Triannon_SolrSearcher/before_search_spec"
       VCR.insert_cassette(cassette_name)
       sw = Triannon::SolrWriter.new

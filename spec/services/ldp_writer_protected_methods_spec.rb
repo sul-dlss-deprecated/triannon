@@ -3,14 +3,11 @@ require 'spec_helper'
 describe Triannon::LdpWriter, :vcr do
 
   before(:all) do
-    @cntnrs_to_delete_after_testing = []
-    @ldp_url = Triannon.config[:ldp]['url']
-    @ldp_url.chop! if @ldp_url.end_with?('/')
-    @uber_cont = Triannon.config[:ldp]['uber_container'].strip
-    @uber_cont = @uber_cont[1..-1] if @uber_cont.start_with?('/')
-    @uber_cont.chop! if @uber_cont.end_with?('/')
-    @uber_root_url = "#{@ldp_url}/#{@uber_cont}"
     @root_container = 'ldpwprotspec'
+    @uber_root_url = "#{spec_ldp_url}/#{spec_uber_cont}"
+    @root_url = "#{@uber_root_url}/#{@root_container}"
+    vcr_cassette_name = "Triannon_LdpWriter/protected_methods/before_ldp_writer_spec"
+    create_root_container(@root_container, vcr_cassette_name)
     @anno = Triannon::Annotation.new data: '
       <> a <http://www.w3.org/ns/oa#Annotation>;
          <http://www.w3.org/ns/oa#hasBody> [
@@ -21,34 +18,11 @@ describe Triannon::LdpWriter, :vcr do
          <http://www.w3.org/ns/oa#hasTarget> <http://purl.stanford.edu/kq666cs7229>;
          <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#commenting> .'
     @ldpw = Triannon::LdpWriter.new @anno, @root_container, 'foo'
-    @root_url = "#{@uber_root_url}/#{@root_container}"
-    cassette_name = "Triannon_LdpWriter/protected_methods/before_ldp_writer_spec"
-    VCR.insert_cassette(cassette_name)
-    begin
-      Triannon::LdpWriter.create_basic_container(nil, @uber_cont)
-      Triannon::LdpWriter.create_basic_container(@uber_cont, @root_container)
-    rescue Faraday::ConnectionFailed
-      # probably here due to vcr cassette
-    end
-    VCR.eject_cassette(cassette_name)
   end
   after(:all) do
-    cassette_name = "Triannon_LdpWriter/protected_methods/after_ldp_writer_spec"
-    VCR.insert_cassette(cassette_name)
-    @cntnrs_to_delete_after_testing << "#{@root_url}"
-    @cntnrs_to_delete_after_testing.uniq.each { |cont_url|
-      begin
-        if Triannon::LdpWriter.container_exist?(cont_url.split("#{@ldp_url}/").last)
-          Triannon::LdpWriter.delete_container cont_url
-          Faraday.new(url: "#{cont_url}/fcr:tombstone").delete
-        end
-      rescue Triannon::LDPStorageError => e
-        # probably here due to parent container being deleted first
-      rescue Faraday::ConnectionFailed
-        # probably here due to vcr cassette
-      end
-    }
-    VCR.eject_cassette(cassette_name)
+    ldp_testing_containers = [@root_url]
+    vcr_cassette_name = "Triannon_LdpWriter/protected_methods/after_ldp_writer_spec"
+    delete_test_objects(ldp_testing_containers, [], @root_container, vcr_cassette_name)
   end
   let(:conn) { Faraday.new(url: @uber_root_url) }
 

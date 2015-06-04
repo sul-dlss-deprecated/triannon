@@ -6,54 +6,21 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
 
   context '#destroy' do
     before(:all) do
-      @cntnrs_to_delete_after_testing = []
-      @solr_doc_ids_to_delete_after_testing = []
-      @ldp_url = Triannon.config[:ldp]['url'].strip
-      @ldp_url.chop! if @ldp_url.end_with?('/')
-      @uber_cont = Triannon.config[:ldp]['uber_container'].strip
-      @uber_cont = @uber_cont[1..-1] if @uber_cont.start_with?('/')
-      @uber_cont.chop! if @uber_cont.end_with?('/')
-      uber_root_url = "#{@ldp_url}/#{@uber_cont}"
       @root_container = 'anno_controller_destroy_specs'
-      @root_url = "#{uber_root_url}/#{@root_container}"
-      cassette_name = "Triannon_AnnotationsController/_destroy/before_spec"
-      VCR.insert_cassette(cassette_name)
-      begin
-        Triannon::LdpWriter.create_basic_container(nil, @uber_cont)
-        Triannon::LdpWriter.create_basic_container(@uber_cont, @root_container)
-      rescue Faraday::ConnectionFailed
-        # probably here due to vcr cassette
-      end
-      VCR.eject_cassette(cassette_name)
+      @solr_docs_from_testing = []
+      vcr_cassette_name = "Triannon_AnnotationsController/_destroy/before_spec"
+      create_root_container(@root_container, vcr_cassette_name)
     end
     after(:all) do
-      cassette_name = "Triannon_AnnotationsController/_destroy/after_spec"
-      VCR.insert_cassette(cassette_name)
-      @cntnrs_to_delete_after_testing << "#{@root_url}"
-      @cntnrs_to_delete_after_testing.uniq.each { |cont_url|
-        begin
-          if Triannon::LdpWriter.container_exist?(cont_url.split("#{@ldp_url}/").last)
-            Triannon::LdpWriter.delete_container cont_url
-            Faraday.new(url: "#{cont_url}/fcr:tombstone").delete
-          end
-        rescue Triannon::LDPStorageError => e
-          # probably here due to parent container being deleted first
-        rescue Faraday::ConnectionFailed
-          # probably here due to vcr cassette
-        end
-      }
-      rsolr_client = RSolr.connect :url => Triannon.config[:solr_url]
-      @solr_doc_ids_to_delete_after_testing.each { |solr_doc_id|
-        rsolr_client.delete_by_id("#{@root_container}/#{solr_doc_id}")
-      }
-      rsolr_client.commit
-      VCR.eject_cassette(cassette_name)
+      ldp_testing_containers = ["#{spec_ldp_url}/#{spec_uber_cont}/#{@root_container}"]
+      vcr_cassette_name = "Triannon_AnnotationsController/_destroy/after_spec"
+      delete_test_objects(ldp_testing_containers, @solr_docs_from_testing, @root_container, vcr_cassette_name)
     end
 
     it "returns 204 status code for successful delete" do
       anno = Triannon::Annotation.new({data: Triannon.annotation_fixture("body-chars.ttl"), root_container: @root_container})
       anno_id = anno.save
-      @solr_doc_ids_to_delete_after_testing << anno_id
+      @solr_docs_from_testing << anno_id
       my_anno = Triannon::Annotation.find(anno_id, @root_container)
       delete :destroy, anno_root: @root_container, id: anno_id
       expect(response.status).to eq 204
