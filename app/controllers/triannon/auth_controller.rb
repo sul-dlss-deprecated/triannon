@@ -44,7 +44,7 @@ module Triannon
               errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
             }
             response.status = 401
-            accept_return_type = mime_type_from_accept(["application/json", "text/x-json", "application/jsonrequest"])
+            accept_return_type = mime_type_from_accept(['application/json', 'text/x-json', 'application/jsonrequest'])
             render :json => err.to_json, content_type: accept_return_type
           }
         end
@@ -275,6 +275,7 @@ module Triannon
 
     # --------------------------------------------------------------------
     # Service information data
+    # TODO: evaluate whether we need this data
 
     # return uri [String] the configured Triannon host URI
     def service_base_uri
