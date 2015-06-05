@@ -12,9 +12,9 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       create_root_container(@root_container, vcr_cassette_name)
     end
     after(:all) do
-      ldp_testing_containers = ["#{spec_ldp_url}/#{spec_uber_cont}/#{@root_container}"]
+      ldp_testing_container_urls = ["#{spec_ldp_url}/#{spec_uber_cont}/#{@root_container}"]
       vcr_cassette_name = "Triannon_AnnotationsController/_destroy/after_spec"
-      delete_test_objects(ldp_testing_containers, @solr_docs_from_testing, @root_container, vcr_cassette_name)
+      delete_test_objects(ldp_testing_container_urls, @solr_docs_from_testing, @root_container, vcr_cassette_name)
     end
 
     it "returns 204 status code for successful delete" do
