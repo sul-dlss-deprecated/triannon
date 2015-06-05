@@ -8,14 +8,24 @@ module Triannon
   class AuthController < ApplicationController
     include RdfResponseFormats
 
-
     AUTH_EXPIRY  =   60 # seconds
     TOKEN_EXPIRY = 3600 # seconds
 
-
-    # OPTIONS /auth
+    # OPTIONS /auth/login
     def options
-      if session[:login_user]
+      # The request MUST use HTTP OPTIONS
+      unless request.options?
+        err = {
+          error: "invalidRequest",
+          errorDescription: "/auth/login accepts GET or OPTIONS requests",
+          errorUri: "http://image-auth.iiif.io/api/image/2.1/authentication.html"
+        }
+        response.body = JSON.dump(err)
+        response.content_type = 'application/json'
+        response.headers.merge!(Allow: 'GET, OPTIONS')
+        response.status = 405
+      end
+      if cookies[:login_user]
         info = service_info_logout
       else
         info = service_info_login
@@ -25,6 +35,7 @@ module Triannon
       render :json => info.to_json, content_type: 'application/json' #accept_return_type
     end
 
+    # GET /auth/login
     # HTTP basic authentication
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#login-service
     def login
@@ -52,6 +63,7 @@ module Triannon
       end
     end
 
+    # GET /auth/logout
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#logout-service
     def logout
       cookies.delete(:login_user)
@@ -59,6 +71,7 @@ module Triannon
       redirect_to root_url, notice: 'Successfully logged out.'
     end
 
+    # POST /auth/client_identity
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#client-identity-service
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#error-conditions
     # return json body [String] containing: { "authorizationCode": code }
@@ -119,6 +132,7 @@ module Triannon
       end
     end
 
+    # GET /auth/token
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#access-token-service
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#error-conditions
     def access_token

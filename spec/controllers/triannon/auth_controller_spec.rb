@@ -31,6 +31,40 @@ describe Triannon::AuthController, :vcr, type: :controller do
       end
     end
 
+    describe 'OPTIONS requests for /auth/login:' do
+      it '#options will reject GET requests for information' do
+        process :options, 'GET'
+        expect(response.status).to eq(405)
+      end
+      context 'when JSON is accepted:' do
+        context 'while a user is logged in:' do
+          it 'has information about how to logout' do
+            request.env['HTTP_AUTHORIZATION'] = basic_auth_code('userA', 'secretA')
+            get :login
+            accept_json
+            process :options, 'OPTIONS'
+            json = JSON.parse(response.body)
+            expect(json.keys).to eql(['service'])
+            info = json['service']
+            expect(info.keys).to eql(['@id','profile', 'label'])
+            expect(info['profile']).to eql('http://iiif.io/api/image/2/auth/logout')
+          end
+        end
+        context 'while a user is logged out:' do
+          it 'has information about how to login' do
+            get :logout
+            accept_json
+            process :options, 'OPTIONS'
+            json = JSON.parse(response.body)
+            expect(json.keys).to eql(['service'])
+            info = json['service']
+            expect(info.keys).to eql(['@id','profile', 'label'])
+            expect(info['profile']).to eql('http://iiif.io/api/image/2/auth/login')
+          end
+        end
+      end
+    end
+
     describe 'rejects unauthorized login' do
       let(:check_unauthorized) do
         get :login
