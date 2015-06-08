@@ -20,6 +20,9 @@ require 'rspec/rails'
 require 'capybara/rails'
 require 'capybara/rspec'
 
+require 'pry'
+require 'pry-doc'
+
 =begin
 RSpec.configure do |config|
 # The settings below are suggested to provide a good initial experience

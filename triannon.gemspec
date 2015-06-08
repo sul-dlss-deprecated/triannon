@@ -32,6 +32,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'webmock'
   s.add_development_dependency 'coveralls'
   s.add_development_dependency 'yard' # for documentation
+  s.add_development_dependency 'pry'
+  s.add_development_dependency 'pry-doc'
   s.add_development_dependency 'pry-rails'
   s.add_development_dependency 'rubocop'
   s.add_development_dependency 'rubocop-rspec'
