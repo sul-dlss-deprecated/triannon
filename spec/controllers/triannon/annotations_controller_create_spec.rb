@@ -39,13 +39,17 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       @solr_docs_from_testing << anno_id
     end
 
-    it "gives LDPContainerError when anno_root doesn't exist" do
-      expect{post :create, anno_root: 'zzzz', annotation: {data: ttl_data}}.to raise_error(Triannon::MissingLDPContainerError)
-    end
-
     it "renders 403 if Triannon::ExternalReferenceError raised during LdpWriter.create_anno" do
       err_msg = "some error during LdpWriter.create_anno"
       allow(Triannon::LdpWriter).to receive(:create_anno).and_raise(Triannon::ExternalReferenceError, err_msg)
+      post :create, ttl_data, anno_root: @root_container
+      expect(response.status).to eq 403
+      expect(response.body).to eql err_msg
+    end
+
+    it "renders 403 if Triannon::LDPContainerError raised during LdpWriter.create_anno" do
+      err_msg = "some error during LdpWriter.create_anno"
+      allow(Triannon::LdpWriter).to receive(:create_anno).and_raise(Triannon::LDPContainerError, err_msg)
       post :create, ttl_data, anno_root: @root_container
       expect(response.status).to eq 403
       expect(response.body).to eql err_msg
@@ -517,6 +521,26 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       end # jsonld context
     end # response format
 
+    context "LDP container error" do
+      let(:err_msg) {"triannon threw an LDP container error"}
+      let(:ldp_error) { Triannon::LDPContainerError.new(err_msg)}
+      it "gives 403 resp code" do
+        allow(Triannon::LdpWriter).to receive(:create_anno).and_raise(ldp_error)
+        post :create, ttl_data, anno_root: @root_container
+        expect(response.status).to eq 403
+      end
+      it "gives plain text response" do
+        allow(Triannon::LdpWriter).to receive(:create_anno).and_raise(ldp_error)
+        post :create, ttl_data, anno_root: @root_container
+        expect(response.content_type).to eql "text/plain"
+      end
+      it "has error message in the response" do
+        allow(Triannon::LdpWriter).to receive(:create_anno).and_raise(ldp_error)
+        post :create, ttl_data, anno_root: @root_container
+        expect(response.body).to match err_msg
+      end
+    end
+
     context 'LDP storage error' do
       let(:ldp_resp_code) { 409 }
       let(:ldp_resp_body) { "body of resp from LDP server" }
@@ -533,7 +557,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
         post :create, ttl_data, anno_root: @root_container
         expect(response.content_type).to eql "text/html"
       end
-      it "has useful info in the responose" do
+      it "has useful info in the response" do
         allow(Triannon::LdpWriter).to receive(:create_anno).and_raise(ldp_error)
         post :create, ttl_data, anno_root: @root_container
         expect(response.body).to match ldp_resp_body
@@ -558,7 +582,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
           get :create, ttl_data, anno_root: @root_container
           expect(response.content_type).to eql "text/html"
         end
-        it "has useful info in the responose" do
+        it "has useful info in the response" do
           allow(subject).to receive(:create).and_raise(search_error)
           get :create, ttl_data, anno_root: @root_container
           expect(response.body).to match search_resp_body
@@ -580,7 +604,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
             get :create, ttl_data, anno_root: @root_container
             expect(response.content_type).to eql "text/html"
           end
-          it "has useful info in the responose" do
+          it "has useful info in the response" do
             allow(subject).to receive(:create).and_raise(search_error)
             get :create, ttl_data, anno_root: @root_container
             expect(response.body).to match triannon_err_msg

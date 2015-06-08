@@ -5,9 +5,9 @@ module Triannon
     include RdfResponseFormats
 
     rescue_from Triannon::LDPStorageError, with: :ldp_storage_error
+    rescue_from Triannon::LDPContainerError, with: :ldp_container_error
     rescue_from Triannon::ExternalReferenceError, with: :ext_ref_error
     rescue_from Triannon::SearchError, with: :search_error
-    # FIXME:  rescue LDPErrors
     before_action :default_format_jsonld, only: [:show]
     before_action :set_annotation, only: [:show, :update, :destroy]
 
@@ -139,6 +139,11 @@ private
     # render Triannon::ExternalReferenceError
     def ext_ref_error(err)
       render plain: err.message, status: 403
+    end
+
+    # render Triannon::LDPContainer error
+    def ldp_container_error(err)
+      render :plain => err.message, status: 403
     end
 
     # render Triannon::LDPStorage error
