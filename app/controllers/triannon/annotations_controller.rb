@@ -69,12 +69,12 @@ module Triannon
         # it's from app html form
         params.require(:annotation).permit(:data)
         if params["annotation"]["data"]
-          @annotation = Annotation.new({:data => params["annotation"]["data"]})
+          @annotation = Annotation.new({:data => params["annotation"]["data"], :root_container => params[:anno_root]})
         end
       else
         # it's a direct post request
         content_type = request.headers["Content-Type"]
-        @annotation = Annotation.new({:data => request.body.read, :expected_content_type => content_type})
+        @annotation = Annotation.new({:data => request.body.read, :expected_content_type => content_type, :root_container => params[:anno_root]})
       end
 
       if @annotation.save
@@ -107,7 +107,7 @@ module Triannon
           format.xml {
             accept_return_type = mime_type_from_accept(["application/xml", "text/xml", "application/x-xml"])
             render :body => @annotation.graph.to_rdfxml, status: 201, content_type: accept_return_type if accept_return_type }
-          format.html { redirect_to @annotation }
+          format.html { redirect_to "/annotations/#{params[:anno_root]}/#{@annotation.id}" }
         end
       else
         render :new, status: 400
