@@ -242,9 +242,9 @@ describe Triannon::Annotation, :vcr do
 
   context '#solr_delete' do
     let(:solr_writer) { bookmark_anno.send(:solr_writer) }
-    it "calls SolrWriter.delete with id" do
+    it "calls SolrWriter.delete with id prefixed with root container" do
       allow(bookmark_anno).to receive(:id).and_return("666")
-      expect(solr_writer).to receive(:delete).with(bookmark_anno.id)
+      expect(solr_writer).to receive(:delete).with("#{@root_container}/#{bookmark_anno.id}")
       bookmark_anno.send(:solr_delete)
     end
     it "raises exception when Solr delete is not successful" do
