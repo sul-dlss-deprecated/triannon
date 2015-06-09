@@ -106,6 +106,16 @@ def spec_uber_cont
   end
 end
 
+# @return [String] sanitized triannon base url from config
+def triannon_base_url
+  @base_url ||= begin
+    base_url = Triannon.config[:triannon_base_url].strip
+    base_url = base_url[1..-1] if base_url.start_with?('/')
+    base_url.chop! if base_url.end_with?('/')
+    base_url
+  end
+end
+
 # create root container(s) needed for testing, using a partiular VCR cassette
 # @param [String] root_container - container to be created as child of uber container
 # @param [String] vcr_cassette_name - the name for the vcr cassette that will capture these network transactions
