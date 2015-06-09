@@ -25,6 +25,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       delete :destroy, anno_root: @root_container, id: anno_id
       expect(response.status).to eq 204
     end
+    
     context 'non-existent id' do
       let(:fake_id) { "foo" }
 
@@ -36,13 +37,43 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
         delete :destroy, anno_root: @root_container, id: fake_id
         expect(response.content_type).to eql "text/html"
       end
-      it "has useful info in the responose" do
+      it "has useful info in the response" do
         delete :destroy, anno_root: @root_container, id: fake_id
         expect(response.body).to match fake_id
         expect(response.body).to match "404"
         expect(response.body).to match "Not Found"
       end
     end
+
+    context 'LDP storage error' do
+      let(:fake_id) {"ldp_storage_error"}
+      let(:ldp_resp_code) { 409 }
+      let(:ldp_resp_body) { "body of resp from LDP server" }
+      let(:triannon_err_msg) { "triannon msg" }
+      let(:ldp_error) { Triannon::LDPStorageError.new(triannon_err_msg, ldp_resp_code, ldp_resp_body)}
+      before(:example) do
+        allow(Triannon::Annotation).to receive(:find)
+        allow(Triannon::LdpWriter).to receive(:delete_anno)
+      end
+
+      it "gives LDP resp code" do
+        allow(subject).to receive(:destroy).and_raise(ldp_error)
+        delete :destroy, anno_root: @root_container, id: fake_id
+        expect(response.status).to eq ldp_resp_code
+      end
+      it "gives html response" do
+        allow(subject).to receive(:destroy).and_raise(ldp_error)
+        delete :destroy, anno_root: @root_container, id: fake_id
+        expect(response.content_type).to eql "text/html"
+      end
+      it "has useful info in the response" do
+        allow(subject).to receive(:destroy).and_raise(ldp_error)
+        delete :destroy, anno_root: @root_container, id: fake_id
+        expect(response.body).to match ldp_resp_body
+        expect(response.body).to match triannon_err_msg
+      end
+    end # LDP storage error
+
     context 'SearchError' do
       let(:triannon_err_msg) { "triannon msg" }
       let(:fake_id) {"blargle"}
@@ -65,7 +96,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
           delete :destroy, anno_root: @root_container, id: fake_id
           expect(response.content_type).to eql "text/html"
         end
-        it "has useful info in the responose" do
+        it "has useful info in the response" do
           allow(subject).to receive(:destroy).and_raise(search_error)
           delete :destroy, anno_root: @root_container, id: fake_id
           expect(response.body).to match search_resp_body
@@ -85,7 +116,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
           delete :destroy, anno_root: @root_container, id: fake_id
           expect(response.content_type).to eql "text/html"
         end
-        it "has useful info in the responose" do
+        it "has useful info in the response" do
           allow(subject).to receive(:destroy).and_raise(search_error)
           delete :destroy, anno_root: @root_container, id: fake_id
           expect(response.body).to match triannon_err_msg
