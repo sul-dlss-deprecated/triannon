@@ -43,6 +43,7 @@ module Triannon
       # to determine the user information provided by the authentication system.
       if user = authenticate_with_http_basic { |u, p| authorized_user(u, p) }
         cookies[:login_user] = user
+        session[:login_user] = user
         redirect_to root_url, notice: 'Successfully logged in.'
       else
         respond_to do |format|
@@ -132,39 +133,53 @@ module Triannon
     def access_token
       # The cookie established via the login service must be passed to this
       # service. The service should delete the cookie from the login service
-      # and create a new cookie that allows the user to access the image
-      # content.
-      # TODO: replace the login cookie
+      # and create a new cookie that allows the user to access content.
 
-      # If an authorization code was obtained using the Client Identity
-      # Service, then this must be passed to the Access Token Service as well.
-      # The code is passed using a query parameter to the service called `code`
-      # with the authorization code as the value.
-      if params[:code]
-        if auth_code_valid?(params[:code])
-          token = access_code_generate
-          token = {
-            accessToken: token,
-            tokenType: "Bearer",
+      key = session[:client_auth_key]
+      if key.nil?
+        # No authorization code has been issued.
+        if session[:login_user]
+          cookies.delete(:login_user)
+          session.delete(:login_user)
+          session[:access_token] = access_code_generate
+          data = {
+            accessToken: session[:access_token],
+            tokenType: 'Bearer',
             expiresIn: TOKEN_EXPIRY
           }
-          response.body = JSON.dump(token)
-          response.content_type = 'application/json'
-          response.status = 200
+          return render_json(data, 200)
+        else
+          redirect_to '/auth/login'
+        end
+      elsif params[:code]
+        # If an authorization code was obtained using the Client Identity
+        # Service, then this must be passed to the Access Token Service as well.
+        # The code is passed using a query parameter to the service called `code`
+        # with the authorization code as the value.
+        # TODO: require an authenticated login also?
+        # if session[:login_user] && auth_code_valid?(params[:code])
+        if auth_code_valid?(params[:code])
+          data = {
+            accessToken: access_code_generate,
+            tokenType: 'Bearer',
+            expiresIn: TOKEN_EXPIRY
+          }
+          return render_json(data, 200)
         else
           err = {
-            error: "invalidClient",
-            errorDescription: "Unable to validate authorization code",
-            errorUri: ""
+            error: 'invalidClient',
+            errorDescription: 'Unable to validate authorization code',
+            errorUri: ''
           }
-          response.body = JSON.dump(err)
-          response.content_type = 'application/json'
-          response.status = 401
+          return render_json(err, 401)
         end
       else
-        # Use login cookie?
-        # cookie[:login_user] = nil
-        #
+        err = {
+          error: 'invalidRequest',
+          errorDescription: 'Unable to authorize access token',
+          errorUri: ''
+        }
+        return render_json(err, 401)
       end
     end
 
