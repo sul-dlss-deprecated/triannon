@@ -217,28 +217,19 @@ module Triannon
       pass = identity['clientSecret']
       timestamp = Time.now.to_i # seconds since epoch
       auth_code = "#{id};;;#{timestamp}"
-      # http://stackoverflow.com/questions/4721423/native-ruby-methods-for-compressing-encrypt-strings
-      c = OpenSSL::Cipher::Cipher.new("aes-256-cbc")
-      c.encrypt
-      c.key = key = Digest::SHA1.hexdigest(pass)
-      c.iv = iv = c.random_iv
-      session[:client_key] = key
-      session[:client_iv] = iv
-      e = c.update(auth_code)
-      e << c.final
-      e
+      salt  = SecureRandom.random_bytes(64)
+      key   = ActiveSupport::KeyGenerator.new(pass).generate_key(salt)
+      crypt = ActiveSupport::MessageEncryptor.new(key)
+      session[:client_auth_key] = key
+      crypt.encrypt_and_sign(auth_code)
     end
 
     # decrypt, parse and validate authorization code
     def auth_code_valid?(code)
-      # http://stackoverflow.com/questions/4721423/native-ruby-methods-for-compressing-encrypt-strings
-      c = OpenSSL::Cipher::Cipher.new("aes-256-cbc")
-      c.decrypt
-      c.key = session[:client_key]
-      c.iv = session[:client_iv]
-      d = c.update(code)
-      d << c.final
-      if d.include?(session[:client_identity]['clientId'])
+      key = session[:client_auth_key]
+      crypt = ActiveSupport::MessageEncryptor.new(key)
+      auth_code = crypt.decrypt_and_verify(code)
+      if auth_code.include?(session[:client_identity]['clientId'])
         timestamp = d.split(';;;').last
         elapsed = Time.now.to_i - timestamp  # sec since auth code was issued
         return true if elapsed < AUTH_EXPIRY # allow 1 minute for authorization
@@ -250,31 +241,25 @@ module Triannon
     # --------------------------------------------------------------------
     # Access tokens
 
-    # construct and encrypt an authorization code
+    # construct and encrypt an access token
     def access_code_generate
-      token = "#{SecureRandom.uuid};;;#{Time.now.to_i}"
+      timestamp = Time.now.to_i # seconds since epoch
+      token = "#{SecureRandom.uuid};;;#{timestamp}"
       session[:access_token] = token
-      # http://stackoverflow.com/questions/4721423/native-ruby-methods-for-compressing-encrypt-strings
-      c = OpenSSL::Cipher::Cipher.new("aes-256-cbc")
-      c.encrypt
-      c.key = session[:client_key]
-      c.iv = session[:client_iv]
-      e = c.update(token)
-      e << c.final
-      e
+      salt  = SecureRandom.random_bytes(64)
+      key   = ActiveSupport::KeyGenerator.new(timestamp).generate_key(salt)
+      crypt = ActiveSupport::MessageEncryptor.new(key)
+      session[:client_access_key] = key
+      crypt.encrypt_and_sign(token)
     end
 
     # decrypt, parse and validate access token
     def access_code_valid?(code)
-      # http://stackoverflow.com/questions/4721423/native-ruby-methods-for-compressing-encrypt-strings
-      c = OpenSSL::Cipher::Cipher.new("aes-256-cbc")
-      c.decrypt
-      c.key = session[:client_key]
-      c.iv = session[:client_iv]
-      d = c.update(code)
-      d << c.final
-      if d.eql?(session[:access_token])
-        timestamp = d.split(';;;').last
+      key = session[:client_access_key]
+      crypt = ActiveSupport::MessageEncryptor.new(key)
+      token = crypt.decrypt_and_verify(code)
+      if token.eql?(session[:access_token])
+        timestamp = token.split(';;;').last
         elapsed = Time.now.to_i - timestamp  # sec since token was issued
         return true if elapsed < TOKEN_EXPIRY
       end
