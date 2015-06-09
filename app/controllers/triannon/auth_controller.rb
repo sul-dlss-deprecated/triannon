@@ -78,57 +78,51 @@ module Triannon
     def client_identity
       # The request MUST use HTTP POST
       unless request.post?
+        logger.debug "Rejected Request Method: #{request.request_method}"
         err = {
-          error: "invalidRequest",
-          errorDescription: "/auth/client_identity only accepts POST requests",
-          errorUri: "http://image-auth.iiif.io/api/image/2.1/authentication.html"
+          error: 'invalidRequest',
+          errorDescription: '/auth/client_identity only accepts POST requests',
+          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
         }
-        response.body = JSON.dump(err)
-        response.content_type = 'application/json'
         response.headers.merge!(Allow: 'POST')
-        response.status = 405
+        return render_json(err, 405)
+      end
+      unless request.headers['Content-Type'] =~ /json/
+        logger.debug "Rejected Content-Type: #{request.headers['Content-Type']}"
+        return render :nothing => true, :status => 415
       end
       # The request MUST carry a body with the following JSON template:
       # {
       #   "clientId" : "CLIENT_ID_HERE",
       #   "clientSecret" : "CLIENT_SECRET_HERE"
       # }
-      identity = JSON.parse(request.body)
+      identity = JSON.parse(request.body.read)
       unless identity.has_key?('clientId')
         err = {
-          error: "invalidRequest",
+          error: 'invalidRequest',
           errorDescription: "/auth/client_identity requires 'clientId' field",
-          errorUri: "http://image-auth.iiif.io/api/image/2.1/authentication.html"
+          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
         }
-        response.body = JSON.dump(err)
-        response.content_type = 'application/json'
-        response.status = 400
+        return render_json(err, 400)
       end
       unless identity.has_key?('clientSecret')
         err = {
-          error: "invalidRequest",
+          error: 'invalidRequest',
           errorDescription: "/auth/client_identity requires 'clientSecret' field",
-          errorUri: "http://image-auth.iiif.io/api/image/2.1/authentication.html"
+          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
         }
-        response.body = JSON.dump(err)
-        response.content_type = 'application/json'
-        response.status = 400
+        return render_json(err, 400)
       end
       if authorized_client? identity
-        code = auth_code_generate(identity)
-        body = JSON.dump({ "authorizationCode" => code })
-        response.body = body
-        response.content_type = 'application/json'
-        response.status = 200
+        code = { authorizationCode: auth_code_generate(identity) }
+        return render_json(code, 200)
       else
         err = {
-          error: "invalidClient",
-          errorDescription: "Unable to authorize client",
-          errorUri: ""
+          error: 'invalidClient',
+          errorDescription: 'Unable to authorize client',
+          errorUri: ''
         }
-        response.body = JSON.dump(err)
-        response.content_type = 'application/json'
-        response.status = 401
+        return render_json(err, 401)
       end
     end
 
@@ -343,6 +337,26 @@ module Triannon
           "label" => "Logout of Triannon"
         }
       }
+    end
+
+
+    private
+
+    # Response content type to match an HTTP accept type for JSON formats
+    def json_type_accepted
+      mime_type_from_accept(['application/json', 'text/x-json', 'application/jsonrequest'])
+    end
+
+    # @param data [Hash] Hash.to_json is rendered
+    # @param status [Integer] HTTP status code
+    def render_json(data, status)
+      response.status = status
+      respond_to do |format|
+        format.json {
+          render :json => data.to_json, content_type: json_type_accepted
+        }
+      end
+      # return render :nothing => true, :status => 415
     end
 
   end # AuthController
