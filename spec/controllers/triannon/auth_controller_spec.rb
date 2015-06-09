@@ -303,6 +303,23 @@ describe Triannon::AuthController, :vcr, type: :controller do
   end
 
   describe 'GET /auth/access_token' do
+    describe 'only responds to GET requests' do
+      it 'GET has a route to /auth/access_token' do
+        expect(:get => '/auth/access_token').to be_routable
+      end
+      it 'DELETE has no route to /auth/access_token' do
+        expect(:delete => '/auth/access_token').not_to be_routable
+      end
+      it 'OPTIONS has no route to /auth/access_token' do
+        expect(:options => '/auth/access_token').not_to be_routable
+      end
+      it 'POST has no route to /auth/access_token' do
+        expect(:post => '/auth/access_token').not_to be_routable
+      end
+      it 'PUT has no route to /auth/access_token' do
+        expect(:put => '/auth/access_token').not_to be_routable
+      end
+    end
   end
 
 
