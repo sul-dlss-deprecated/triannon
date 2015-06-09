@@ -104,7 +104,7 @@ protected
 
     # Delete annotation from Solr
     def solr_delete
-      solr_writer.delete(id) if id
+      solr_writer.delete("#{root_container}/#{id}") if id
     end
 
 private
