@@ -209,11 +209,8 @@ describe Triannon::LdpWriter, :vcr do
     context '.create_basic_container' do
       before(:all) do
         @created_before_slug = 'created_before'
-        begin
-          Triannon::LdpWriter.create_basic_container(spec_uber_cont, @created_before_slug)
-        rescue Faraday::ConnectionFailed
-          # probably here due to vcr cassette
-        end
+        vcr_cassette_name = "Triannon_LdpWriter/class_methods/_create_basic_container/before_spec"
+        create_root_container(@created_before_slug, vcr_cassette_name)
         @ldp_testing_container_urls << "#{spec_ldp_url}/#{spec_uber_cont}/#{@created_before_slug}"
       end
       it "creates container if it doesn't already exist" do
