@@ -389,6 +389,51 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       end
     end # jsonld_context via HTTP header
 
+    context "LDP container error" do
+      let(:fake_id) { "mmm" }
+      let(:err_msg) {"triannon threw an LDP container error"}
+      let(:ldp_error) { Triannon::LDPContainerError.new(err_msg)}
+      it "gives 403 resp code" do
+        allow(Triannon::Annotation).to receive(:find).with(fake_id, @root_container).and_raise(ldp_error)
+        get :show, anno_root: @root_container, id: fake_id
+        expect(response.status).to eq 403
+      end
+      it "gives plain text response" do
+        allow(Triannon::Annotation).to receive(:find).with(fake_id, @root_container).and_raise(ldp_error)
+        get :show, anno_root: @root_container, id: fake_id
+        expect(response.content_type).to eql "text/plain"
+      end
+      it "has error message in the response" do
+        allow(Triannon::Annotation).to receive(:find).with(fake_id, @root_container).and_raise(ldp_error)
+        get :show, anno_root: @root_container, id: fake_id
+        expect(response.body).to match err_msg
+      end
+    end
+
+    context 'LDP storage error' do
+      let(:fake_id) { "mmm" }
+      let(:ldp_resp_code) { 409 }
+      let(:ldp_resp_body) { "body of resp from LDP server" }
+      let(:triannon_err_msg) { "triannon msg" }
+      let(:ldp_error) { Triannon::LDPStorageError.new(triannon_err_msg, ldp_resp_code, ldp_resp_body)}
+
+      it "gives LDP resp code" do
+        allow(Triannon::Annotation).to receive(:find).with(fake_id, @root_container).and_raise(ldp_error)
+        get :show, anno_root: @root_container, id: fake_id
+        expect(response.status).to eq ldp_resp_code
+      end
+      it "gives html response" do
+        allow(Triannon::Annotation).to receive(:find).with(fake_id, @root_container).and_raise(ldp_error)
+        get :show, anno_root: @root_container, id: fake_id
+        expect(response.content_type).to eql "text/html"
+      end
+      it "has useful info in the response" do
+        allow(Triannon::Annotation).to receive(:find).with(fake_id, @root_container).and_raise(ldp_error)
+        get :show, anno_root: @root_container, id: fake_id
+        expect(response.body).to match ldp_resp_body
+        expect(response.body).to match triannon_err_msg
+      end
+    end # LDP storage error
   end # #show
 
 end
