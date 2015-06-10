@@ -6,10 +6,12 @@ http_interactions:
     body:
       encoding: UTF-8
       string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
         @prefix oa: <http://www.w3.org/ns/oa#> .
         @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
-        <> a oa:Annotation;
+        <> a oa:Annotation,
+             ldp:BasicContainer;
            oa:motivatedBy oa:bookmarking .
     headers:
       User-Agent:
@@ -28,23 +30,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"b1b26c7e16d28cc5321b6237a3dfe7295f52a176"'
+      - '"d9f0b08a1ac93cfb96926368f262fc5134be0dc8"'
       Last-Modified:
-      - Tue, 05 May 2015 00:47:23 GMT
+      - Wed, 10 Jun 2015 18:25:56 GMT
       Content-Length:
       - '87'
       Location:
-      - http://localhost:8983/fedora/rest/anno/d3/5a/ea/84/d35aea84-b899-4989-81ca-de1516305da0
+      - http://localhost:8983/fedora/rest/anno/e0/e6/07/2c/e0e6072c-bf2b-466e-83df-6d534731cc88
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/d3/5a/ea/84/d35aea84-b899-4989-81ca-de1516305da0
+      string: http://localhost:8983/fedora/rest/anno/e0/e6/07/2c/e0e6072c-bf2b-466e-83df-6d534731cc88
     http_version: 
-  recorded_at: Tue, 05 May 2015 00:47:23 GMT
+  recorded_at: Wed, 10 Jun 2015 18:25:56 GMT
 - request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno/d3/5a/ea/84/d35aea84-b899-4989-81ca-de1516305da0
+    uri: http://localhost:8983/fedora/rest/anno/e0/e6/07/2c/e0e6072c-bf2b-466e-83df-6d534731cc88
     body:
       encoding: UTF-8
       string: |
@@ -54,7 +56,7 @@ http_interactions:
 
         <> a ldp:DirectContainer;
            ldp:hasMemberRelation oa:hasTarget;
-           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/d3/5a/ea/84/d35aea84-b899-4989-81ca-de1516305da0> .
+           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/e0/e6/07/2c/e0e6072c-bf2b-466e-83df-6d534731cc88> .
     headers:
       User-Agent:
       - Faraday v0.9.1
@@ -74,29 +76,32 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"89662b20f45dcd8218235c7fa57eea92616485ef"'
+      - '"62440d0c84589036d3b02ef1a3a6639279483b0f"'
       Last-Modified:
-      - Tue, 05 May 2015 00:47:23 GMT
+      - Wed, 10 Jun 2015 18:25:56 GMT
       Content-Length:
       - '89'
       Location:
-      - http://localhost:8983/fedora/rest/anno/d3/5a/ea/84/d35aea84-b899-4989-81ca-de1516305da0/t
+      - http://localhost:8983/fedora/rest/anno/e0/e6/07/2c/e0e6072c-bf2b-466e-83df-6d534731cc88/t
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/d3/5a/ea/84/d35aea84-b899-4989-81ca-de1516305da0/t
+      string: http://localhost:8983/fedora/rest/anno/e0/e6/07/2c/e0e6072c-bf2b-466e-83df-6d534731cc88/t
     http_version: 
-  recorded_at: Tue, 05 May 2015 00:47:23 GMT
+  recorded_at: Wed, 10 Jun 2015 18:25:56 GMT
 - request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno/d3/5a/ea/84/d35aea84-b899-4989-81ca-de1516305da0/t
+    uri: http://localhost:8983/fedora/rest/anno/e0/e6/07/2c/e0e6072c-bf2b-466e-83df-6d534731cc88/t
     body:
       encoding: UTF-8
       string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
         @prefix triannon: <http://triannon.stanford.edu/ns/> .
 
-        <> triannon:externalReference <http://purl.stanford.edu/kq131cs7229> .
+        <> a ldp:BasicContainer;
+           triannon:externalReference <http://purl.stanford.edu/kq131cs7229> .
     headers:
       User-Agent:
       - Faraday v0.9.1
@@ -114,23 +119,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"b7febfa2c0e82ea5960b10d28cc7977b5e81802d"'
+      - '"738bc5e15e8efdbb6ae5003fa0f1041b16d30962"'
       Last-Modified:
-      - Tue, 05 May 2015 00:47:23 GMT
+      - Wed, 10 Jun 2015 18:25:56 GMT
       Content-Length:
       - '138'
       Location:
-      - http://localhost:8983/fedora/rest/anno/d3/5a/ea/84/d35aea84-b899-4989-81ca-de1516305da0/t/fa/40/5e/24/fa405e24-d8bb-4b64-bd3b-71fce73bdcb6
+      - http://localhost:8983/fedora/rest/anno/e0/e6/07/2c/e0e6072c-bf2b-466e-83df-6d534731cc88/t/c4/b3/1f/fb/c4b31ffb-4aff-414b-8445-1d7702f50cd7
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/d3/5a/ea/84/d35aea84-b899-4989-81ca-de1516305da0/t/fa/40/5e/24/fa405e24-d8bb-4b64-bd3b-71fce73bdcb6
+      string: http://localhost:8983/fedora/rest/anno/e0/e6/07/2c/e0e6072c-bf2b-466e-83df-6d534731cc88/t/c4/b3/1f/fb/c4b31ffb-4aff-414b-8445-1d7702f50cd7
     http_version: 
-  recorded_at: Tue, 05 May 2015 00:47:23 GMT
+  recorded_at: Wed, 10 Jun 2015 18:25:56 GMT
 - request:
     method: get
-    uri: http://localhost:8983/fedora/rest/anno/d3/5a/ea/84/d35aea84-b899-4989-81ca-de1516305da0
+    uri: http://localhost:8983/fedora/rest/anno/e0/e6/07/2c/e0e6072c-bf2b-466e-83df-6d534731cc88
     body:
       encoding: US-ASCII
       string: ''
@@ -149,9 +154,9 @@ http_interactions:
       message: OK
     headers:
       Etag:
-      - '"f13dda246ccd48508255a26ad9f1a5678014c466"'
+      - '"7ffeeeef14dcab776669000174f9efec7aed69a2"'
       Last-Modified:
-      - Tue, 05 May 2015 00:47:23 GMT
+      - Wed, 10 Jun 2015 18:25:56 GMT
       Link:
       - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
       - <http://www.w3.org/ns/ldp#Container>;rel="type"
@@ -168,33 +173,33 @@ http_interactions:
       - Accept, Range, Accept-Encoding, Accept-Language
       - Prefer
       Content-Length:
-      - '1575'
+      - '1507'
       Content-Type:
       - application/x-turtle
     body:
       encoding: UTF-8
-      string: "@prefix premis: <http://www.loc.gov/premis/rdf/v1#> .\n@prefix nt:
-        <http://www.jcp.org/jcr/nt/1.0> .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        .\n@prefix xsi: <http://www.w3.org/2001/XMLSchema-instance> .\n@prefix mode:
-        <http://www.modeshape.org/1.0> .\n@prefix oa: <http://www.w3.org/ns/oa#> .\n@prefix
-        xml: <http://www.w3.org/XML/1998/namespace> .\n@prefix fedoraconfig: <http://fedora.info/definitions/v4/config#>
-        .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0> .\n@prefix prov: <http://www.w3.org/ns/prov#>
-        .\n@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n@prefix image: <http://www.modeshape.org/images/1.0>
-        .\n@prefix sv: <http://www.jcp.org/jcr/sv/1.0> .\n@prefix test: <info:fedora/test/>
+      string: "@prefix premis: <http://www.loc.gov/premis/rdf/v1#> .\n@prefix image:
+        <http://www.modeshape.org/images/1.0> .\n@prefix sv: <http://www.jcp.org/jcr/sv/1.0>
+        .\n@prefix test: <info:fedora/test/> .\n@prefix nt: <http://www.jcp.org/jcr/nt/1.0>
         .\n@prefix cnt: <http://www.w3.org/2011/content#> .\n@prefix dcmitype: <http://purl.org/dc/dcmitype/>
-        .\n@prefix dc11: <http://purl.org/dc/elements/1.1/> .\n@prefix triannon: <http://triannon.stanford.edu/ns/>
-        .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n@prefix fedora:
-        <http://fedora.info/definitions/v4/repository#> .\n@prefix ldp: <http://www.w3.org/ns/ldp#>
-        .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix dc: <http://purl.org/dc/terms/>
-        .\n\n\n<http://localhost:8983/fedora/rest/anno/d3/5a/ea/84/d35aea84-b899-4989-81ca-de1516305da0>
-        a oa:Annotation ;\n\toa:motivatedBy oa:bookmarking ;\n\tldp:contains <http://localhost:8983/fedora/rest/anno/d3/5a/ea/84/d35aea84-b899-4989-81ca-de1516305da0/t>
-        ;\n\toa:hasTarget <http://localhost:8983/fedora/rest/anno/d3/5a/ea/84/d35aea84-b899-4989-81ca-de1516305da0/t/fa/40/5e/24/fa405e24-d8bb-4b64-bd3b-71fce73bdcb6>
+        .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n@prefix xsi: <http://www.w3.org/2001/XMLSchema-instance>
+        .\n@prefix mode: <http://www.modeshape.org/1.0> .\n@prefix oa: <http://www.w3.org/ns/oa#>
+        .\n@prefix triannon: <http://triannon.stanford.edu/ns/> .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        .\n@prefix fedora: <http://fedora.info/definitions/v4/repository#> .\n@prefix
+        xml: <http://www.w3.org/XML/1998/namespace> .\n@prefix ldp: <http://www.w3.org/ns/ldp#>
+        .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix fedoraconfig:
+        <http://fedora.info/definitions/v4/config#> .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0>
+        .\n@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n@prefix dc: <http://purl.org/dc/elements/1.1/>
+        .\n\n\n<http://localhost:8983/fedora/rest/anno/e0/e6/07/2c/e0e6072c-bf2b-466e-83df-6d534731cc88>
+        a oa:Annotation , ldp:BasicContainer ;\n\toa:motivatedBy oa:bookmarking ;\n\tldp:contains
+        <http://localhost:8983/fedora/rest/anno/e0/e6/07/2c/e0e6072c-bf2b-466e-83df-6d534731cc88/t>
+        ;\n\toa:hasTarget <http://localhost:8983/fedora/rest/anno/e0/e6/07/2c/e0e6072c-bf2b-466e-83df-6d534731cc88/t/c4/b3/1f/fb/c4b31ffb-4aff-414b-8445-1d7702f50cd7>
         .\n"
     http_version: 
-  recorded_at: Tue, 05 May 2015 00:47:23 GMT
+  recorded_at: Wed, 10 Jun 2015 18:25:57 GMT
 - request:
     method: get
-    uri: http://localhost:8983/fedora/rest/anno/d3/5a/ea/84/d35aea84-b899-4989-81ca-de1516305da0/t/fa/40/5e/24/fa405e24-d8bb-4b64-bd3b-71fce73bdcb6
+    uri: http://localhost:8983/fedora/rest/anno/e0/e6/07/2c/e0e6072c-bf2b-466e-83df-6d534731cc88/t/c4/b3/1f/fb/c4b31ffb-4aff-414b-8445-1d7702f50cd7
     body:
       encoding: US-ASCII
       string: ''
@@ -213,9 +218,9 @@ http_interactions:
       message: OK
     headers:
       Etag:
-      - '"b7febfa2c0e82ea5960b10d28cc7977b5e81802d"'
+      - '"738bc5e15e8efdbb6ae5003fa0f1041b16d30962"'
       Last-Modified:
-      - Tue, 05 May 2015 00:47:23 GMT
+      - Wed, 10 Jun 2015 18:25:56 GMT
       Link:
       - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
       - <http://www.w3.org/ns/ldp#Container>;rel="type"
@@ -232,49 +237,37 @@ http_interactions:
       - Accept, Range, Accept-Encoding, Accept-Language
       - Prefer
       Content-Length:
-      - '1378'
+      - '1313'
       Content-Type:
       - application/x-turtle
     body:
       encoding: UTF-8
-      string: |
-        @prefix premis: <http://www.loc.gov/premis/rdf/v1#> .
-        @prefix nt: <http://www.jcp.org/jcr/nt/1.0> .
-        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-        @prefix xsi: <http://www.w3.org/2001/XMLSchema-instance> .
-        @prefix mode: <http://www.modeshape.org/1.0> .
-        @prefix oa: <http://www.w3.org/ns/oa#> .
-        @prefix xml: <http://www.w3.org/XML/1998/namespace> .
-        @prefix fedoraconfig: <http://fedora.info/definitions/v4/config#> .
-        @prefix mix: <http://www.jcp.org/jcr/mix/1.0> .
-        @prefix prov: <http://www.w3.org/ns/prov#> .
-        @prefix foaf: <http://xmlns.com/foaf/0.1/> .
-        @prefix image: <http://www.modeshape.org/images/1.0> .
-        @prefix sv: <http://www.jcp.org/jcr/sv/1.0> .
-        @prefix test: <info:fedora/test/> .
-        @prefix cnt: <http://www.w3.org/2011/content#> .
-        @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
-        @prefix dc11: <http://purl.org/dc/elements/1.1/> .
-        @prefix triannon: <http://triannon.stanford.edu/ns/> .
-        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-        @prefix fedora: <http://fedora.info/definitions/v4/repository#> .
-        @prefix ldp: <http://www.w3.org/ns/ldp#> .
-        @prefix xs: <http://www.w3.org/2001/XMLSchema> .
-        @prefix dc: <http://purl.org/dc/terms/> .
-
-
-        <http://localhost:8983/fedora/rest/anno/d3/5a/ea/84/d35aea84-b899-4989-81ca-de1516305da0/t/fa/40/5e/24/fa405e24-d8bb-4b64-bd3b-71fce73bdcb6> triannon:externalReference <http://purl.stanford.edu/kq131cs7229> .
+      string: "@prefix premis: <http://www.loc.gov/premis/rdf/v1#> .\n@prefix image:
+        <http://www.modeshape.org/images/1.0> .\n@prefix sv: <http://www.jcp.org/jcr/sv/1.0>
+        .\n@prefix test: <info:fedora/test/> .\n@prefix nt: <http://www.jcp.org/jcr/nt/1.0>
+        .\n@prefix cnt: <http://www.w3.org/2011/content#> .\n@prefix dcmitype: <http://purl.org/dc/dcmitype/>
+        .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n@prefix xsi: <http://www.w3.org/2001/XMLSchema-instance>
+        .\n@prefix mode: <http://www.modeshape.org/1.0> .\n@prefix oa: <http://www.w3.org/ns/oa#>
+        .\n@prefix triannon: <http://triannon.stanford.edu/ns/> .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        .\n@prefix fedora: <http://fedora.info/definitions/v4/repository#> .\n@prefix
+        xml: <http://www.w3.org/XML/1998/namespace> .\n@prefix ldp: <http://www.w3.org/ns/ldp#>
+        .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix fedoraconfig:
+        <http://fedora.info/definitions/v4/config#> .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0>
+        .\n@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n@prefix dc: <http://purl.org/dc/elements/1.1/>
+        .\n\n\n<http://localhost:8983/fedora/rest/anno/e0/e6/07/2c/e0e6072c-bf2b-466e-83df-6d534731cc88/t/c4/b3/1f/fb/c4b31ffb-4aff-414b-8445-1d7702f50cd7>
+        a ldp:BasicContainer ;\n\ttriannon:externalReference <http://purl.stanford.edu/kq131cs7229>
+        .\n"
     http_version: 
-  recorded_at: Tue, 05 May 2015 00:47:23 GMT
+  recorded_at: Wed, 10 Jun 2015 18:25:57 GMT
 - request:
     method: post
     uri: http://localhost:8983/solr/triannon/update?wt=ruby
     body:
       encoding: UTF-8
       string: <?xml version="1.0" encoding="UTF-8"?><add commitWithin="500"><doc><field
-        name="id">d35aea84-b899-4989-81ca-de1516305da0</field><field name="motivation">bookmarking</field><field
+        name="id">e0/e6/07/2c/e0e6072c-bf2b-466e-83df-6d534731cc88</field><field name="motivation">bookmarking</field><field
         name="target_url">http://purl.stanford.edu/kq131cs7229</field><field name="target_type">external_URI</field><field
-        name="body_type">no_body</field><field name="anno_jsonld">{"@context":"http://www.w3.org/ns/oa-context-20130208.json","@id":"http://your.triannon-server.com/annotations/d35aea84-b899-4989-81ca-de1516305da0","@type":"oa:Annotation","hasTarget":"http://purl.stanford.edu/kq131cs7229","motivatedBy":"oa:bookmarking"}</field></doc></add>
+        name="body_type">no_body</field><field name="anno_jsonld">{"@context":"http://www.w3.org/ns/oa-context-20130208.json","@id":"http://your.triannon-server.com/annotations/e0/e6/07/2c/e0e6072c-bf2b-466e-83df-6d534731cc88","@type":"oa:Annotation","hasTarget":"http://purl.stanford.edu/kq131cs7229","motivatedBy":"oa:bookmarking"}</field></doc></add>
     headers:
       Content-Type:
       - text/xml
@@ -290,7 +283,7 @@ http_interactions:
     body:
       encoding: UTF-8
       string: |
-        {'responseHeader'=>{'status'=>0,'QTime'=>1}}
+        {'responseHeader'=>{'status'=>0,'QTime'=>2}}
     http_version: 
-  recorded_at: Tue, 05 May 2015 00:47:23 GMT
+  recorded_at: Wed, 10 Jun 2015 18:25:57 GMT
 recorded_with: VCR 2.9.3

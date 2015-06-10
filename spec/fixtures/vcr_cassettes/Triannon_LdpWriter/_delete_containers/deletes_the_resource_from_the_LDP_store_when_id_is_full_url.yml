@@ -6,10 +6,12 @@ http_interactions:
     body:
       encoding: UTF-8
       string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
         @prefix oa: <http://www.w3.org/ns/oa#> .
         @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
-        <> a oa:Annotation;
+        <> a oa:Annotation,
+             ldp:BasicContainer;
            oa:motivatedBy oa:commenting .
     headers:
       User-Agent:
@@ -28,23 +30,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"66b57bfe7113bcb35a4725f826bc1d6983a97776"'
+      - '"1999ef578a399c17d3abd6be33cd7794e47071b6"'
       Last-Modified:
-      - Tue, 05 May 2015 00:48:23 GMT
+      - Wed, 10 Jun 2015 18:26:53 GMT
       Content-Length:
       - '87'
       Location:
-      - http://localhost:8983/fedora/rest/anno/e6/85/4c/97/e6854c97-3b85-4108-8b08-589b03c8a510
+      - http://localhost:8983/fedora/rest/anno/db/a6/19/1d/dba6191d-bfd4-4253-a1f7-75d8add36f0b
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/e6/85/4c/97/e6854c97-3b85-4108-8b08-589b03c8a510
+      string: http://localhost:8983/fedora/rest/anno/db/a6/19/1d/dba6191d-bfd4-4253-a1f7-75d8add36f0b
     http_version: 
-  recorded_at: Tue, 05 May 2015 00:48:23 GMT
+  recorded_at: Wed, 10 Jun 2015 18:26:53 GMT
 - request:
     method: delete
-    uri: http://localhost:8983/fedora/rest/anno/e6/85/4c/97/e6854c97-3b85-4108-8b08-589b03c8a510
+    uri: http://localhost:8983/fedora/rest/anno/db/a6/19/1d/dba6191d-bfd4-4253-a1f7-75d8add36f0b
     body:
       encoding: US-ASCII
       string: ''
@@ -66,10 +68,10 @@ http_interactions:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Tue, 05 May 2015 00:48:23 GMT
+  recorded_at: Wed, 10 Jun 2015 18:26:53 GMT
 - request:
     method: get
-    uri: http://localhost:8983/fedora/rest/anno/e6/85/4c/97/e6854c97-3b85-4108-8b08-589b03c8a510
+    uri: http://localhost:8983/fedora/rest/anno/db/a6/19/1d/dba6191d-bfd4-4253-a1f7-75d8add36f0b
     body:
       encoding: US-ASCII
       string: ''
@@ -88,14 +90,14 @@ http_interactions:
       Content-Length:
       - '192'
       Link:
-      - <http://localhost:8983/fedora/rest/anno/e6/85/4c/97/e6854c97-3b85-4108-8b08-589b03c8a510/fcr:tombstone>;
+      - <http://localhost:8983/fedora/rest/anno/db/a6/19/1d/dba6191d-bfd4-4253-a1f7-75d8add36f0b/fcr:tombstone>;
         rel="hasTombstone"
       Content-Type:
       - text/turtle
     body:
       encoding: UTF-8
-      string: Discovered tombstone resource at /anno/e6/85/4c/97/e6854c97-3b85-4108-8b08-589b03c8a510
-        {jcr:createdBy=bypassAdmin, jcr:primaryType=fedora:Tombstone, jcr:created=2015-05-04T17:48:23.131-07:00}
+      string: Discovered tombstone resource at /anno/db/a6/19/1d/dba6191d-bfd4-4253-a1f7-75d8add36f0b
+        {jcr:createdBy=bypassAdmin, jcr:primaryType=fedora:Tombstone, jcr:created=2015-06-10T11:26:53.980-07:00}
     http_version: 
-  recorded_at: Tue, 05 May 2015 00:48:23 GMT
+  recorded_at: Wed, 10 Jun 2015 18:26:54 GMT
 recorded_with: VCR 2.9.3

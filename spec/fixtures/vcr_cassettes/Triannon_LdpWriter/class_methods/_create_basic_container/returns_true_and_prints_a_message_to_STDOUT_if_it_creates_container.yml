@@ -26,7 +26,7 @@ http_interactions:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Fri, 08 May 2015 01:04:35 GMT
+  recorded_at: Wed, 10 Jun 2015 18:26:45 GMT
 - request:
     method: post
     uri: http://localhost:8983/fedora/rest/anno
@@ -54,9 +54,9 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"98c9b35b268bbd80f0d936017fea7c106bfef97c"'
+      - '"b1f8ede36b2d7af48b51744475eeeb32f1b921a5"'
       Last-Modified:
-      - Fri, 08 May 2015 01:04:35 GMT
+      - Wed, 10 Jun 2015 18:26:45 GMT
       Content-Length:
       - '50'
       Location:
@@ -67,7 +67,7 @@ http_interactions:
       encoding: UTF-8
       string: http://localhost:8983/fedora/rest/anno/stdout-test
     http_version: 
-  recorded_at: Fri, 08 May 2015 01:04:35 GMT
+  recorded_at: Wed, 10 Jun 2015 18:26:45 GMT
 - request:
     method: get
     uri: http://localhost:8983/fedora/rest/anno/stdout-test
@@ -87,9 +87,9 @@ http_interactions:
       message: OK
     headers:
       Etag:
-      - '"98c9b35b268bbd80f0d936017fea7c106bfef97c"'
+      - '"b1f8ede36b2d7af48b51744475eeeb32f1b921a5"'
       Last-Modified:
-      - Fri, 08 May 2015 01:04:35 GMT
+      - Wed, 10 Jun 2015 18:26:45 GMT
       Link:
       - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
       - <http://www.w3.org/ns/ldp#Container>;rel="type"
@@ -106,7 +106,7 @@ http_interactions:
       - Accept, Range, Accept-Encoding, Accept-Language
       - Prefer
       Content-Length:
-      - '2599'
+      - '2819'
       Content-Type:
       - application/x-turtle
     body:
@@ -114,13 +114,15 @@ http_interactions:
       string: "@prefix premis: <http://www.loc.gov/premis/rdf/v1#> .\n@prefix image:
         <http://www.modeshape.org/images/1.0> .\n@prefix sv: <http://www.jcp.org/jcr/sv/1.0>
         .\n@prefix test: <info:fedora/test/> .\n@prefix nt: <http://www.jcp.org/jcr/nt/1.0>
+        .\n@prefix cnt: <http://www.w3.org/2011/content#> .\n@prefix dcmitype: <http://purl.org/dc/dcmitype/>
         .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n@prefix xsi: <http://www.w3.org/2001/XMLSchema-instance>
-        .\n@prefix mode: <http://www.modeshape.org/1.0> .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        .\n@prefix mode: <http://www.modeshape.org/1.0> .\n@prefix oa: <http://www.w3.org/ns/oa#>
+        .\n@prefix triannon: <http://triannon.stanford.edu/ns/> .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         .\n@prefix fedora: <http://fedora.info/definitions/v4/repository#> .\n@prefix
         xml: <http://www.w3.org/XML/1998/namespace> .\n@prefix ldp: <http://www.w3.org/ns/ldp#>
         .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix fedoraconfig:
         <http://fedora.info/definitions/v4/config#> .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0>
-        .\n@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n@prefix dc: <http://purl.org/dc/elements/1.1/>
+        .\n@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n@prefix dc: <http://purl.org/dc/terms/>
         .\n\n\n<http://localhost:8983/fedora/rest/anno/stdout-test> a ldp:RDFSource
         , ldp:Container , <http://www.jcp.org/jcr/nt/1.0folder> , <http://www.jcp.org/jcr/nt/1.0hierarchyNode>
         , <http://www.jcp.org/jcr/nt/1.0base> , <http://www.jcp.org/jcr/mix/1.0created>
@@ -128,19 +130,20 @@ http_interactions:
         , <http://www.jcp.org/jcr/mix/1.0created> , <http://www.jcp.org/jcr/mix/1.0lastModified>
         , <http://www.jcp.org/jcr/mix/1.0referenceable> , fedora:Container ;\n\tfedora:lastModifiedBy
         \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string> ;\n\tfedora:uuid
-        \"781641fd-145a-4655-834c-05ed00420e18\"^^<http://www.w3.org/2001/XMLSchema#string>
+        \"828d18e1-2daf-4dae-a7c1-81981a907e32\"^^<http://www.w3.org/2001/XMLSchema#string>
         ;\n\tfedora:createdBy \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
         ;\n\tfedora:primaryType \"nt:folder\"^^<http://www.w3.org/2001/XMLSchema#string>
-        ;\n\tfedora:created \"2015-05-08T01:04:35.035Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
-        ;\n\tfedora:lastModified \"2015-05-08T01:04:35.035Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\tfedora:created \"2015-06-10T18:26:45.215Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
         ;\n\tfedora:mixinTypes \"fedora:Container\"^^<http://www.w3.org/2001/XMLSchema#string>
         , \"fedora:Resource\"^^<http://www.w3.org/2001/XMLSchema#string> , \"ldp:BasicContainer\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfedora:lastModified \"2015-06-10T18:26:45.215Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
         ;\n\tfedora:writable \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>
         ;\n\tfedora:hasParent <http://localhost:8983/fedora/rest/anno> ;\n\tfedora:exportsAs
         <http://localhost:8983/fedora/rest/anno/stdout-test/fcr:export?format=jcr/xml>
         .\n\n<http://localhost:8983/fedora/rest/anno/stdout-test/fcr:export?format=jcr/xml>
-        dc:format <http://fedora.info/definitions/v4/repository#jcr/xml> .\n\n<http://fedora.info/definitions/v4/repository#jcr/xml>
-        rdfs:label \"jcr/xml\"^^<http://www.w3.org/2001/XMLSchema#string> .\n"
+        <http://purl.org/dc/elements/1.1/format> <http://fedora.info/definitions/v4/repository#jcr/xml>
+        .\n\n<http://fedora.info/definitions/v4/repository#jcr/xml> rdfs:label \"jcr/xml\"^^<http://www.w3.org/2001/XMLSchema#string>
+        .\n"
     http_version: 
-  recorded_at: Fri, 08 May 2015 01:04:35 GMT
+  recorded_at: Wed, 10 Jun 2015 18:26:45 GMT
 recorded_with: VCR 2.9.3
