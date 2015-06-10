@@ -12,24 +12,22 @@ module Triannon
     def options
       # The request MUST use HTTP OPTIONS
       unless request.options?
+        response.headers.merge!(Allow: 'GET, OPTIONS')
         err = {
           error: "invalidRequest",
           errorDescription: "/auth/login accepts GET or OPTIONS requests",
           errorUri: "http://image-auth.iiif.io/api/image/2.1/authentication.html"
         }
-        response.body = JSON.dump(err)
-        response.content_type = 'application/json'
-        response.headers.merge!(Allow: 'GET, OPTIONS')
-        response.status = 405
-      end
-      if cookies[:login_user]
-        info = service_info_logout
+        render_json(err, 405)
       else
-        info = service_info_login
+        if cookies[:login_user]
+          info = service_info_logout
+        else
+          info = service_info_login
+        end
+        # TODO: include optional info, such as service_info_client_identity
+        render_json(info, 200)
       end
-      # TODO: include optional info, such as service_info_client_identity
-      # accept_return_type = mime_type_from_accept(['application/json', 'text/x-json', 'application/jsonrequest'])
-      render :json => info.to_json, content_type: 'application/json' #accept_return_type
     end
 
     # GET /auth/login
@@ -53,9 +51,7 @@ module Triannon
               errorDescription: 'invalid login details received',
               errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
             }
-            response.status = 401
-            accept_return_type = mime_type_from_accept(['application/json', 'text/x-json', 'application/jsonrequest'])
-            render :json => err.to_json, content_type: accept_return_type
+            render_json(err, 401)
           }
         end
       end
@@ -347,8 +343,10 @@ module Triannon
         format.json {
           render :json => data.to_json, content_type: json_type_accepted
         }
+        format.html {
+          return render :nothing => true
+        }
       end
-      # return render :nothing => true, :status => 415
     end
 
   end # AuthController
