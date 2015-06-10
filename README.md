@@ -2,7 +2,7 @@
 
 # Triannon
 
-Store Open Annotation in Fedora4 to support the Linked Data for Libraries use cases.
+Store Open Annotation RDF in Fedora4 to support the Linked Data for Libraries use cases.
 
 ## Installation into Your Existing Rails Application
 
@@ -29,7 +29,7 @@ Edit the `config/triannon.yml` file:
 * `ldp:` Properties of LDP server
   * `url:` the baseurl of LDP server
   * `uber_container:` name of an LDP Basic Container holding specific anno containers
-  * `anno_containers:`  (Future: the names of LDP Basic Containers holding individual annos)
+  * `anno_containers:`  (the names of LDP Basic Containers holding individual annos)
 * `solr_url:` Points to the baseurl of Solr instance configured for Triannon
 * `triannon_base_url:` Used as the base url for all annotations hosted by your Triannon server.  Identifiers from the LDP server will be appended to this base-url.  Generally something like "https://your-triannon-rails-box/annotations", as "/annotations" is added to the path by the Triannon gem
 
@@ -38,6 +38,10 @@ Generate the root annotations containers on your LDP server:
 ```console
 $ rake triannon:create_root_containers
 ```
+
+  This will generate the uber_container and the anno_containers (aka 'root containers') under the uber_container.
+
+  NOTE:  you MUST create the root containers before creating any annotations.  All annotation MUST be created as a child of a root container.
 
 Set up caching for jsonld context documents:
 
@@ -86,8 +90,21 @@ Search Parameters:
   * also supports turtle, rdfxml, json, html
     * `Accept`: `application/x-turtle`
 
+### Get a list of annos in a particular root container
+as a IIIF Annotation List (see http://iiif.io/api/presentation/2.0/#other-content-resources)
+
+* `GET`: `http://(host)/annotations/(root container name)/search?targetUri=some.url.org`
+
+Search Parameters as above.
+
+* use HTTP `Accept` header with mime type to indicate desired format
+  * default:  jsonld
+    * `Accept`: `application/ld+json`
+  * also supports turtle, rdfxml, json, html
+    * `Accept`: `application/x-turtle`
+
 ### Get a particular anno
-`GET`: `http://(host)/annotations/(anno_id)`
+`GET`: `http://(host)/annotations/(root container)/(anno_id)`
 
 * use HTTP `Accept` header with mime type to indicate desired format
   * default:  jsonld
@@ -120,7 +137,7 @@ You can also use either of these methods (with the correct HTTP Accept header):
 Note that OA (Open Annotation) is the default context if none is specified.
 
 ### Create an anno
-`POST`: `http://(host)/annotations`
+`POST`: `http://(host)/annotations/(root container)`
 * the body of the HTTP request should contain the annotation, as jsonld, turtle, or rdfxml
   * Wrap the annotation in an object, as such:
   * `{ "commit" => "Create Annotation", "annotation" => { "data" => oa_jsonld } }`
@@ -136,7 +153,7 @@ Note that OA (Open Annotation) is the default context if none is specified.
       * note that the "type" part is optional and refers to the type of the rel, which is the reference for all json-ld contexts.
 
 ### Delete an anno
-`DELETE`: `http://(host)/annotations/(anno_id)`
+`DELETE`: `http://(host)/annotations/(root container)/(anno_id)`
 
 
 # Running This Code in Development
@@ -170,7 +187,7 @@ triannon:jetty_config task does the following:
 $ rake jetty:start
 ```
 
-Note that jetty can be very sloooooooow to start up with Fedora and Solr.
+Note that jetty can be very sloooooooow (a couple of minutes) to start up with Fedora and Solr.
 
 #### Check if Solr and Fedora are up
 Go to 
@@ -186,13 +203,13 @@ If all is not well for Fedora or Solr, try:
 $ rake triannon:jetty_reset
 ```
 
-This stops jetty, cleans out the jetty directory, recreates it anew from the download, configures jetty for Triannon, and starts jetty.
+This stops jetty, cleans out the jetty directory, recreates it anew from the download, configures jetty for Triannon, and starts jetty.  It may take a long time (a couple of minutes) for jetty to restart.
 
 Then check the Solr and Fedora urls again.
 
 
 #### Generate root annotations containers in Fedora
-After you ensure that Fedora is running, you need to create the root anno container using the configuration of test rails app created by engine_cart:
+After you ensure that Fedora is running, you need to create the root anno containers using the configuration of test rails app created by engine_cart:
 
 ```console
 $ cd spec/internal
@@ -216,7 +233,7 @@ $ <cntl + C> # to stop Rails application
 $ rake jetty:stop # to stop Fedora and Solr
 ```
 
-The app will be running at localhost:3000
+The app will be running at localhost:3000, with root containers "foo" and "blah" available (and empty).
 
 # Running the Tests
 
