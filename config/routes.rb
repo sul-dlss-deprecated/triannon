@@ -76,6 +76,7 @@ Triannon::Engine.routes.draw do
     }
 
 
+  get '/annotations', to: 'search#find'
   root to: 'search#find'
 
 end

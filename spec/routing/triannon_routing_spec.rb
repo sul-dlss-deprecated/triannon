@@ -9,6 +9,11 @@ describe Triannon::AnnotationsController, type: :routing do
       expect(:get => "/").to route_to(controller: "triannon/search", action: "find")
     end
   end
+  context 'GET to /annotations' do
+    it '/annotations routed to triannon/search#find without anno_root param' do
+      expect(:get => "/annotations").to route_to(controller: "triannon/search", action: "find")
+    end
+  end
 
   context "GET" do
     context "#show" do
