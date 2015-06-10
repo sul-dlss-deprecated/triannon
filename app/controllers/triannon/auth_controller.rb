@@ -74,7 +74,6 @@ module Triannon
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#error-conditions
     # return json body [String] containing: { "authorizationCode": code }
     def client_identity
-      # The request MUST use HTTP POST
       unless request.post?
         logger.debug "Rejected Request Method: #{request.request_method}"
         err = {
@@ -95,18 +94,10 @@ module Triannon
       #   "clientSecret" : "CLIENT_SECRET_HERE"
       # }
       identity = JSON.parse(request.body.read)
-      unless identity.has_key?('clientId')
+      unless identity.has_key?('clientId') && identity.has_key?('clientSecret')
         err = {
           error: 'invalidRequest',
-          errorDescription: "/auth/client_identity requires 'clientId' field",
-          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
-        }
-        return render_json(err, 400)
-      end
-      unless identity.has_key?('clientSecret')
-        err = {
-          error: 'invalidRequest',
-          errorDescription: "/auth/client_identity requires 'clientSecret' field",
+          errorDescription: "/auth/client_identity requires 'clientId' and 'clientSecret' fields",
           errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
         }
         return render_json(err, 400)
