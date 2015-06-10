@@ -18,7 +18,7 @@ module Triannon
           errorDescription: "/auth/login accepts GET or OPTIONS requests",
           errorUri: "http://image-auth.iiif.io/api/image/2.1/authentication.html"
         }
-        render_json(err, 405)
+        json_response(err, 405)
       else
         if cookies[:login_user]
           info = service_info_logout
@@ -26,7 +26,7 @@ module Triannon
           info = service_info_login
         end
         # TODO: include optional info, such as service_info_client_identity
-        render_json(info, 200)
+        json_response(info, 200)
       end
     end
 
@@ -67,18 +67,18 @@ module Triannon
           errorDescription: "/auth/client_identity requires 'clientId' and 'clientSecret' fields",
           errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
         }
-        return render_json(err, 400)
+        return json_response(err, 400)
       end
       if authorized_client? identity
         code = { authorizationCode: auth_code_generate(identity) }
-        return render_json(code, 200)
+        return json_response(code, 200)
       else
         err = {
           error: 'invalidClient',
           errorDescription: 'Unable to authorize client',
           errorUri: ''
         }
-        return render_json(err, 401)
+        return json_response(err, 401)
       end
     end
 
@@ -104,7 +104,7 @@ module Triannon
             tokenType: 'Bearer',
             expiresIn: TOKEN_EXPIRY
           }
-          return render_json(data, 200)
+          return json_response(data, 200)
         else
           redirect_to '/auth/login'
         end
@@ -123,14 +123,9 @@ module Triannon
             tokenType: 'Bearer',
             expiresIn: TOKEN_EXPIRY
           }
-          return render_json(data, 200)
+          return json_response(data, 200)
         else
-          err = {
-            error: 'invalidClient',
-            errorDescription: 'Unable to validate authorization code',
-            errorUri: ''
-          }
-          return render_json(err, 401)
+          auth_code_error
         end
       else
         err = {
@@ -138,7 +133,7 @@ module Triannon
           errorDescription: 'Unable to authorize access token',
           errorUri: ''
         }
-        return render_json(err, 401)
+        return json_response(err, 401)
       end
     end
 
@@ -178,13 +173,12 @@ module Triannon
     def login_handler_post
       return unless process_post?
       return unless process_json?
-      # The request MUST carry a body with the following JSON template:
-      # {
-      #   "userId" : "USER_ID_HERE",
-      #   "userSecret" : "USER_SECRET_HERE"
-      # }
-      if auth_code_valid?(params[:code])
-        # get user information
+      if auth_code_valid?(params[:code]) # requires a client auth-code.
+        # The request MUST carry a body with the following JSON template:
+        # {
+        #   "userId" : "USER_ID_HERE",
+        #   "userSecret" : "USER_SECRET_HERE"
+        # }
         identity = JSON.parse(request.body.read)
         unless identity.has_key?('userId') && identity.has_key?('userSecret')
           err = {
@@ -192,7 +186,7 @@ module Triannon
             errorDescription: "POST /auth/login requires 'userId' and 'userSecret' fields",
             errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
           }
-          return render_json(err, 400)
+          return json_response(err, 400)
         end
         # When an authorized client POSTs user data, it is simply accepted, as
         # is, without authentication.
@@ -221,7 +215,7 @@ module Triannon
             errorDescription: 'invalid login details received',
             errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
           }
-          render_json(err, 401)
+          json_response(err, 401)
         }
       end
     end
@@ -363,23 +357,34 @@ module Triannon
 
     private
 
-    # Response content type to match an HTTP accept type for JSON formats
-    def json_type_accepted
-      mime_type_from_accept(['application/json', 'text/x-json', 'application/jsonrequest'])
+
+    # Issue a 401 for invalid client authorization codes
+    def auth_code_error
+      err = {
+        error: 'invalidClient',
+        errorDescription: 'Unable to validate authorization code',
+        errorUri: ''
+      }
+      return json_response(err, 401)
     end
 
     # @param data [Hash] Hash.to_json is rendered
     # @param status [Integer] HTTP status code
-    def render_json(data, status)
+    def json_response(data, status)
       response.status = status
       respond_to do |format|
         format.json {
           render :json => data.to_json, content_type: json_type_accepted
         }
         format.html {
-          return render :nothing => true
+          render :nothing => true
         }
       end
+    end
+
+    # Response content type to match an HTTP accept type for JSON formats
+    def json_type_accepted
+      mime_type_from_accept(['application/json', 'text/x-json', 'application/jsonrequest'])
     end
 
     # Is the request content type JSON?  If not, issue a 415 error.
@@ -405,7 +410,7 @@ module Triannon
           errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
         }
         response.headers.merge!(Allow: 'POST')
-        render_json(err, 405)
+        json_response(err, 405)
         false
       end
     end
