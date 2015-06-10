@@ -30,31 +30,14 @@ module Triannon
       end
     end
 
-    # GET /auth/login
+    # GET || POST to /auth/login
     # HTTP basic authentication
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#login-service
     def login
       # The service must set a Cookie for the Access Token Service to retrieve
       # to determine the user information provided by the authentication system.
-      if user = authenticate_with_http_basic { |u, p| authorized_user(u, p) }
-        cookies[:login_user] = user
-        session[:login_user] = user
-        redirect_to root_url, notice: 'Successfully logged in.'
-      else
-        respond_to do |format|
-          format.html {
-            request_http_basic_authentication
-          }
-          format.json {
-            err = {
-              error: '401 Unauthorized',
-              errorDescription: 'invalid login details received',
-              errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
-            }
-            render_json(err, 401)
-          }
-        end
-      end
+      login_handler_get if request.get?
+      login_handler_post if request.post?
     end
 
     # GET /auth/logout
@@ -70,20 +53,8 @@ module Triannon
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#error-conditions
     # return json body [String] containing: { "authorizationCode": code }
     def client_identity
-      unless request.post?
-        logger.debug "Rejected Request Method: #{request.request_method}"
-        err = {
-          error: 'invalidRequest',
-          errorDescription: '/auth/client_identity only accepts POST requests',
-          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
-        }
-        response.headers.merge!(Allow: 'POST')
-        return render_json(err, 405)
-      end
-      unless request.headers['Content-Type'] =~ /json/
-        logger.debug "Rejected Content-Type: #{request.headers['Content-Type']}"
-        return render :nothing => true, :status => 415
-      end
+      return unless process_post?
+      return unless process_json?
       # The request MUST carry a body with the following JSON template:
       # {
       #   "clientId" : "CLIENT_ID_HERE",
@@ -192,6 +163,68 @@ module Triannon
       @authorized_users ||= Triannon.config[:authorized_users]
     end
 
+
+    # Handles GET /auth/login
+    def login_handler_get
+      if user = authenticate_with_http_basic { |u, p| authorized_user(u, p) }
+        login_update(user)
+        redirect_to root_url, notice: 'Successfully logged in.'
+      else
+        login_error
+      end
+    end
+
+    # Handles POST /auth/login
+    def login_handler_post
+      return unless process_post?
+      return unless process_json?
+      # The request MUST carry a body with the following JSON template:
+      # {
+      #   "userId" : "USER_ID_HERE",
+      #   "userSecret" : "USER_SECRET_HERE"
+      # }
+      if auth_code_valid?(params[:code])
+        # get user information
+        identity = JSON.parse(request.body.read)
+        unless identity.has_key?('userId') && identity.has_key?('userSecret')
+          err = {
+            error: 'invalidRequest',
+            errorDescription: "POST /auth/login requires 'userId' and 'userSecret' fields",
+            errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
+          }
+          return render_json(err, 400)
+        end
+        # When an authorized client POSTs user data, it is simply accepted, as
+        # is, without authentication.
+        user = identity['userId']
+        # pass = identity['userSecret']  # actually secret is not required, right?
+        login_update(user)
+        redirect_to root_url, notice: 'Successfully logged in.'
+      else
+        login_error
+      end
+    end
+
+    def login_update(data)
+      cookies[:login_user] = data
+      session[:login_user] = data
+    end
+
+    def login_error(data=nil)
+      respond_to do |format|
+        format.html {
+          request_http_basic_authentication
+        }
+        format.json {
+          err = {
+            error: '401 Unauthorized',
+            errorDescription: 'invalid login details received',
+            errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
+          }
+          render_json(err, 401)
+        }
+      end
+    end
 
     # --------------------------------------------------------------------
     # Client authentication
@@ -348,6 +381,35 @@ module Triannon
         }
       end
     end
+
+    # Is the request content type JSON?  If not, issue a 415 error.
+    def process_json?
+      if request.headers['Content-Type'] =~ /json/
+        true
+      else
+        logger.debug "Rejected Content-Type: #{request.headers['Content-Type']}"
+        render :nothing => true, :status => 415
+        false
+      end
+    end
+
+    # Is the request method POST?  If not, issue a 405 error.
+    def process_post?
+      if request.post?
+        true
+      else
+        logger.debug "Rejected Request Method: #{request.request_method}"
+        err = {
+          error: 'invalidRequest',
+          errorDescription: "#{request.path} accepts POST requests, not #{request.request_method}",
+          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
+        }
+        response.headers.merge!(Allow: 'POST')
+        render_json(err, 405)
+        false
+      end
+    end
+
 
   end # AuthController
 end # Triannon
