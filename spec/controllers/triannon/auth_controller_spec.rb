@@ -17,7 +17,6 @@ describe Triannon::AuthController, :vcr, type: :controller do
   }
 
   describe '/auth/login' do
-
     describe 'responds to GET and OPTIONS requests' do
       it 'GET has a route to /auth/login' do
         expect(:get => '/auth/login').to be_routable
@@ -35,41 +34,35 @@ describe Triannon::AuthController, :vcr, type: :controller do
         expect(:put => '/auth/login').not_to be_routable
       end
     end
-
     describe 'OPTIONS requests for /auth/login:' do
-      it '#options will reject GET requests for information' do
+      it 'reject GET requests for information' do
         process :options, 'GET'
         expect(response.status).to eq(405)
       end
       context 'when JSON is accepted:' do
-        context 'while a user is logged in:' do
-          it 'has information about how to logout' do
-            basic_auth('userA', 'secretA')
-            get :login
-            accept_json
-            process :options, 'OPTIONS'
-            json = JSON.parse(response.body)
-            expect(json.keys).to eql(['service'])
-            info = json['service']
-            expect(info.keys).to eql(['@id','profile', 'label'])
-            expect(info['profile']).to eql('http://iiif.io/api/image/2/auth/logout')
-          end
+        it 'returns logout information while a user is logged in' do
+          basic_auth('userA', 'secretA')
+          get :login
+          accept_json
+          process :options, 'OPTIONS'
+          json = JSON.parse(response.body)
+          expect(json.keys).to eql(['service'])
+          info = json['service']
+          expect(info.keys).to eql(['@id','profile', 'label'])
+          expect(info['profile']).to eql('http://iiif.io/api/image/2/auth/logout')
         end
-        context 'while a user is logged out:' do
-          it 'has information about how to login' do
-            get :logout
-            accept_json
-            process :options, 'OPTIONS'
-            json = JSON.parse(response.body)
-            expect(json.keys).to eql(['service'])
-            info = json['service']
-            expect(info.keys).to eql(['@id','profile', 'label'])
-            expect(info['profile']).to eql('http://iiif.io/api/image/2/auth/login')
-          end
+        it 'returns login information with no user logged in' do
+          get :logout
+          accept_json
+          process :options, 'OPTIONS'
+          json = JSON.parse(response.body)
+          expect(json.keys).to eql(['service'])
+          info = json['service']
+          expect(info.keys).to eql(['@id','profile', 'label'])
+          expect(info['profile']).to eql('http://iiif.io/api/image/2/auth/login')
         end
       end
     end
-
     describe 'rejects unauthorized login' do
       let(:check_unauthorized) do
         get :login
@@ -135,7 +128,6 @@ describe Triannon::AuthController, :vcr, type: :controller do
         end
       end
     end
-
     describe 'accepts authorized login' do
       # curl -v -u userA:secretA http://localhost:3000/auth/login
       before :each do
@@ -165,9 +157,9 @@ describe Triannon::AuthController, :vcr, type: :controller do
         end
       end
     end
-  end
+  end # /auth/login
 
-  describe '#logout' do
+  describe 'GET /auth/logout' do
     describe 'only responds to GET requests' do
       it 'GET has a route to /auth/logout' do
         expect(:get => '/auth/logout').to be_routable
@@ -218,7 +210,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
       expect(logout_notice).not_to be_nil
       expect(logout_notice).not_to eql(login_notice)
     end
-  end
+  end # /auth/logout
 
   describe 'POST /auth/client_identity' do
     before :each do
@@ -300,9 +292,38 @@ describe Triannon::AuthController, :vcr, type: :controller do
       expect(data['authorizationCode']).not_to be_nil
       expect(data['authorizationCode']).to be_instance_of String
     end
-  end
+  end # /auth/client_identity
 
+  # adapted from
+  # http://image-auth.iiif.io/api/image/2.1/authentication.html#access-token-service
   describe 'GET /auth/access_token' do
+    let(:login) {
+      basic_auth('userA', 'secretA')
+      get :login
+      expect(response.status).to eq(302)
+      expect(response).to redirect_to('/')
+      expect(response.cookies['login_user']).not_to be_nil
+    }
+    let(:get_auth_code) {
+      accept_json
+      content_json
+      params = {clientId: 'clientA', clientSecret: 'secretA'}
+      post :client_identity, params.to_json
+      expect(response.code.to_i).to eql(200)
+      data = JSON.parse(response.body)
+      expect(data).not_to be_empty
+      expect(data['authorizationCode']).not_to be_nil
+      expect(data['authorizationCode']).to be_instance_of String
+      data['authorizationCode']
+    }
+    let(:check_access_token) {
+      expect(response.code.to_i).to eql(200)
+      expect(response.cookies['login_user']).to be_nil
+      data = JSON.parse(response.body)
+      expect(data).not_to be_empty
+      expect(data['accessToken']).not_to be_nil
+      expect(data['accessToken']).to be_instance_of String
+    }
     describe 'only responds to GET requests' do
       it 'GET has a route to /auth/access_token' do
         expect(:get => '/auth/access_token').to be_routable
@@ -320,7 +341,39 @@ describe Triannon::AuthController, :vcr, type: :controller do
         expect(:put => '/auth/access_token').not_to be_routable
       end
     end
-  end
+    describe 'with valid login credentials' do
+      before :each do
+        login
+      end
+      it 'returns an access code, given a valid authorization code' do
+        code = get_auth_code
+        get :access_token, {code: code}
+        check_access_token
+      end
+      it 'returns an access code, without any authorization code' do
+        accept_json
+        content_json
+        get :access_token
+        check_access_token
+      end
+    end
+    describe 'without valid login credentials' do
+      it 'returns an access code, given a valid authorization code' do
+        code = get_auth_code
+        get :access_token, {code: code}
+        check_access_token
+      end
+      # it 'returns an error, without any authorization code' do
+      it 'redirects to /auth/login, without any authorization code' do
+        accept_json
+        content_json
+        get :access_token
+        expect(response.status).to eq(302)
+        expect(response).to redirect_to('/auth/login')
+        expect(response.cookies['login_user']).to be_nil
+      end
+    end
+  end # /auth/access_token
 
 
   protected

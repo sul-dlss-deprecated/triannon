@@ -139,6 +139,8 @@ module Triannon
       if key.nil?
         # No authorization code has been issued.
         if session[:login_user]
+          # A login session is current, that is sufficient
+          # for granting an access token.
           cookies.delete(:login_user)
           session.delete(:login_user)
           session[:access_token] = access_code_generate
@@ -152,13 +154,15 @@ module Triannon
           redirect_to '/auth/login'
         end
       elsif params[:code]
-        # If an authorization code was obtained using the Client Identity
-        # Service, then this must be passed to the Access Token Service as well.
-        # The code is passed using a query parameter to the service called `code`
-        # with the authorization code as the value.
+        # When an authorization code was obtained using /auth/client_identity,
+        # that code must be passed to the Access Token Service as well.
+
         # TODO: require an authenticated login also?
         # if session[:login_user] && auth_code_valid?(params[:code])
+
         if auth_code_valid?(params[:code])
+          # The valid authorization code is sufficient to grant
+          # an access token.
           data = {
             accessToken: access_code_generate,
             tokenType: 'Bearer',
@@ -245,7 +249,7 @@ module Triannon
       crypt = ActiveSupport::MessageEncryptor.new(key)
       auth_code = crypt.decrypt_and_verify(code)
       if auth_code.include?(session[:client_identity]['clientId'])
-        timestamp = d.split(';;;').last
+        timestamp = auth_code.split(';;;').last.to_i
         elapsed = Time.now.to_i - timestamp  # sec since auth code was issued
         return true if elapsed < AUTH_EXPIRY # allow 1 minute for authorization
       end
@@ -258,7 +262,7 @@ module Triannon
 
     # construct and encrypt an access token
     def access_code_generate
-      timestamp = Time.now.to_i # seconds since epoch
+      timestamp = Time.now.to_i.to_s # seconds since epoch
       token = "#{SecureRandom.uuid};;;#{timestamp}"
       session[:access_token] = token
       salt  = SecureRandom.random_bytes(64)
@@ -274,7 +278,7 @@ module Triannon
       crypt = ActiveSupport::MessageEncryptor.new(key)
       token = crypt.decrypt_and_verify(code)
       if token.eql?(session[:access_token])
-        timestamp = token.split(';;;').last
+        timestamp = token.split(';;;').last.to_i
         elapsed = Time.now.to_i - timestamp  # sec since token was issued
         return true if elapsed < TOKEN_EXPIRY
       end
