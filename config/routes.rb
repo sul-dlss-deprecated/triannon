@@ -31,7 +31,7 @@ Triannon::Engine.routes.draw do
 
   # Authentication routes
   match '/auth/login', to: 'auth#options', via: [:options]
-  match '/auth/login', to: 'auth#login', via: [:get]
+  match '/auth/login', to: 'auth#login', via: [:get, :post]
   get '/auth/logout', to: 'auth#logout'
   get '/auth/access_token', to: 'auth#access_token'
   post '/auth/client_identity', to: 'auth#client_identity'

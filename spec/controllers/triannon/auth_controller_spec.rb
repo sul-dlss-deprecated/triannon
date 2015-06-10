@@ -17,25 +17,28 @@ describe Triannon::AuthController, :vcr, type: :controller do
   }
 
   describe '/auth/login' do
-    describe 'responds to GET and OPTIONS requests' do
+
+    describe 'responds to GET, OPTIONS and POST requests' do
       it 'GET has a route to /auth/login' do
         expect(:get => '/auth/login').to be_routable
       end
       it 'OPTIONS has a route to /auth/login' do
         expect(:options => '/auth/login').to be_routable
       end
+      it 'POST has no route to /auth/login' do
+        expect(:post => '/auth/login').to be_routable
+      end
+      # no routes:
       it 'DELETE has no route to /auth/login' do
         expect(:delete => '/auth/login').not_to be_routable
-      end
-      it 'POST has no route to /auth/login' do
-        expect(:post => '/auth/login').not_to be_routable
       end
       it 'PUT has no route to /auth/login' do
         expect(:put => '/auth/login').not_to be_routable
       end
     end
+
     describe 'OPTIONS requests for /auth/login:' do
-      it 'reject GET requests for information' do
+      it 'the #options method will reject GET requests for information' do
         process :options, 'GET'
         expect(response.status).to eq(405)
       end
@@ -63,11 +66,14 @@ describe Triannon::AuthController, :vcr, type: :controller do
         end
       end
     end
-    describe 'rejects unauthorized login' do
+
+    describe 'GET requests are rejected for unauthorized login' do
+
       let(:check_unauthorized) do
         get :login
         expect(response.status).to eq(401)
       end
+
       context 'HTML' do
         it 'GET response status is 401 for anonymous user' do
           check_unauthorized
@@ -91,7 +97,8 @@ describe Triannon::AuthController, :vcr, type: :controller do
           basic_auth('userB', 'secretA')
           check_unauthorized
         end
-      end
+      end # HTML context
+
       context 'JSON' do
         before :each do
           accept_json
@@ -126,18 +133,21 @@ describe Triannon::AuthController, :vcr, type: :controller do
           basic_auth('userB', 'secretA')
           unauthorized_json_response
         end
-      end
-    end
-    describe 'accepts authorized login' do
+      end # JSON context
+    end # GET for unauthorized login
+
+    describe 'GET requests are accepted for authorized login' do
       # curl -v -u userA:secretA http://localhost:3000/auth/login
       before :each do
         basic_auth('userA', 'secretA')
       end
+
       let(:authorized_response) do
         get :login
         expect(response.status).to eq(302)
         expect(response).to redirect_to('/')
       end
+
       it 'GET response status is 302 and redirects to root for authorized user' do
         authorized_response
       end
@@ -145,6 +155,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
         authorized_response
         expect(response.cookies['login_user']).not_to be_nil
       end
+
       context 'JSON' do
         # curl -u userA:secretA  -H "Accept: application/json" http://localhost:3000/auth/login
         before :each do
@@ -156,10 +167,12 @@ describe Triannon::AuthController, :vcr, type: :controller do
           expect{ JSON.parse(response.body) }.to raise_error
         end
       end
-    end
+    end # GET for authorized login
   end # /auth/login
 
+
   describe 'GET /auth/logout' do
+
     describe 'only responds to GET requests' do
       it 'GET has a route to /auth/logout' do
         expect(:get => '/auth/logout').to be_routable
@@ -177,6 +190,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
         expect(:put => '/auth/logout').not_to be_routable
       end
     end
+
     it 'GET response status is 302 and redirects to root path' do
       get :logout
       expect(response.status).to eq(302)
@@ -212,10 +226,13 @@ describe Triannon::AuthController, :vcr, type: :controller do
     end
   end # /auth/logout
 
+
   describe 'POST /auth/client_identity' do
+
     before :each do
       basic_auth('userA', 'secretA')
     end
+
     describe 'only responds to POST requests' do
       it 'POST has a route to /auth/client_identity' do
         expect(:post => '/auth/client_identity').to be_routable
@@ -233,6 +250,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
         expect(:put => '/auth/client_identity').not_to be_routable
       end
     end
+
     it 'accepts JSON content' do
       accept_json
       content_json
@@ -294,9 +312,11 @@ describe Triannon::AuthController, :vcr, type: :controller do
     end
   end # /auth/client_identity
 
+
   # adapted from
   # http://image-auth.iiif.io/api/image/2.1/authentication.html#access-token-service
   describe 'GET /auth/access_token' do
+
     let(:login) {
       basic_auth('userA', 'secretA')
       get :login
@@ -304,6 +324,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
       expect(response).to redirect_to('/')
       expect(response.cookies['login_user']).not_to be_nil
     }
+
     let(:get_auth_code) {
       accept_json
       content_json
@@ -316,6 +337,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
       expect(data['authorizationCode']).to be_instance_of String
       data['authorizationCode']
     }
+
     let(:check_access_token) {
       expect(response.code.to_i).to eql(200)
       expect(response.cookies['login_user']).to be_nil
@@ -324,6 +346,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
       expect(data['accessToken']).not_to be_nil
       expect(data['accessToken']).to be_instance_of String
     }
+
     describe 'only responds to GET requests' do
       it 'GET has a route to /auth/access_token' do
         expect(:get => '/auth/access_token').to be_routable
@@ -341,6 +364,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
         expect(:put => '/auth/access_token').not_to be_routable
       end
     end
+
     describe 'with valid login credentials' do
       before :each do
         login
@@ -357,6 +381,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
         check_access_token
       end
     end
+
     describe 'without valid login credentials' do
       it 'returns an access code, given a valid authorization code' do
         code = get_auth_code
