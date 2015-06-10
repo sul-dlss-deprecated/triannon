@@ -47,10 +47,7 @@ describe "viewing an annotation", :vcr, type: :feature do
   end
 
   def create_annotation f
-    Triannon::Annotation.new(root_container: root_container, data: annotation_fixture(f), id: '1234')
+    Triannon::Annotation.new(root_container: root_container, data: Triannon.annotation_fixture(f), id: '1234')
   end
 
-  def annotation_fixture fixture
-    File.read Triannon.fixture_path("annotations/#{fixture}")
-  end
 end
