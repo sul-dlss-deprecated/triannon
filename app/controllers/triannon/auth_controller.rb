@@ -1,8 +1,5 @@
 require_dependency "triannon/application_controller"
 
-require 'openssl'
-require 'digest/sha1'
-
 module Triannon
   # Adapted from http://image-auth.iiif.io/api/image/2.1/authentication.html
   class AuthController < ApplicationController
