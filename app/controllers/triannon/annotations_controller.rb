@@ -111,7 +111,9 @@ module Triannon
           format.xml {
             accept_return_type = mime_type_from_accept(["application/xml", "text/xml", "application/x-xml"])
             render :body => @annotation.graph.to_rdfxml, status: 201, content_type: accept_return_type if accept_return_type }
-          format.html { redirect_to "/annotations/#{params[:anno_root]}/#{@annotation.id}" }
+          format.html {
+            require 'cgi'
+            redirect_to "/annotations/#{params[:anno_root]}/#{CGI.escape(@annotation.id)}" }
         end
       else
         render :new, status: 400
