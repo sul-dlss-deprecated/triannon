@@ -13,7 +13,11 @@ module Triannon
 
     # GET /annotations
     def index
-      redirect_to "/search/#{params[:anno_root]}"
+      if !params[:anno_root].blank?
+        redirect_to "/#{params[:anno_root]}/search"
+      else
+        redirect_to "/search"
+      end
     end
 
     # GET /annotations/1

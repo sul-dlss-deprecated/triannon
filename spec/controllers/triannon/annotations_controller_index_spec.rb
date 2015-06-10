@@ -9,7 +9,7 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
     context "anno_root param is empty string" do
       it "redirects to search#find" do
         get :index, anno_root: ""
-        expect(response).to redirect_to('/search/')
+        expect(response).to redirect_to('/search')
       end
       it "response code of 302 due to redirect" do
         get :index, anno_root: ""
@@ -29,9 +29,9 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
         delete_test_objects(ldp_testing_container_urls, [], @root_container, vcr_cassette_name)
       end
 
-      it "redirects to /search/anno_root param" do
+      it "redirects to /[anno_root]/search" do
         get :index, anno_root: @root_container
-        expect(response).to redirect_to("/search/#{@root_container}")
+        expect(response).to redirect_to("/#{@root_container}/search")
       end
       it "response code of 302 due to redirect" do
         get :index, anno_root: @root_container
@@ -41,9 +41,9 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
 
     context "anno_root param is non-existent root container" do
       let(:root_container) {'blargle'}
-      it "redirects to /search/anno_root" do
+      it "redirects to /[anno_root]/search" do
         get :index, anno_root: root_container
-        expect(response).to redirect_to("/search/#{root_container}")
+        expect(response).to redirect_to("/#{root_container}/search")
       end
       it "response code of 302 due to redirect" do
         get :index, anno_root: root_container
