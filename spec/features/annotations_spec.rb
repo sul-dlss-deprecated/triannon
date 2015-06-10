@@ -1,11 +1,12 @@
 require 'spec_helper'
 
 describe "viewing an annotation", :vcr, type: :feature do
+  let(:root_container) { 'view_anno_feature' }
   context 'html' do
     before(:each) do
       annotation = create_annotation('body-chars.json')
       allow(Triannon::Annotation).to receive(:find).and_return(annotation)
-      visit "/annotations/#{annotation.id}.html"
+      visit "/annotations/#{root_container}/#{annotation.id}.html"
     end
 
     it "has a page title" do
@@ -22,8 +23,8 @@ describe "viewing an annotation", :vcr, type: :feature do
       end
       it "multiple" do
         anno = create_annotation('mult-motivations.json')
-        allow(Triannon::Annotation).to receive(:find).with(anno.id).and_return(anno)
-        visit "/annotations/#{anno.id}.html"
+        allow(Triannon::Annotation).to receive(:find).with(anno.id, root_container).and_return(anno)
+        visit "/annotations/#{root_container}/#{anno.id}.html"
         expect(page).to have_content "http://www.w3.org/ns/oa#moderating"
         expect(page).to have_content "http://www.w3.org/ns/oa#tagging"
       end
@@ -46,7 +47,7 @@ describe "viewing an annotation", :vcr, type: :feature do
   end
 
   def create_annotation f
-    Triannon::Annotation.new data: annotation_fixture(f), id: '1234'
+    Triannon::Annotation.new(root_container: root_container, data: annotation_fixture(f), id: '1234')
   end
 
   def annotation_fixture fixture
