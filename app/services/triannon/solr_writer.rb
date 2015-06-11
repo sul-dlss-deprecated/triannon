@@ -12,7 +12,7 @@ module Triannon
     def self.solr_hash(triannon_graph, root_container)
       doc_hash = {}
       triannon_id = triannon_graph.id_as_url
-      if triannon_id && !root_container.blank?
+      if triannon_id && root_container.present?
         # we simplify the URL, removing the triannon base_url.  This will only be problematic if
         #  two different LDP Stores had the same root-container/pair-tree/uuid format AND they were
         #  both writing to the same Solr index.
