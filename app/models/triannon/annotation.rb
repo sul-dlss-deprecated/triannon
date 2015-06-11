@@ -99,12 +99,12 @@ protected
 
     # Add annotation to Solr as a Solr document
     def solr_save
-      solr_writer.write(graph, root_container) if id_as_url && !id_as_url.empty?
+      solr_writer.write(graph, root_container) if id_as_url.present?
     end
 
     # Delete annotation from Solr
     def solr_delete
-      solr_writer.delete("#{root_container}/#{id}") if id
+      solr_writer.delete("#{root_container}/#{id}") if id.present?
     end
 
 private
