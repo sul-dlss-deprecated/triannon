@@ -22,15 +22,15 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
     let(:bookmark_anno) { Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json"), id: '123'}
     let(:body_chars_anno) { Triannon::Annotation.new data: Triannon.annotation_fixture("body-chars.ttl"), id: '666' }
     before(:each) do
-      allow(Triannon::Annotation).to receive(:find).with('123', @root_container).and_return(bookmark_anno)
-      allow(Triannon::Annotation).to receive(:find).with('666', @root_container).and_return(body_chars_anno)
+      allow(Triannon::Annotation).to receive(:find).with(@root_container, '123').and_return(bookmark_anno)
+      allow(Triannon::Annotation).to receive(:find).with(@root_container, '666').and_return(body_chars_anno)
     end
 
     context 'non-existent id' do
       let(:fake_id) { "foo" }
       before(:each) do
-        allow(Triannon::Annotation).to receive(:find).with(fake_id, @root_container).and_raise(
-          Triannon::LDPStorageError.new("Not Found", 404, 
+        allow(Triannon::Annotation).to receive(:find).with(@root_container, fake_id).and_raise(
+          Triannon::LDPStorageError.new("Not Found", 404,
             "<html>\n<head>\n<meta http-equiv=\"Content-Type\" content=\"text/html;
               charset=ISO-8859-1\"/>\n<title>Error 404 Not Found</title>\n</head>\n<body><h2>HTTP
               ERROR 404</h2>\n<p>Problem accessing /fedora/rest/anno/foo. Reason:\n<pre>
@@ -394,17 +394,17 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       let(:err_msg) {"triannon threw an LDP container error"}
       let(:ldp_error) { Triannon::LDPContainerError.new(err_msg)}
       it "gives 403 resp code" do
-        allow(Triannon::Annotation).to receive(:find).with(fake_id, @root_container).and_raise(ldp_error)
+        allow(Triannon::Annotation).to receive(:find).with(@root_container, fake_id).and_raise(ldp_error)
         get :show, anno_root: @root_container, id: fake_id
         expect(response.status).to eq 403
       end
       it "gives plain text response" do
-        allow(Triannon::Annotation).to receive(:find).with(fake_id, @root_container).and_raise(ldp_error)
+        allow(Triannon::Annotation).to receive(:find).with(@root_container, fake_id).and_raise(ldp_error)
         get :show, anno_root: @root_container, id: fake_id
         expect(response.content_type).to eql "text/plain"
       end
       it "has error message in the response" do
-        allow(Triannon::Annotation).to receive(:find).with(fake_id, @root_container).and_raise(ldp_error)
+        allow(Triannon::Annotation).to receive(:find).with(@root_container, fake_id).and_raise(ldp_error)
         get :show, anno_root: @root_container, id: fake_id
         expect(response.body).to match err_msg
       end
@@ -418,17 +418,17 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       let(:ldp_error) { Triannon::LDPStorageError.new(triannon_err_msg, ldp_resp_code, ldp_resp_body)}
 
       it "gives LDP resp code" do
-        allow(Triannon::Annotation).to receive(:find).with(fake_id, @root_container).and_raise(ldp_error)
+        allow(Triannon::Annotation).to receive(:find).with(@root_container, fake_id).and_raise(ldp_error)
         get :show, anno_root: @root_container, id: fake_id
         expect(response.status).to eq ldp_resp_code
       end
       it "gives html response" do
-        allow(Triannon::Annotation).to receive(:find).with(fake_id, @root_container).and_raise(ldp_error)
+        allow(Triannon::Annotation).to receive(:find).with(@root_container, fake_id).and_raise(ldp_error)
         get :show, anno_root: @root_container, id: fake_id
         expect(response.content_type).to eql "text/html"
       end
       it "has useful info in the response" do
-        allow(Triannon::Annotation).to receive(:find).with(fake_id, @root_container).and_raise(ldp_error)
+        allow(Triannon::Annotation).to receive(:find).with(@root_container, fake_id).and_raise(ldp_error)
         get :show, anno_root: @root_container, id: fake_id
         expect(response.body).to match ldp_resp_body
         expect(response.body).to match triannon_err_msg

@@ -34,7 +34,7 @@ describe "integration tests for external URIs", :vcr do
      allow(sw).to receive(:add)
      id = write_anno.save
 
-     anno = Triannon::Annotation.find(id, @root_container)
+     anno = Triannon::Annotation.find(@root_container, id)
      h = anno.graph
      expect(h.size).to eql 3
      anno_uri_obj = RDF::URI("#{triannon_base_url}/#{@root_container}/#{id}")
@@ -67,7 +67,7 @@ describe "integration tests for external URIs", :vcr do
      allow(sw).to receive(:add)
      id = write_anno.save
 
-     anno = Triannon::Annotation.find(id, @root_container)
+     anno = Triannon::Annotation.find(@root_container, id)
      h = anno.graph
      expect(h.size).to eql 4
      anno_uri_obj = RDF::URI("#{triannon_base_url}/#{@root_container}/#{id}")
@@ -101,7 +101,7 @@ describe "integration tests for external URIs", :vcr do
     allow(sw).to receive(:add)
     id = write_anno.save
 
-    anno = Triannon::Annotation.find(id, @root_container)
+    anno = Triannon::Annotation.find(@root_container, id)
     h = anno.graph
     expect(h.size).to eql 4
     anno_uri_obj = RDF::URI("#{triannon_base_url}/#{@root_container}/#{id}")
@@ -138,7 +138,7 @@ describe "integration tests for external URIs", :vcr do
     allow(sw).to receive(:add)
     id = write_anno.save
 
-    anno = Triannon::Annotation.find(id, @root_container)
+    anno = Triannon::Annotation.find(@root_container, id)
     h = anno.graph
     expect(h.size).to eql 5
     anno_uri_obj = RDF::URI("#{triannon_base_url}/#{@root_container}/#{id}")
@@ -181,7 +181,7 @@ describe "integration tests for external URIs", :vcr do
     allow(sw).to receive(:add)
     id = write_anno.save
 
-    anno = Triannon::Annotation.find(id, @root_container)
+    anno = Triannon::Annotation.find(@root_container, id)
     h = anno.graph
     expect(h.size).to eql 6
     anno_uri_obj = RDF::URI("#{triannon_base_url}/#{@root_container}/#{id}")
@@ -220,7 +220,7 @@ describe "integration tests for external URIs", :vcr do
     allow(sw).to receive(:add)
     id = write_anno.save
 
-    anno = Triannon::Annotation.find(id, @root_container)
+    anno = Triannon::Annotation.find(@root_container, id)
     h = anno.graph
     expect(h.size).to eql 5
     anno_uri_obj = RDF::URI("#{triannon_base_url}/#{@root_container}/#{id}")
@@ -263,7 +263,7 @@ describe "integration tests for external URIs", :vcr do
     allow(sw).to receive(:add)
     id = write_anno.save
 
-    anno = Triannon::Annotation.find(id, @root_container)
+    anno = Triannon::Annotation.find(@root_container, id)
     h = anno.graph
     expect(h.size).to eql 6
     anno_uri_obj = RDF::URI("#{triannon_base_url}/#{@root_container}/#{id}")

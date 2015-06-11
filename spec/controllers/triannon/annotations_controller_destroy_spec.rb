@@ -21,11 +21,11 @@ describe Triannon::AnnotationsController, :vcr, type: :controller do
       anno = Triannon::Annotation.new({data: Triannon.annotation_fixture("body-chars.ttl"), root_container: @root_container})
       anno_id = anno.save
       @solr_docs_from_testing << anno_id
-      my_anno = Triannon::Annotation.find(anno_id, @root_container)
+      my_anno = Triannon::Annotation.find(@root_container, anno_id)
       delete :destroy, anno_root: @root_container, id: anno_id
       expect(response.status).to eq 204
     end
-    
+
     context 'non-existent id' do
       let(:fake_id) { "foo" }
 

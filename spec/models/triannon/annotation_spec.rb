@@ -216,7 +216,7 @@ describe Triannon::Annotation, :vcr do
       # make sure we have id for anno
       id = bookmark_anno.save
       @solr_doc_ids << id
-      Triannon::Annotation.find(id, @root_container)
+      Triannon::Annotation.find(@root_container, id)
     }
     let(:solr_writer) { my_bookmark_anno.send(:solr_writer) }
     it "calls SolrWriter write with triannon graph" do
@@ -259,7 +259,7 @@ describe Triannon::Annotation, :vcr do
       anno = Triannon::Annotation.new(data: Triannon.annotation_fixture("body-chars.ttl"), root_container: @root_container)
       anno_id = anno.save
       @solr_doc_ids << anno_id
-      my_anno = Triannon::Annotation.find(anno_id, @root_container)
+      my_anno = Triannon::Annotation.find(@root_container, anno_id)
       expect(my_anno.id).to eq anno_id
     end
   end

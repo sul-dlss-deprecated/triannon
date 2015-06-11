@@ -137,7 +137,7 @@ module Triannon
 private
 
     def set_annotation
-      @annotation = Annotation.find(params[:id], params[:anno_root])
+      @annotation = Annotation.find(params[:anno_root], params[:id])
     end
 
     # render Triannon::ExternalReferenceError

@@ -61,7 +61,7 @@ describe "integration tests for SpecificResource", :vcr do
     allow(sw).to receive(:add)
     id = write_anno.save
 
-    anno = Triannon::Annotation.find(id, @root_container)
+    anno = Triannon::Annotation.find(@root_container, id)
     h = anno.graph
     expect(h.size).to eql g.size
     anno_uri_obj = RDF::URI.new("#{triannon_base_url}/#{@root_container}/#{id}")
@@ -131,7 +131,7 @@ describe "integration tests for SpecificResource", :vcr do
     allow(sw).to receive(:add)
     id = write_anno.save
 
-    anno = Triannon::Annotation.find(id, @root_container)
+    anno = Triannon::Annotation.find(@root_container, id)
     h = anno.graph
     expect(h.size).to eql g.size
     anno_uri_obj = RDF::URI.new("#{triannon_base_url}/#{@root_container}/#{id}")
@@ -208,7 +208,7 @@ describe "integration tests for SpecificResource", :vcr do
     allow(sw).to receive(:add)
     id = write_anno.save
 
-    anno = Triannon::Annotation.find(id, @root_container)
+    anno = Triannon::Annotation.find(@root_container, id)
     h = anno.graph
     expect(h.size).to eql g.size
     anno_uri_obj = RDF::URI.new("#{triannon_base_url}/#{@root_container}/#{id}")
@@ -292,7 +292,7 @@ describe "integration tests for SpecificResource", :vcr do
     allow(sw).to receive(:add)
     id = write_anno.save
 
-    anno = Triannon::Annotation.find(id, @root_container)
+    anno = Triannon::Annotation.find(@root_container, id)
     h = anno.graph
     expect(h.size).to eql g.size
     anno_uri_obj = RDF::URI.new("#{triannon_base_url}/#{@root_container}/#{id}")
@@ -373,7 +373,7 @@ describe "integration tests for SpecificResource", :vcr do
     allow(sw).to receive(:add)
     id = write_anno.save
 
-    anno = Triannon::Annotation.find(id, @root_container)
+    anno = Triannon::Annotation.find(@root_container, id)
     h = anno.graph
     expect(h.size).to eql g.size
     anno_uri_obj = RDF::URI.new("#{triannon_base_url}/#{@root_container}/#{id}")
@@ -446,7 +446,7 @@ describe "integration tests for SpecificResource", :vcr do
     allow(sw).to receive(:add)
     id = write_anno.save
 
-    anno = Triannon::Annotation.find(id, @root_container)
+    anno = Triannon::Annotation.find(@root_container, id)
     h = anno.graph
     expect(h.size).to eql g.size
     anno_uri_obj = RDF::URI.new("#{triannon_base_url}/#{@root_container}/#{id}")
@@ -523,7 +523,7 @@ describe "integration tests for SpecificResource", :vcr do
     allow(sw).to receive(:add)
     id = write_anno.save
 
-    anno = Triannon::Annotation.find(id, @root_container)
+    anno = Triannon::Annotation.find(@root_container, id)
     h = anno.graph
     expect(h.size).to eql g.size
     anno_uri_obj = RDF::URI.new("#{triannon_base_url}/#{@root_container}/#{id}")

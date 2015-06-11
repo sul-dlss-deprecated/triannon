@@ -26,8 +26,9 @@ module Triannon
       a
     end
 
+    # @param [String] root_container - LDP parent container for annotation
     # @param [String] id the unique id of the annotation.  Can include base_uri prefix or omit it.
-    def self.find(id, root_container)
+    def self.find(root_container, id)
       oa_graph = Triannon::LdpLoader.load(id, root_container)
       anno = Triannon::Annotation.new
       anno.graph = oa_graph

@@ -23,7 +23,7 @@ describe "viewing an annotation", :vcr, type: :feature do
       end
       it "multiple" do
         anno = create_annotation('mult-motivations.json')
-        allow(Triannon::Annotation).to receive(:find).with(anno.id, root_container).and_return(anno)
+        allow(Triannon::Annotation).to receive(:find).with(root_container, anno.id).and_return(anno)
         visit "/annotations/#{root_container}/#{anno.id}.html"
         expect(page).to have_content "http://www.w3.org/ns/oa#moderating"
         expect(page).to have_content "http://www.w3.org/ns/oa#tagging"
