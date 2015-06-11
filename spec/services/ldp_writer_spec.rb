@@ -260,7 +260,7 @@ describe Triannon::LdpWriter, :vcr do
           expect(body_uuids.size).to eql 1
           @body_child_path = "#{@anno_id}/b/#{body_uuids[0]}"
           @body_child_url = "#{@root_url}/#{@body_child_path}"
-        end 
+        end
         after(:all) do
           VCR.eject_cassette(@cassette_name)
         end
@@ -356,7 +356,7 @@ describe Triannon::LdpWriter, :vcr do
         ldpw = Triannon::LdpWriter.new @anno, @root_container
         ldp_id = ldpw.create_base
         @ldp_testing_container_urls << "#{@root_container}/#{ldp_id}"
-        
+
         expect(ldp_id).not_to match @root_url
         ldpw.delete_containers "#{@root_url}/#{ldp_id}"
 
@@ -403,7 +403,7 @@ describe Triannon::LdpWriter, :vcr do
         ldpw = Triannon::LdpWriter.new(nil, @root_container)
 
         # delete the body resources
-        l = Triannon::LdpLoader.new(ldp_id, @root_container)
+        l = Triannon::LdpLoader.new(@root_container, ldp_id)
         l.load_anno_container
         ldpw.delete_containers l.ldp_annotation.body_uris
 
@@ -418,7 +418,7 @@ describe Triannon::LdpWriter, :vcr do
         ldp_id = Triannon::LdpWriter.create_anno @anno, @root_container
         @ldp_testing_container_urls << "#{@root_container}/#{ldp_id}"
 
-        l = Triannon::LdpLoader.new(ldp_id, @root_container)
+        l = Triannon::LdpLoader.new(@root_container, ldp_id)
         l.load_anno_container
         body_uris = l.ldp_annotation.body_uris
         expect(body_uris.size).to be > 0

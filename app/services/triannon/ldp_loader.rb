@@ -4,10 +4,10 @@ module Triannon
   # Loads an existing Annotation from the LDP server
   class LdpLoader
 
-    # @param [String] id the unique id of the annotation.  Can include base_uri prefix or omit it.
     # @param [String] root_container the LDP parent container for the annotation
-    def self.load(id, root_container)
-      l = Triannon::LdpLoader.new(id, root_container)
+    # @param [String] id the unique id of the annotation.  Can include base_uri prefix or omit it.
+    def self.load(root_container, id)
+      l = Triannon::LdpLoader.new(root_container, id)
       l.load_anno_container
       l.load_bodies
       l.load_targets
@@ -20,7 +20,7 @@ module Triannon
 
     # @param [String] id the unique id of the annotation.  Can include base_uri prefix or omit it.
     # @param [String] root_container the LDP parent container for the annotation
-    def initialize(id = nil, root_container)
+    def initialize(root_container, id = nil)
       @id = id
       @root_container = root_container
       if @root_container.blank?

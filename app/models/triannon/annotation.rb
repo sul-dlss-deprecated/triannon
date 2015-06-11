@@ -29,7 +29,7 @@ module Triannon
     # @param [String] root_container - LDP parent container for annotation
     # @param [String] id the unique id of the annotation.  Can include base_uri prefix or omit it.
     def self.find(root_container, id)
-      oa_graph = Triannon::LdpLoader.load(id, root_container)
+      oa_graph = Triannon::LdpLoader.load(root_container, id)
       anno = Triannon::Annotation.new
       anno.graph = oa_graph
       anno.id = id
@@ -45,7 +45,7 @@ module Triannon
         @id = Triannon::LdpWriter.create_anno(self, root_container) if graph && graph.size > 2
         # reload from storage to get the anno id within the graph
         # TODO:  do graph manipulation to add id instead?
-        @graph = Triannon::LdpLoader.load(id, root_container)
+        @graph = Triannon::LdpLoader.load(root_container, id)
         id
       end
     end
