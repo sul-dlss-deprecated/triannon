@@ -155,7 +155,7 @@ module Triannon
       if @root_container.blank?
         fail Triannon::LDPContainerError, "Annotations must be created in a root container."
       end
-      if !self.class.container_exist? "#{@uber_container_path}/#{@root_container}"
+      unless self.class.container_exist? "#{@uber_container_path}/#{@root_container}"
         fail Triannon::MissingLDPContainerError, "Annotation root container #{@root_container} doesn't exist."
       end
 
