@@ -38,6 +38,13 @@ describe Triannon::AuthController, :vcr, type: :controller do
     end
 
     describe 'OPTIONS requests for /auth/login:' do
+      let(:check_service) {
+        json = JSON.parse(response.body)
+        expect(json.keys).to eql(['service'])
+        info = json['service']
+        expect(info.keys).to eql(['@id','profile', 'label'])
+        expect(info['profile']).to eql(@service_profile)
+      }
       it 'the #options method will reject GET requests for information' do
         process :options, 'GET'
         expect(response.status).to eq(405)
@@ -48,21 +55,15 @@ describe Triannon::AuthController, :vcr, type: :controller do
           get :login
           accept_json
           process :options, 'OPTIONS'
-          json = JSON.parse(response.body)
-          expect(json.keys).to eql(['service'])
-          info = json['service']
-          expect(info.keys).to eql(['@id','profile', 'label'])
-          expect(info['profile']).to eql('http://iiif.io/api/image/2/auth/logout')
+          @service_profile = 'http://iiif.io/api/image/2/auth/logout'
+          check_service
         end
         it 'returns login information with no user logged in' do
           get :logout
           accept_json
           process :options, 'OPTIONS'
-          json = JSON.parse(response.body)
-          expect(json.keys).to eql(['service'])
-          info = json['service']
-          expect(info.keys).to eql(['@id','profile', 'label'])
-          expect(info['profile']).to eql('http://iiif.io/api/image/2/auth/login')
+          @service_profile = 'http://iiif.io/api/image/2/auth/login'
+          check_service
         end
       end
     end
@@ -269,25 +270,25 @@ describe Triannon::AuthController, :vcr, type: :controller do
     #   "clientId" : "CLIENT_ID_HERE",
     #   "clientSecret" : "CLIENT_SECRET_HERE"
     # }
-    it 'rejects a request that has no "clientId" field (response code 400)' do
+    it 'rejects a request that has no "clientId" field (response code 401)' do
       accept_json
       content_json
       params = {clientSecret: 'secretA'}
       post :client_identity, params.to_json
-      expect(response.code.to_i).to eql(400)
+      expect(response.code.to_i).to eql(401)
       err = JSON.parse(response.body)
       expect(err).not_to be_empty
-      expect(err['errorDescription']).to match(/requires.*clientId/)
+      expect(err['errorDescription']).to eql('Unable to authorize client')
     end
-    it 'rejects a request that has no "clientSecret" field (response code 400)' do
+    it 'rejects a request that has no "clientSecret" field (response code 401)' do
       accept_json
       content_json
       params = {clientId: 'clientA'}
       post :client_identity, params.to_json
-      expect(response.code.to_i).to eql(400)
+      expect(response.code.to_i).to eql(401)
       err = JSON.parse(response.body)
       expect(err).not_to be_empty
-      expect(err['errorDescription']).to match(/requires.*clientSecret/)
+      expect(err['errorDescription']).to eql('Unable to authorize client')
     end
     it 'rejects unauthorized client requests (response code 401)' do
       accept_json
@@ -383,12 +384,13 @@ describe Triannon::AuthController, :vcr, type: :controller do
     end
 
     describe 'without valid login credentials' do
-      it 'returns an access code, given a valid authorization code' do
+      it 'redirects to /auth/login, despite a valid authorization code' do
         code = get_auth_code
         get :access_token, {code: code}
-        check_access_token
+        expect(response.status).to eq(302)
+        expect(response).to redirect_to('/auth/login')
+        expect(response.cookies['login_user']).to be_nil
       end
-      # it 'returns an error, without any authorization code' do
       it 'redirects to /auth/login, without any authorization code' do
         accept_json
         content_json

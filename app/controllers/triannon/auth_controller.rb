@@ -8,18 +8,14 @@ module Triannon
     AUTH_EXPIRY  =   60 # seconds
     TOKEN_EXPIRY = 3600 # seconds
 
+    # HTTP request methods accepted by /auth/login
+    LOGIN_ACCEPT = 'GET, POST, OPTIONS'
+
     # OPTIONS /auth/login
     def options
       # The request MUST use HTTP OPTIONS
-      unless request.options?
-        response.headers.merge!(Allow: 'GET, OPTIONS')
-        err = {
-          error: "invalidRequest",
-          errorDescription: "/auth/login accepts GET or OPTIONS requests",
-          errorUri: "http://image-auth.iiif.io/api/image/2.1/authentication.html"
-        }
-        json_response(err, 405)
-      else
+      case request.request_method
+      when 'OPTIONS'
         if cookies[:login_user]
           info = service_info_logout
         else
@@ -27,6 +23,9 @@ module Triannon
         end
         # TODO: include optional info, such as service_info_client_identity
         json_response(info, 200)
+      else
+        # The routes should prevent any execution here.
+        request_method_error(LOGIN_ACCEPT)
       end
     end
 
@@ -36,16 +35,29 @@ module Triannon
     def login
       # The service must set a Cookie for the Access Token Service to retrieve
       # to determine the user information provided by the authentication system.
-      login_handler_get if request.get?
-      login_handler_post if request.post?
+      case request.request_method
+      when 'GET'
+        login_handler_get
+      when 'POST'
+        login_handler_post
+      else
+        # The routes should prevent any execution here.
+        request_method_error(LOGIN_ACCEPT)
+      end
     end
 
     # GET /auth/logout
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#logout-service
     def logout
-      cookies.delete(:login_user)
-      reset_session
-      redirect_to root_url, notice: 'Successfully logged out.'
+      case request.request_method
+      when 'GET'
+        cookies.delete(:login_user)
+        reset_session
+        redirect_to root_url, notice: 'Successfully logged out.'
+      else
+        # The routes should prevent any execution here.
+        request_method_error('GET')
+      end
     end
 
     # POST /auth/client_identity
@@ -55,20 +67,10 @@ module Triannon
     def client_identity
       return unless process_post?
       return unless process_json?
-      # The request MUST carry a body with the following JSON template:
-      # {
-      #   "clientId" : "CLIENT_ID_HERE",
-      #   "clientSecret" : "CLIENT_SECRET_HERE"
-      # }
-      identity = JSON.parse(request.body.read)
-      unless identity.has_key?('clientId') && identity.has_key?('clientSecret')
-        err = {
-          error: 'invalidRequest',
-          errorDescription: "/auth/client_identity requires 'clientId' and 'clientSecret' fields",
-          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
-        }
-        return json_response(err, 400)
-      end
+      # An authentication token request MUST carry a body with:
+      # { "clientId" : "ID", "clientSecret" : "SECRET" }
+      required_fields = ['clientId', 'clientSecret']
+      identity = parse_identity(required_fields)
       if authorized_client? identity
         code = { authorizationCode: auth_code_generate(identity) }
         return json_response(code, 200)
@@ -76,11 +78,12 @@ module Triannon
         err = {
           error: 'invalidClient',
           errorDescription: 'Unable to authorize client',
-          errorUri: ''
+          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
         }
-        return json_response(err, 401)
+        json_response(err, 401)
       end
     end
+
 
     # GET /auth/token
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#access-token-service
@@ -89,51 +92,22 @@ module Triannon
       # The cookie established via the login service must be passed to this
       # service. The service should delete the cookie from the login service
       # and create a new cookie that allows the user to access content.
-
-      key = session[:client_auth_key]
-      if key.nil?
-        # No authorization code has been issued.
-        if session[:login_user]
-          # A login session is current, that is sufficient
-          # for granting an access token.
-          cookies.delete(:login_user)
-          session.delete(:login_user)
-          session[:access_token] = access_code_generate
-          data = {
-            accessToken: session[:access_token],
-            tokenType: 'Bearer',
-            expiresIn: TOKEN_EXPIRY
-          }
-          return json_response(data, 200)
+      if session[:login_user]
+        if session[:client_auth_key]
+          # When an authorization code was obtained using /auth/client_identity,
+          # that code must be passed to the Access Token Service as well.
+          if auth_code_valid? params[:code]
+            grant_access_token
+          else
+            auth_code_error
+          end
         else
-          redirect_to '/auth/login'
-        end
-      elsif params[:code]
-        # When an authorization code was obtained using /auth/client_identity,
-        # that code must be passed to the Access Token Service as well.
-
-        # TODO: require an authenticated login also?
-        # if session[:login_user] && auth_code_valid?(params[:code])
-
-        if auth_code_valid?(params[:code])
-          # The valid authorization code is sufficient to grant
-          # an access token.
-          data = {
-            accessToken: access_code_generate,
-            tokenType: 'Bearer',
-            expiresIn: TOKEN_EXPIRY
-          }
-          return json_response(data, 200)
-        else
-          auth_code_error
+          # Without any authorization token, a login session is sufficient
+          # authentication for granting an access token.
+          grant_access_token
         end
       else
-        err = {
-          error: 'invalidRequest',
-          errorDescription: 'Unable to authorize access token',
-          errorUri: ''
-        }
-        return json_response(err, 401)
+        redirect_to '/auth/login'
       end
     end
 
@@ -175,27 +149,21 @@ module Triannon
       return unless process_json?
       if auth_code_valid?(params[:code]) # requires a client auth-code.
         # The request MUST carry a body with the following JSON template:
-        # {
-        #   "userId" : "USER_ID_HERE",
-        #   "userSecret" : "USER_SECRET_HERE"
-        # }
-        identity = JSON.parse(request.body.read)
-        unless identity.has_key?('userId') && identity.has_key?('userSecret')
-          err = {
-            error: 'invalidRequest',
-            errorDescription: "POST /auth/login requires 'userId' and 'userSecret' fields",
-            errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
-          }
-          return json_response(err, 400)
-        end
+        # { "userId" : "ID", "userSecret" : "SECRET" }
+        required_fields = ['userId', 'userSecret']
+        identity = parse_identity(required_fields)
         # When an authorized client POSTs user data, it is simply accepted, as
         # is, without authentication.
-        user = identity['userId']
-        # pass = identity['userSecret']  # actually secret is not required, right?
-        login_update(user)
-        redirect_to root_url, notice: 'Successfully logged in.'
+        if identity['userId']
+          user = identity['userId']
+          # pass = identity['userSecret']  # actually secret is not required, right?
+          login_update(user)
+          redirect_to root_url, notice: 'Successfully logged in.'
+        else
+          login_error
+        end
       else
-        login_error
+        auth_code_error
       end
     end
 
@@ -267,6 +235,16 @@ module Triannon
       return false
     end
 
+    # Issue a 401 for invalid client authorization codes
+    def auth_code_error
+      err = {
+        error: 'invalidClient',
+        errorDescription: 'Unable to validate authorization code',
+        errorUri: ''
+      }
+      json_response(err, 401)
+    end
+
 
     # --------------------------------------------------------------------
     # Access tokens
@@ -294,6 +272,19 @@ module Triannon
         return true if elapsed < TOKEN_EXPIRY
       end
       return false
+    end
+
+    # Grant an access token for authorized access
+    def grant_access_token
+      cookies.delete(:login_user)
+      session.delete(:login_user)
+      session[:access_token] = access_code_generate
+      data = {
+        accessToken: session[:access_token],
+        tokenType: 'Bearer',
+        expiresIn: TOKEN_EXPIRY
+      }
+      json_response(data, 200)
     end
 
 
@@ -355,18 +346,9 @@ module Triannon
     end
 
 
-    private
+    # --------------------------------------------------------------------
+    # Utility methods
 
-
-    # Issue a 401 for invalid client authorization codes
-    def auth_code_error
-      err = {
-        error: 'invalidClient',
-        errorDescription: 'Unable to validate authorization code',
-        errorUri: ''
-      }
-      return json_response(err, 401)
-    end
 
     # @param data [Hash] Hash.to_json is rendered
     # @param status [Integer] HTTP status code
@@ -385,6 +367,17 @@ module Triannon
     # Response content type to match an HTTP accept type for JSON formats
     def json_type_accepted
       mime_type_from_accept(['application/json', 'text/x-json', 'application/jsonrequest'])
+    end
+
+    # Parse POST JSON data to ensure it contains required fields
+    # @param fields [Array<String>] an array of required fields
+    def parse_identity(fields)
+      identity = JSON.parse(request.body.read)
+      unless fields.collect {|k| identity.has_key? k }.all?
+        identity = {}
+        fields.each {|f| identity[f] = '' }
+      end
+      identity
     end
 
     # Is the request content type JSON?  If not, issue a 415 error.
@@ -415,6 +408,25 @@ module Triannon
       end
     end
 
+    # @param accept [String] a csv for request methods accepted
+    def request_method_error(accept)
+      logger.debug "Rejected Request Method: #{request.request_method}"
+      response.status = 405
+      response.headers.merge!(Allow: accept)
+      respond_to do |format|
+        format.json {
+          err = {
+            error: 'invalidRequest',
+            errorDescription: "#{request.path} accepts: #{accept}",
+            errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
+          }
+          render :json => err.to_json, content_type: json_type_accepted
+        }
+        format.html {
+          render :nothing => true
+        }
+      end
+    end
 
   end # AuthController
 end # Triannon
