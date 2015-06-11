@@ -14,9 +14,9 @@ module Triannon
     # GET /annotations
     def index
       if params[:anno_root].present?
-        redirect_to "/#{params[:anno_root]}/search"
+        redirect_to "/#{params[:anno_root]}#{search_path}"
       else
-        redirect_to "/search"
+        redirect_to search_path
       end
     end
 
@@ -111,9 +111,7 @@ module Triannon
           format.xml {
             accept_return_type = mime_type_from_accept(["application/xml", "text/xml", "application/x-xml"])
             render body: @annotation.graph.to_rdfxml, status: 201, content_type: accept_return_type if accept_return_type }
-          format.html {
-            require 'cgi'
-            redirect_to "/annotations/#{params[:anno_root]}/#{CGI.escape(@annotation.id)}" }
+          format.html { redirect_to annotations_path(anno_root: params[:anno_root], id: @annotation.id) }
         end
       else
         render :new, status: 400
@@ -133,7 +131,7 @@ module Triannon
     # DELETE /annotations/1
     def destroy
       @annotation.destroy
-      redirect_to "/annotations/#{params[:anno_root]}", status: 204, notice: 'Annotation was successfully destroyed.'
+      redirect_to annotations_path(anno_root: params[:anno_root]), status: 204, notice: 'Annotation was successfully destroyed.'
     end
 
 private
