@@ -1,1 +1,21 @@
-<%= render 'form' %>
+<%= form_for @annotation, url: {action: "create"} do |f| %>
+  <% if @annotation.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@annotation.errors.count, "error") %> prohibited this annotation from being saved:</h2>
+
+      <ul>
+      <% @annotation.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label 'Annotation (as json-ld or turtle)' %><br>
+    <%= f.text_area :data, size: "80x20" %>
+  </div>
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

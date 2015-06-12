@@ -1,13 +1,15 @@
 require 'spec_helper'
 
 describe Triannon::LdpToOaMapper, :vcr do
-  let(:triannon_anno_container) {"#{Triannon.config[:ldp]['url']}/#{Triannon.config[:ldp]['uber_container']}"}
+  let(:uber_container_url) {"#{Triannon.config[:ldp]['url']}/#{Triannon.config[:ldp]['uber_container']}"}
+  let(:root_container) {'specs'}
   let(:anno_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_base.ttl') }
   let(:base_stmts) { RDF::Graph.new.from_ttl(anno_ttl).statements }
-  let(:base_container_id) {"f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec"}
+  let(:base_container_id) {"67/c0/18/9d/67c0189d-56d4-47fb-abea-1f995187b358"}
   let(:body_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_body.ttl') }
   let(:body_stmts) { RDF::Graph.new.from_ttl(body_ttl).statements }
-  let(:body_container_id) {"#{base_container_id}/b/75/18/5b/af/75185baf-7057-4762-bfb2-432e88221810"}
+  let(:body_container_id) {"#{base_container_id}/b/67/f2/30/a2/67f230a2-3bf3-41e5-952e-8362dc7a5366"}
+  let(:stored_body_obj_url) {"#{uber_container_url}/#{root_container}/#{body_container_id}"}
   let(:target_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_target.ttl') }
   let(:target_stmts) { RDF::Graph.new.from_ttl(target_ttl).statements }
   let(:ldp_anno) {
@@ -21,7 +23,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       ldp_anno.load_statements_into_graph body_stmts
       body_uri = ldp_anno.body_uris.first
 
-      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper = Triannon::LdpToOaMapper.new(ldp_anno, root_container)
       mapper.extract_base
       solns = mapper.oa_graph.query [nil, RDF::Vocab::OA.hasBody, nil]
       expect(solns.count).to eq 0
@@ -34,11 +36,11 @@ describe Triannon::LdpToOaMapper, :vcr do
       expect(blank_node.class).to eq RDF::Node
       expect(mapper.oa_graph.query([blank_node, RDF.type, RDF::Vocab::CNT.ContentAsText]).size).to eq 1
     end
-    it "adds all relevant statements in simple skolemized blank node to @oa_graph" do
+    it "adds all relevant statements from simple de-skolemized blank node to @oa_graph" do
       ldp_anno.load_statements_into_graph body_stmts
       body_uri = ldp_anno.body_uris.first
 
-      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper = Triannon::LdpToOaMapper.new(ldp_anno, root_container)
       mapper.extract_base
       mapper.map_content_as_text(body_uri, RDF::Vocab::OA.hasBody)
 
@@ -49,32 +51,25 @@ describe Triannon::LdpToOaMapper, :vcr do
       expect(blank_node_solns.count).to eq 3
       expect(blank_node_solns).to include [blank_node, RDF.type, RDF::Vocab::CNT.ContentAsText]
       expect(blank_node_solns).to include [blank_node, RDF.type, RDF::Vocab::DCMIType.Text]
-      expect(blank_node_solns).to include [blank_node, RDF::Vocab::CNT.chars, "Solr integration test"]
+      expect(blank_node_solns).to include [blank_node, RDF::Vocab::CNT.chars, "ldp loader test"]
     end
-    it "adds all relevant statements in skolemized blank node to @oa_graph" do
+    it "adds all relevant statements in de-skolemized blank node to @oa_graph" do
       body_container_stmts = RDF::Turtle::Reader.new("
-      @prefix content: <http://www.w3.org/2011/content#> .
-      @prefix dc11: <http://purl.org/dc/elements/1.1/> .
-      @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
-      @prefix ldp: <http://www.w3.org/ns/ldp#> .
-      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-      @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+        @prefix cnt: <http://www.w3.org/2011/content#> .
+        @prefix dc11: <http://purl.org/dc/elements/1.1/> .
+        @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
 
-      <http://localhost:8983/fedora/rest/anno/#{body_container_id}> a ldp:Container,
-           ldp:DirectContainer,
-           ldp:RDFSource,
-           dcmitype:Text,
-           content:ContentAsText;
-         dc11:format \"text/plain\";
-         dc11:language \"en\";
-         content:chars \"I love this!\";
-         ldp:hasMemberRelation ldp:member;
-         ldp:membershipResource <http://localhost:8983/fedora/rest/anno/#{body_container_id}> .
+        <#{stored_body_obj_url}> a 
+             dcmitype:Text,
+             cnt:ContentAsText;
+           dc11:format \"text/plain\";
+           dc11:language \"en\";
+           cnt:chars \"I love this!\" .
       ").statements.to_a
       ldp_anno.load_statements_into_graph body_container_stmts
       body_uri = ldp_anno.body_uris.first
 
-      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper = Triannon::LdpToOaMapper.new(ldp_anno, root_container)
       mapper.extract_base
       mapper.map_content_as_text(body_uri, RDF::Vocab::OA.hasBody)
 
@@ -93,7 +88,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       ldp_anno.load_statements_into_graph body_stmts
       body_uri = ldp_anno.body_uris.first
 
-      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper = Triannon::LdpToOaMapper.new(ldp_anno, root_container)
       mapper.extract_base
       orig_size = mapper.oa_graph.size
 
@@ -104,7 +99,7 @@ describe Triannon::LdpToOaMapper, :vcr do
       ldp_anno.load_statements_into_graph target_stmts
       target_uri = ldp_anno.target_uris.first
 
-      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper = Triannon::LdpToOaMapper.new(ldp_anno, root_container)
       mapper.extract_base
       orig_size = mapper.oa_graph.size
 
@@ -115,12 +110,11 @@ describe Triannon::LdpToOaMapper, :vcr do
       # see 'returns false if it doesn't change oa_graph'
     end
     it "attaches external ref to passed param for subject" do
-      stored_body_obj_url = "#{triannon_anno_container}/#{body_container_id}"
       ldp_anno.load_statements_into_graph body_stmts
       ldp_anno.load_statements_into_graph target_stmts
       target_uri = ldp_anno.target_uris.first
 
-      mapper = Triannon::LdpToOaMapper.new ldp_anno
+      mapper = Triannon::LdpToOaMapper.new(ldp_anno, root_container)
       mapper.extract_base
       # map target to root statement
       mapper.map_external_ref(target_uri, RDF::Vocab::OA.hasTarget)

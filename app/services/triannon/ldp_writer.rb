@@ -4,13 +4,13 @@ module Triannon
   class LdpWriter
 
     # use LDP protocol to create the OpenAnnotation.Annotation in an RDF store
-    # @param [Triannon::Annotation] anno a Triannon::Annotation object, from
-    #   which we use the graph
-    def self.create_anno(anno)
+    # @param [Triannon::Annotation] anno a Triannon::Annotation object, from which we use the graph
+    # @param [String] root_container the LDP parent container for the annotation
+    def self.create_anno(anno, root_container)
       if anno && anno.graph
         # TODO:  special case if the Annotation object already has an id --
         #  see https://github.com/sul-dlss/triannon/issues/84
-        ldp_writer = Triannon::LdpWriter.new anno
+        ldp_writer = Triannon::LdpWriter.new anno, root_container
         id = ldp_writer.create_base
 
         bodies_solns = anno.graph.query([nil, RDF::Vocab::OA.hasBody, nil])
@@ -30,8 +30,7 @@ module Triannon
       end
     end
 
-    # deletes the indicated container and all its child containers from the LDP
-    #   store
+    # deletes the indicated container and all its child containers from the LDP store
     # @param [String] id the unique id for the LDP container for an annotation.
     #   May be a compound id, such as  uuid1/t/uuid2, in which case the LDP
     #   container object uuid2 and its children are deleted from the LDP
@@ -39,7 +38,7 @@ module Triannon
     #   the LDP store.
     def self.delete_container id
       if id && id.size > 0
-        ldpw = Triannon::LdpWriter.new nil
+        ldpw = Triannon::LdpWriter.new nil, nil
         ldpw.delete_containers id
       end
     end
@@ -126,34 +125,38 @@ module Triannon
 
 
     # @param [Triannon::Annotation] anno a Triannon::Annotation object
-    # @param [String] id the unique id for the LDP container for the passed
-    #   annotation; defaults to nil
-    def initialize(anno, id = nil)
+    # @param [String] root_container the LDP parent container for the annotation
+    # @param [String] id the unique id for the LDP container for the passed annotation; defaults to nil
+    def initialize(anno, root_container, id = nil)
       @anno = anno
+      @root_container = root_container
       @id = id
       base_url = Triannon.config[:ldp]['url'].strip
       base_url.chop! if base_url.end_with?('/')
-      container_path = Triannon.config[:ldp]['uber_container']
-      if container_path
-        container_path.strip!
-        container_path = container_path[1..-1] if container_path.start_with?('/')
-        container_path.chop! if container_path.end_with?('/')
+      @uber_container_path = Triannon.config[:ldp]['uber_container'].strip
+      if @uber_container_path
+        @uber_container_path = @uber_container_path[1..-1] if @uber_container_path.start_with?('/')
+        @uber_container_path.chop! if @uber_container_path.end_with?('/')
       end
-      @base_uri = "#{base_url}/#{container_path}"
+      @base_uri = "#{base_url}/#{@uber_container_path}"
     end
 
     # creates a stored LDP container for this object's Annotation, without its
     #   targets or bodies (as those are put in descendant containers)
     #   SIDE EFFECT:  assigns the uuid of the container created to @id
-    # @return [String] the unique id for the LDP container created for this
-    #   annotation
+    # @return [String] the unique id for the LDP container created for this annotation
     def create_base
       if @anno.graph.query([nil, RDF::Triannon.externalReference, nil]).count > 0
         fail Triannon::ExternalReferenceError, "Incoming annotations may not have http://triannon.stanford.edu/ns/externalReference as a predicate."
       end
-
       if @anno.graph.id_as_url && @anno.graph.id_as_url.size > 0
         fail Triannon::ExternalReferenceError, "Incoming new annotations may not have an existing id (yet)."
+      end
+      if @root_container.blank?
+        fail Triannon::LDPContainerError, "Annotations must be created in a root container."
+      end
+      unless self.class.container_exist? "#{@uber_container_path}/#{@root_container}"
+        fail Triannon::MissingLDPContainerError, "Annotation root container #{@root_container} doesn't exist."
       end
 
       # TODO:  special case if the Annotation object already has an id --
@@ -169,7 +172,7 @@ module Triannon
       g.make_null_relative_uri_out_of_blank_node
       g << [RDF::URI.new, RDF.type, RDF::Vocab::LDP.BasicContainer]
 
-      @id = create_resource g.to_ttl
+      @id = create_resource g.to_ttl, @root_container
     end
 
     # creates the LDP container for any and all bodies for this annotation
@@ -203,8 +206,9 @@ module Triannon
       end
       something_deleted = false
       ldp_container_uris.each { |uri|
-        ldp_id = uri.to_s.split(@base_uri + '/').last
-        resp = conn.delete { |req| req.url ldp_id }
+        ldp_id = uri.to_s.split("#{@base_uri}/").last
+        ldp_id = "#{@root_container}/#{ldp_id}" unless @root_container.blank? || ldp_id.match(@root_container)
+        resp = conn.delete { |req| req.url "#{ldp_id}" }
         if resp.status != 204
           fail Triannon::LDPStorageError.new("Unable to delete LDP container #{ldp_id}", resp.status, resp.body)
         end
@@ -243,7 +247,7 @@ module Triannon
         req.body = ttl
       end
       if resp.status != 200 && resp.status != 201
-        fail Triannon::LDPStorageError.new("Unable to create LDP resource in container #{parent_path}; RDF sent: #{ttl}", resp.status, resp.body)
+        fail Triannon::LDPStorageError.new("Unable to create LDP resource in container #{parent_path};\nRDF sent: #{ttl}", resp.status, resp.body)
       end
       new_url = resp.headers['Location'] ? resp.headers['Location'] : resp.headers['location']
       if new_url
@@ -257,32 +261,29 @@ module Triannon
     #   the base container at @id and has the memberRelation per the
     #   oa_vocab_term. The id of the created container will be (base container
     #   id)/b  if hasBody or  (base container id)/t  if hasTarget
-    # @param [RDF::Vocabulary::Term] oa_vocab_term RDF::Vocab::OA.hasTarget or
-    #   RDF::Vocab::OA.hasBody
+    # @param [RDF::Vocabulary::Term] oa_vocab_term RDF::Vocab::OA.hasTarget or RDF::Vocab::OA.hasBody
     def create_direct_container oa_vocab_term
       null_rel_uri = RDF::URI.new
       g = RDF::Graph.new
       g << [null_rel_uri, RDF.type, RDF::Vocab::LDP.DirectContainer]
       g << [null_rel_uri, RDF::Vocab::LDP.hasMemberRelation, oa_vocab_term]
-      g << [null_rel_uri, RDF::Vocab::LDP.membershipResource, RDF::URI.new("#{@base_uri}/#{@id}")]
+      g << [null_rel_uri, RDF::Vocab::LDP.membershipResource, RDF::URI.new("#{@base_uri}/#{@root_container}/#{@id}")]
 
       resp = conn.post do |req|
-        req.url "#{@id}"
+        req.url "#{@root_container}/#{@id}"
         req.headers['Content-Type'] = 'application/x-turtle'
         # OA vocab relationships all of form "hasXXX" so this becomes 't' or 'b'
         req.headers['Slug'] = oa_vocab_term.fragment.slice(3).downcase
         req.body = g.to_ttl
       end
       if resp.status != 201
-        fail Triannon::LDPStorageError.new("Unable to create #{oa_vocab_term.fragment.sub('has', '')} LDP container for anno; RDF sent: #{g.to_ttl}", resp.status, resp.body)
+        fail Triannon::LDPStorageError.new("Unable to create #{oa_vocab_term.fragment.sub('has', '')} LDP container for anno #{@root_container}/#{@id};\nRDF sent: #{g.to_ttl}", resp.status, resp.body)
       end
       resp
     end
 
-    # create the target/body resources inside the (already created) target/body
-    #   container
-    # @param [RDF::URI] predicate either RDF::Vocab::OA.hasTarget or
-    #   RDF::Vocab::OA.hasBody
+    # create the target/body resources inside the (already created) target/body container
+    # @param [RDF::URI] predicate either RDF::Vocab::OA.hasTarget or RDF::Vocab::OA.hasBody
     def create_resources_in_container(predicate)
       predicate_solns = @anno.graph.query([nil, predicate, nil])
       resource_ids = []
@@ -387,9 +388,9 @@ module Triannon
         }
 
         if (predicate == RDF::Vocab::OA.hasTarget)
-          resource_ids << create_resource(graph_for_resource.to_ttl, "#{@id}/t")
+          resource_ids << create_resource(graph_for_resource.to_ttl, "#{@root_container}/#{@id}/t")
         else
-          resource_ids << create_resource(graph_for_resource.to_ttl, "#{@id}/b")
+          resource_ids << create_resource(graph_for_resource.to_ttl, "#{@root_container}/#{@id}/b")
         end
       }
       resource_ids

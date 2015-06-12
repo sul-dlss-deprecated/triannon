@@ -9,6 +9,20 @@ module Triannon
     end
   end
 
+  # general error for LDP anno root container issues
+  class LDPContainerError < Triannon::Error
+    def initialize(message = nil)
+      super(message)
+    end
+  end
+
+  # used when LDP anno root container doesn't exist
+  class MissingLDPContainerError < Triannon::LDPContainerError
+    def initialize(message = nil)
+      super(message)
+    end
+  end
+
   # used to keep HTTP response info from LDP
   class LDPStorageError < Triannon::Error
     attr_accessor :ldp_resp_status, :ldp_resp_body

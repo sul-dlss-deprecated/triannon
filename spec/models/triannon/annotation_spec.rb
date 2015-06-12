@@ -1,7 +1,19 @@
 require 'spec_helper'
 
 describe Triannon::Annotation, :vcr do
-  let(:bookmark_anno) {Triannon::Annotation.new data: Triannon.annotation_fixture("bookmark.json")}
+
+  before(:all) do
+    @root_container = 'annomodelspecs'
+    vcr_cassette_name = "Triannon_Annotation/before_spec"
+    create_root_container(@root_container, vcr_cassette_name)
+    @solr_doc_ids = []
+  end
+  after(:all) do
+    ldp_testing_container_urls = ["#{spec_ldp_url}/#{spec_uber_cont}/#{@root_container}"]
+    vcr_cassette_name = "Triannon_Annotation/after_spec"
+    delete_test_objects(ldp_testing_container_urls, @solr_doc_ids, @root_container, vcr_cassette_name)
+  end
+  let(:bookmark_anno) {Triannon::Annotation.new(data: Triannon.annotation_fixture("bookmark.json"), root_container: @root_container)}
 
   it "doesn't do external lookup of json_ld context", :vcr => {:record => :none} do
     # NOTE:  VCR would throw an error if this does an external lookup
@@ -40,28 +52,28 @@ describe Triannon::Annotation, :vcr do
     let(:json_ld_data) { Triannon.annotation_fixture("bookmark.json") }
 
     it "does Mime::Type.lookup if expected_content_type" do
-      anno = Triannon::Annotation.new({data: json_ld_data, expected_content_type: "application/ld+json"})
+      anno = Triannon::Annotation.new({data: json_ld_data, expected_content_type: "application/ld+json", root_container: @root_container})
       expect(Mime::Type).to receive(:lookup).with("application/ld+json").and_call_original
       expect(anno.graph).to be_a_kind_of OA::Graph
     end
     it "does NOT do Mime::Type.lookup if no expected_content_type" do
-      anno = Triannon::Annotation.new data: json_ld_data
+      anno = Triannon::Annotation.new(data: json_ld_data, root_container: @root_container)
       expect(Mime::Type).not_to receive(:lookup)
       expect(anno.graph).to be_a_kind_of OA::Graph
     end
     context "json-ld data" do
       it "populates graph from json-ld" do
         expect(json_ld_data).to match(/\A\{.+\}\Z/m) # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
-        anno = Triannon::Annotation.new data: json_ld_data
+        anno = Triannon::Annotation.new(data: json_ld_data, root_container: @root_container)
         expect(anno.graph).to be_a_kind_of OA::Graph
         expect(anno.graph.count).to be > 1
       end
       it "is rejected if first and last non whitespace characters aren't { and }" do
-        anno = Triannon::Annotation.new data: "xxx " + json_ld_data
+        anno = Triannon::Annotation.new(data: "xxx " + json_ld_data, root_container: @root_container)
         expect(anno.graph).to be_nil
       end
       it "converts data to turtle" do
-        anno = Triannon::Annotation.new data: json_ld_data
+        anno = Triannon::Annotation.new(data: json_ld_data, root_container: @root_container)
         c = anno.graph.count
         g = RDF::Graph.new
         g.from_ttl(anno.data)
@@ -73,12 +85,12 @@ describe Triannon::Annotation, :vcr do
 
       it "populates graph from ttl" do
         expect(ttl_data).to match(/\.\Z/)  # (Note:  \Z is needed instead of $ due to \n in data)
-        anno = Triannon::Annotation.new data: ttl_data
+        anno = Triannon::Annotation.new(data: ttl_data, root_container: @root_container)
         expect(anno.graph).to be_a_kind_of OA::Graph
         expect(anno.graph.count).to be > 1
       end
       it "is rejected if it doesn't end in period" do
-        anno = Triannon::Annotation.new data: ttl_data + "xxx"
+        anno = Triannon::Annotation.new(data: ttl_data + "xxx", root_container: @root_container)
         expect(anno.graph).to be_nil
       end
     end
@@ -87,16 +99,16 @@ describe Triannon::Annotation, :vcr do
 
       it "populates graph from rdfxml" do
         expect(rdfxml_data).to match(/\A<.+>\Z/m) # (Note:  \A and \Z and m are needed instead of ^$ due to \n in data)
-        anno = Triannon::Annotation.new data: rdfxml_data
+        anno = Triannon::Annotation.new(data: rdfxml_data, root_container: @root_container)
         expect(anno.graph).to be_a_kind_of OA::Graph
         expect(anno.graph.count).to be > 1
       end
       it "is rejected if first and last non whitespace characters aren't < and >" do
-        anno = Triannon::Annotation.new data: "xxx " + rdfxml_data
+        anno = Triannon::Annotation.new(data: "xxx " + rdfxml_data, root_container: @root_container)
         expect(anno.graph).to be_nil
       end
       it "converts data to turtle" do
-        anno = Triannon::Annotation.new data: rdfxml_data
+        anno = Triannon::Annotation.new(data: rdfxml_data, root_container: @root_container)
         c = anno.graph.count
         g = RDF::Graph.new
         g.from_ttl(anno.data)
@@ -133,17 +145,20 @@ describe Triannon::Annotation, :vcr do
   context '#save' do
     it "sets anno id" do
       anno_id = bookmark_anno.save
+      @solr_doc_ids << anno_id
       expect(bookmark_anno.id).to eq anno_id
     end
     it "reloads graph from storage to ensure id is in the graph" do
       expect(Triannon::LdpLoader).to receive(:load).and_call_original
       anno_id = bookmark_anno.save
+      @solr_doc_ids << anno_id
       expect(bookmark_anno.graph.id_as_url).to match bookmark_anno.id
     end
     it "calls solr_save method after successful save to LDP Store" do
       # test to make sure callback logic implemented properly in model
       expect(bookmark_anno).to receive(:solr_save)
-      bookmark_anno.save
+      anno_id = bookmark_anno.save
+      @solr_doc_ids << anno_id
     end
     it "doesn't call solr_save method after unsuccessful save to LDP Store - nil returned" do
       # test to make sure callback logic implemented properly in model
@@ -170,14 +185,15 @@ describe Triannon::Annotation, :vcr do
   context "#destroy" do
     it "calls LdpWriter.delete_anno with its own id" do
       id = 'someid'
-      a = Triannon::Annotation.new :id => id
+      a = Triannon::Annotation.new(id: id, root_container: @root_container)
       allow(a.send(:solr_writer)).to receive(:delete)
-      expect(Triannon::LdpWriter).to receive(:delete_anno).with(id)
+      expect(Triannon::LdpWriter).to receive(:delete_anno).with("#{@root_container}/#{id}")
       a.destroy
     end
     it "calls solr_delete method after successful destroy in LDP store" do
       # test to make sure callback logic implemented properly in model
       bookmark_anno.save
+      @solr_doc_ids << bookmark_anno.id
       expect(bookmark_anno).to receive(:solr_delete)
       bookmark_anno.destroy
     end
@@ -199,11 +215,12 @@ describe Triannon::Annotation, :vcr do
     let(:my_bookmark_anno) {
       # make sure we have id for anno
       id = bookmark_anno.save
-      Triannon::Annotation.find id
+      @solr_doc_ids << id
+      Triannon::Annotation.find(@root_container, id)
     }
     let(:solr_writer) { my_bookmark_anno.send(:solr_writer) }
     it "calls SolrWriter write with triannon graph" do
-      expect(solr_writer).to receive(:write).with(my_bookmark_anno.graph)
+      expect(solr_writer).to receive(:write).with(my_bookmark_anno.graph, @root_container)
       my_bookmark_anno.send(:solr_save)
     end
     it "does NOT call SolrWriter write when graph is nil" do
@@ -225,9 +242,9 @@ describe Triannon::Annotation, :vcr do
 
   context '#solr_delete' do
     let(:solr_writer) { bookmark_anno.send(:solr_writer) }
-    it "calls SolrWriter.delete with id" do
+    it "calls SolrWriter.delete with id prefixed with root container" do
       allow(bookmark_anno).to receive(:id).and_return("666")
-      expect(solr_writer).to receive(:delete).with(bookmark_anno.id)
+      expect(solr_writer).to receive(:delete).with("#{@root_container}/#{bookmark_anno.id}")
       bookmark_anno.send(:solr_delete)
     end
     it "raises exception when Solr delete is not successful" do
@@ -239,27 +256,11 @@ describe Triannon::Annotation, :vcr do
 
   context '*find' do
     it "sets anno id" do
-      anno = Triannon::Annotation.new({:data => Triannon.annotation_fixture("body-chars.ttl")})
+      anno = Triannon::Annotation.new(data: Triannon.annotation_fixture("body-chars.ttl"), root_container: @root_container)
       anno_id = anno.save
-      my_anno = Triannon::Annotation.find(anno_id)
+      @solr_doc_ids << anno_id
+      my_anno = Triannon::Annotation.find(@root_container, anno_id)
       expect(my_anno.id).to eq anno_id
-    end
-  end
-
-  context "*all" do
-    it "returns an array of all Annotation identifiers in the repository" do
-      root_anno_ttl = File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_root_anno_container.ttl')
-      allow_any_instance_of(Triannon::LdpLoader).to receive(:get_ttl).and_return(root_anno_ttl)
-      results = Triannon::Annotation.all
-      expect(results).to be_an_instance_of Array
-      expect(results[0]).to be_an_instance_of Triannon::Annotation
-      expect(results[0].id).to be_an_instance_of String
-      # result only contains populated id attribute
-      expect(results[0].id_as_url).to eql nil
-    end
-    it "calls LdpLoader.find_all" do
-      expect_any_instance_of(Triannon::LdpLoader).to receive(:find_all)
-      Triannon::Annotation.all
     end
   end
 

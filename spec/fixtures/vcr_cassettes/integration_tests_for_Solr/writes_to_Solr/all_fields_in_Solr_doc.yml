@@ -1,15 +1,56 @@
 ---
 http_interactions:
 - request:
+    method: head
+    uri: http://localhost:8983/fedora/rest/anno/solr_integration_specs
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Etag:
+      - '"8ea2cf79963c649315d9515d334436ddadc6ff6a"'
+      Last-Modified:
+      - Tue, 09 Jun 2015 23:38:04 GMT
+      Link:
+      - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Container>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      Accept-Patch:
+      - application/sparql-update
+      Accept-Post:
+      - text/turtle,text/rdf+n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      Allow:
+      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
+      Content-Type:
+      - text/tab-separated-values
+      Content-Length:
+      - '0'
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Tue, 09 Jun 2015 23:38:10 GMT
+- request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno
+    uri: http://localhost:8983/fedora/rest/anno/solr_integration_specs
     body:
       encoding: UTF-8
       string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
         @prefix oa: <http://www.w3.org/ns/oa#> .
         @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
-        <> a oa:Annotation;
+        <> a oa:Annotation,
+             ldp:BasicContainer;
            oa:motivatedBy oa:commenting .
     headers:
       User-Agent:
@@ -28,23 +69,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"5c2a8c0b9d34f7bfaab9b9fc7703db5656f27564"'
+      - '"0ae1c1a31c2f05c1f607099a32cd8cdb560bb3ca"'
       Last-Modified:
-      - Tue, 05 May 2015 18:21:54 GMT
+      - Tue, 09 Jun 2015 23:38:10 GMT
       Content-Length:
-      - '87'
+      - '110'
       Location:
-      - http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec
+      - http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec
+      string: http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f
     http_version: 
-  recorded_at: Tue, 05 May 2015 18:21:54 GMT
+  recorded_at: Tue, 09 Jun 2015 23:38:10 GMT
 - request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec
+    uri: http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f
     body:
       encoding: UTF-8
       string: |
@@ -54,7 +95,7 @@ http_interactions:
 
         <> a ldp:DirectContainer;
            ldp:hasMemberRelation oa:hasBody;
-           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec> .
+           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f> .
     headers:
       User-Agent:
       - Faraday v0.9.1
@@ -74,32 +115,34 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"0fc586d687eafa66298b42ada9c6dff9ea74da55"'
+      - '"1b5e0ccea2fca8af86fdaa681ea527ec8591db76"'
       Last-Modified:
-      - Tue, 05 May 2015 18:21:54 GMT
+      - Tue, 09 Jun 2015 23:38:10 GMT
       Content-Length:
-      - '89'
+      - '112'
       Location:
-      - http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/b
+      - http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/b
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/b
+      string: http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/b
     http_version: 
-  recorded_at: Tue, 05 May 2015 18:21:54 GMT
+  recorded_at: Tue, 09 Jun 2015 23:38:10 GMT
 - request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/b
+    uri: http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/b
     body:
       encoding: UTF-8
       string: |
         @prefix cnt: <http://www.w3.org/2011/content#> .
         @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
         @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
         @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-        <> a cnt:ContentAsText,
+        <> a ldp:BasicContainer,
+             cnt:ContentAsText,
              dcmitype:Text;
            cnt:chars "Solr integration test" .
     headers:
@@ -119,23 +162,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"3a1630b9e656e56233f094ebdbe216dbbdb4be38"'
+      - '"1edab108d58cffe0bcb4cecb26015d0a7d179fc8"'
       Last-Modified:
-      - Tue, 05 May 2015 18:21:55 GMT
+      - Tue, 09 Jun 2015 23:38:10 GMT
       Content-Length:
-      - '138'
+      - '161'
       Location:
-      - http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/b/75/18/5b/af/75185baf-7057-4762-bfb2-432e88221810
+      - http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/b/5e/9e/d9/bb/5e9ed9bb-d4ac-4938-b5d6-83335d97aee9
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/b/75/18/5b/af/75185baf-7057-4762-bfb2-432e88221810
+      string: http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/b/5e/9e/d9/bb/5e9ed9bb-d4ac-4938-b5d6-83335d97aee9
     http_version: 
-  recorded_at: Tue, 05 May 2015 18:21:55 GMT
+  recorded_at: Tue, 09 Jun 2015 23:38:10 GMT
 - request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec
+    uri: http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f
     body:
       encoding: UTF-8
       string: |
@@ -145,7 +188,7 @@ http_interactions:
 
         <> a ldp:DirectContainer;
            ldp:hasMemberRelation oa:hasTarget;
-           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec> .
+           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f> .
     headers:
       User-Agent:
       - Faraday v0.9.1
@@ -165,29 +208,32 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"95c9af0b87df2e9373751ac9d93d3ec4073966fb"'
+      - '"1a9a64a27ef262e2cbf157cfe4831d12e25731f4"'
       Last-Modified:
-      - Tue, 05 May 2015 18:21:55 GMT
+      - Tue, 09 Jun 2015 23:38:10 GMT
       Content-Length:
-      - '89'
+      - '112'
       Location:
-      - http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/t
+      - http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/t
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/t
+      string: http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/t
     http_version: 
-  recorded_at: Tue, 05 May 2015 18:21:55 GMT
+  recorded_at: Tue, 09 Jun 2015 23:38:10 GMT
 - request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/t
+    uri: http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/t
     body:
       encoding: UTF-8
       string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
         @prefix triannon: <http://triannon.stanford.edu/ns/> .
 
-        <> triannon:externalReference <http://example.com/solr-integration-test> .
+        <> a ldp:BasicContainer;
+           triannon:externalReference <http://example.com/solr-integration-test> .
     headers:
       User-Agent:
       - Faraday v0.9.1
@@ -205,23 +251,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"35c9c62d541c78fd95037f242b63e356afe2e550"'
+      - '"d65d732152697bfd45a7925d5edb9da15648da2d"'
       Last-Modified:
-      - Tue, 05 May 2015 18:21:55 GMT
+      - Tue, 09 Jun 2015 23:38:10 GMT
       Content-Length:
-      - '138'
+      - '161'
       Location:
-      - http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/t/07/1b/94/c0/071b94c0-953e-46aa-b21c-2bb201c5ff59
+      - http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/t/7a/08/77/ea/7a0877ea-a88d-4b8b-983a-612af4f00532
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/t/07/1b/94/c0/071b94c0-953e-46aa-b21c-2bb201c5ff59
+      string: http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/t/7a/08/77/ea/7a0877ea-a88d-4b8b-983a-612af4f00532
     http_version: 
-  recorded_at: Tue, 05 May 2015 18:21:55 GMT
+  recorded_at: Tue, 09 Jun 2015 23:38:10 GMT
 - request:
     method: get
-    uri: http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec
+    uri: http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f
     body:
       encoding: US-ASCII
       string: ''
@@ -240,9 +286,9 @@ http_interactions:
       message: OK
     headers:
       Etag:
-      - '"e1e6a1774d88b4aef238eb18c6218c7738d17205"'
+      - '"b1eb78f153fc7d162e18c31ec4d95569ae23cec4"'
       Last-Modified:
-      - Tue, 05 May 2015 18:21:55 GMT
+      - Tue, 09 Jun 2015 23:38:10 GMT
       Link:
       - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
       - <http://www.w3.org/ns/ldp#Container>;rel="type"
@@ -259,7 +305,7 @@ http_interactions:
       - Accept, Range, Accept-Encoding, Accept-Language
       - Prefer
       Content-Length:
-      - '1734'
+      - '1870'
       Content-Type:
       - application/x-turtle
     body:
@@ -276,17 +322,18 @@ http_interactions:
         .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix fedoraconfig:
         <http://fedora.info/definitions/v4/config#> .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0>
         .\n@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n@prefix dc: <http://purl.org/dc/elements/1.1/>
-        .\n\n\n<http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec>
-        a oa:Annotation ;\n\toa:motivatedBy oa:commenting ;\n\tldp:contains <http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/b>
-        , <http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/t>
-        ;\n\toa:hasTarget <http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/t/07/1b/94/c0/071b94c0-953e-46aa-b21c-2bb201c5ff59>
-        ;\n\toa:hasBody <http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/b/75/18/5b/af/75185baf-7057-4762-bfb2-432e88221810>
+        .\n\n\n<http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f>
+        a oa:Annotation , ldp:BasicContainer ;\n\toa:motivatedBy oa:commenting ;\n\tldp:contains
+        <http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/b>
+        , <http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/t>
+        ;\n\toa:hasTarget <http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/t/7a/08/77/ea/7a0877ea-a88d-4b8b-983a-612af4f00532>
+        ;\n\toa:hasBody <http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/b/5e/9e/d9/bb/5e9ed9bb-d4ac-4938-b5d6-83335d97aee9>
         .\n"
     http_version: 
-  recorded_at: Tue, 05 May 2015 18:21:55 GMT
+  recorded_at: Tue, 09 Jun 2015 23:38:10 GMT
 - request:
     method: get
-    uri: http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/b/75/18/5b/af/75185baf-7057-4762-bfb2-432e88221810
+    uri: http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/b/5e/9e/d9/bb/5e9ed9bb-d4ac-4938-b5d6-83335d97aee9
     body:
       encoding: US-ASCII
       string: ''
@@ -305,9 +352,9 @@ http_interactions:
       message: OK
     headers:
       Etag:
-      - '"3a1630b9e656e56233f094ebdbe216dbbdb4be38"'
+      - '"1edab108d58cffe0bcb4cecb26015d0a7d179fc8"'
       Last-Modified:
-      - Tue, 05 May 2015 18:21:55 GMT
+      - Tue, 09 Jun 2015 23:38:10 GMT
       Link:
       - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
       - <http://www.w3.org/ns/ldp#Container>;rel="type"
@@ -324,7 +371,7 @@ http_interactions:
       - Accept, Range, Accept-Encoding, Accept-Language
       - Prefer
       Content-Length:
-      - '1339'
+      - '1383'
       Content-Type:
       - application/x-turtle
     body:
@@ -341,14 +388,14 @@ http_interactions:
         .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix fedoraconfig:
         <http://fedora.info/definitions/v4/config#> .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0>
         .\n@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n@prefix dc: <http://purl.org/dc/elements/1.1/>
-        .\n\n\n<http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/b/75/18/5b/af/75185baf-7057-4762-bfb2-432e88221810>
-        a dcmitype:Text , cnt:ContentAsText ;\n\tcnt:chars \"Solr integration test\"^^<http://www.w3.org/2001/XMLSchema#string>
-        .\n"
+        .\n\n\n<http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/b/5e/9e/d9/bb/5e9ed9bb-d4ac-4938-b5d6-83335d97aee9>
+        a dcmitype:Text , ldp:BasicContainer , cnt:ContentAsText ;\n\tcnt:chars \"Solr
+        integration test\"^^<http://www.w3.org/2001/XMLSchema#string> .\n"
     http_version: 
-  recorded_at: Tue, 05 May 2015 18:21:55 GMT
+  recorded_at: Tue, 09 Jun 2015 23:38:10 GMT
 - request:
     method: get
-    uri: http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/t/07/1b/94/c0/071b94c0-953e-46aa-b21c-2bb201c5ff59
+    uri: http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/t/7a/08/77/ea/7a0877ea-a88d-4b8b-983a-612af4f00532
     body:
       encoding: US-ASCII
       string: ''
@@ -367,9 +414,9 @@ http_interactions:
       message: OK
     headers:
       Etag:
-      - '"35c9c62d541c78fd95037f242b63e356afe2e550"'
+      - '"d65d732152697bfd45a7925d5edb9da15648da2d"'
       Last-Modified:
-      - Tue, 05 May 2015 18:21:55 GMT
+      - Tue, 09 Jun 2015 23:38:10 GMT
       Link:
       - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
       - <http://www.w3.org/ns/ldp#Container>;rel="type"
@@ -386,49 +433,40 @@ http_interactions:
       - Accept, Range, Accept-Encoding, Accept-Language
       - Prefer
       Content-Length:
-      - '1293'
+      - '1340'
       Content-Type:
       - application/x-turtle
     body:
       encoding: UTF-8
-      string: |
-        @prefix premis: <http://www.loc.gov/premis/rdf/v1#> .
-        @prefix image: <http://www.modeshape.org/images/1.0> .
-        @prefix sv: <http://www.jcp.org/jcr/sv/1.0> .
-        @prefix test: <info:fedora/test/> .
-        @prefix nt: <http://www.jcp.org/jcr/nt/1.0> .
-        @prefix cnt: <http://www.w3.org/2011/content#> .
-        @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
-        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-        @prefix xsi: <http://www.w3.org/2001/XMLSchema-instance> .
-        @prefix mode: <http://www.modeshape.org/1.0> .
-        @prefix oa: <http://www.w3.org/ns/oa#> .
-        @prefix triannon: <http://triannon.stanford.edu/ns/> .
-        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-        @prefix fedora: <http://fedora.info/definitions/v4/repository#> .
-        @prefix xml: <http://www.w3.org/XML/1998/namespace> .
-        @prefix ldp: <http://www.w3.org/ns/ldp#> .
-        @prefix xs: <http://www.w3.org/2001/XMLSchema> .
-        @prefix fedoraconfig: <http://fedora.info/definitions/v4/config#> .
-        @prefix mix: <http://www.jcp.org/jcr/mix/1.0> .
-        @prefix foaf: <http://xmlns.com/foaf/0.1/> .
-        @prefix dc: <http://purl.org/dc/elements/1.1/> .
-
-
-        <http://localhost:8983/fedora/rest/anno/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec/t/07/1b/94/c0/071b94c0-953e-46aa-b21c-2bb201c5ff59> triannon:externalReference <http://example.com/solr-integration-test> .
+      string: "@prefix premis: <http://www.loc.gov/premis/rdf/v1#> .\n@prefix image:
+        <http://www.modeshape.org/images/1.0> .\n@prefix sv: <http://www.jcp.org/jcr/sv/1.0>
+        .\n@prefix test: <info:fedora/test/> .\n@prefix nt: <http://www.jcp.org/jcr/nt/1.0>
+        .\n@prefix cnt: <http://www.w3.org/2011/content#> .\n@prefix dcmitype: <http://purl.org/dc/dcmitype/>
+        .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n@prefix xsi: <http://www.w3.org/2001/XMLSchema-instance>
+        .\n@prefix mode: <http://www.modeshape.org/1.0> .\n@prefix oa: <http://www.w3.org/ns/oa#>
+        .\n@prefix triannon: <http://triannon.stanford.edu/ns/> .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        .\n@prefix fedora: <http://fedora.info/definitions/v4/repository#> .\n@prefix
+        xml: <http://www.w3.org/XML/1998/namespace> .\n@prefix ldp: <http://www.w3.org/ns/ldp#>
+        .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix fedoraconfig:
+        <http://fedora.info/definitions/v4/config#> .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0>
+        .\n@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n@prefix dc: <http://purl.org/dc/elements/1.1/>
+        .\n\n\n<http://localhost:8983/fedora/rest/anno/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f/t/7a/08/77/ea/7a0877ea-a88d-4b8b-983a-612af4f00532>
+        a ldp:BasicContainer ;\n\ttriannon:externalReference <http://example.com/solr-integration-test>
+        .\n"
     http_version: 
-  recorded_at: Tue, 05 May 2015 18:21:55 GMT
+  recorded_at: Tue, 09 Jun 2015 23:38:10 GMT
 - request:
     method: post
     uri: http://localhost:8983/solr/triannon/update?wt=ruby
     body:
       encoding: UTF-8
       string: <?xml version="1.0" encoding="UTF-8"?><add commitWithin="500"><doc><field
-        name="id">f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec</field><field name="motivation">commenting</field><field
+        name="id">solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f</field><field
+        name="root">solr_integration_specs</field><field name="motivation">commenting</field><field
         name="target_url">http://example.com/solr-integration-test</field><field name="target_type">external_URI</field><field
         name="body_type">content_as_text</field><field name="body_chars_exact">Solr
-        integration test</field><field name="anno_jsonld">{"@context":"http://www.w3.org/ns/oa-context-20130208.json","@graph":[{"@id":"_:g70132611908460","@type":["dctypes:Text","cnt:ContentAsText"],"chars":"Solr
-        integration test"},{"@id":"http://your.triannon-server.com/annotations/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec","@type":"oa:Annotation","hasBody":"_:g70132611908460","hasTarget":"http://example.com/solr-integration-test","motivatedBy":"oa:commenting"}]}</field></doc></add>
+        integration test</field><field name="anno_jsonld">{"@context":"http://www.w3.org/ns/oa-context-20130208.json","@graph":[{"@id":"_:g70277492477000","@type":["dctypes:Text","cnt:ContentAsText"],"chars":"Solr
+        integration test"},{"@id":"http://your.triannon-server.com/annotations/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f","@type":"oa:Annotation","hasBody":"_:g70277492477000","hasTarget":"http://example.com/solr-integration-test","motivatedBy":"oa:commenting"}]}</field></doc></add>
     headers:
       Content-Type:
       - text/xml
@@ -446,10 +484,10 @@ http_interactions:
       string: |
         {'responseHeader'=>{'status'=>0,'QTime'=>2}}
     http_version: 
-  recorded_at: Tue, 05 May 2015 18:21:55 GMT
+  recorded_at: Tue, 09 Jun 2015 23:38:10 GMT
 - request:
     method: get
-    uri: http://localhost:8983/solr/triannon/doc?id=f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec&wt=ruby
+    uri: http://localhost:8983/solr/triannon/doc?id=solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f&wt=ruby
     body:
       encoding: US-ASCII
       string: ''
@@ -460,7 +498,7 @@ http_interactions:
       message: OK
     headers:
       Last-Modified:
-      - Tue, 05 May 2015 18:21:55 GMT
+      - Tue, 09 Jun 2015 23:38:10 GMT
       Etag:
       - '"ZTAwMDAwMDAwMDAwMDAwMFNvbHI="'
       Content-Type:
@@ -475,20 +513,21 @@ http_interactions:
             'status'=>0,
             'QTime'=>1,
             'params'=>{
-              'id'=>'f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec',
+              'id'=>'solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f',
               'wt'=>'ruby'}},
           'response'=>{'numFound'=>1,'start'=>0,'docs'=>[
               {
-                'id'=>'f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec',
+                'id'=>'solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f',
+                'root'=>'solr_integration_specs',
                 'motivation'=>['commenting'],
                 'target_url'=>['http://example.com/solr-integration-test'],
                 'target_type'=>['external_URI'],
                 'body_type'=>['content_as_text'],
                 'body_chars_exact'=>['Solr integration test'],
-                'anno_jsonld'=>'{"@context":"http://www.w3.org/ns/oa-context-20130208.json","@graph":[{"@id":"_:g70132611908460","@type":["dctypes:Text","cnt:ContentAsText"],"chars":"Solr integration test"},{"@id":"http://your.triannon-server.com/annotations/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec","@type":"oa:Annotation","hasBody":"_:g70132611908460","hasTarget":"http://example.com/solr-integration-test","motivatedBy":"oa:commenting"}]}',
-                '_version_'=>1500355090416926720,
-                'timestamp'=>'2015-05-05T18:21:55.22Z'}]
+                'anno_jsonld'=>'{"@context":"http://www.w3.org/ns/oa-context-20130208.json","@graph":[{"@id":"_:g70277492477000","@type":["dctypes:Text","cnt:ContentAsText"],"chars":"Solr integration test"},{"@id":"http://your.triannon-server.com/annotations/solr_integration_specs/18/a4/9f/4d/18a49f4d-9a3c-452f-8035-83184ca6028f","@type":"oa:Annotation","hasBody":"_:g70277492477000","hasTarget":"http://example.com/solr-integration-test","motivatedBy":"oa:commenting"}]}',
+                '_version_'=>1503545881177096192,
+                'timestamp'=>'2015-06-09T23:38:10.417Z'}]
           }}
     http_version: 
-  recorded_at: Tue, 05 May 2015 18:21:56 GMT
+  recorded_at: Tue, 09 Jun 2015 23:38:11 GMT
 recorded_with: VCR 2.9.3
