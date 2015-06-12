@@ -106,6 +106,8 @@ Search Parameters as above.
 ### Get a particular anno
 `GET`: `http://(host)/annotations/(root container)/(anno_id)`
 
+NOTE:  you may need to URL encode the anno_id (e.g. "6f%2F0e%2F79%2F92%2F6f0e7992-83f5-4f31-8bb7-94a23465fdfb" instead of "6f/0e/79/92/6f0e7992-83f5-4f31-8bb7-94a23465fdfb"), particularly from a web browser.
+
 * use HTTP `Accept` header with mime type to indicate desired format
   * default:  jsonld
     * indicate desired context url in the HTTP Accept header thus:
@@ -154,6 +156,8 @@ Note that OA (Open Annotation) is the default context if none is specified.
 
 ### Delete an anno
 `DELETE`: `http://(host)/annotations/(root container)/(anno_id)`
+
+NOTE:  you may need to URL encode the anno_id (e.g. "6f%2F0e%2F79%2F92%2F6f0e7992-83f5-4f31-8bb7-94a23465fdfb" instead of "6f/0e/79/92/6f0e7992-83f5-4f31-8bb7-94a23465fdfb")
 
 
 # Running This Code in Development
