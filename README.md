@@ -83,6 +83,7 @@ Search Parameters:
 * `bodyExact` - matches body characters exactly
 * `bodyKeyword` - matches terms in body characters
 * `motivatedBy` - matches fragment part of motivation predicate URI, e.g.  commenting, tagging, painting
+* `anno_root` - matches the root container of the result annos
 
 * use HTTP `Accept` header with mime type to indicate desired format
   * default:  jsonld
@@ -93,7 +94,7 @@ Search Parameters:
 ### Get a list of annos in a particular root container
 as a IIIF Annotation List (see http://iiif.io/api/presentation/2.0/#other-content-resources)
 
-* `GET`: `http://(host)/annotations/(root container name)/search?targetUri=some.url.org`
+* `GET`: `http://(host)/annotations/(root container)/search?targetUri=some.url.org`
 
 Search Parameters as above.
 
@@ -128,17 +129,17 @@ The correct way:
   * `Accept`: `application/ld+json; profile="http://www.w3.org/ns/oa-context-20130208.json"`
   * `Accept`: `application/ld+json; profile="http://iiif.io/api/presentation/2/context.json"`
 
-You can also use either of these methods (with the correct HTTP Accept header):
+You can also use this method (with the correct HTTP Accept header):
 
-* `GET`: `http://(host)/annotations/iiif/(anno_id)`
-* `GET`: `http://(host)/annotations/(anno_id)?jsonld_context=iiif`
-
-* `GET`:` http://(host)/annotations/oa/(anno_id)`
-* `GET`: `http://(host)/annotations/(anno_id)?jsonld_context=oa`
+* `GET`: `http://(host)/annotations/(root)/(anno_id)?jsonld_context=iiif`
+* `GET`: `http://(host)/annotations/(root)/(anno_id)?jsonld_context=oa`
 
 Note that OA (Open Annotation) is the default context if none is specified.
 
 ### Create an anno
+
+Note that annos must be created in an existing root container.
+
 `POST`: `http://(host)/annotations/(root container)`
 * the body of the HTTP request should contain the annotation, as jsonld, turtle, or rdfxml
   * Wrap the annotation in an object, as such:
