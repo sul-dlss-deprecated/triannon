@@ -1,0 +1,488 @@
+---
+http_interactions:
+- request:
+    method: head
+    uri: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Etag:
+      - '"29454bba7481552df3a5fea9aad32a62137ce683"'
+      Last-Modified:
+      - Mon, 08 Jun 2015 18:56:41 GMT
+      Link:
+      - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Container>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      Accept-Patch:
+      - application/sparql-update
+      Accept-Post:
+      - text/turtle,text/rdf+n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      Allow:
+      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
+      Content-Type:
+      - text/tab-separated-values
+      Content-Length:
+      - '0'
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Mon, 08 Jun 2015 18:56:41 GMT
+- request:
+    method: post
+    uri: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs
+    body:
+      encoding: UTF-8
+      string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix oa: <http://www.w3.org/ns/oa#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+        <> a oa:Annotation,
+             ldp:BasicContainer;
+           oa:motivatedBy oa:commenting .
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Prefer:
+      - return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"
+      Content-Type:
+      - application/x-turtle
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - '"60ef8b913148f3e18f8f7f28a200c7a278449109"'
+      Last-Modified:
+      - Mon, 08 Jun 2015 18:56:41 GMT
+      Content-Length:
+      - '116'
+      Location:
+      - http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022
+      Content-Type:
+      - text/plain
+    body:
+      encoding: UTF-8
+      string: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022
+    http_version: 
+  recorded_at: Mon, 08 Jun 2015 18:56:41 GMT
+- request:
+    method: post
+    uri: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022
+    body:
+      encoding: UTF-8
+      string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix oa: <http://www.w3.org/ns/oa#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+        <> a ldp:DirectContainer;
+           ldp:hasMemberRelation oa:hasBody;
+           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022> .
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Prefer:
+      - return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"
+      Content-Type:
+      - application/x-turtle
+      Slug:
+      - b
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - '"0dbafc7a43c6564e8569303c06709e385737f770"'
+      Last-Modified:
+      - Mon, 08 Jun 2015 18:56:41 GMT
+      Content-Length:
+      - '118'
+      Location:
+      - http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/b
+      Content-Type:
+      - text/plain
+    body:
+      encoding: UTF-8
+      string: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/b
+    http_version: 
+  recorded_at: Mon, 08 Jun 2015 18:56:41 GMT
+- request:
+    method: post
+    uri: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/b
+    body:
+      encoding: UTF-8
+      string: |
+        @prefix cnt: <http://www.w3.org/2011/content#> .
+        @prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+        @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+        <> a ldp:BasicContainer,
+             cnt:ContentAsText,
+             dcmitype:Text;
+           cnt:chars "I love this!" .
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Prefer:
+      - return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"
+      Content-Type:
+      - application/x-turtle
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - '"010a59900665ac7e78670570e1141092bda3a361"'
+      Last-Modified:
+      - Mon, 08 Jun 2015 18:56:41 GMT
+      Content-Length:
+      - '167'
+      Location:
+      - http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/b/9b/92/91/3d/9b92913d-354c-4ebe-bc2c-515791800904
+      Content-Type:
+      - text/plain
+    body:
+      encoding: UTF-8
+      string: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/b/9b/92/91/3d/9b92913d-354c-4ebe-bc2c-515791800904
+    http_version: 
+  recorded_at: Mon, 08 Jun 2015 18:56:41 GMT
+- request:
+    method: post
+    uri: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022
+    body:
+      encoding: UTF-8
+      string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix oa: <http://www.w3.org/ns/oa#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+        <> a ldp:DirectContainer;
+           ldp:hasMemberRelation oa:hasTarget;
+           ldp:membershipResource <http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022> .
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Prefer:
+      - return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"
+      Content-Type:
+      - application/x-turtle
+      Slug:
+      - t
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - '"13819913fcd486baa58e216a760750f170a46ced"'
+      Last-Modified:
+      - Mon, 08 Jun 2015 18:56:41 GMT
+      Content-Length:
+      - '118'
+      Location:
+      - http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/t
+      Content-Type:
+      - text/plain
+    body:
+      encoding: UTF-8
+      string: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/t
+    http_version: 
+  recorded_at: Mon, 08 Jun 2015 18:56:41 GMT
+- request:
+    method: post
+    uri: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/t
+    body:
+      encoding: UTF-8
+      string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+        @prefix triannon: <http://triannon.stanford.edu/ns/> .
+
+        <> a ldp:BasicContainer;
+           triannon:externalReference <http://purl.stanford.edu/kq131cs7229> .
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Prefer:
+      - return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"
+      Content-Type:
+      - application/x-turtle
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - '"de163ac20974268d6a7e99846415415fdf345b42"'
+      Last-Modified:
+      - Mon, 08 Jun 2015 18:56:41 GMT
+      Content-Length:
+      - '167'
+      Location:
+      - http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/t/06/80/df/fe/0680dffe-4464-4b76-80c2-680e6dd63270
+      Content-Type:
+      - text/plain
+    body:
+      encoding: UTF-8
+      string: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/t/06/80/df/fe/0680dffe-4464-4b76-80c2-680e6dd63270
+    http_version: 
+  recorded_at: Mon, 08 Jun 2015 18:56:41 GMT
+- request:
+    method: get
+    uri: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Prefer:
+      - return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"
+      Accept:
+      - application/x-turtle
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Etag:
+      - '"18d2afe8b3ac913e6125bc8a0f311461a515c254"'
+      Last-Modified:
+      - Mon, 08 Jun 2015 18:56:41 GMT
+      Link:
+      - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Container>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      Accept-Patch:
+      - application/sparql-update
+      Accept-Post:
+      - text/turtle,text/rdf+n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      Allow:
+      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
+      Preference-Applied:
+      - return=representation
+      Vary:
+      - Accept, Range, Accept-Encoding, Accept-Language
+      - Prefer
+      Content-Length:
+      - '1900'
+      Content-Type:
+      - application/x-turtle
+    body:
+      encoding: UTF-8
+      string: "@prefix premis: <http://www.loc.gov/premis/rdf/v1#> .\n@prefix image:
+        <http://www.modeshape.org/images/1.0> .\n@prefix sv: <http://www.jcp.org/jcr/sv/1.0>
+        .\n@prefix test: <info:fedora/test/> .\n@prefix nt: <http://www.jcp.org/jcr/nt/1.0>
+        .\n@prefix cnt: <http://www.w3.org/2011/content#> .\n@prefix dcmitype: <http://purl.org/dc/dcmitype/>
+        .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n@prefix xsi: <http://www.w3.org/2001/XMLSchema-instance>
+        .\n@prefix mode: <http://www.modeshape.org/1.0> .\n@prefix oa: <http://www.w3.org/ns/oa#>
+        .\n@prefix triannon: <http://triannon.stanford.edu/ns/> .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        .\n@prefix fedora: <http://fedora.info/definitions/v4/repository#> .\n@prefix
+        xml: <http://www.w3.org/XML/1998/namespace> .\n@prefix ldp: <http://www.w3.org/ns/ldp#>
+        .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix fedoraconfig:
+        <http://fedora.info/definitions/v4/config#> .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0>
+        .\n@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n@prefix dc: <http://purl.org/dc/elements/1.1/>
+        .\n\n\n<http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022>
+        a oa:Annotation , ldp:BasicContainer ;\n\toa:motivatedBy oa:commenting ;\n\tldp:contains
+        <http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/b>
+        , <http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/t>
+        ;\n\toa:hasTarget <http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/t/06/80/df/fe/0680dffe-4464-4b76-80c2-680e6dd63270>
+        ;\n\toa:hasBody <http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/b/9b/92/91/3d/9b92913d-354c-4ebe-bc2c-515791800904>
+        .\n"
+    http_version: 
+  recorded_at: Mon, 08 Jun 2015 18:56:41 GMT
+- request:
+    method: get
+    uri: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/b/9b/92/91/3d/9b92913d-354c-4ebe-bc2c-515791800904
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Prefer:
+      - return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"
+      Accept:
+      - application/x-turtle
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Etag:
+      - '"010a59900665ac7e78670570e1141092bda3a361"'
+      Last-Modified:
+      - Mon, 08 Jun 2015 18:56:41 GMT
+      Link:
+      - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Container>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      Accept-Patch:
+      - application/sparql-update
+      Accept-Post:
+      - text/turtle,text/rdf+n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      Allow:
+      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
+      Preference-Applied:
+      - return=representation
+      Vary:
+      - Accept, Range, Accept-Encoding, Accept-Language
+      - Prefer
+      Content-Length:
+      - '1380'
+      Content-Type:
+      - application/x-turtle
+    body:
+      encoding: UTF-8
+      string: "@prefix premis: <http://www.loc.gov/premis/rdf/v1#> .\n@prefix image:
+        <http://www.modeshape.org/images/1.0> .\n@prefix sv: <http://www.jcp.org/jcr/sv/1.0>
+        .\n@prefix test: <info:fedora/test/> .\n@prefix nt: <http://www.jcp.org/jcr/nt/1.0>
+        .\n@prefix cnt: <http://www.w3.org/2011/content#> .\n@prefix dcmitype: <http://purl.org/dc/dcmitype/>
+        .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n@prefix xsi: <http://www.w3.org/2001/XMLSchema-instance>
+        .\n@prefix mode: <http://www.modeshape.org/1.0> .\n@prefix oa: <http://www.w3.org/ns/oa#>
+        .\n@prefix triannon: <http://triannon.stanford.edu/ns/> .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        .\n@prefix fedora: <http://fedora.info/definitions/v4/repository#> .\n@prefix
+        xml: <http://www.w3.org/XML/1998/namespace> .\n@prefix ldp: <http://www.w3.org/ns/ldp#>
+        .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix fedoraconfig:
+        <http://fedora.info/definitions/v4/config#> .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0>
+        .\n@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n@prefix dc: <http://purl.org/dc/elements/1.1/>
+        .\n\n\n<http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/b/9b/92/91/3d/9b92913d-354c-4ebe-bc2c-515791800904>
+        a dcmitype:Text , ldp:BasicContainer , cnt:ContentAsText ;\n\tcnt:chars \"I
+        love this!\"^^<http://www.w3.org/2001/XMLSchema#string> .\n"
+    http_version: 
+  recorded_at: Mon, 08 Jun 2015 18:56:41 GMT
+- request:
+    method: get
+    uri: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/t/06/80/df/fe/0680dffe-4464-4b76-80c2-680e6dd63270
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Prefer:
+      - return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"
+      Accept:
+      - application/x-turtle
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Etag:
+      - '"de163ac20974268d6a7e99846415415fdf345b42"'
+      Last-Modified:
+      - Mon, 08 Jun 2015 18:56:41 GMT
+      Link:
+      - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Container>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      Accept-Patch:
+      - application/sparql-update
+      Accept-Post:
+      - text/turtle,text/rdf+n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      Allow:
+      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
+      Preference-Applied:
+      - return=representation
+      Vary:
+      - Accept, Range, Accept-Encoding, Accept-Language
+      - Prefer
+      Content-Length:
+      - '1342'
+      Content-Type:
+      - application/x-turtle
+    body:
+      encoding: UTF-8
+      string: "@prefix premis: <http://www.loc.gov/premis/rdf/v1#> .\n@prefix image:
+        <http://www.modeshape.org/images/1.0> .\n@prefix sv: <http://www.jcp.org/jcr/sv/1.0>
+        .\n@prefix test: <info:fedora/test/> .\n@prefix nt: <http://www.jcp.org/jcr/nt/1.0>
+        .\n@prefix cnt: <http://www.w3.org/2011/content#> .\n@prefix dcmitype: <http://purl.org/dc/dcmitype/>
+        .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n@prefix xsi: <http://www.w3.org/2001/XMLSchema-instance>
+        .\n@prefix mode: <http://www.modeshape.org/1.0> .\n@prefix oa: <http://www.w3.org/ns/oa#>
+        .\n@prefix triannon: <http://triannon.stanford.edu/ns/> .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        .\n@prefix fedora: <http://fedora.info/definitions/v4/repository#> .\n@prefix
+        xml: <http://www.w3.org/XML/1998/namespace> .\n@prefix ldp: <http://www.w3.org/ns/ldp#>
+        .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix fedoraconfig:
+        <http://fedora.info/definitions/v4/config#> .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0>
+        .\n@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n@prefix dc: <http://purl.org/dc/elements/1.1/>
+        .\n\n\n<http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022/t/06/80/df/fe/0680dffe-4464-4b76-80c2-680e6dd63270>
+        a ldp:BasicContainer ;\n\ttriannon:externalReference <http://purl.stanford.edu/kq131cs7229>
+        .\n"
+    http_version: 
+  recorded_at: Mon, 08 Jun 2015 18:56:41 GMT
+- request:
+    method: post
+    uri: http://localhost:8983/solr/triannon/update?wt=ruby
+    body:
+      encoding: UTF-8
+      string: <?xml version="1.0" encoding="UTF-8"?><add commitWithin="500"><doc><field
+        name="id">anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022</field><field
+        name="root">anno_controller_create_specs</field><field name="motivation">commenting</field><field
+        name="target_url">http://purl.stanford.edu/kq131cs7229</field><field name="target_type">external_URI</field><field
+        name="body_type">content_as_text</field><field name="body_chars_exact">I love
+        this!</field><field name="anno_jsonld">{"@context":"http://www.w3.org/ns/oa-context-20130208.json","@graph":[{"@id":"_:g70237738469360","@type":["dctypes:Text","cnt:ContentAsText"],"chars":"I
+        love this!"},{"@id":"http://your.triannon-server.com/annotations/anno_controller_create_specs/bd/e3/45/e3/bde345e3-7a03-4a49-ba5e-f7211e0fe022","@type":"oa:Annotation","hasBody":"_:g70237738469360","hasTarget":"http://purl.stanford.edu/kq131cs7229","motivatedBy":"oa:commenting"}]}</field></doc></add>
+    headers:
+      Content-Type:
+      - text/xml
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - text/plain;charset=UTF-8
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |
+        {'responseHeader'=>{'status'=>0,'QTime'=>2}}
+    http_version: 
+  recorded_at: Mon, 08 Jun 2015 18:56:41 GMT
+recorded_with: VCR 2.9.3

@@ -1,0 +1,175 @@
+---
+http_interactions:
+- request:
+    method: head
+    uri: http://localhost:8983/fedora/rest/missing_parent_path
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      Content-Type:
+      - text/html;charset=ISO-8859-1
+      Cache-Control:
+      - must-revalidate,no-cache,no-store
+      Content-Length:
+      - '1396'
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Tue, 09 Jun 2015 18:53:22 GMT
+- request:
+    method: post
+    uri: http://localhost:8983/fedora/rest
+    body:
+      encoding: UTF-8
+      string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+        <> a ldp:BasicContainer .
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Content-Type:
+      - text/turtle
+      Slug:
+      - missing_parent_path
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - '"ddb380a86c59ca47e4240fc337d8fb8ee741f02b"'
+      Last-Modified:
+      - Tue, 09 Jun 2015 18:53:22 GMT
+      Content-Length:
+      - '53'
+      Location:
+      - http://localhost:8983/fedora/rest/missing_parent_path
+      Content-Type:
+      - text/plain
+    body:
+      encoding: UTF-8
+      string: http://localhost:8983/fedora/rest/missing_parent_path
+    http_version: 
+  recorded_at: Tue, 09 Jun 2015 18:53:22 GMT
+- request:
+    method: get
+    uri: http://localhost:8983/fedora/rest/missing_parent_path
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Accept:
+      - application/x-turtle
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Etag:
+      - '"ddb380a86c59ca47e4240fc337d8fb8ee741f02b"'
+      Last-Modified:
+      - Tue, 09 Jun 2015 18:53:22 GMT
+      Link:
+      - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Container>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      Accept-Patch:
+      - application/sparql-update
+      Accept-Post:
+      - text/turtle,text/rdf+n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      Allow:
+      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
+      Preference-Applied:
+      - return=representation
+      Vary:
+      - Accept, Range, Accept-Encoding, Accept-Language
+      - Prefer
+      Content-Length:
+      - '2800'
+      Content-Type:
+      - application/x-turtle
+    body:
+      encoding: UTF-8
+      string: "@prefix premis: <http://www.loc.gov/premis/rdf/v1#> .\n@prefix image:
+        <http://www.modeshape.org/images/1.0> .\n@prefix sv: <http://www.jcp.org/jcr/sv/1.0>
+        .\n@prefix test: <info:fedora/test/> .\n@prefix nt: <http://www.jcp.org/jcr/nt/1.0>
+        .\n@prefix cnt: <http://www.w3.org/2011/content#> .\n@prefix dcmitype: <http://purl.org/dc/dcmitype/>
+        .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n@prefix xsi: <http://www.w3.org/2001/XMLSchema-instance>
+        .\n@prefix mode: <http://www.modeshape.org/1.0> .\n@prefix oa: <http://www.w3.org/ns/oa#>
+        .\n@prefix triannon: <http://triannon.stanford.edu/ns/> .\n@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        .\n@prefix fedora: <http://fedora.info/definitions/v4/repository#> .\n@prefix
+        xml: <http://www.w3.org/XML/1998/namespace> .\n@prefix ldp: <http://www.w3.org/ns/ldp#>
+        .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix fedoraconfig:
+        <http://fedora.info/definitions/v4/config#> .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0>
+        .\n@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n@prefix dc: <http://purl.org/dc/elements/1.1/>
+        .\n\n\n<http://localhost:8983/fedora/rest/missing_parent_path> a ldp:RDFSource
+        , ldp:Container , <http://www.jcp.org/jcr/nt/1.0folder> , <http://www.jcp.org/jcr/nt/1.0hierarchyNode>
+        , <http://www.jcp.org/jcr/nt/1.0base> , <http://www.jcp.org/jcr/mix/1.0created>
+        , fedora:Container , fedora:Resource , ldp:BasicContainer , fedora:Resource
+        , <http://www.jcp.org/jcr/mix/1.0created> , <http://www.jcp.org/jcr/mix/1.0lastModified>
+        , <http://www.jcp.org/jcr/mix/1.0referenceable> , fedora:Container ;\n\tfedora:lastModifiedBy
+        \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string> ;\n\tfedora:uuid
+        \"9aa08a13-8456-48ad-8c33-6ee6a7d859d6\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfedora:createdBy \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfedora:primaryType \"nt:folder\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfedora:created \"2015-06-09T18:53:22.218Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\tfedora:lastModified \"2015-06-09T18:53:22.218Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\tfedora:mixinTypes \"fedora:Container\"^^<http://www.w3.org/2001/XMLSchema#string>
+        , \"fedora:Resource\"^^<http://www.w3.org/2001/XMLSchema#string> , \"ldp:BasicContainer\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfedora:writable \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>
+        ;\n\tfedora:hasParent <http://localhost:8983/fedora/rest/> ;\n\tfedora:exportsAs
+        <http://localhost:8983/fedora/rest/missing_parent_path/fcr:export?format=jcr/xml>
+        .\n\n<http://localhost:8983/fedora/rest/missing_parent_path/fcr:export?format=jcr/xml>
+        dc:format <http://fedora.info/definitions/v4/repository#jcr/xml> .\n\n<http://fedora.info/definitions/v4/repository#jcr/xml>
+        rdfs:label \"jcr/xml\"^^<http://www.w3.org/2001/XMLSchema#string> .\n"
+    http_version: 
+  recorded_at: Tue, 09 Jun 2015 18:53:22 GMT
+- request:
+    method: head
+    uri: http://localhost:8983/fedora/rest/anno/missing_parent_path
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      Content-Type:
+      - text/html;charset=ISO-8859-1
+      Cache-Control:
+      - must-revalidate,no-cache,no-store
+      Content-Length:
+      - '1401'
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Tue, 09 Jun 2015 18:53:22 GMT
+recorded_with: VCR 2.9.3

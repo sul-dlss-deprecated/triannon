@@ -1,0 +1,43 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: http://localhost:8983/solr/triannon/select?wt=ruby
+    body:
+      encoding: UTF-8
+      string: ''
+    headers: {}
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - text/plain;charset=UTF-8
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |
+        {
+          'responseHeader'=>{
+            'status'=>0,
+            'QTime'=>0,
+            'params'=>{
+              'wt'=>'ruby'}},
+          'response'=>{'numFound'=>0,'start'=>0,'maxScore'=>0.0,'docs'=>[]
+          },
+          'facet_counts'=>{
+            'facet_queries'=>{},
+            'facet_fields'=>{
+              'root'=>[],
+              'motivation'=>[],
+              'target_type'=>[],
+              'body_type'=>[],
+              'annotated_at_tdate'=>[]},
+            'facet_dates'=>{},
+            'facet_ranges'=>{},
+            'facet_intervals'=>{}}}
+    http_version: 
+  recorded_at: Tue, 09 Jun 2015 20:34:04 GMT
+recorded_with: VCR 2.9.3

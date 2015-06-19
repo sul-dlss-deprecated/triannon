@@ -7,10 +7,10 @@ describe Triannon::LdpLoader, :vcr do
   let(:target_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_target.ttl') }
   let(:root_anno_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_root_anno_container.ttl') }
 
-  describe '*load' do
+  context '*load' do
     it "returns a OA::Graph of an OpenAnnotation without LDP or FCrepo triples" do
       allow_any_instance_of(Triannon::LdpLoader).to receive(:get_ttl).and_return(anno_ttl, body_ttl, target_ttl)
-      result = Triannon::LdpLoader.load('somekey')
+      result = Triannon::LdpLoader.load('someroot', 'somekey')
       expect(result).to be_an_instance_of(OA::Graph)
       root_node_solns = result.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
       expect(root_node_solns.count).to eql 1
@@ -23,55 +23,64 @@ describe Triannon::LdpLoader, :vcr do
       expect_any_instance_of(Triannon::LdpLoader).to receive(:load_anno_container)
       expect_any_instance_of(Triannon::LdpLoader).to receive(:load_bodies)
       expect_any_instance_of(Triannon::LdpLoader).to receive(:load_targets)
-      Triannon::LdpLoader.load('somekey')
+      Triannon::LdpLoader.load('someroot', 'somekey')
     end
     it "calls LdpToOAMapper.ldp_to_oa" do
       allow_any_instance_of(Triannon::LdpLoader).to receive(:load_anno_container)
       allow_any_instance_of(Triannon::LdpLoader).to receive(:load_bodies)
       allow_any_instance_of(Triannon::LdpLoader).to receive(:load_targets)
-      expect(Triannon::LdpToOaMapper).to receive(:ldp_to_oa).with(instance_of(Triannon::AnnotationLdp))
-      Triannon::LdpLoader.load('somekey')
+      expect(Triannon::LdpToOaMapper).to receive(:ldp_to_oa).with(instance_of(Triannon::AnnotationLdp), 'someroot')
+      Triannon::LdpLoader.load('someroot', 'somekey')
     end
   end
 
-  describe "#load_anno_container" do
+  context "#initialize" do
+    it 'raises Triannon::LDPContainerError if root_container is nil' do
+      expect{Triannon::LdpLoader.new(nil, @anno)}.to raise_error(Triannon::LDPContainerError, "Annotations must be in a root container.")
+    end
+    it 'raises Triannon::LDPContainerError if root_container is empty string' do
+      expect{Triannon::LdpLoader.new("", @anno)}.to raise_error(Triannon::LDPContainerError, "Annotations must be in a root container.")
+    end
+  end
+
+  context "#load_anno_container" do
     it "asks the ldp store for the annotation object" do
-      loader = Triannon::LdpLoader.new 'somekey'
-      expect(loader).to receive(:get_ttl).with("somekey")
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
+      expect(loader).to receive(:get_ttl).with("someroot/somekey")
       loader.load_anno_container
     end
     it "calls AnnotationLdp.load_statements_into_graph for stored anno object" do
-      loader = Triannon::LdpLoader.new 'somekey'
-      allow(loader).to receive(:get_ttl).with("somekey").and_return(anno_ttl)
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
+      allow(loader).to receive(:get_ttl).with("someroot/somekey").and_return(anno_ttl)
       expect(loader.ldp_annotation).to receive(:load_statements_into_graph)
       loader.load_anno_container
     end
     it "removes Fedora triples before calling AnnotationLdp.load_statements_into_graph" do
-      loader = Triannon::LdpLoader.new 'somekey'
-      allow(loader).to receive(:get_ttl).with("somekey").and_return(anno_ttl)
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
+      allow(loader).to receive(:get_ttl).with("someroot/somekey").and_return(anno_ttl)
       expect(OA::Graph).to receive(:remove_fedora_triples).and_return(RDF::Graph.new)
       expect(loader.ldp_annotation).to receive(:load_statements_into_graph)
       loader.load_anno_container
     end
     it "graph triples include annotatedAt triple from stored anno object" do
-      loader = Triannon::LdpLoader.new 'somekey'
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
       prov_ttl = File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_base_prov.ttl')
-      allow(loader).to receive(:get_ttl).with("somekey").and_return(prov_ttl)
+      allow(loader).to receive(:get_ttl).with("someroot/somekey").and_return(prov_ttl)
       loader.load_anno_container
       result = loader.ldp_annotation.graph.query [nil, RDF::Vocab::OA.annotatedAt, nil]
       expect(result.size).to eq 1
     end
     it "no triple in the graph has the (ldp store) body uri as a subject (before #load_bodies is called)" do
-      loader = Triannon::LdpLoader.new 'somekey'
-      allow(loader).to receive(:get_ttl).with("somekey").and_return(anno_ttl)
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
+      allow(loader).to receive(:get_ttl).with("someroot/somekey").and_return(anno_ttl)
       loader.load_anno_container
       body_uri = loader.ldp_annotation.body_uris.first
       result = loader.ldp_annotation.graph.query [body_uri, nil, nil]
       expect(result.size).to eq 0
     end
     it "no triple in the graph has the (ldp store) target uri as a subject (before #load_targets is called)" do
-      loader = Triannon::LdpLoader.new 'somekey'
-      allow(loader).to receive(:get_ttl).with("somekey").and_return(anno_ttl)
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
+      allow(loader).to receive(:get_ttl).with("someroot/somekey").and_return(anno_ttl)
       loader.load_anno_container
       target_uri = loader.ldp_annotation.target_uris.first
       result = loader.ldp_annotation.graph.query [target_uri, nil, nil]
@@ -79,16 +88,16 @@ describe Triannon::LdpLoader, :vcr do
     end
   end
 
-  describe "#load_bodies" do
+  context "#load_bodies" do
     it "asks the ldp store for each subject of hasBody" do
-      loader = Triannon::LdpLoader.new 'somekey'
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
       allow(loader.ldp_annotation).to receive(:body_uris).and_return(["body_key1", "body_key2"])
       expect(loader).to receive(:get_ttl).with("body_key1").and_return(body_ttl)
       expect(loader).to receive(:get_ttl).with("body_key2")
       loader.load_bodies
     end
     it "calls AnnotationLdp.load_statements_into_graph for each stored body object" do
-      loader = Triannon::LdpLoader.new 'somekey'
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
       allow(loader.ldp_annotation).to receive(:body_uris).and_return(["body_key1", "body_key2"])
       allow(loader).to receive(:get_ttl).with("body_key1").and_return(body_ttl)
       allow(loader).to receive(:get_ttl).with("body_key2").and_return(body_ttl)
@@ -96,7 +105,7 @@ describe Triannon::LdpLoader, :vcr do
       loader.load_bodies
     end
     it "removes Fedora triples before calling AnnotationLdp.load_statements_into_graph" do
-      loader = Triannon::LdpLoader.new 'somekey'
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
       allow(loader.ldp_annotation).to receive(:body_uris).and_return(["some_body_key"])
       allow(loader).to receive(:get_ttl).with("some_body_key").and_return(body_ttl)
       expect(OA::Graph).to receive(:remove_fedora_triples).and_return(RDF::Graph.new)
@@ -104,16 +113,16 @@ describe Triannon::LdpLoader, :vcr do
       loader.load_bodies
     end
     it "retrieves the bodies via hasBody objects in anno container" do
-      loader = Triannon::LdpLoader.new 'somekey'
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
       allow(loader).to receive(:get_ttl).and_return(anno_ttl, body_ttl)
       loader.load_anno_container
       loader.load_bodies
       body_uri = loader.ldp_annotation.body_uris.first
       result = loader.ldp_annotation.graph.query [body_uri, RDF::Vocab::CNT.chars, nil]
-      expect(result.first.object.to_s).to eq "Solr integration test"
+      expect(result.first.object.to_s).to eq "ldp loader test"
     end
     it "retrieves triples about external refs" do
-      loader = Triannon::LdpLoader.new 'somekey'
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
       my_body_ttl = File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_body_ext_refs.ttl')
       allow(loader).to receive(:get_ttl).and_return(anno_ttl, my_body_ttl)
       loader.load_anno_container
@@ -126,16 +135,16 @@ describe Triannon::LdpLoader, :vcr do
     end
   end
 
-  describe "#load_targets" do
+  context "#load_targets" do
     it "asks the ldp store for each subject of hasTarget" do
-      loader = Triannon::LdpLoader.new 'somekey'
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
       allow(loader.ldp_annotation).to receive(:target_uris).and_return(["target_key1", "target_key2"])
       expect(loader).to receive(:get_ttl).with("target_key1").and_return(target_ttl)
       expect(loader).to receive(:get_ttl).with("target_key2")
       loader.load_targets
     end
     it "calls AnnotationLdp.load_statements_into_graph for each stored target object" do
-      loader = Triannon::LdpLoader.new 'somekey'
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
       allow(loader.ldp_annotation).to receive(:target_uris).and_return(["target_key1", "target_key2"])
       expect(loader).to receive(:get_ttl).with("target_key1").and_return(target_ttl)
       expect(loader).to receive(:get_ttl).with("target_key2").and_return(target_ttl)
@@ -143,7 +152,7 @@ describe Triannon::LdpLoader, :vcr do
       loader.load_targets
     end
     it "removes Fedora triples before calling AnnotationLdp.load_statements_into_graph" do
-      loader = Triannon::LdpLoader.new 'somekey'
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
       allow(loader.ldp_annotation).to receive(:target_uris).and_return(["some_target_key"])
       allow(loader).to receive(:get_ttl).with("some_target_key").and_return(body_ttl)
       expect(OA::Graph).to receive(:remove_fedora_triples).and_return(RDF::Graph.new)
@@ -151,7 +160,7 @@ describe Triannon::LdpLoader, :vcr do
       loader.load_targets
     end
     it "retrieves the targets via hasTarget objects in anno container" do
-      loader = Triannon::LdpLoader.new 'somekey'
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
       allow(loader).to receive(:get_ttl).and_return(anno_ttl, target_ttl)
       loader.load_anno_container
       loader.load_targets
@@ -160,7 +169,7 @@ describe Triannon::LdpLoader, :vcr do
       expect(result.first.object.to_s).to eq "http://example.com/solr-integration-test"
     end
     it "retrieves triples about external refs" do
-      loader = Triannon::LdpLoader.new 'somekey'
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
       my_target_ttl = File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_target_ext_refs.ttl')
       allow(loader).to receive(:get_ttl).and_return(anno_ttl, my_target_ttl)
       loader.load_anno_container
@@ -187,19 +196,7 @@ describe Triannon::LdpLoader, :vcr do
     end
   end
 
-  describe ".find_all" do
-    it "returns an array of Triannon::Annnotation objects, with just id set" do
-      loader = Triannon::LdpLoader.new
-      allow(loader).to receive(:get_ttl).and_return(root_anno_ttl)
-      objs = loader.find_all
-
-      expect(objs.size).to be > 0
-      expect(objs.first.class).to eq Triannon::Annotation
-      expect(objs.first.id).to_not be_nil
-    end
-  end
-
-  describe '#get_ttl' do
+  context '#get_ttl' do
     # TODO: these tests are brittle since they stubs the whole http interaction with faraday objects
     it "retrieves data via HTTP over LdpLoader.conn when given an id" do
       resp = double()
@@ -208,7 +205,7 @@ describe Triannon::LdpLoader, :vcr do
       conn = double()
       allow(conn).to receive(:get).and_return(resp)
 
-      loader = Triannon::LdpLoader.new 'somekey'
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
       expect(loader).to receive(:conn).and_return(conn)
 
       loader.send(:get_ttl, "somekey")
@@ -223,7 +220,7 @@ describe Triannon::LdpLoader, :vcr do
           conn = double()
           allow(conn).to receive(:get).and_return(ldp_resp)
 
-          loader = Triannon::LdpLoader.new 'somekey'
+          loader = Triannon::LdpLoader.new('someroot', 'somekey')
           allow(loader).to receive(:conn).and_return(conn)
 
           expect { loader.send(:get_ttl, "somekey") }.to raise_error { |error|
@@ -237,14 +234,14 @@ describe Triannon::LdpLoader, :vcr do
     end
   end
 
-  describe '#conn' do
+  context '#conn' do
     it "returns a Faraday::Connection" do
-      loader = Triannon::LdpLoader.new 'somekey'
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
       conn = loader.send(:conn)
       expect(conn).to be_a Faraday::Connection
     end
     it "sets Prefer header to omit server managed triples" do
-      loader = Triannon::LdpLoader.new 'somekey'
+      loader = Triannon::LdpLoader.new('someroot', 'somekey')
       conn = loader.send(:conn)
       expect(conn.headers).to include("Prefer" => 'return=respresentation; omit="http://fedora.info/definitions/v4/repository#ServerManaged"')
     end

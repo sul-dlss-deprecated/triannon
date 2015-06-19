@@ -6,11 +6,11 @@ module Triannon
     after_save :solr_save
     after_destroy :solr_delete
 
-    attr_accessor :id, :data, :expected_content_type
+    attr_accessor :id, :data, :expected_content_type, :root_container
 
-    validates_each :data do |record, attr, value|
-      record.errors.add attr, 'less than 30 chars' if value.to_s.length < 30
-    end
+    validates :data, :root_container, presence: true
+    # TODO:  ensure root container exists in LDP store??  seems too expensive
+    validates :data, length: {minimum: 30}
 
     # full validation should be optional?
     #   minimal:  a subject with the right type and a hasTarget?  (see url)
@@ -26,18 +26,15 @@ module Triannon
       a
     end
 
+    # @param [String] root_container - LDP parent container for annotation
     # @param [String] id the unique id of the annotation.  Can include base_uri prefix or omit it.
-    def self.find(id)
-      oa_graph = Triannon::LdpLoader.load id
+    def self.find(root_container, id)
+      oa_graph = Triannon::LdpLoader.load(root_container, id)
       anno = Triannon::Annotation.new
       anno.graph = oa_graph
       anno.id = id
+      anno.root_container = root_container
       anno
-    end
-
-    # @deprecated - was used by old annotations#index action, before redirect to search (2015-04)
-    def self.all
-      Triannon::LdpLoader.find_all
     end
 
     # Instance Methods ----------------------------------------------------------------
@@ -45,17 +42,17 @@ module Triannon
     def save
       _run_save_callbacks do
         # TODO: check if valid anno?
-        @id = Triannon::LdpWriter.create_anno self if graph && graph.size > 2
+        @id = Triannon::LdpWriter.create_anno(self, root_container) if graph && graph.size > 2
         # reload from storage to get the anno id within the graph
         # TODO:  do graph manipulation to add id instead?
-        @graph = Triannon::LdpLoader.load id
+        @graph = Triannon::LdpLoader.load(root_container, id)
         id
       end
     end
 
     def destroy
       _run_destroy_callbacks do
-        Triannon::LdpWriter.delete_anno @id
+        Triannon::LdpWriter.delete_anno "#{root_container}/#{id}"
       end
     end
 
@@ -103,12 +100,12 @@ protected
 
     # Add annotation to Solr as a Solr document
     def solr_save
-      solr_writer.write(graph) if id_as_url && !id_as_url.empty?
+      solr_writer.write(graph, root_container) if id_as_url.present?
     end
 
     # Delete annotation from Solr
     def solr_delete
-      solr_writer.delete(id) if id
+      solr_writer.delete("#{root_container}/#{id}") if id.present?
     end
 
 private
