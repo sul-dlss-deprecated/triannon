@@ -1,5 +1,13 @@
 Triannon::Engine.routes.draw do
 
+  # Authentication routes; these must precede '/:anno_root/*' and they
+  # preclude the use of an anno root named 'auth'.
+  match '/auth/login', to: 'auth#options', via: [:options]
+  match '/auth/login', to: 'auth#login', via: [:get]
+  get '/auth/logout', to: 'auth#logout'
+  get '/auth/access_token', to: 'auth#access_token'
+  post '/auth/client_identity', to: 'auth#client_identity'
+
   # 1. can't use resourceful routing because of :anno_root (dynamic path segment)
 
   # 2. couldn't figure out how to exclude specific values with regexp constraint since beginning and end regex matchers
@@ -79,12 +87,5 @@ Triannon::Engine.routes.draw do
   get '/annotations', to: 'search#find'
   root to: 'search#find'
 
-
-  # Authentication routes
-  match '/auth/login', to: 'auth#options', via: [:options]
-  match '/auth/login', to: 'auth#login', via: [:get]
-  get '/auth/logout', to: 'auth#logout'
-  get '/auth/access_token', to: 'auth#access_token'
-  post '/auth/client_identity', to: 'auth#client_identity'
 
 end
