@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: head
-    uri: http://localhost:8983/fedora/rest/anno/whee
+    uri: http://localhost:8983/fedora/rest/anno/ldpwclassspec/whee
     body:
       encoding: US-ASCII
       string: ''
@@ -21,15 +21,15 @@ http_interactions:
       Cache-Control:
       - must-revalidate,no-cache,no-store
       Content-Length:
-      - '1386'
+      - '1400'
     body:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Wed, 10 Jun 2015 18:26:45 GMT
+  recorded_at: Tue, 09 Jun 2015 18:53:22 GMT
 - request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno
+    uri: http://localhost:8983/fedora/rest/anno/ldpwclassspec
     body:
       encoding: UTF-8
       string: |
@@ -54,23 +54,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"5d318942491c92389fdfa4987b4314c16bfe497d"'
+      - '"c7145a50f1a1ef09bb35bd3e8f386bd805e8d67b"'
       Last-Modified:
-      - Wed, 10 Jun 2015 18:26:45 GMT
+      - Tue, 09 Jun 2015 18:53:22 GMT
       Content-Length:
-      - '43'
+      - '57'
       Location:
-      - http://localhost:8983/fedora/rest/anno/whee
+      - http://localhost:8983/fedora/rest/anno/ldpwclassspec/whee
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/whee
+      string: http://localhost:8983/fedora/rest/anno/ldpwclassspec/whee
     http_version: 
-  recorded_at: Wed, 10 Jun 2015 18:26:45 GMT
+  recorded_at: Tue, 09 Jun 2015 18:53:22 GMT
 - request:
     method: get
-    uri: http://localhost:8983/fedora/rest/anno/whee
+    uri: http://localhost:8983/fedora/rest/anno/ldpwclassspec/whee
     body:
       encoding: US-ASCII
       string: ''
@@ -87,9 +87,9 @@ http_interactions:
       message: OK
     headers:
       Etag:
-      - '"5d318942491c92389fdfa4987b4314c16bfe497d"'
+      - '"c7145a50f1a1ef09bb35bd3e8f386bd805e8d67b"'
       Last-Modified:
-      - Wed, 10 Jun 2015 18:26:45 GMT
+      - Tue, 09 Jun 2015 18:53:22 GMT
       Link:
       - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
       - <http://www.w3.org/ns/ldp#Container>;rel="type"
@@ -106,7 +106,7 @@ http_interactions:
       - Accept, Range, Accept-Encoding, Accept-Language
       - Prefer
       Content-Length:
-      - '2798'
+      - '2890'
       Content-Type:
       - application/x-turtle
     body:
@@ -122,27 +122,28 @@ http_interactions:
         xml: <http://www.w3.org/XML/1998/namespace> .\n@prefix ldp: <http://www.w3.org/ns/ldp#>
         .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix fedoraconfig:
         <http://fedora.info/definitions/v4/config#> .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0>
-        .\n@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n@prefix dc: <http://purl.org/dc/terms/>
-        .\n\n\n<http://localhost:8983/fedora/rest/anno/whee> a ldp:RDFSource , ldp:Container
-        , <http://www.jcp.org/jcr/nt/1.0folder> , <http://www.jcp.org/jcr/nt/1.0hierarchyNode>
+        .\n@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n@prefix dc: <http://purl.org/dc/elements/1.1/>
+        .\n\n\n<http://localhost:8983/fedora/rest/anno/ldpwclassspec/whee> a ldp:RDFSource
+        , ldp:Container , <http://www.jcp.org/jcr/nt/1.0folder> , <http://www.jcp.org/jcr/nt/1.0hierarchyNode>
         , <http://www.jcp.org/jcr/nt/1.0base> , <http://www.jcp.org/jcr/mix/1.0created>
         , fedora:Container , fedora:Resource , ldp:BasicContainer , fedora:Resource
         , <http://www.jcp.org/jcr/mix/1.0created> , <http://www.jcp.org/jcr/mix/1.0lastModified>
         , <http://www.jcp.org/jcr/mix/1.0referenceable> , fedora:Container ;\n\tfedora:lastModifiedBy
         \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string> ;\n\tfedora:uuid
-        \"7bc410de-6e96-4a95-84d9-941aaf24fcd1\"^^<http://www.w3.org/2001/XMLSchema#string>
+        \"90370b2f-9d3c-43b5-8dac-21b40425f63f\"^^<http://www.w3.org/2001/XMLSchema#string>
         ;\n\tfedora:createdBy \"bypassAdmin\"^^<http://www.w3.org/2001/XMLSchema#string>
         ;\n\tfedora:primaryType \"nt:folder\"^^<http://www.w3.org/2001/XMLSchema#string>
-        ;\n\tfedora:created \"2015-06-10T18:26:45.101Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\tfedora:created \"2015-06-09T18:53:22.024Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
         ;\n\tfedora:mixinTypes \"fedora:Container\"^^<http://www.w3.org/2001/XMLSchema#string>
         , \"fedora:Resource\"^^<http://www.w3.org/2001/XMLSchema#string> , \"ldp:BasicContainer\"^^<http://www.w3.org/2001/XMLSchema#string>
-        ;\n\tfedora:lastModified \"2015-06-10T18:26:45.101Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
+        ;\n\tfedora:lastModified \"2015-06-09T18:53:22.024Z\"^^<http://www.w3.org/2001/XMLSchema#dateTime>
         ;\n\tfedora:writable \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>
-        ;\n\tfedora:hasParent <http://localhost:8983/fedora/rest/anno> ;\n\tfedora:exportsAs
-        <http://localhost:8983/fedora/rest/anno/whee/fcr:export?format=jcr/xml> .\n\n<http://localhost:8983/fedora/rest/anno/whee/fcr:export?format=jcr/xml>
-        <http://purl.org/dc/elements/1.1/format> <http://fedora.info/definitions/v4/repository#jcr/xml>
-        .\n\n<http://fedora.info/definitions/v4/repository#jcr/xml> rdfs:label \"jcr/xml\"^^<http://www.w3.org/2001/XMLSchema#string>
+        ;\n\tfedora:hasParent <http://localhost:8983/fedora/rest/anno/ldpwclassspec>
+        .\n\n<http://localhost:8983/fedora/rest/anno/ldpwclassspec/whee/fcr:export?format=jcr/xml>
+        dc:format <http://fedora.info/definitions/v4/repository#jcr/xml> .\n\n<http://fedora.info/definitions/v4/repository#jcr/xml>
+        rdfs:label \"jcr/xml\"^^<http://www.w3.org/2001/XMLSchema#string> .\n\n<http://localhost:8983/fedora/rest/anno/ldpwclassspec/whee>
+        fedora:exportsAs <http://localhost:8983/fedora/rest/anno/ldpwclassspec/whee/fcr:export?format=jcr/xml>
         .\n"
     http_version: 
-  recorded_at: Wed, 10 Jun 2015 18:26:45 GMT
+  recorded_at: Tue, 09 Jun 2015 18:53:22 GMT
 recorded_with: VCR 2.9.3

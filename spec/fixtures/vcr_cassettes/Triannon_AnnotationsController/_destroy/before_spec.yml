@@ -1,0 +1,110 @@
+---
+http_interactions:
+- request:
+    method: head
+    uri: http://localhost:8983/fedora/rest/anno
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Etag:
+      - '"ff99c5b04ad9a1f56bd3aba107a7c7685b60d841"'
+      Last-Modified:
+      - Thu, 04 Jun 2015 20:24:17 GMT
+      Link:
+      - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Container>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      Accept-Patch:
+      - application/sparql-update
+      Accept-Post:
+      - text/turtle,text/rdf+n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      Allow:
+      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
+      Content-Type:
+      - text/tab-separated-values
+      Content-Length:
+      - '0'
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Thu, 04 Jun 2015 20:24:34 GMT
+- request:
+    method: head
+    uri: http://localhost:8983/fedora/rest/anno/anno_controller_destroy_specs
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      Content-Type:
+      - text/html;charset=ISO-8859-1
+      Cache-Control:
+      - must-revalidate,no-cache,no-store
+      Content-Length:
+      - '1411'
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Thu, 04 Jun 2015 20:24:34 GMT
+- request:
+    method: post
+    uri: http://localhost:8983/fedora/rest/anno
+    body:
+      encoding: UTF-8
+      string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+        <> a ldp:BasicContainer .
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Content-Type:
+      - text/turtle
+      Slug:
+      - anno_controller_destroy_specs
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - '"9275d68638ce6984c8bdb26042082beedae7fbc0"'
+      Last-Modified:
+      - Thu, 04 Jun 2015 20:24:34 GMT
+      Content-Length:
+      - '68'
+      Location:
+      - http://localhost:8983/fedora/rest/anno/anno_controller_destroy_specs
+      Content-Type:
+      - text/plain
+    body:
+      encoding: UTF-8
+      string: http://localhost:8983/fedora/rest/anno/anno_controller_destroy_specs
+    http_version: 
+  recorded_at: Thu, 04 Jun 2015 20:24:35 GMT
+recorded_with: VCR 2.9.3

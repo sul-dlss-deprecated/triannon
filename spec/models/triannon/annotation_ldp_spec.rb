@@ -4,6 +4,8 @@ describe Triannon::AnnotationLdp, :vcr do
 
   let(:anno_ttl) { File.read(Triannon.fixture_path("ldp_annotations") + '/fcrepo4_base.ttl') }
   let(:base_stmts) { RDF::Graph.new.from_ttl(anno_ttl).statements }
+  let(:root_container) {'specs'}
+  let(:root_container_url) {"#{Triannon.config[:ldp]['url']}/#{Triannon.config[:ldp]['uber_container']}/#{root_container}"}
   let(:anno) { Triannon::AnnotationLdp.new }
 
   describe "#graph" do
@@ -16,7 +18,7 @@ describe Triannon::AnnotationLdp, :vcr do
   describe "#base_uri" do
     it "returns the URI to the annotation's main root-level subject" do
       anno.load_statements_into_graph base_stmts
-      expect(anno.base_uri.path).to match %r{/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec$}
+      expect(anno.base_uri.path).to match %r{/67/c0/18/9d/67c0189d-56d4-47fb-abea-1f995187b358$}
     end
   end
 
@@ -27,18 +29,18 @@ describe Triannon::AnnotationLdp, :vcr do
       expect(anno.body_uris.size).to eq 1
       body_uri = anno.body_uris.first
       expect(body_uri.class).to eql RDF::URI
-      expect(body_uri.path).to match "#{anno.base_uri.path}/b/75/18/5b/af/75185baf-7057-4762-bfb2-432e88221810"
+      expect(body_uri.path).to match "#{anno.base_uri.path}/b/67/f2/30/a2/67f230a2-3bf3-41e5-952e-8362dc7a5366"
     end
     it 'returns an Array of body object ids as URIs - 2 bodies' do
-      body_url1 = "http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2/b/14788e2d-fe2a-424b-89b3-f73e77d81c62"
-      body_url2 = "http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2/b/b20b2bd7-bbfa-4209-997c-e21ad8032e28"
+      body_url1 = "#{root_container_url}/a6/42/73/68/a6427368-4358-444c-80fc-10587f24c94b/b/e1/89/b9/e1/e189b9e1-4e83-4549-aa48-ac0b4dd6bf0c"
+      body_url2 = "#{root_container_url}/a6/42/73/68/a6427368-4358-444c-80fc-10587f24c94b/b/93/b2/66/39/93b26639-b0ba-43c7-954e-ecd800332bec"
       stmts = RDF::Turtle::Reader.new("
-      @prefix openannotation: <http://www.w3.org/ns/oa#> .
-      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-      <http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2> a openannotation:Annotation;
-         openannotation:motivatedBy openannotation:commenting;
-         openannotation:hasBody <#{body_url1}>,
-           <#{body_url2}> .
+        @prefix oa: <http://www.w3.org/ns/oa#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+        <#{root_container_url}/a6/42/73/68/a6427368-4358-444c-80fc-10587f24c94b> a oa:Annotation;
+           oa:motivatedBy oa:commenting;
+           oa:hasBody <#{body_url1}>,
+             <#{body_url2}> .
       ").statements.to_a
       anno.load_statements_into_graph stmts
       expect(anno.body_uris.class).to eql Array
@@ -52,16 +54,14 @@ describe Triannon::AnnotationLdp, :vcr do
     end
     it 'returns empty Array if there are no bodies' do
       stmts = RDF::Turtle::Reader.new("
-      @prefix ldp: <http://www.w3.org/ns/ldp#> .
-      @prefix openannotation: <http://www.w3.org/ns/oa#> .
-      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-      <http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2> a ldp:Container,
-           ldp:DirectContainer,
-           ldp:RDFSource,
-           openannotation:Annotation;
-         ldp:hasMemberRelation ldp:member;
-         ldp:membershipResource <http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2>;
-         openannotation:motivatedBy openannotation:bookmarking .
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix oa: <http://www.w3.org/ns/oa#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+        <#{root_container_url}/a6/42/73/68/a6427368-4358-444c-80fc-10587f24c94b> a ldp:Container,
+             ldp:BasicContainer,
+             ldp:RDFSource,
+             oa:Annotation;
+           oa:motivatedBy oa:bookmarking .
       ").statements.to_a
       anno.load_statements_into_graph stmts
       expect(anno.body_uris).to eql []
@@ -75,18 +75,18 @@ describe Triannon::AnnotationLdp, :vcr do
       expect(anno.target_uris.size).to eq 1
       target_uri = anno.target_uris.first
       expect(target_uri.class).to eql RDF::URI
-      expect(target_uri.path).to match "#{anno.base_uri.path}/t/07/1b/94/c0/071b94c0-953e-46aa-b21c-2bb201c5ff59"
+      expect(target_uri.path).to match "#{anno.base_uri.path}/t/0a/b5/36/9d/0ab5369d-f872-4488-8f1e-3143819b94bf"
     end
     it 'returns an Array of target object ids as URIs - 2 targets' do
-      target_url1 = "http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2/t/14788e2d-fe2a-424b-89b3-f73e77d81c62"
-      target_url2 = "http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2/t/b20b2bd7-bbfa-4209-997c-e21ad8032e28"
+      target_url1 = "#{root_container_url}/a6/42/73/68/a6427368-4358-444c-80fc-10587f24c94b/t/e1/89/b9/e1/e189b9e1-4e83-4549-aa48-ac0b4dd6bf0c"
+      target_url2 = "#{root_container_url}/a6/42/73/68/a6427368-4358-444c-80fc-10587f24c94b/t/93/b2/66/39/93b26639-b0ba-43c7-954e-ecd800332bec"
       stmts = RDF::Turtle::Reader.new("
-      @prefix openannotation: <http://www.w3.org/ns/oa#> .
-      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-      <http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2> a openannotation:Annotation;
-         openannotation:motivatedBy openannotation:commenting;
-         openannotation:hasTarget <#{target_url1}>,
-            <#{target_url2}> .
+        @prefix oa: <http://www.w3.org/ns/oa#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+        <#{root_container_url}/a6/42/73/68/a6427368-4358-444c-80fc-10587f24c94b> a oa:Annotation;
+           oa:motivatedBy oa:commenting;
+           oa:hasTarget <#{target_url1}>,
+              <#{target_url2}> .
       ").statements.to_a
       anno.load_statements_into_graph stmts
       expect(anno.target_uris.class).to eql Array
@@ -100,16 +100,14 @@ describe Triannon::AnnotationLdp, :vcr do
     end
     it 'returns empty Array if there are no targets' do
       stmts = RDF::Turtle::Reader.new("
-      @prefix ldp: <http://www.w3.org/ns/ldp#> .
-      @prefix openannotation: <http://www.w3.org/ns/oa#> .
-      @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-      <http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2> a ldp:Container,
-           ldp:DirectContainer,
-           ldp:RDFSource,
-           openannotation:Annotation;
-         ldp:hasMemberRelation ldp:member;
-         ldp:membershipResource <http://localhost:8983/fedora/rest/anno/b5b5889b-d7f9-4c04-8117-2571bd42a3d2>;
-         openannotation:motivatedBy openannotation:bookmarking .
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix oa: <http://www.w3.org/ns/oa#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+        <#{root_container_url}/a6/42/73/68/a6427368-4358-444c-80fc-10587f24c94b> a ldp:Container,
+             ldp:BasicContainer,
+             ldp:RDFSource,
+             oa:Annotation;
+           oa:motivatedBy oa:bookmarking .
       ").statements.to_a
       anno.load_statements_into_graph stmts
       expect(anno.target_uris).to eql []
@@ -122,7 +120,7 @@ describe Triannon::AnnotationLdp, :vcr do
       anno.load_statements_into_graph stmts
       solns = anno.graph.query [nil, RDF.type, RDF::Vocab::OA.Annotation]
       expect(solns.size).to eq 1
-      expect(solns.first.subject.path).to match %r{/f8/c2/36/de/f8c236de-be13-499d-a1e2-3f6fbd3a89ec}
+      expect(solns.first.subject.path).to match %r{/67/c0/18/9d/67c0189d-56d4-47fb-abea-1f995187b358$}
     end
     it 'adds statements to existing graph' do
       stmts = RDF::Graph.new.from_ttl(anno_ttl).statements
