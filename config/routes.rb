@@ -57,12 +57,12 @@ end
 
 def anno_container_exclusions(request)
   anno_root = request.path_parameters[:anno_root]
-  anno_root !~ /^annotations|auth|new|search$/ && id_exclusions(request)
+  anno_root !~ /^annotations$|^auth$|^new$|^search$/ && id_exclusions(request)
 end
 
 def annotations_container_exclusions(request)
   anno_root = request.path_parameters[:anno_root]
-  anno_root !~ /^auth|new|search$/ && id_exclusions(request)
+  anno_root !~ /^auth$|^new$|^search$/ && id_exclusions(request)
 end
 
 def id_exclusions(request)
