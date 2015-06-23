@@ -17,23 +17,6 @@ describe Triannon::AuthController, :vcr, type: :controller do
   }
 
   describe '/auth/login' do
-    describe 'responds to GET and OPTIONS requests' do
-      it 'GET has a route to /auth/login' do
-        expect(:get => '/auth/login').to be_routable
-      end
-      it 'OPTIONS has a route to /auth/login' do
-        expect(:options => '/auth/login').to be_routable
-      end
-      it 'DELETE has no route to /auth/login' do
-        expect(:delete => '/auth/login').not_to be_routable
-      end
-      it 'POST has no route to /auth/login' do
-        expect(:post => '/auth/login').not_to be_routable
-      end
-      it 'PUT has no route to /auth/login' do
-        expect(:put => '/auth/login').not_to be_routable
-      end
-    end
     describe 'OPTIONS requests for /auth/login:' do
       it 'reject GET requests for information' do
         process :options, 'GET'
@@ -160,23 +143,6 @@ describe Triannon::AuthController, :vcr, type: :controller do
   end # /auth/login
 
   describe 'GET /auth/logout' do
-    describe 'only responds to GET requests' do
-      it 'GET has a route to /auth/logout' do
-        expect(:get => '/auth/logout').to be_routable
-      end
-      it 'DELETE has no route to /auth/logout' do
-        expect(:delete => '/auth/logout').not_to be_routable
-      end
-      it 'OPTIONS has no route to /auth/logout' do
-        expect(:options => '/auth/logout').not_to be_routable
-      end
-      it 'POST has no route to /auth/logout' do
-        expect(:post => '/auth/logout').not_to be_routable
-      end
-      it 'PUT has no route to /auth/logout' do
-        expect(:put => '/auth/logout').not_to be_routable
-      end
-    end
     it 'GET response status is 302 and redirects to root path' do
       get :logout
       expect(response.status).to eq(302)
@@ -215,23 +181,6 @@ describe Triannon::AuthController, :vcr, type: :controller do
   describe 'POST /auth/client_identity' do
     before :each do
       basic_auth('userA', 'secretA')
-    end
-    describe 'only responds to POST requests' do
-      it 'POST has a route to /auth/client_identity' do
-        expect(:post => '/auth/client_identity').to be_routable
-      end
-      it 'DELETE has no route to /auth/client_identity' do
-        expect(:delete => '/auth/client_identity').not_to be_routable
-      end
-      it 'GET has no route to /auth/client_identity' do
-        expect(:get => '/auth/client_identity').not_to be_routable
-      end
-      it 'OPTIONS has no route to /auth/client_identity' do
-        expect(:options => '/auth/client_identity').not_to be_routable
-      end
-      it 'PUT has no route to /auth/client_identity' do
-        expect(:put => '/auth/client_identity').not_to be_routable
-      end
     end
     it 'accepts JSON content' do
       accept_json
@@ -324,23 +273,6 @@ describe Triannon::AuthController, :vcr, type: :controller do
       expect(data['accessToken']).not_to be_nil
       expect(data['accessToken']).to be_instance_of String
     }
-    describe 'only responds to GET requests' do
-      it 'GET has a route to /auth/access_token' do
-        expect(:get => '/auth/access_token').to be_routable
-      end
-      it 'DELETE has no route to /auth/access_token' do
-        expect(:delete => '/auth/access_token').not_to be_routable
-      end
-      it 'OPTIONS has no route to /auth/access_token' do
-        expect(:options => '/auth/access_token').not_to be_routable
-      end
-      it 'POST has no route to /auth/access_token' do
-        expect(:post => '/auth/access_token').not_to be_routable
-      end
-      it 'PUT has no route to /auth/access_token' do
-        expect(:put => '/auth/access_token').not_to be_routable
-      end
-    end
     describe 'with valid login credentials' do
       before :each do
         login
