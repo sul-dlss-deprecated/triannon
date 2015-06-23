@@ -1,8 +1,47 @@
 ---
 http_interactions:
 - request:
+    method: head
+    uri: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Etag:
+      - '"86e4aa893703f44c4c84794ab6cfab28241ac7fc"'
+      Last-Modified:
+      - Mon, 22 Jun 2015 22:48:56 GMT
+      Link:
+      - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
+      - <http://www.w3.org/ns/ldp#Container>;rel="type"
+      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
+      Accept-Patch:
+      - application/sparql-update
+      Accept-Post:
+      - text/turtle,text/rdf+n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
+      Allow:
+      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
+      Content-Type:
+      - text/tab-separated-values
+      Content-Length:
+      - '0'
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Mon, 22 Jun 2015 22:48:56 GMT
+- request:
     method: post
-    uri: http://localhost:8983/fedora/rest/anno
+    uri: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs
     body:
       encoding: UTF-8
       string: |
@@ -30,23 +69,23 @@ http_interactions:
       message: Created
     headers:
       Etag:
-      - '"801164ff6e7cb59fe8ca234390a39ca8bd68d618"'
+      - '"d94f3396894a6ae3672324043f127c23a012cca0"'
       Last-Modified:
-      - Wed, 10 Jun 2015 18:25:39 GMT
+      - Mon, 22 Jun 2015 22:48:56 GMT
       Content-Length:
-      - '87'
+      - '116'
       Location:
-      - http://localhost:8983/fedora/rest/anno/87/c8/c5/93/87c8c593-1d7b-46e3-a7ba-8070fd9c97e5
+      - http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/42/b9/df/b4/42b9dfb4-0acf-4dcc-add1-d3edfbaedb4c
       Content-Type:
       - text/plain
     body:
       encoding: UTF-8
-      string: http://localhost:8983/fedora/rest/anno/87/c8/c5/93/87c8c593-1d7b-46e3-a7ba-8070fd9c97e5
+      string: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/42/b9/df/b4/42b9dfb4-0acf-4dcc-add1-d3edfbaedb4c
     http_version: 
-  recorded_at: Wed, 10 Jun 2015 18:25:39 GMT
+  recorded_at: Mon, 22 Jun 2015 22:48:56 GMT
 - request:
     method: get
-    uri: http://localhost:8983/fedora/rest/anno/87/c8/c5/93/87c8c593-1d7b-46e3-a7ba-8070fd9c97e5
+    uri: http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/42/b9/df/b4/42b9dfb4-0acf-4dcc-add1-d3edfbaedb4c
     body:
       encoding: US-ASCII
       string: ''
@@ -65,9 +104,9 @@ http_interactions:
       message: OK
     headers:
       Etag:
-      - '"801164ff6e7cb59fe8ca234390a39ca8bd68d618"'
+      - '"d94f3396894a6ae3672324043f127c23a012cca0"'
       Last-Modified:
-      - Wed, 10 Jun 2015 18:25:39 GMT
+      - Mon, 22 Jun 2015 22:48:56 GMT
       Link:
       - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
       - <http://www.w3.org/ns/ldp#Container>;rel="type"
@@ -84,7 +123,7 @@ http_interactions:
       - Accept, Range, Accept-Encoding, Accept-Language
       - Prefer
       Content-Length:
-      - '1241'
+      - '1270'
       Content-Type:
       - application/x-turtle
     body:
@@ -101,8 +140,8 @@ http_interactions:
         .\n@prefix xs: <http://www.w3.org/2001/XMLSchema> .\n@prefix fedoraconfig:
         <http://fedora.info/definitions/v4/config#> .\n@prefix mix: <http://www.jcp.org/jcr/mix/1.0>
         .\n@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n@prefix dc: <http://purl.org/dc/elements/1.1/>
-        .\n\n\n<http://localhost:8983/fedora/rest/anno/87/c8/c5/93/87c8c593-1d7b-46e3-a7ba-8070fd9c97e5>
+        .\n\n\n<http://localhost:8983/fedora/rest/anno/anno_controller_create_specs/42/b9/df/b4/42b9dfb4-0acf-4dcc-add1-d3edfbaedb4c>
         a oa:Annotation , ldp:BasicContainer ;\n\toa:motivatedBy oa:commenting .\n"
     http_version: 
-  recorded_at: Wed, 10 Jun 2015 18:25:39 GMT
+  recorded_at: Mon, 22 Jun 2015 22:48:56 GMT
 recorded_with: VCR 2.9.3

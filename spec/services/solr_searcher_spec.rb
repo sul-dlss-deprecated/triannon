@@ -34,13 +34,39 @@ describe Triannon::SolrSearcher, :vcr do
   end
 
   context '#search' do
+    before(:all) do
+      root = "solr_searcher_spec"
+    	ldp_id = "my_root/81/4b/02/25/814b0225-bd48-4de9-a724-a72a9fa86c18"
+      tg = OA::Graph.new RDF::Graph.new.from_ttl "
+        <#{triannon_base_url}/#{ldp_id}> a <http://www.w3.org/ns/oa#Annotation>;
+           <http://www.w3.org/ns/oa#hasTarget> <http://my.favorite.org>;
+           <http://www.w3.org/ns/oa#motivatedBy> <http://www.w3.org/ns/oa#bookmarking> ."
+      doc_hash = Triannon::SolrWriter.solr_hash(tg, root)
+      @testing_ids = [doc_hash[:id]]
+      cassette_name = "Triannon_SolrSearcher/before_search_spec"
+      VCR.insert_cassette(cassette_name)
+      sw = Triannon::SolrWriter.new
+      sw.add(doc_hash)
+      sleep(3) # SolrWriter add has commitWithin set to 500 ms; solrconfig has autocommit set to 3 sec
+      VCR.eject_cassette(cassette_name)
+    end
+    after(:all) do
+      cassette_name = "Triannon_SolrSearcher/after_search_spec"
+      VCR.insert_cassette(cassette_name)
+      sw = Triannon::SolrWriter.new
+      @testing_ids.uniq.each { |doc_id|
+        sw.delete(doc_id)
+      }
+      VCR.eject_cassette(cassette_name)
+    end
+
     it "calls RSolr::Client.post with params hash" do
       solr_params_hash = {:q => '666'}
       expect_any_instance_of(RSolr::Client).to receive(:post).with('select', {:params => solr_params_hash})
       solr_searcher.send(:search, solr_params_hash)
     end
     it "returns a solr response object with docs with anno_jsonld field" do
-      solr_response = solr_searcher.send(:search, {:fq => ["motivation:commenting"]})
+      solr_response = solr_searcher.send(:search, {:fq => ["motivation:bookmarking"]})
       expect(solr_response).to be_a_kind_of RSolr::Response
       expect(solr_response).to match a_hash_including('response' => a_hash_including('docs'))
       expect(solr_response['response']['docs'].size).to be > 0
@@ -90,7 +116,7 @@ describe Triannon::SolrSearcher, :vcr do
         }
       end
     end
-  end
+  end # search
 
   context '.anno_graphs_array' do
     let(:solr_response) {
@@ -175,6 +201,19 @@ describe Triannon::SolrSearcher, :vcr do
       fail "test to be implemented"
     end
 =end
+
+    context "anno_root" do
+      it "maps to Solr fq root" do
+        expect(Triannon::SolrSearcher.solr_params("anno_root" => 'specs')).to include :fq => ["root:specs"]
+      end
+      it "Solr escapes value" do
+        raw_value = "a!b[c|d]"
+        expect(RSolr).to receive(:solr_escape).with(raw_value).and_call_original
+        solr_params = Triannon::SolrSearcher.solr_params('anno_root' => raw_value)
+        expect(solr_params).not_to include :fq => [(a_string_ending_with(raw_value))]
+        expect(solr_params).to include :fq => [a_string_ending_with("a\\!b\\[c\\|d\\]")]
+      end
+    end
 
     context 'targetUri' do
       it "creates term in q param" do
