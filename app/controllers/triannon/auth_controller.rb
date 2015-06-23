@@ -9,7 +9,7 @@ module Triannon
     TOKEN_EXPIRY = 3600 # seconds
 
     # HTTP request methods accepted by /auth/login
-    LOGIN_ACCEPT = 'GET, POST, OPTIONS'
+    LOGIN_ACCEPT = 'OPTIONS, GET, POST'
 
     # OPTIONS /auth/login
     def options
