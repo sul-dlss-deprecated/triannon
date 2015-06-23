@@ -16,38 +16,38 @@ Triannon::Engine.routes.draw do
   # get -> new action
   get '/annotations/:anno_root/new', to: 'annotations#new'
   get '/:anno_root/new', to: 'annotations#new',
-    constraints: lambda { |request| anno_container_exclusions request }
+    constraints: lambda { |r| anno_root_filter(r) }
 
   # get -> search controller find action
   get '/annotations/:anno_root/search', to: 'search#find'
   get '/annotations/search', to: 'search#find'
   get '/:anno_root/search', to: 'search#find',
-    constraints: lambda { |request| anno_container_exclusions request }
+    constraints: lambda { |r| anno_root_filter(r) }
   get '/search', to: 'search#find'
 
-  # get w id -> show action
+  # get + id -> show action
   get '/annotations/:anno_root/:id(.:format)', to: 'annotations#show',
-    constraints: lambda { |request| annotations_container_exclusions request }
+    constraints: lambda { |r| anno_root_filter(r) && id_filter(r) }
   get '/:anno_root/:id(.:format)', to: 'annotations#show',
-    constraints: lambda { |request| anno_container_exclusions request }
+    constraints: lambda { |r| anno_root_filter(r) && id_filter(r) }
 
-  # get no id -> index action
+  # get - id -> index action
   get '/annotations/:anno_root', to: 'annotations#index',
-    constraints: lambda { |request| annotations_container_exclusions request }
+    constraints: lambda { |r| anno_root_filter(r) }
   get '/:anno_root', to: 'annotations#index',
-    constraints: lambda { |request| anno_container_exclusions request }
+    constraints: lambda { |r| anno_root_filter(r) }
 
   # post -> create action
   post '/annotations/:anno_root', to: 'annotations#create',
-    constraints: lambda { |request| annotations_container_exclusions request }
+    constraints: lambda { |r| anno_root_filter(r) }
   post '/:anno_root', to: 'annotations#create',
-    constraints: lambda { |request| anno_container_exclusions request }
+    constraints: lambda { |r| anno_root_filter(r) }
 
   # delete -> destroy action
   delete '/annotations/:anno_root/:id(.:format)', to: 'annotations#destroy',
-    constraints: lambda { |request| annotations_container_exclusions request }
+    constraints: lambda { |r| anno_root_filter(r) && id_filter(r) }
   delete '/:anno_root/:id(.:format)', to: 'annotations#destroy',
-    constraints: lambda { |request| anno_container_exclusions request }
+    constraints: lambda { |r| anno_root_filter(r) && id_filter(r) }
 
   get '/annotations', to: 'search#find'
   root to: 'search#find'
@@ -55,19 +55,12 @@ Triannon::Engine.routes.draw do
 end
 
 
-def anno_container_exclusions(request)
-  anno_root = request.path_parameters[:anno_root]
-  anno_root !~ /^annotations$|^auth$|^new$|^search$/ && id_exclusions(request)
+def anno_root_filter(request)
+  request.path_parameters[:anno_root] !~ /^annotations$|^auth$|^new$|^search$/
 end
 
-def annotations_container_exclusions(request)
-  anno_root = request.path_parameters[:anno_root]
-  anno_root !~ /^auth$|^new$|^search$/ && id_exclusions(request)
-end
-
-def id_exclusions(request)
-  return true if request.path_parameters[:id].nil?
-  request.path_parameters[:id] !~ /^new|search$/
+def id_filter(request)
+  request.path_parameters[:id] !~ /^new$|^search$/
 end
 
 
