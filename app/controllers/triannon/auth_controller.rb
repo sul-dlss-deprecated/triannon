@@ -5,9 +5,6 @@ module Triannon
   class AuthController < ApplicationController
     include RdfResponseFormats
 
-    AUTH_EXPIRY  =   60 # seconds
-    TOKEN_EXPIRY = 3600 # seconds
-
     # HTTP request methods accepted by /auth/login
     LOGIN_ACCEPT = 'OPTIONS, GET, POST'
 
@@ -230,7 +227,7 @@ module Triannon
       if auth_code.include?(session[:client_identity]['clientId'])
         timestamp = auth_code.split(';;;').last.to_i
         elapsed = Time.now.to_i - timestamp  # sec since auth code was issued
-        return true if elapsed < AUTH_EXPIRY # allow 1 minute for authorization
+        return true if elapsed < Triannon.config[:client_token_expiry]
       end
       return false
     end
@@ -269,7 +266,7 @@ module Triannon
       if token.eql?(session[:access_token])
         timestamp = token.split(';;;').last.to_i
         elapsed = Time.now.to_i - timestamp  # sec since token was issued
-        return true if elapsed < TOKEN_EXPIRY
+        return true if elapsed < Triannon.config[:access_token_expiry]
       end
       return false
     end
@@ -282,7 +279,7 @@ module Triannon
       data = {
         accessToken: session[:access_token],
         tokenType: 'Bearer',
-        expiresIn: TOKEN_EXPIRY
+        expiresIn: Triannon.config[:access_token_expiry]
       }
       json_response(data, 200)
     end

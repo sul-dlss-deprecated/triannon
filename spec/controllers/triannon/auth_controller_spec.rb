@@ -7,6 +7,8 @@ describe Triannon::AuthController, :vcr, type: :controller do
   before :all do
     Triannon.config[:authorized_clients] = {'clientA'=>'secretA'}
     Triannon.config[:authorized_users] = {'userA'=>'secretA'}
+    Triannon.config[:client_token_expiry] = 60
+    Triannon.config[:access_token_expiry] = 3600
   end
 
   let(:accept_json) {
