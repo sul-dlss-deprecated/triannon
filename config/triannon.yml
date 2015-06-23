@@ -1,3 +1,5 @@
+# http://www.yaml.org/YAML_for_ruby.html
+
 development:
   ldp:
     url: http://your.ldp_store_url.here
@@ -16,6 +18,12 @@ development:
   max_solr_retries: 5
   base_sleep_seconds: 1
   max_sleep_seconds: 5
+  authorized_clients:
+    clientA: secretA
+    clientB: secretB
+  authorized_users:
+    userA: secretA
+    userB: secretB
 
 test: &test
   ldp:
@@ -26,6 +34,12 @@ test: &test
       - blah
   solr_url: http://your.triannon_solr_url.here
   triannon_base_url: http://your.triannon-server.com/annotations/
+  authorized_clients:
+    clientA: secretA
+    clientB: secretB
+  authorized_users:
+    userA: secretA
+    userB: secretB
 
 production:
   ldp:
@@ -36,3 +50,5 @@ production:
       - blah
   solr_url: http://your.triannon_solr_url.here
   triannon_base_url: http://your.triannon-server.com/annotations/
+  authorized_clients:
+  authorized_users:
