@@ -5,15 +5,15 @@ describe Triannon::AuthController, type: :routing do
   routes { Triannon::Engine.routes }
 
   describe '/auth/login' do
-    describe 'responds to OPTIONS, GET and POST requests' do
-      it 'GET has a route to /auth/login' do
-        expect(:get => '/auth/login').to be_routable
-      end
-      it 'GET /auth/login routes to triannon/auth#login' do
-        expect(:get => '/auth/login').to route_to(
-          controller: 'triannon/auth',
-          action: 'login')
-      end
+    describe 'responds to OPTIONS and POST requests' do
+      # it 'GET has a route to /auth/login' do
+      #   expect(:get => '/auth/login').to be_routable
+      # end
+      # it 'GET /auth/login routes to triannon/auth#login' do
+      #   expect(:get => '/auth/login').to route_to(
+      #     controller: 'triannon/auth',
+      #     action: 'login')
+      # end
       it 'OPTIONS has a route to /auth/login' do
         expect(:options => '/auth/login').to be_routable
       end
@@ -32,6 +32,9 @@ describe Triannon::AuthController, type: :routing do
       end
       it 'DELETE has no route to /auth/login' do
         expect(:delete => '/auth/login').not_to be_routable
+      end
+      it 'GET has no route to /auth/login' do
+        expect(:get => '/auth/login').not_to be_routable
       end
       it 'PATCH has no route to /auth/login' do
         expect(:patch => '/auth/login').not_to be_routable

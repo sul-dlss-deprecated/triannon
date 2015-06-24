@@ -3,7 +3,7 @@ Triannon::Engine.routes.draw do
   # Authentication routes; these must precede '/:anno_root/*' and they
   # preclude the use of an anno root named 'auth'.
   match '/auth/login', to: 'auth#options', via: [:options]
-  match '/auth/login', to: 'auth#login', via: [:get, :post]
+  match '/auth/login', to: 'auth#login', via: [:post]
   get '/auth/logout', to: 'auth#logout'
   get '/auth/access_token', to: 'auth#access_token'
   post '/auth/client_identity', to: 'auth#client_identity'
