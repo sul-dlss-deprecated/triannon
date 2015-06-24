@@ -93,10 +93,13 @@ module Triannon
         if session[:client_auth_key]
           # When an authorization code was obtained using /auth/client_identity,
           # that code must be passed to the Access Token Service as well.
-          if auth_code_valid? params[:code]
+          auth_code = params[:code]
+          if auth_code.nil?
+            auth_code_required
+          elsif auth_code_valid?(auth_code)
             grant_access_token
           else
-            auth_code_error
+            auth_code_invalid
           end
         else
           # Without any authorization token, a login session is sufficient
@@ -118,7 +121,7 @@ module Triannon
     # Authenticates known users
     # @param username [String]
     # @param password [String]
-    def authorized_user(username, password)
+    def authenticate_user(username, password)
       username if authorized_users[username] == password
     end
 
@@ -132,11 +135,16 @@ module Triannon
 
     # Handles GET /auth/login
     def login_handler_get
-      if user = authenticate_with_http_basic { |u, p| authorized_user(u, p) }
-        login_update(user)
-        redirect_to root_url, notice: 'Successfully logged in.'
+      if ! ActionController::HttpAuthentication::Basic.has_basic_credentials?(request)
+        login_required
       else
-        login_error
+        user = authenticate_with_http_basic {|u, p| authenticate_user(u, p) }
+        if user.nil?
+          login_forbidden
+        else
+          login_update(user)
+          redirect_to root_url, notice: 'Successfully logged in.'
+        end
       end
     end
 
@@ -144,7 +152,10 @@ module Triannon
     def login_handler_post
       return unless process_post?
       return unless process_json?
-      if auth_code_valid?(params[:code]) # requires a client auth-code.
+      auth_code = params[:code]
+      if auth_code.nil?
+        auth_code_required
+      elsif auth_code_valid?(auth_code)
         # The request MUST carry a body with the following JSON template:
         # { "userId" : "ID", "userSecret" : "SECRET" }
         required_fields = ['userId', 'userSecret']
@@ -157,10 +168,10 @@ module Triannon
           login_update(user)
           redirect_to root_url, notice: 'Successfully logged in.'
         else
-          login_error
+          login_required
         end
       else
-        auth_code_error
+        auth_code_invalid
       end
     end
 
@@ -169,21 +180,37 @@ module Triannon
       session[:login_user] = data
     end
 
-    def login_error(data=nil)
+    def login_forbidden
+      response.status = 403
       respond_to do |format|
         format.html {
-          request_http_basic_authentication
+          render html: '<p>invalid login credentials received</p>'.html_safe
         }
         format.json {
           err = {
-            error: '401 Unauthorized',
-            errorDescription: 'invalid login details received',
+            error: '403 Forbidden',
+            errorDescription: 'invalid login credentials received',
             errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
           }
-          json_response(err, 401)
+          json_response(err, 403)
         }
       end
     end
+
+    def login_required
+      if request.format == :html
+        request_http_basic_authentication
+      elsif request.format == :json
+        response.headers["WWW-Authenticate"] = %(Basic realm="Application")
+        err = {
+          error: '401 Unauthorized',
+          errorDescription: 'login credentials required',
+          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
+        }
+        json_response(err, 401)
+      end
+    end
+
 
     # --------------------------------------------------------------------
     # Client authentication
@@ -232,11 +259,21 @@ module Triannon
       return false
     end
 
-    # Issue a 401 for invalid client authorization codes
-    def auth_code_error
+    # Issue a 403 for invalid client authorization codes
+    def auth_code_invalid
       err = {
         error: 'invalidClient',
         errorDescription: 'Unable to validate authorization code',
+        errorUri: ''
+      }
+      json_response(err, 403)
+    end
+
+    # Issue a 401 to challenge for a client authorization code
+    def auth_code_required
+      err = {
+        error: 'invalidClient',
+        errorDescription: 'authorization code is required',
         errorUri: ''
       }
       json_response(err, 401)
@@ -353,10 +390,10 @@ module Triannon
       response.status = status
       respond_to do |format|
         format.json {
-          render :json => data.to_json, content_type: json_type_accepted
+          render json: data.to_json, content_type: json_type_accepted
         }
         format.html {
-          render :nothing => true
+          render nothing: true
         }
       end
     end
@@ -383,7 +420,7 @@ module Triannon
         true
       else
         logger.debug "Rejected Content-Type: #{request.headers['Content-Type']}"
-        render :nothing => true, :status => 415
+        render nothing: true, status: 415
         false
       end
     end
@@ -417,10 +454,10 @@ module Triannon
             errorDescription: "#{request.path} accepts: #{accept}",
             errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
           }
-          render :json => err.to_json, content_type: json_type_accepted
+          render json: err.to_json, content_type: json_type_accepted
         }
         format.html {
-          render :nothing => true
+          render nothing: true
         }
       end
     end

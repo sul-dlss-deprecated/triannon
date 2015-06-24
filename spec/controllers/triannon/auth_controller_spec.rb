@@ -52,33 +52,33 @@ describe Triannon::AuthController, :vcr, type: :controller do
 
     describe 'GET requests are rejected for unauthorized login' do
 
-      let(:check_unauthorized) do
+      def check_unauthorized(status)
         get :login
-        expect(response.status).to eq(401)
+        expect(response.status).to eq(status)
       end
 
       context 'HTML' do
         it 'GET response status is 401 for anonymous user' do
-          check_unauthorized
+          check_unauthorized 401
         end
-        it 'GET response status is 401 for unauthorized user' do
+        it 'GET response status is 403 for unauthorized user' do
           # curl -v -u fred:bloggs http://localhost:3000/auth/login
           basic_auth('guessed', 'wrong')
-          check_unauthorized
+          check_unauthorized 403
         end
         it 'GET does not set a login cookie for unauthorized user' do
           basic_auth('guessed', 'wrong')
-          check_unauthorized
+          check_unauthorized 403
           expect(response.cookies['login_user']).to be_nil
         end
-        it 'GET response status is 401 for invalid password on authorized user' do
+        it 'GET response status is 403 for invalid password on authorized user' do
           # curl -v -u userA:secretB http://localhost:3000/auth/login
           basic_auth('userA', 'wrong')
-          check_unauthorized
+          check_unauthorized 403
         end
-        it 'GET response status is 401 for correct password on unauthorized user' do
+        it 'GET response status is 403 for correct password on unauthorized user' do
           basic_auth('userB', 'secretA')
-          check_unauthorized
+          check_unauthorized 403
         end
       end # HTML context
 
@@ -86,35 +86,35 @@ describe Triannon::AuthController, :vcr, type: :controller do
         before :each do
           accept_json
         end
-        let(:unauthorized_json_response) do
-          check_unauthorized
+        def unauthorized_json_response(status)
+          check_unauthorized status
           json = JSON.parse(response.body)
           expect(json.keys).to eql(["error", "errorDescription", "errorUri"])
         end
         it 'GET response status is 401 for anonymous user' do
           # curl -v -H "Accept: application/json" http://localhost:3000/auth/login
-          unauthorized_json_response
+          unauthorized_json_response 401
         end
-        it 'GET response status is 401 for unauthorized user' do
+        it 'GET response status is 403 for unauthorized user' do
           # curl -v -u fred:bloggs -H "Accept: application/json" http://localhost:3000/auth/login
           # {"error":"401 Unauthorized","errorDescription":"invalid login details received","errorUri":"http://image-auth.iiif.io/api/image/2.1/authentication.html"}
           basic_auth('guessed', 'wrong')
-          unauthorized_json_response
+          unauthorized_json_response 403
         end
         it 'GET does not set a login cookie for unauthorized user' do
           basic_auth('guessed', 'wrong')
-          unauthorized_json_response
+          unauthorized_json_response 403
           expect(response.cookies['login_user']).to be_nil
         end
-        it 'GET response status is 401 for invalid password on authorized user' do
+        it 'GET response status is 403 for invalid password on authorized user' do
           # curl -v -u userA:secretB  -H "Accept: application/json" http://localhost:3000/auth/login
           basic_auth('userA', 'wrong')
-          unauthorized_json_response
+          unauthorized_json_response 403
         end
-        it 'GET response status is 401 for valid password on unauthorized user' do
+        it 'GET response status is 403 for valid password on unauthorized user' do
           # curl -v -u userA:secretB  -H "Accept: application/json" http://localhost:3000/auth/login
           basic_auth('userB', 'secretA')
-          unauthorized_json_response
+          unauthorized_json_response 403
         end
       end # JSON context
     end # GET for unauthorized login
