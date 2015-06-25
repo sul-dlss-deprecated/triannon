@@ -6,7 +6,8 @@ module Triannon
     include RdfResponseFormats
 
     # HTTP request methods accepted by /auth/login
-    LOGIN_ACCEPT = 'OPTIONS, GET, POST'
+    # TODO: enable GET when triannon supports true user authentication
+    LOGIN_ACCEPT = 'OPTIONS, POST'
 
     # OPTIONS /auth/login
     def options
@@ -27,14 +28,11 @@ module Triannon
     end
 
     # GET || POST to /auth/login
-    # HTTP basic authentication
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#login-service
     def login
       # The service must set a Cookie for the Access Token Service to retrieve
       # to determine the user information provided by the authentication system.
       case request.request_method
-      when 'GET'
-        login_handler_get
       when 'POST'
         login_handler_post
       else
@@ -58,26 +56,35 @@ module Triannon
     end
 
     # POST /auth/client_identity
+    # A request MUST carry a body with:
+    # { "clientId" : "ID", "clientSecret" : "SECRET" }
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#client-identity-service
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#error-conditions
     # return json body [String] containing: { "authorizationCode": code }
     def client_identity
       return unless process_post?
       return unless process_json?
-      # An authentication token request MUST carry a body with:
-      # { "clientId" : "ID", "clientSecret" : "SECRET" }
       required_fields = ['clientId', 'clientSecret']
       identity = parse_identity(required_fields)
-      if authorized_client? identity
-        code = { authorizationCode: auth_code_generate(identity) }
-        return json_response(code, 200)
-      else
+      unless identity['clientId'] && identity['clientSecret']
         err = {
           error: 'invalidClient',
-          errorDescription: 'Unable to authorize client',
+          errorDescription: 'Insufficient client data for authentication',
           errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
         }
         json_response(err, 401)
+      else
+        if authorized_client? identity
+          code = { authorizationCode: auth_code_generate(identity) }
+          return json_response(code, 200)
+        else
+          err = {
+            error: 'invalidClient',
+            errorDescription: 'Invalid client credentials',
+            errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
+          }
+          json_response(err, 403)
+        end
       end
     end
 
@@ -103,11 +110,15 @@ module Triannon
           end
         else
           # Without any authorization token, a login session is sufficient
-          # authentication for granting an access token.
+          # authentication for granting an access token.  Note, however, that
+          # the only way to enable a login session is for an authorized client
+          # to provide user data in POST /auth/login and that requires the
+          # client to first obtain an authentication code, so this block of
+          # code should never get executed (unless login requirements change).
           grant_access_token
         end
       else
-        redirect_to '/auth/login'
+        login_required
       end
     end
 
@@ -116,39 +127,12 @@ module Triannon
 
     # --------------------------------------------------------------------
     # User authentication
-    # TODO: replace this section with a fully-fledged user authentication
-
-    # Authenticates known users
-    # @param username [String]
-    # @param password [String]
-    def authenticate_user(username, password)
-      username if authorized_users[username] == password
-    end
-
-    # Sets a hash of authorized user data key:value pairs that correspond to
-    # the login service parameters named 'username':'password';
-    # the data is provided by configuration.
-    def authorized_users
-      @authorized_users ||= Triannon.config[:authorized_users]
-    end
-
-
-    # Handles GET /auth/login
-    def login_handler_get
-      if ! ActionController::HttpAuthentication::Basic.has_basic_credentials?(request)
-        login_required
-      else
-        user = authenticate_with_http_basic {|u, p| authenticate_user(u, p) }
-        if user.nil?
-          login_forbidden
-        else
-          login_update(user)
-          redirect_to root_url, notice: 'Successfully logged in.'
-        end
-      end
-    end
 
     # Handles POST /auth/login
+    # The request MUST include a URI parameter 'code=client_token' where
+    # the 'client_token' has been obtained from /auth/client_identity and
+    # the request MUST carry a body with the following JSON template:
+    # { "userId" : "ID", "userSecret" : "SECRET" }
     def login_handler_post
       return unless process_post?
       return unless process_json?
@@ -156,16 +140,11 @@ module Triannon
       if auth_code.nil?
         auth_code_required
       elsif auth_code_valid?(auth_code)
-        # The request MUST carry a body with the following JSON template:
-        # { "userId" : "ID", "userSecret" : "SECRET" }
         required_fields = ['userId', 'userSecret']
         identity = parse_identity(required_fields)
-        # When an authorized client POSTs user data, it is simply accepted, as
-        # is, without authentication.
+        # When an authorized client POSTs user data, it is simply accepted.
         if identity['userId']
-          user = identity['userId']
-          # pass = identity['userSecret']  # actually secret is not required, right?
-          login_update(user)
+          login_update(identity['userId'])
           redirect_to root_url, notice: 'Successfully logged in.'
         else
           login_required
@@ -178,23 +157,6 @@ module Triannon
     def login_update(data)
       cookies[:login_user] = data
       session[:login_user] = data
-    end
-
-    def login_forbidden
-      response.status = 403
-      respond_to do |format|
-        format.html {
-          render html: '<p>invalid login credentials received</p>'.html_safe
-        }
-        format.json {
-          err = {
-            error: '403 Forbidden',
-            errorDescription: 'invalid login credentials received',
-            errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
-          }
-          json_response(err, 403)
-        }
-      end
     end
 
     def login_required
@@ -406,10 +368,10 @@ module Triannon
     # Parse POST JSON data to ensure it contains required fields
     # @param fields [Array<String>] an array of required fields
     def parse_identity(fields)
-      identity = JSON.parse(request.body.read)
-      unless fields.collect {|k| identity.has_key? k }.all?
-        identity = {}
-        fields.each {|f| identity[f] = '' }
+      identity = Hash[fields.map {|f| [f, nil]}]
+      data = JSON.parse(request.body.read)
+      if fields.collect {|f| data.has_key? f }.all?
+        fields.each {|f| identity[f] = data[f] }
       end
       identity
     end

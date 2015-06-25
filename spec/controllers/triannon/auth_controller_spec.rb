@@ -6,7 +6,6 @@ describe Triannon::AuthController, :vcr, type: :controller do
 
   before :all do
     Triannon.config[:authorized_clients] = {'clientA'=>'secretA'}
-    Triannon.config[:authorized_users] = {'userA'=>'secretA'}
     Triannon.config[:client_token_expiry] = 60
     Triannon.config[:access_token_expiry] = 3600
   end
@@ -17,152 +16,97 @@ describe Triannon::AuthController, :vcr, type: :controller do
   let(:content_json) {
     request.headers['Content-Type'] =  'application/json'
   }
+  let(:json_payloads) {
+    accept_json
+    content_json
+  }
+  let(:auth_code) {
+    json_payloads
+    data = {clientId: 'clientA', clientSecret: 'secretA'}
+    post :client_identity, data.to_json
+    expect(response.code.to_i).to eql(200)
+    data = JSON.parse(response.body)
+    data['authorizationCode']
+  }
+  let(:login) {
+    json_payloads
+    data = {userId: 'userA', userSecret: 'secretA'}
+    post :login, data.to_json, code: auth_code
+    expect(response.status).to eq(302)
+    expect(response).to redirect_to('/')
+    expect(response.cookies['login_user']).not_to be_nil
+  }
 
-  describe '/auth/login' do
-    describe 'OPTIONS requests for /auth/login:' do
-      let(:check_service) {
-        json = JSON.parse(response.body)
-        expect(json.keys).to eql(['service'])
-        info = json['service']
-        expect(info.keys).to eql(['@id','profile', 'label'])
-        expect(info['profile']).to eql(@service_profile)
-      }
-      it 'the #options method will reject GET requests for information' do
-        process :options, 'GET'
-        expect(response.status).to eq(405)
+  describe 'OPTIONS /auth/login' do
+    let(:check_service) {
+      json = JSON.parse(response.body)
+      expect(json.keys).to eql(['service'])
+      info = json['service']
+      expect(info.keys).to eql(['@id','profile', 'label'])
+      expect(info['profile']).to eql(@service_profile)
+    }
+    context 'accept JSON:' do
+      it 'returns login information, with no user logged in' do
+        accept_json
+        process :options, 'OPTIONS'
+        @service_profile = 'http://iiif.io/api/image/2/auth/login'
+        check_service
       end
-      context 'when JSON is accepted:' do
-        it 'returns logout information while a user is logged in' do
-          basic_auth('userA', 'secretA')
-          get :login
-          accept_json
-          process :options, 'OPTIONS'
-          @service_profile = 'http://iiif.io/api/image/2/auth/logout'
-          check_service
-        end
-        it 'returns login information with no user logged in' do
-          get :logout
-          accept_json
-          process :options, 'OPTIONS'
-          @service_profile = 'http://iiif.io/api/image/2/auth/login'
-          check_service
-        end
+      it 'returns logout information, while a user is logged in' do
+        login
+        accept_json
+        process :options, 'OPTIONS'
+        @service_profile = 'http://iiif.io/api/image/2/auth/logout'
+        check_service
       end
     end
+  end
 
-    describe 'GET requests are rejected for unauthorized login' do
-
-      def check_unauthorized(status)
-        get :login
-        expect(response.status).to eq(status)
-      end
-
-      context 'HTML' do
-        it 'GET response status is 401 for anonymous user' do
-          check_unauthorized 401
-        end
-        it 'GET response status is 403 for unauthorized user' do
-          # curl -v -u fred:bloggs http://localhost:3000/auth/login
-          basic_auth('guessed', 'wrong')
-          check_unauthorized 403
-        end
-        it 'GET does not set a login cookie for unauthorized user' do
-          basic_auth('guessed', 'wrong')
-          check_unauthorized 403
-          expect(response.cookies['login_user']).to be_nil
-        end
-        it 'GET response status is 403 for invalid password on authorized user' do
-          # curl -v -u userA:secretB http://localhost:3000/auth/login
-          basic_auth('userA', 'wrong')
-          check_unauthorized 403
-        end
-        it 'GET response status is 403 for correct password on unauthorized user' do
-          basic_auth('userB', 'secretA')
-          check_unauthorized 403
-        end
-      end # HTML context
-
-      context 'JSON' do
-        before :each do
-          accept_json
-        end
-        def unauthorized_json_response(status)
-          check_unauthorized status
-          json = JSON.parse(response.body)
-          expect(json.keys).to eql(["error", "errorDescription", "errorUri"])
-        end
-        it 'GET response status is 401 for anonymous user' do
-          # curl -v -H "Accept: application/json" http://localhost:3000/auth/login
-          unauthorized_json_response 401
-        end
-        it 'GET response status is 403 for unauthorized user' do
-          # curl -v -u fred:bloggs -H "Accept: application/json" http://localhost:3000/auth/login
-          # {"error":"401 Unauthorized","errorDescription":"invalid login details received","errorUri":"http://image-auth.iiif.io/api/image/2.1/authentication.html"}
-          basic_auth('guessed', 'wrong')
-          unauthorized_json_response 403
-        end
-        it 'GET does not set a login cookie for unauthorized user' do
-          basic_auth('guessed', 'wrong')
-          unauthorized_json_response 403
-          expect(response.cookies['login_user']).to be_nil
-        end
-        it 'GET response status is 403 for invalid password on authorized user' do
-          # curl -v -u userA:secretB  -H "Accept: application/json" http://localhost:3000/auth/login
-          basic_auth('userA', 'wrong')
-          unauthorized_json_response 403
-        end
-        it 'GET response status is 403 for valid password on unauthorized user' do
-          # curl -v -u userA:secretB  -H "Accept: application/json" http://localhost:3000/auth/login
-          basic_auth('userB', 'secretA')
-          unauthorized_json_response 403
-        end
-      end # JSON context
-    end # GET for unauthorized login
-
-    describe 'GET requests are accepted for authorized login' do
-      # curl -v -u userA:secretA http://localhost:3000/auth/login
-      before :each do
-        basic_auth('userA', 'secretA')
-      end
-
-      let(:authorized_response) do
-        get :login
-        expect(response.status).to eq(302)
-        expect(response).to redirect_to('/')
-      end
-
-      it 'GET response status is 302 and redirects to root for authorized user' do
-        authorized_response
-      end
-      it 'GET sets a login cookie for authorized user' do
-        authorized_response
-        expect(response.cookies['login_user']).not_to be_nil
-      end
-
-      context 'JSON' do
-        # curl -u userA:secretA  -H "Accept: application/json" http://localhost:3000/auth/login
-        before :each do
-          accept_json
-        end
-        it 'GET does not return a json document for authorized user' do
-          authorized_response
-          expect(response.cookies['login_user']).not_to be_nil
-          expect{ JSON.parse(response.body) }.to raise_error
-        end
-      end
-    end # GET for authorized login
-  end # /auth/login
-
+  describe 'POST /auth/login' do
+    before :each do
+      json_payloads
+    end
+    it 'rejects HTML content' do
+      data = {userId: 'userA', userSecret: 'secretA'}
+      params = {code: auth_code }
+      request.headers['Content-Type'] = 'text/html'
+      post :login, data.to_json, params
+      expect(response.code.to_i).to eql(415)
+    end
+    it 'rejects a request that has no "userId" field (response code 401)' do
+      data = {userSecret: 'secretA'}
+      params = {code: auth_code }
+      post :login, data.to_json, params
+      expect(response.code.to_i).to eql(401)
+      err = JSON.parse(response.body)
+      expect(err).not_to be_empty
+      expect(err['errorDescription']).to eql('login credentials required')
+    end
+    it 'rejects a request that has no "userSecret" field (response code 401)' do
+      data = {userId: 'userA'}
+      params = {code: auth_code }
+      post :login, data.to_json, params
+      expect(response.code.to_i).to eql(401)
+      err = JSON.parse(response.body)
+      expect(err).not_to be_empty
+      expect(err['errorDescription']).to eql('login credentials required')
+    end
+    it 'accepts any user login data from authorized client (response code 302)' do
+      data = {userId: 'userAnon', userSecret: 'whatever'}
+      params = {code: auth_code }
+      post :login, data.to_json, params
+      expect(response.code.to_i).to eql(302)
+    end
+  end
 
   describe 'GET /auth/logout' do
-    it 'GET response status is 302 and redirects to root path' do
+    it 'response status is 302 and redirects to root path' do
       get :logout
       expect(response.status).to eq(302)
       expect(response).to redirect_to('/')
     end
     it 'clears login cookie' do
-      basic_auth('userA', 'secretA')
-      get :login
+      login
       expect(response.cookies['login_user']).not_to be_nil
       request.cookies['login_user'] = response.cookies[:login_user]
       get :logout
@@ -174,8 +118,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
       # In this test, the login/logout notices are different, and that will suffice; although
       # it would be ideal to test for different session IDs, they are not different because
       # the test apparatus uses the same session across get calls in this example.
-      basic_auth('userA', 'secretA')
-      get :login
+      login
       login_session = session.dup
       login_notice = flash.notice
       expect(login_session).not_to be_nil
@@ -192,13 +135,11 @@ describe Triannon::AuthController, :vcr, type: :controller do
 
 
   describe 'POST /auth/client_identity' do
-
     before :each do
-      basic_auth('userA', 'secretA')
-    end
-    it 'accepts JSON content' do
       accept_json
       content_json
+    end
+    it 'accepts JSON content' do
       params = {clientId: 'clientA', clientSecret: 'secretA'}
       post :client_identity, params.to_json
       expect(response.code.to_i).to eql(200)
@@ -209,46 +150,36 @@ describe Triannon::AuthController, :vcr, type: :controller do
       post :client_identity, params.to_json
       expect(response.code.to_i).to eql(415)
     end
-    # The request MUST carry a body with the following JSON template:
-    # {
-    #   "clientId" : "CLIENT_ID_HERE",
-    #   "clientSecret" : "CLIENT_SECRET_HERE"
-    # }
-    it 'rejects a request that has no "clientId" field (response code 401)' do
-      accept_json
-      content_json
-      params = {clientSecret: 'secretA'}
-      post :client_identity, params.to_json
-      expect(response.code.to_i).to eql(401)
-      err = JSON.parse(response.body)
-      expect(err).not_to be_empty
-      expect(err['errorDescription']).to eql('Unable to authorize client')
-    end
-    it 'rejects a request that has no "clientSecret" field (response code 401)' do
-      accept_json
-      content_json
-      params = {clientId: 'clientA'}
-      post :client_identity, params.to_json
-      expect(response.code.to_i).to eql(401)
-      err = JSON.parse(response.body)
-      expect(err).not_to be_empty
-      expect(err['errorDescription']).to eql('Unable to authorize client')
-    end
-    it 'rejects unauthorized client requests (response code 401)' do
-      accept_json
-      content_json
-      params = {clientId: 'clientA', clientSecret: 'secretB'}
-      post :client_identity, params.to_json
+    it 'rejects a request without "clientId" (response code 401)' do
+      data = {clientSecret: 'secretA'}
+      post :client_identity, data.to_json
       expect(response.code.to_i).to eql(401)
       err = JSON.parse(response.body)
       expect(err).not_to be_empty
       expect(err['error']).to eql('invalidClient')
+      expect(err['errorDescription']).to eql('Insufficient client data for authentication')
+    end
+    it 'rejects a request without "clientSecret" (response code 401)' do
+      data = {clientId: 'clientA'}
+      post :client_identity, data.to_json
+      expect(response.code.to_i).to eql(401)
+      err = JSON.parse(response.body)
+      expect(err).not_to be_empty
+      expect(err['error']).to eql('invalidClient')
+      expect(err['errorDescription']).to eql('Insufficient client data for authentication')
+    end
+    it 'rejects unauthorized client requests (response code 403)' do
+      data = {clientId: 'clientA', clientSecret: 'secretB'}
+      post :client_identity, data.to_json
+      expect(response.code.to_i).to eql(403)
+      err = JSON.parse(response.body)
+      expect(err).not_to be_empty
+      expect(err['error']).to eql('invalidClient')
+      expect(err['errorDescription']).to eql('Invalid client credentials')
     end
     it 'returns an authorizationCode for authorized clients (response code 200)' do
-      accept_json
-      content_json
-      params = {clientId: 'clientA', clientSecret: 'secretA'}
-      post :client_identity, params.to_json
+      data = {clientId: 'clientA', clientSecret: 'secretA'}
+      post :client_identity, data.to_json
       expect(response.code.to_i).to eql(200)
       data = JSON.parse(response.body)
       expect(data).not_to be_empty
@@ -262,81 +193,50 @@ describe Triannon::AuthController, :vcr, type: :controller do
   # http://image-auth.iiif.io/api/image/2.1/authentication.html#access-token-service
   describe 'GET /auth/access_token' do
 
-    let(:login) {
-      basic_auth('userA', 'secretA')
-      get :login
-      expect(response.status).to eq(302)
-      expect(response).to redirect_to('/')
-      expect(response.cookies['login_user']).not_to be_nil
-    }
-
-    let(:get_auth_code) {
-      accept_json
-      content_json
-      params = {clientId: 'clientA', clientSecret: 'secretA'}
-      post :client_identity, params.to_json
-      expect(response.code.to_i).to eql(200)
-      data = JSON.parse(response.body)
-      expect(data).not_to be_empty
-      expect(data['authorizationCode']).not_to be_nil
-      expect(data['authorizationCode']).to be_instance_of String
-      data['authorizationCode']
-    }
-
-    let(:check_access_token) {
-      expect(response.code.to_i).to eql(200)
-      expect(response.cookies['login_user']).to be_nil
-      data = JSON.parse(response.body)
-      expect(data).not_to be_empty
-      expect(data['accessToken']).not_to be_nil
-      expect(data['accessToken']).to be_instance_of String
-    }
     describe 'with valid login credentials' do
       before :each do
         login
       end
       it 'returns an access code, given a valid authorization code' do
-        code = get_auth_code
-        get :access_token, {code: code}
-        check_access_token
+        get :access_token, code: auth_code
+        expect(response.code.to_i).to eql(200)
+        expect(response.cookies['login_user']).to be_nil
+        data = JSON.parse(response.body)
+        expect(data).not_to be_empty
+        expect(data['accessToken']).not_to be_nil
+        expect(data['accessToken']).to be_instance_of String
       end
-      it 'returns an access code, without any authorization code' do
-        accept_json
-        content_json
+      it 'response status is 401, without an authorization code' do
         get :access_token
-        check_access_token
+        expect(response.status).to eq(401)
+        expect(response.cookies['login_user']).to be_nil
+        err = JSON.parse(response.body)
+        expect(err).not_to be_empty
+        expect(err['error']).to eql('invalidClient')
+        expect(err['errorDescription']).to eql('authorization code is required')
       end
     end
 
     describe 'without valid login credentials' do
-      it 'redirects to /auth/login, despite a valid authorization code' do
-        code = get_auth_code
-        get :access_token, {code: code}
-        expect(response.status).to eq(302)
-        expect(response).to redirect_to('/auth/login')
-        expect(response.cookies['login_user']).to be_nil
-      end
-      it 'redirects to /auth/login, without any authorization code' do
+      it 'response status is 401, with a valid authorization code' do
         accept_json
-        content_json
-        get :access_token
-        expect(response.status).to eq(302)
-        expect(response).to redirect_to('/auth/login')
+        get :access_token, code: auth_code
+        expect(response.status).to eq(401)
         expect(response.cookies['login_user']).to be_nil
+        err = JSON.parse(response.body)
+        expect(err).not_to be_empty
+        expect(err['errorDescription']).to eql('login credentials required')
+      end
+      it 'response status is 401, without an authorization code' do
+        accept_json
+        get :access_token
+        expect(response.status).to eq(401)
+        expect(response.cookies['login_user']).to be_nil
+        err = JSON.parse(response.body)
+        expect(err).not_to be_empty
+        expect(err['errorDescription']).to eql('login credentials required')
       end
     end
   end # /auth/access_token
-
-
-  protected
-
-  def basic_auth(user, pass)
-    # request.env['HTTP_AUTHORIZATION'] = basic_auth_code(user, pass)
-    request.headers['Authorization'] = basic_auth_code(user, pass)
-  end
-
-  def basic_auth_code(user, pass)
-    ActionController::HttpAuthentication::Basic.encode_credentials(user, pass)
-  end
 
 end
