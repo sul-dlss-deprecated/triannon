@@ -66,14 +66,7 @@ module Triannon
       return unless process_json?
       required_fields = ['clientId', 'clientSecret']
       identity = parse_identity(required_fields)
-      unless identity['clientId'] && identity['clientSecret']
-        err = {
-          error: 'invalidClient',
-          errorDescription: 'Insufficient client data for authentication',
-          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
-        }
-        json_response(err, 401)
-      else
+      if identity['clientId'] && identity['clientSecret']
         if authorized_client? identity
           code = { authorizationCode: auth_code_generate(identity) }
           return json_response(code, 200)
@@ -85,6 +78,13 @@ module Triannon
           }
           json_response(err, 403)
         end
+      else
+        err = {
+          error: 'invalidClient',
+          errorDescription: 'Insufficient client data for authentication',
+          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
+        }
+        json_response(err, 401)
       end
     end
 
@@ -218,7 +218,7 @@ module Triannon
         elapsed = Time.now.to_i - timestamp  # sec since auth code was issued
         return true if elapsed < Triannon.config[:client_token_expiry]
       end
-      return false
+      false
     end
 
     # Issue a 403 for invalid client authorization codes
@@ -267,7 +267,7 @@ module Triannon
         elapsed = Time.now.to_i - timestamp  # sec since token was issued
         return true if elapsed < Triannon.config[:access_token_expiry]
       end
-      return false
+      false
     end
 
     # Grant an access token for authorized access
@@ -370,7 +370,7 @@ module Triannon
     def parse_identity(fields)
       identity = Hash[fields.map {|f| [f, nil]}]
       data = JSON.parse(request.body.read)
-      if fields.collect {|f| data.has_key? f }.all?
+      if fields.map {|f| data.key? f }.all?
         fields.each {|f| identity[f] = data[f] }
       end
       identity
