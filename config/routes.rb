@@ -6,6 +6,7 @@ Triannon::Engine.routes.draw do
   match '/auth/login', to: 'auth#login', via: [:post]
   get '/auth/logout', to: 'auth#logout'
   get '/auth/access_token', to: 'auth#access_token'
+  get '/auth/access_validate', to: 'auth#access_validate'
   post '/auth/client_identity', to: 'auth#client_identity'
 
   # 1. can't use resourceful routing because of :anno_root (dynamic path segment)

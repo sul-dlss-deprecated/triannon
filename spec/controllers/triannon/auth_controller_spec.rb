@@ -20,6 +20,12 @@ describe Triannon::AuthController, :vcr, type: :controller do
     accept_json
     content_json
   }
+  let(:access_token) {
+    login
+    get :access_token, code: auth_code
+    data = JSON.parse(response.body)
+    data['accessToken']
+  }
   let(:auth_code) {
     json_payloads
     data = {clientId: 'clientA', clientSecret: 'secretA'}
@@ -192,7 +198,6 @@ describe Triannon::AuthController, :vcr, type: :controller do
   # adapted from
   # http://image-auth.iiif.io/api/image/2.1/authentication.html#access-token-service
   describe 'GET /auth/access_token' do
-
     describe 'with valid login credentials' do
       before :each do
         login
@@ -238,5 +243,35 @@ describe Triannon::AuthController, :vcr, type: :controller do
       end
     end
   end # /auth/access_token
+
+  describe 'GET /auth/access_validate -' do
+    it 'response code is 200 for a valid access token' do
+      request.headers['Authorization'] = "Bearer #{access_token}"
+      get :access_validate
+      expect(response.status).to eq(200)
+    end
+    it 'access token is not sufficient, login session is required' do
+      token = access_token
+      get :logout # resets session data, required to validate token
+      request.headers['Authorization'] = "Bearer #{token}"
+      get :access_validate
+      expect(response.status).to eq(403)
+    end
+    it 'response code is 403 with invalid access token' do
+      request.headers['Authorization'] = "Bearer invalid_token"
+      get :access_validate
+      expect(response.status).to eq(403)
+    end
+    it 'response code is 401 with no access token' do
+      request.headers['Authorization'] = nil
+      get :access_validate
+      expect(response.status).to eq(401)
+    end
+    it 'response code is 401 without "Bearer" authorization' do
+      request.headers['Authorization'] = "Digest #{access_token}"
+      get :access_validate
+      expect(response.status).to eq(401)
+    end
+  end # /auth/access_validate
 
 end

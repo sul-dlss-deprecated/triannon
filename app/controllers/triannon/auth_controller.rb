@@ -122,6 +122,24 @@ module Triannon
       end
     end
 
+    # GET /auth/access_validate
+    # Authorize access based on validating an access token
+    def access_validate
+      auth = request.headers['Authorization']
+      if auth.nil? || auth !~ /Bearer/
+        access_token_required
+      else
+        token = auth.split[1]
+        if access_token_valid?(token)
+          response.status = 200
+          # TODO: redirect to request.path ?
+          render nothing: true
+        else
+          access_token_invalid
+        end
+      end
+    end
+
 
     private
 
@@ -246,10 +264,9 @@ module Triannon
     # Access tokens
 
     # construct and encrypt an access token
-    def access_code_generate
+    def access_token_generate
       timestamp = Time.now.to_i.to_s # seconds since epoch
       token = "#{SecureRandom.uuid};;;#{timestamp}"
-      session[:access_token] = token
       salt  = SecureRandom.random_bytes(64)
       key   = ActiveSupport::KeyGenerator.new(timestamp).generate_key(salt)
       crypt = ActiveSupport::MessageEncryptor.new(key)
@@ -258,11 +275,11 @@ module Triannon
     end
 
     # decrypt, parse and validate access token
-    def access_code_valid?(code)
-      key = session[:client_access_key]
-      crypt = ActiveSupport::MessageEncryptor.new(key)
-      token = crypt.decrypt_and_verify(code)
-      if token.eql?(session[:access_token])
+    def access_token_valid?(code)
+      if code == session[:access_token]
+        key = session[:client_access_key]
+        crypt = ActiveSupport::MessageEncryptor.new(key)
+        token = crypt.decrypt_and_verify(code)
         timestamp = token.split(';;;').last.to_i
         elapsed = Time.now.to_i - timestamp  # sec since token was issued
         return true if elapsed < Triannon.config[:access_token_expiry]
@@ -274,13 +291,33 @@ module Triannon
     def grant_access_token
       cookies.delete(:login_user)
       session.delete(:login_user)
-      session[:access_token] = access_code_generate
+      session[:access_token] = access_token_generate
       data = {
         accessToken: session[:access_token],
         tokenType: 'Bearer',
         expiresIn: Triannon.config[:access_token_expiry]
       }
       json_response(data, 200)
+    end
+
+    # Issue a 403 for invalid access token
+    def access_token_invalid
+      err = {
+        error: 'invalidAccess',
+        errorDescription: 'invalid access token',
+        errorUri: ''
+      }
+      json_response(err, 403)
+    end
+
+    # Issue a 401 to challenge for a client access token
+    def access_token_required
+      err = {
+        error: 'invalidAccess',
+        errorDescription: 'access token is required',
+        errorUri: ''
+      }
+      json_response(err, 401)
     end
 
 
