@@ -30,7 +30,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
     json_payloads
     data = {clientId: 'clientA', clientSecret: 'secretA'}
     post :client_identity, data.to_json
-    expect(response.code.to_i).to eql(200)
+    expect(response.status).to eql(200)
     data = JSON.parse(response.body)
     data['authorizationCode']
   }
@@ -77,13 +77,13 @@ describe Triannon::AuthController, :vcr, type: :controller do
       params = {code: auth_code }
       request.headers['Content-Type'] = 'text/html'
       post :login, data.to_json, params
-      expect(response.code.to_i).to eql(415)
+      expect(response.status).to eql(415)
     end
     it 'rejects a request that has no "userId" field (response code 401)' do
       data = {userSecret: 'secretA'}
       params = {code: auth_code }
       post :login, data.to_json, params
-      expect(response.code.to_i).to eql(401)
+      expect(response.status).to eql(401)
       err = JSON.parse(response.body)
       expect(err).not_to be_empty
       expect(err['errorDescription']).to eql('login credentials required')
@@ -92,7 +92,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
       data = {userId: 'userA'}
       params = {code: auth_code }
       post :login, data.to_json, params
-      expect(response.code.to_i).to eql(401)
+      expect(response.status).to eql(401)
       err = JSON.parse(response.body)
       expect(err).not_to be_empty
       expect(err['errorDescription']).to eql('login credentials required')
@@ -101,7 +101,8 @@ describe Triannon::AuthController, :vcr, type: :controller do
       data = {userId: 'userAnon', userSecret: 'whatever'}
       params = {code: auth_code }
       post :login, data.to_json, params
-      expect(response.code.to_i).to eql(302)
+      expect(response.status).to eql(302)
+    end
     end
   end
 
@@ -148,18 +149,18 @@ describe Triannon::AuthController, :vcr, type: :controller do
     it 'accepts JSON content' do
       params = {clientId: 'clientA', clientSecret: 'secretA'}
       post :client_identity, params.to_json
-      expect(response.code.to_i).to eql(200)
+      expect(response.status).to eql(200)
     end
     it 'rejects HTML content' do
       request.headers['Content-Type'] = 'text/html'
       params = {clientId: 'clientA', clientSecret: 'secretA'}
       post :client_identity, params.to_json
-      expect(response.code.to_i).to eql(415)
+      expect(response.status).to eql(415)
     end
     it 'rejects a request without "clientId" (response code 401)' do
       data = {clientSecret: 'secretA'}
       post :client_identity, data.to_json
-      expect(response.code.to_i).to eql(401)
+      expect(response.status).to eql(401)
       err = JSON.parse(response.body)
       expect(err).not_to be_empty
       expect(err['error']).to eql('invalidClient')
@@ -168,7 +169,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
     it 'rejects a request without "clientSecret" (response code 401)' do
       data = {clientId: 'clientA'}
       post :client_identity, data.to_json
-      expect(response.code.to_i).to eql(401)
+      expect(response.status).to eql(401)
       err = JSON.parse(response.body)
       expect(err).not_to be_empty
       expect(err['error']).to eql('invalidClient')
@@ -177,7 +178,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
     it 'rejects unauthorized client requests (response code 403)' do
       data = {clientId: 'clientA', clientSecret: 'secretB'}
       post :client_identity, data.to_json
-      expect(response.code.to_i).to eql(403)
+      expect(response.status).to eql(403)
       err = JSON.parse(response.body)
       expect(err).not_to be_empty
       expect(err['error']).to eql('invalidClient')
@@ -186,7 +187,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
     it 'returns an authorizationCode for authorized clients (response code 200)' do
       data = {clientId: 'clientA', clientSecret: 'secretA'}
       post :client_identity, data.to_json
-      expect(response.code.to_i).to eql(200)
+      expect(response.status).to eql(200)
       data = JSON.parse(response.body)
       expect(data).not_to be_empty
       expect(data['authorizationCode']).not_to be_nil
@@ -204,7 +205,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
       end
       it 'returns an access code, given a valid authorization code' do
         get :access_token, code: auth_code
-        expect(response.code.to_i).to eql(200)
+        expect(response.status).to eql(200)
         expect(response.cookies['login_user']).to be_nil
         data = JSON.parse(response.body)
         expect(data).not_to be_empty
