@@ -154,6 +154,15 @@ describe Triannon::AuthController, :vcr, type: :controller do
       expect(logout_notice).not_to be_nil
       expect(logout_notice).not_to eql(login_notice)
     end
+    it 'does not respond to OPTIONS' do
+      json_payloads
+      process :logout, 'OPTIONS'
+      expect(response.status).to eq(405)
+      err = JSON.parse(response.body)
+      expect(err).not_to be_empty
+      expect(err['error']).to eql('invalidRequest')
+      expect(err['errorDescription']).to include('GET')
+    end
   end # /auth/logout
 
 
