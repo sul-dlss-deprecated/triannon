@@ -52,18 +52,27 @@ describe Triannon::AuthController, :vcr, type: :controller do
       expect(info['profile']).to eql(@service_profile)
     }
     context 'accept JSON:' do
+      before :each do
+        json_payloads
+      end
       it 'returns login information, with no user logged in' do
-        accept_json
         process :options, 'OPTIONS'
         @service_profile = 'http://iiif.io/api/image/2/auth/login'
         check_service
       end
       it 'returns logout information, while a user is logged in' do
         login
-        accept_json
         process :options, 'OPTIONS'
         @service_profile = 'http://iiif.io/api/image/2/auth/logout'
         check_service
+      end
+      it 'does not respond to GET' do
+        process :options, 'GET'
+        expect(response.status).to eq(405)
+        err = JSON.parse(response.body)
+        expect(err).not_to be_empty
+        expect(err['error']).to eql('invalidRequest')
+        expect(err['errorDescription']).to include('OPTIONS')
       end
     end
   end
@@ -103,6 +112,13 @@ describe Triannon::AuthController, :vcr, type: :controller do
       post :login, data.to_json, params
       expect(response.status).to eql(302)
     end
+    it 'does not respond to GET' do
+      process :login, 'GET'
+      expect(response.status).to eq(405)
+      err = JSON.parse(response.body)
+      expect(err).not_to be_empty
+      expect(err['error']).to eql('invalidRequest')
+      expect(err['errorDescription']).to include('POST')
     end
   end
 
