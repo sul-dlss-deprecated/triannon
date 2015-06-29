@@ -227,13 +227,18 @@ module Triannon
 
     # decrypt, parse and validate authorization code
     def auth_code_valid?(code)
-      key = session[:client_auth_key]
-      crypt = ActiveSupport::MessageEncryptor.new(key)
-      auth_code = crypt.decrypt_and_verify(code)
-      if auth_code.include?(session[:client_identity]['clientId'])
-        timestamp = auth_code.split(';;;').last.to_i
-        elapsed = Time.now.to_i - timestamp  # sec since auth code was issued
-        return true if elapsed < Triannon.config[:client_token_expiry]
+      begin
+        key = session[:client_auth_key]
+        return false if key.nil?  # requires client authentication
+        crypt = ActiveSupport::MessageEncryptor.new(key)
+        auth_code = crypt.decrypt_and_verify(code)
+        if auth_code.include?(session[:client_identity]['clientId'])
+          timestamp = auth_code.split(';;;').last.to_i
+          elapsed = Time.now.to_i - timestamp  # sec since auth code was issued
+          return true if elapsed < Triannon.config[:client_token_expiry]
+        end
+      rescue ActiveSupport::MessageVerifier::InvalidSignature
+        # This is an invalid auth-code, so return false.
       end
       false
     end
