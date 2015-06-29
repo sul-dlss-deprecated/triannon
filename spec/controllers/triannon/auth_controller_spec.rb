@@ -116,9 +116,9 @@ describe Triannon::AuthController, :vcr, type: :controller do
       expect(err['errorDescription']).to eql('authorization code is required')
     end
     it 'rejects an invalid authorization code (response code 403)' do
-      code = auth_code # first make sure the client has requested a code
+      auth_code # first the client requests a code (setup session data)
       data = {userId: 'userA', userSecret: 'secretA'}
-      params = {code: 'invalid_auth_code' } # now use an invalid code
+      params = {code: 'invalid_auth_code' } # invalid code != session data
       post :login, data.to_json, params
       expect(response.status).to eql(403)
       err = JSON.parse(response.body)
