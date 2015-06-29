@@ -109,12 +109,12 @@ module Triannon
             auth_code_invalid
           end
         else
-          # Without any authorization token, a login session is sufficient
-          # authentication for granting an access token.  Note, however, that
-          # the only way to enable a login session is for an authorized client
-          # to provide user data in POST /auth/login and that requires the
-          # client to first obtain an authentication code, so this block of
-          # code should never get executed (unless login requirements change).
+          # Without an authentication code, a login session is sufficient for
+          # granting an access token.  However, the only way to enable a login
+          # session is for an authorized client to provide user data in POST
+          # /auth/login, which requires the client to first obtain an
+          # authentication code.  Hence, this block of code should never get
+          # executed (unless login requirements change).
           grant_access_token
         end
       else
