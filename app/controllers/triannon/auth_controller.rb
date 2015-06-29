@@ -27,7 +27,7 @@ module Triannon
       end
     end
 
-    # GET || POST to /auth/login
+    # POST to /auth/login
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#login-service
     def login
       # The service must set a Cookie for the Access Token Service to retrieve
@@ -132,7 +132,6 @@ module Triannon
         token = auth.split[1]
         if access_token_valid?(token)
           response.status = 200
-          # TODO: redirect to request.path ?
           render nothing: true
         else
           access_token_invalid
