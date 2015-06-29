@@ -106,6 +106,26 @@ describe Triannon::AuthController, :vcr, type: :controller do
       expect(err).not_to be_empty
       expect(err['errorDescription']).to eql('login credentials required')
     end
+    it 'requires an authorization code (response code 401)' do
+      data = {userId: 'userA', userSecret: 'secretA'}
+      post :login, data.to_json
+      expect(response.status).to eql(401)
+      err = JSON.parse(response.body)
+      expect(err).not_to be_empty
+      expect(err['error']).to eql('invalidClient')
+      expect(err['errorDescription']).to eql('authorization code is required')
+    end
+    it 'rejects an invalid authorization code (response code 403)' do
+      code = auth_code # first make sure the client has requested a code
+      data = {userId: 'userA', userSecret: 'secretA'}
+      params = {code: 'invalid_auth_code' } # now use an invalid code
+      post :login, data.to_json, params
+      expect(response.status).to eql(403)
+      err = JSON.parse(response.body)
+      expect(err).not_to be_empty
+      expect(err['error']).to eql('invalidClient')
+      expect(err['errorDescription']).to eql('Unable to validate authorization code')
+    end
     it 'accepts any user login data from authorized client (response code 302)' do
       data = {userId: 'userAnon', userSecret: 'whatever'}
       params = {code: auth_code }
@@ -228,7 +248,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
       before :each do
         login
       end
-      it 'returns an access code, given a valid authorization code' do
+      it 'with a valid authorization code - returns an access code' do
         get :access_token, code: auth_code
         expect(response.status).to eql(200)
         expect(response.cookies['login_user']).to be_nil
@@ -237,7 +257,16 @@ describe Triannon::AuthController, :vcr, type: :controller do
         expect(data['accessToken']).not_to be_nil
         expect(data['accessToken']).to be_instance_of String
       end
-      it 'response status is 401, without an authorization code' do
+      it 'with an invalid authorization code - response status is 403' do
+        get :access_token, code: 'invalid_auth_code'
+        expect(response.status).to eq(403)
+        expect(response.cookies['login_user']).to be_nil
+        err = JSON.parse(response.body)
+        expect(err).not_to be_empty
+        expect(err['error']).to eql('invalidClient')
+        expect(err['errorDescription']).to eql('Unable to validate authorization code')
+      end
+      it 'without an authorization code - response status is 401' do
         get :access_token
         expect(response.status).to eq(401)
         expect(response.cookies['login_user']).to be_nil
@@ -248,8 +277,8 @@ describe Triannon::AuthController, :vcr, type: :controller do
       end
     end
 
-    describe 'without valid login credentials' do
-      it 'response status is 401, with a valid authorization code' do
+    describe 'without valid login -' do
+      it 'with a valid authorization code - response status is 401' do
         accept_json
         get :access_token, code: auth_code
         expect(response.status).to eq(401)
@@ -258,7 +287,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
         expect(err).not_to be_empty
         expect(err['errorDescription']).to eql('login credentials required')
       end
-      it 'response status is 401, without an authorization code' do
+      it 'without an authorization code - response status is 401' do
         accept_json
         get :access_token
         expect(response.status).to eq(401)
