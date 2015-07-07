@@ -1,6 +1,7 @@
 module Triannon
   class Annotation
     include ActiveModel::Model
+    extend ActiveModel::Callbacks
 
     define_model_callbacks :save, :destroy
     after_save :solr_save
@@ -40,7 +41,7 @@ module Triannon
     # Instance Methods ----------------------------------------------------------------
 
     def save
-      _run_save_callbacks do
+      run_callbacks :save do
         # TODO: check if valid anno?
         @id = Triannon::LdpWriter.create_anno(self, root_container) if graph && graph.size > 2
         # reload from storage to get the anno id within the graph
@@ -51,7 +52,7 @@ module Triannon
     end
 
     def destroy
-      _run_destroy_callbacks do
+      run_callbacks :destroy do
         Triannon::LdpWriter.delete_anno "#{root_container}/#{id}"
       end
     end

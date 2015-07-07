@@ -1,8 +1,13 @@
 require 'spec_helper'
+require "erb"
+include ERB::Util
 
 describe Triannon::AnnotationsController, type: :routing do
 
   routes {Triannon::Engine.routes}
+
+  let (:pair_tree_id) {'79/76/1a/04/79761a04-cc10-4be2-8aad-c5ead453fa08'}
+  let (:url_encoded_pair_tree_id) { url_encode(pair_tree_id) }
 
   context 'GET to root url' do
     it '/ routed to triannon/search#find without anno_root param' do
@@ -17,21 +22,29 @@ describe Triannon::AnnotationsController, type: :routing do
 
   context "GET" do
     context "#show" do
-      it '/annotations/:anno_root/:id (GET) routed to triannon/annotations#show with params' do
-        expect(:get => "/annotations/foo/666").to route_to(controller: "triannon/annotations", action: "show", anno_root: "foo", id: "666")
+      it '/annotations/:anno_root/url_encode(:id) (GET) routed to triannon/annotations#show with params' do
+        expect(:get => "/annotations/foo/#{url_encoded_pair_tree_id}").to route_to(controller: "triannon/annotations", action: "show", anno_root: "foo", id: pair_tree_id)
       end
-      it '/:anno_root/:id (GET) routed to triannon/annotations#show with params' do
-        expect(:get => "/foo/666").to route_to(controller: "triannon/annotations", action: "show", anno_root: "foo", id: "666")
+      it '/:anno_root/url_encode(:id) (GET) routed to triannon/annotations#show with params' do
+        expect(:get => "/foo/#{url_encoded_pair_tree_id}").to route_to(controller: "triannon/annotations", action: "show", anno_root: "foo", id: pair_tree_id)
       end
       context "forbidden anno_root values" do
         it '/search/:id is not routable' do
-          expect(:get => "/search/666").not_to be_routable
+          expect(:get => "/search/#{url_encoded_pair_tree_id}").not_to be_routable
         end
         it '/new/:id is not routable' do
-          expect(:get => "/new/666").not_to be_routable
+          expect(:get => "/new/#{url_encoded_pair_tree_id}").not_to be_routable
         end
-        it '/annotations/:id routed to triannon/annotations#index with anno_root param' do
-          expect(:get => "/annotations/666").to route_to(controller: "triannon/annotations", action: "index", anno_root: "666")
+        it '/annotations/url_encode(:id) routed to triannon/annotations#index with anno_root param' do
+          expect(:get => "/annotations/#{url_encoded_pair_tree_id}").to route_to(controller: "triannon/annotations", action: "index", anno_root: pair_tree_id)
+        end
+      end
+      context "pair tree id must be url encoded" do
+        it '/:anno_root/:id (pair tree id not url encoded) (GET) is not routable' do
+          expect(:get => "/search/#{pair_tree_id}").not_to be_routable
+        end
+        it '/:anno_root/:id (pair tree id url encoded) (GET) works' do
+          # see '/:anno_root/url_encode(:id) (GET) routed to triannon/annotations#show with params'
         end
       end
     end
@@ -96,66 +109,92 @@ describe Triannon::AnnotationsController, type: :routing do
 
   context 'DELETE' do
     it '/annotations/:anno_root/:id routed to triannon/annotations#destroy' do
-      expect(:delete => "/annotations/foo/666").to route_to(controller: "triannon/annotations", action: "destroy", anno_root: "foo", id: "666")
+      expect(:delete => "/annotations/foo/#{url_encoded_pair_tree_id}").to route_to(controller: "triannon/annotations", action: "destroy", anno_root: "foo", id: pair_tree_id)
     end
     it '/:anno_root/:id routed to triannon/annotations#destroy' do
-      expect(:delete => "/foo/666").to route_to(controller: "triannon/annotations", action: "destroy", anno_root: "foo", id: "666")
+      expect(:delete => "/foo/#{url_encoded_pair_tree_id}").to route_to(controller: "triannon/annotations", action: "destroy", anno_root: "foo", id: pair_tree_id)
     end
     context "forbidden anno_root values" do
       it '/annotations/:id is not routable' do
-        expect(:delete => "/annotations/666").not_to be_routable
+        expect(:delete => "/annotations/#{url_encoded_pair_tree_id}").not_to be_routable
       end
       it '/search/:id is not routable' do
-        expect(:delete => "/search/666").not_to be_routable
+        expect(:delete => "/search/#{url_encoded_pair_tree_id}").not_to be_routable
       end
       it '/new/:id is not routable' do
-        expect(:delete => "/new/666").not_to be_routable
+        expect(:delete => "/new/#{url_encoded_pair_tree_id}").not_to be_routable
+      end
+    end
+    context "pair tree id must be url encoded" do
+      it '/:anno_root/:id (pair tree id not url encoded) is not routable' do
+        expect(:delete => "/search/#{pair_tree_id}").not_to be_routable
+      end
+      it '/:anno_root/:id (pair tree id url encoded) works' do
+        # see '/:anno_root/url_encode(:id) routed to triannon/annotations#destroy'
       end
     end
   end
 
   context 'http PUT' do
     it '/annotations/:anno_root/:id is not YET routable' do
-      expect(:put => "/annotations/foo/666").not_to be_routable
+      expect(:put => "/annotations/foo/#{url_encoded_pair_tree_id}").not_to be_routable
+      expect(:put => "/annotations/foo/#{pair_tree_id}").not_to be_routable
     end
     #it '/annotations/:anno_root/:id routed to triannon/search#update with params' do
-    #  expect(:put => "/annotations/foo/666").to route_to(controller: "triannon/annotations", action: "update", anno_root: "foo", id: "666")
+    #  expect(:put => "/annotations/foo/#{url_encoded_pair_tree_id}").to route_to(controller: "triannon/annotations", action: "update", anno_root: "foo", id: pair_tree_id)
     #end
     it '/:anno_root/:id is not YET routable' do
-      expect(:put => "/foo/666").not_to be_routable
+      expect(:put => "/foo/#{url_encoded_pair_tree_id}").not_to be_routable
+      expect(:put => "/foo/#{pair_tree_id}").not_to be_routable
     end
     #it '/:anno_root/:id routed to triannon/search#update with params' do
-    #  expect(:put => "/foo/666").to route_to(controller: "triannon/annotations", action: "update", anno_root: "foo", id: "666")
+    #  expect(:put => "/foo/#{url_encoded_pair_tree_id}").to route_to(controller: "triannon/annotations", action: "update", anno_root: "foo", id: pair_tree_id)
     #end
     context "forbidden anno_root values" do
       it '/annotations/:id is not routable' do
-        expect(:put => "/annotations/666").not_to be_routable
+        expect(:put => "/annotations/#{url_encoded_pair_tree_id}").not_to be_routable
+        expect(:put => "/annotations/#{pair_tree_id}").not_to be_routable
       end
       it '/search/:id is not routable' do
-        expect(:put => "/search/666").not_to be_routable
+        expect(:put => "/search/#{url_encoded_pair_tree_id}").not_to be_routable
+        expect(:put => "/search/#{pair_tree_id}").not_to be_routable
       end
       it '/new/:id is not routable' do
-        expect(:put => "/new/666").not_to be_routable
+        expect(:put => "/new/#{url_encoded_pair_tree_id}").not_to be_routable
+        expect(:put => "/new/#{pair_tree_id}").not_to be_routable
+      end
+    end
+    context "pair tree id must be url encoded" do
+      it '/:anno_root/:id (pair tree id not url encoded) is not routable' do
+        expect(:put => "/foo/#{pair_tree_id}").not_to be_routable
+      end
+      it '/:anno_root/:id (pair tree id url encoded) works' do
+        # see '/:anno_root/:id routed to triannon/search#update with params'
       end
     end
   end
 
   context 'http PATCH' do
     it '/annotations/:anno_root/:id is not routable' do
-      expect(:patch => "/annotations/foo/666").not_to be_routable
+      expect(:patch => "/annotations/foo/#{url_encoded_pair_tree_id}").not_to be_routable
+      expect(:patch => "/annotations/foo/#{pair_tree_id}").not_to be_routable
     end
     it '/:anno_root/:id is not routable' do
-      expect(:patch => "/foo/666").not_to be_routable
+      expect(:patch => "/foo/#{url_encoded_pair_tree_id}").not_to be_routable
+      expect(:patch => "/foo/#{pair_tree_id}").not_to be_routable
     end
     context "forbidden anno_root values" do
       it '/annotations/:id is not routable' do
-        expect(:patch => "/annotations/666").not_to be_routable
+        expect(:patch => "/annotations/#{url_encoded_pair_tree_id}").not_to be_routable
+        expect(:patch => "/annotations/#{pair_tree_id}").not_to be_routable
       end
       it '/search/:id is not routable' do
-        expect(:patch => "/search/666").not_to be_routable
+        expect(:patch => "/search/#{url_encoded_pair_tree_id}").not_to be_routable
+        expect(:patch => "/search/#{pair_tree_id}").not_to be_routable
       end
       it '/new/:id is not routable' do
-        expect(:patch => "/new/666").not_to be_routable
+        expect(:patch => "/new/#{url_encoded_pair_tree_id}").not_to be_routable
+        expect(:patch => "/new/#{pair_tree_id}").not_to be_routable
       end
     end
   end
@@ -180,9 +219,12 @@ describe Triannon::AnnotationsController, type: :routing do
       expect(:get => "/search?foo=bar").to route_to(controller: "triannon/search", action: "find", :foo => "bar")
     end
     it "does not take an id" do
-      expect(:get => "/annotations/dms/search/666").not_to be_routable
-      expect(:get => "/annotations/search/666").not_to be_routable
-      expect(:get => "/search/666").not_to be_routable
+      expect(:get => "/annotations/dms/search/#{url_encoded_pair_tree_id}").not_to be_routable
+      expect(:get => "/annotations/dms/search/#{pair_tree_id}").not_to be_routable
+      expect(:get => "/annotations/search/#{url_encoded_pair_tree_id}").not_to be_routable
+      expect(:get => "/annotations/search/#{pair_tree_id}").not_to be_routable
+      expect(:get => "/search/#{url_encoded_pair_tree_id}").not_to be_routable
+      expect(:get => "/search/#{pair_tree_id}").not_to be_routable
     end
     it "http POST should not be available" do
       expect(:post => "/annotations/dms/search").not_to be_routable
@@ -193,19 +235,22 @@ describe Triannon::AnnotationsController, type: :routing do
       expect(:delete => "/annotations/dms/search").not_to be_routable
       expect(:delete => "/annotations/search").not_to be_routable
       expect(:delete => "/search").not_to be_routable
-      expect(:delete => "/annotations/search/666").not_to be_routable
+      expect(:delete => "/annotations/search/#{url_encoded_pair_tree_id}").not_to be_routable
+      expect(:delete => "/annotations/search/#{pair_tree_id}").not_to be_routable
     end
     it "http PUT should not be available" do
       expect(:put => "/annotations/dms/search").not_to be_routable
       expect(:put => "/annotations/search").not_to be_routable
       expect(:put => "/search").not_to be_routable
-      expect(:put => "/annotations/search/666").not_to be_routable
+      expect(:put => "/annotations/search/#{url_encoded_pair_tree_id}").not_to be_routable
+      expect(:put => "/annotations/search/#{pair_tree_id}").not_to be_routable
     end
     it "http PATCH should not be available" do
       expect(:patch => "/annotations/dms/search").not_to be_routable
       expect(:patch => "/annotations/search").not_to be_routable
       expect(:patch => "/search").not_to be_routable
-      expect(:patch => "/annotations/search/666").not_to be_routable
+      expect(:patch => "/annotations/search/#{url_encoded_pair_tree_id}").not_to be_routable
+      expect(:patch => "/annotations/search/#{pair_tree_id}").not_to be_routable
     end
   end # search
 
