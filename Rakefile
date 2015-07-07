@@ -12,15 +12,19 @@ require 'jettywrapper'
 require 'engine_cart/rake_task'
 desc 'run the triannon specs'
 task :ci => 'engine_cart:generate' do
+  File.rename('Gemfile.lock', 'Gemfile.lockDISABLED') rescue nil
   RAILS_ENV = 'test'
   Rake::Task['spec'].invoke
+  File.rename('Gemfile.lockDISABLED', 'Gemfile.lock') rescue nil
 end
 
 load 'rails/tasks/statistics.rake'
 
 require 'rspec/core/rake_task'
-
 RSpec::Core::RakeTask.new(:spec)
+
+require 'rubocop/rake_task'
+RuboCop::RakeTask.new
 
 task :default => :ci
 

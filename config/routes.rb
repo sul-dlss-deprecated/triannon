@@ -3,9 +3,10 @@ Triannon::Engine.routes.draw do
   # Authentication routes; these must precede '/:anno_root/*' and they
   # preclude the use of an anno root named 'auth'.
   match '/auth/login', to: 'auth#options', via: [:options]
-  match '/auth/login', to: 'auth#login', via: [:get]
+  match '/auth/login', to: 'auth#login', via: [:post]
   get '/auth/logout', to: 'auth#logout'
   get '/auth/access_token', to: 'auth#access_token'
+  get '/auth/access_validate', to: 'auth#access_validate'
   post '/auth/client_identity', to: 'auth#client_identity'
 
   # 1. can't use resourceful routing because of :anno_root (dynamic path segment)
@@ -62,5 +63,3 @@ end
 def id_filter(request)
   request.path_parameters[:id] !~ /^new$|^search$/
 end
-
-

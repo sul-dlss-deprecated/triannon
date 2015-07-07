@@ -27,6 +27,12 @@ development:
   max_solr_retries: 5
   base_sleep_seconds: 1
   max_sleep_seconds: 5
+  authorized_clients:
+    clientA: secretA
+    clientB: secretB
+  # expiry values are in seconds
+  client_token_expiry: 60
+  access_token_expiry: 3600
 test: &test
   ldp:
     url: http://localhost:8983/fedora/rest
@@ -36,6 +42,12 @@ test: &test
       - blah
   solr_url: http://localhost:8983/solr/triannon
   triannon_base_url: http://your.triannon-server.com/annotations/
+  authorized_clients:
+    clientA: secretA
+    clientB: secretB
+  # expiry values are in seconds
+  client_token_expiry: 60
+  access_token_expiry: 3600
 production:
   ldp:
     url:
@@ -45,7 +57,7 @@ production:
       - blah
   solr_url:
   triannon_base_url:
-      YML
+YML
       create_file 'config/triannon.yml', default_yml
     end
 

@@ -21,9 +21,9 @@ development:
   authorized_clients:
     clientA: secretA
     clientB: secretB
-  authorized_users:
-    userA: secretA
-    userB: secretB
+  # expiry values are in seconds
+  client_token_expiry: 60
+  access_token_expiry: 3600
 
 test: &test
   ldp:
@@ -37,9 +37,9 @@ test: &test
   authorized_clients:
     clientA: secretA
     clientB: secretB
-  authorized_users:
-    userA: secretA
-    userB: secretB
+  # expiry values are in seconds
+  client_token_expiry: 60
+  access_token_expiry: 3600
 
 production:
   ldp:
@@ -51,4 +51,6 @@ production:
   solr_url: http://your.triannon_solr_url.here
   triannon_base_url: http://your.triannon-server.com/annotations/
   authorized_clients:
-  authorized_users:
+  # expiry values are in seconds
+  client_token_expiry: 60
+  access_token_expiry: 3600

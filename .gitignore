@@ -1,16 +1,13 @@
 .bundle/
-.gemtags
 .ruby-*
 .pryrc
 .pry_history
 .railsrc
 *.sublime*
-.tags
 .yardoc/
 coverage
 log/*.log
 pkg/
-Gemfile.lock
 spec/internal
 tmp
 jetty
@@ -18,10 +15,17 @@ uri-cache
 
 ./spec/internal
 
+# This gem SHOULD ignore Gemfile.lock
+Gemfile.lock
+
 # Sublime text files
 *.sublime*
 
 # Ctags files
+bin/ctags.rb
 .tags
 .gemtags
+
+# Server reset utility
+bin/triannon_server_reset.sh
 
