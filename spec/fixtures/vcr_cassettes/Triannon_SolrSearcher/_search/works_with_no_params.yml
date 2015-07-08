@@ -1,0 +1,73 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: http://localhost:8983/solr/triannon/select?wt=ruby
+    body:
+      encoding: UTF-8
+      string: ''
+    headers: {}
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - text/plain;charset=UTF-8
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: |
+        {
+          'responseHeader'=>{
+            'status'=>0,
+            'QTime'=>1,
+            'params'=>{
+              'wt'=>'ruby'}},
+          'response'=>{'numFound'=>2,'start'=>0,'maxScore'=>1.0,'docs'=>[
+              {
+                'id'=>'new_anno_feature/02/fc/69/52/02fc6952-4b6c-475d-a1bd-abd5f8ebc47a',
+                'root'=>'new_anno_feature',
+                'motivation'=>['commenting'],
+                'target_url'=>['http://purl.stanford.edu/kq131cs7229'],
+                'target_type'=>['external_URI'],
+                'body_type'=>['content_as_text'],
+                'body_chars_exact'=>['I love this!'],
+                'anno_jsonld'=>'{"@context":"http://www.w3.org/ns/oa-context-20130208.json","@graph":[{"@id":"_:g69850691583040","@type":["dctypes:Text","cnt:ContentAsText"],"chars":"I love this!"},{"@id":"http://your.triannon-server.com/annotations/new_anno_feature/02/fc/69/52/02fc6952-4b6c-475d-a1bd-abd5f8ebc47a","@type":"oa:Annotation","hasBody":"_:g69850691583040","hasTarget":"http://purl.stanford.edu/kq131cs7229","motivatedBy":"oa:commenting"}]}',
+                '_version_'=>1506171794843762688,
+                'timestamp'=>'2015-07-08T23:15:56.838Z',
+                'score'=>1.0},
+              {
+                'id'=>'my_root/81/4b/02/25/814b0225-bd48-4de9-a724-a72a9fa86c18',
+                'root'=>'solr_searcher_spec',
+                'motivation'=>['bookmarking'],
+                'target_url'=>['http://my.favorite.org'],
+                'target_type'=>['external_URI'],
+                'body_type'=>['no_body'],
+                'anno_jsonld'=>'{"@context":"http://www.w3.org/ns/oa-context-20130208.json","@id":"http://your.triannon-server.com/annotations/my_root/81/4b/02/25/814b0225-bd48-4de9-a724-a72a9fa86c18","@type":"oa:Annotation","hasTarget":"http://my.favorite.org","motivatedBy":"oa:bookmarking"}',
+                '_version_'=>1506171836183871488,
+                'timestamp'=>'2015-07-08T23:16:36.262Z',
+                'score'=>1.0}]
+          },
+          'facet_counts'=>{
+            'facet_queries'=>{},
+            'facet_fields'=>{
+              'root'=>[
+                'new_anno_feature',1,
+                'solr_searcher_spec',1],
+              'motivation'=>[
+                'bookmarking',1,
+                'commenting',1],
+              'target_type'=>[
+                'external_URI',2],
+              'body_type'=>[
+                'content_as_text',1,
+                'no_body',1],
+              'annotated_at_tdate'=>[]},
+            'facet_dates'=>{},
+            'facet_ranges'=>{},
+            'facet_intervals'=>{}}}
+    http_version: 
+  recorded_at: Wed, 08 Jul 2015 23:16:39 GMT
+recorded_with: VCR 2.9.3
