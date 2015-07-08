@@ -89,7 +89,7 @@ module Triannon
     end
 
 
-    # GET /auth/token
+    # GET /auth/access_token
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#access-token-service
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#error-conditions
     def access_token
