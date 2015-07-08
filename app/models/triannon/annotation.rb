@@ -1,7 +1,6 @@
 module Triannon
   class Annotation
     include ActiveModel::Model
-    extend ActiveModel::Callbacks
 
     define_model_callbacks :save, :destroy
     after_save :solr_save
