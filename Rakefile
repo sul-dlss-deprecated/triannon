@@ -12,10 +12,8 @@ require 'jettywrapper'
 require 'engine_cart/rake_task'
 desc 'run the triannon specs'
 task :ci => 'engine_cart:generate' do
-  File.rename('Gemfile.lock', 'Gemfile.lockDISABLED') rescue nil
   RAILS_ENV = 'test'
   Rake::Task['spec'].invoke
-  File.rename('Gemfile.lockDISABLED', 'Gemfile.lock') rescue nil
 end
 
 load 'rails/tasks/statistics.rake'
@@ -69,6 +67,26 @@ namespace :triannon do
   end
   desc 'run test rails console w triannon but no jetty'
   task :console => :console_no_jetty
+
+  desc 'update triannon gems and engine cart app'
+  task :update_app do
+    # This project uses an engine cart app to run specs.  The engine cart
+    # preparation modifies the root Gemfile so that it will include the engine
+    # cart Gemfile, if it exists (by default, it's in ./spec/internal/Gemfile).
+    # The engine cart Gemfile contains specific versions of gems that were last
+    # available when the engine cart was generated.  To perform a complete
+    # update, first remove the engine cart app.
+    File.delete('Gemfile.lock')
+    Rake::Task['engine_cart:clean'].invoke
+    # Now update the triannon gems (independent of an engine_cart app).
+    system 'bundle install'
+    # Now regenerate the engine cart app, but do not constrain it with the root
+    # Gemfile.lock gemset; removing Gemfile.lock allows third-party gems to be
+    # resolved by the gem system (as they would when a third-party app includes
+    # triannon.
+    File.delete('Gemfile.lock')
+    Rake::Task['engine_cart:generate'].invoke
+  end
 
 end # namespace triannon
 
