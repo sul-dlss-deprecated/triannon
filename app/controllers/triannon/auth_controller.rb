@@ -64,8 +64,9 @@ module Triannon
     def client_identity
       return unless process_post?
       return unless process_json?
+      data = JSON.parse(request.body.read)
       required_fields = ['clientId', 'clientSecret']
-      identity = parse_identity(required_fields)
+      identity = parse_identity(data, required_fields)
       if identity['clientId'] && identity['clientSecret']
         if authorized_client? identity
           code = { authorizationCode: auth_code_generate(identity) }
@@ -96,7 +97,7 @@ module Triannon
       # The cookie established via the login service must be passed to this
       # service. The service should delete the cookie from the login service
       # and create a new cookie that allows the user to access content.
-      if session[:login_user]
+      if session[:login_data]
         if session[:client_auth_key]
           # When an authorization code was obtained using /auth/client_identity,
           # that code must be passed to the Access Token Service as well.
@@ -139,6 +140,12 @@ module Triannon
       end
     end
 
+    # A public method to return access login data, if it is valid.
+    # @return login_data [Hash|nil]
+    def access_token_data(token)
+      access_token_valid?(token)
+    end
+
 
     private
 
@@ -149,7 +156,7 @@ module Triannon
     # The request MUST include a URI parameter 'code=client_token' where
     # the 'client_token' has been obtained from /auth/client_identity and
     # the request MUST carry a body with the following JSON template:
-    # { "userId" : "ID", "userSecret" : "SECRET" }
+    # { "userId" : "ID", "userSecret" : "SECRET", "workgroups" : "wgA, wgB" }
     def login_handler_post
       return unless process_post?
       return unless process_json?
@@ -157,11 +164,13 @@ module Triannon
       if auth_code.nil?
         auth_code_required
       elsif auth_code_valid?(auth_code)
-        required_fields = ['userId', 'userSecret']
-        identity = parse_identity(required_fields)
+        data = JSON.parse(request.body.read)
+        required_fields = ['userId', 'userSecret', 'workgroups']
+        identity = parse_identity(data, required_fields)
         # When an authorized client POSTs user data, it is simply accepted.
-        if identity['userId']
-          login_update(identity['userId'])
+        if identity['userId'] && identity['workgroups']
+          cookies[:login_user] = identity['userId']
+          session[:login_data] = identity
           redirect_to root_url, notice: 'Successfully logged in.'
         else
           login_required
@@ -169,11 +178,6 @@ module Triannon
       else
         auth_code_invalid
       end
-    end
-
-    def login_update(data)
-      cookies[:login_user] = data
-      session[:login_user] = data
     end
 
     def login_required
@@ -267,10 +271,12 @@ module Triannon
     # --------------------------------------------------------------------
     # Access tokens
 
-    # construct and encrypt an access token
+    # construct and encrypt an access token, using login data
     def access_token_generate
+      cookies.delete(:login_user)
+      login_data = session.delete(:login_data)
       timestamp = Time.now.to_i.to_s # seconds since epoch
-      token = "#{SecureRandom.uuid};;;#{timestamp}"
+      token = "#{login_data.to_json};;;#{timestamp}"
       salt  = SecureRandom.random_bytes(64)
       key   = ActiveSupport::KeyGenerator.new(timestamp).generate_key(salt)
       crypt = ActiveSupport::MessageEncryptor.new(key)
@@ -284,17 +290,17 @@ module Triannon
         key = session[:client_access_key]
         crypt = ActiveSupport::MessageEncryptor.new(key)
         token = crypt.decrypt_and_verify(code)
-        timestamp = token.split(';;;').last.to_i
+        token_data = token.split(';;;')
+        identity = JSON.parse(token_data.first)
+        timestamp = token_data.last.to_i
         elapsed = Time.now.to_i - timestamp  # sec since token was issued
-        return true if elapsed < Triannon.config[:access_token_expiry]
+        return identity if elapsed < Triannon.config[:access_token_expiry]
       end
-      false
+      nil
     end
 
     # Grant an access token for authorized access
     def grant_access_token
-      cookies.delete(:login_user)
-      session.delete(:login_user)
       session[:access_token] = access_token_generate
       data = {
         accessToken: session[:access_token],
@@ -408,9 +414,8 @@ module Triannon
 
     # Parse POST JSON data to ensure it contains required fields
     # @param fields [Array<String>] an array of required fields
-    def parse_identity(fields)
+    def parse_identity(data, fields)
       identity = Hash[fields.map {|f| [f, nil]}]
-      data = JSON.parse(request.body.read)
       if fields.map {|f| data.key? f }.all?
         fields.each {|f| identity[f] = data[f] }
       end

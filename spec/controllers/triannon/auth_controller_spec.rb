@@ -36,7 +36,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
   }
   let(:login) {
     json_payloads
-    data = {userId: 'userA', userSecret: 'secretA'}
+    data = {userId: 'userA', userSecret: 'secretA', workgroups: 'A,B'}
     post :login, data.to_json, code: auth_code
     expect(response.status).to eq(302)
     expect(response).to redirect_to('/')
@@ -127,7 +127,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
       expect(err['errorDescription']).to eql('Unable to validate authorization code')
     end
     it 'accepts any user login data from authorized client (response code 302)' do
-      data = {userId: 'userAnon', userSecret: 'whatever'}
+      data = {userId: 'userAnon', userSecret: 'whatever', workgroups: 'doh :-)'}
       params = {code: auth_code }
       post :login, data.to_json, params
       expect(response.status).to eql(302)
