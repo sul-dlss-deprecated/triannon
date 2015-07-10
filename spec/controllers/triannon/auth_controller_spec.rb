@@ -10,22 +10,13 @@ describe Triannon::AuthController, :vcr, type: :controller do
     Triannon.config[:access_token_expiry] = 3600
   end
 
-  let(:accept_json) {
-    request.headers['Accept'] = 'application/json'
-  }
-  let(:content_json) {
-    request.headers['Content-Type'] =  'application/json'
-  }
-  let(:json_payloads) {
-    accept_json
-    content_json
-  }
   let(:access_token) {
     login
     get :access_token, code: auth_code
     data = JSON.parse(response.body)
     data['accessToken']
   }
+
   let(:auth_code) {
     json_payloads
     data = {clientId: 'clientA', clientSecret: 'secretA'}
@@ -34,10 +25,16 @@ describe Triannon::AuthController, :vcr, type: :controller do
     data = JSON.parse(response.body)
     data['authorizationCode']
   }
+
+  let(:login_data) {
+    # This is an old style hash so the keys are strings that are easier to
+    # work with when comparing this data in HTTP responses.
+    {'userId' => 'userA', 'userSecret' => 'secretA', 'workgroups' => 'A,B'}
+  }
+
   let(:login) {
     json_payloads
-    data = {userId: 'userA', userSecret: 'secretA', workgroups: 'A,B'}
-    post :login, data.to_json, code: auth_code
+    post :login, login_data.to_json, code: auth_code
     expect(response.status).to eq(302)
     expect(response).to redirect_to('/')
     expect(response.cookies['login_user']).not_to be_nil
@@ -328,5 +325,20 @@ describe Triannon::AuthController, :vcr, type: :controller do
       expect(response.status).to eq(401)
     end
   end # /auth/access_validate
+
+  describe '#access_token_data' do
+    it 'returns nil for invalid access token' do
+      access_token = 'invalid data'
+      headers = {'Authorization' => "Bearer #{access_token}"}
+      access_data = subject.send(:access_token_data, headers)
+      expect(access_data).to be_nil
+    end
+    it 'returns login data for valid access token' do
+      token = access_token
+      headers = {'Authorization' => "Bearer #{token}"}
+      access_data = subject.send(:access_token_data, headers)
+      expect(access_data).to eql(login_data)
+    end
+  end #access_token_data
 
 end
