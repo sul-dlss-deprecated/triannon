@@ -214,6 +214,13 @@ describe Triannon::AnnotationsController, type: :routing do
       expect(:get => "/annotations/search?target=neato.url.org").to route_to(controller: "triannon/search", action: "find", target: "neato.url.org")
       expect(:get => "/annotations/search?foo=bar").to route_to(controller: "triannon/search", action: "find", :foo => "bar")
     end
+    it "/:anno_root/search routed to triannon/search#find with anno_root param" do
+      expect(:get => "/dms/search").to route_to(controller: "triannon/search", action: "find", anno_root: "dms")
+    end
+    it "/:anno_root/search?params routed to triannon/search#find with anno_root param" do
+      expect(:get => "/dms/search?target=neato.url.org").to route_to(controller: "triannon/search", action: "find", anno_root: "dms", target: "neato.url.org")
+      expect(:get => "/dms/search?foo=bar").to route_to(controller: "triannon/search", action: "find", anno_root: "dms", :foo => "bar")
+    end
     it "/search?params routed to triannon/search#find without anno_root param" do
       expect(:get => "/search?target=neato.url.org").to route_to(controller: "triannon/search", action: "find", target: "neato.url.org")
       expect(:get => "/search?foo=bar").to route_to(controller: "triannon/search", action: "find", :foo => "bar")

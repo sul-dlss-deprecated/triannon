@@ -7,7 +7,7 @@ require 'triannon/version'
 Gem::Specification.new do |s|
   s.name        = 'triannon'
   s.version     = Triannon::VERSION
-  s.authors     = ['Naomi Dushay', 'Willy Mene']
+  s.authors     = ['Naomi Dushay', 'Willy Mene', 'Darren Weber']
   s.email       = ['triannon-commits@lists.stanford.edu']
   s.summary     = 'Rails engine for working with OpenAnnotations stored in Fedora4'
   s.license     = 'Apache-2.0'
@@ -32,6 +32,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'webmock'
   s.add_development_dependency 'coveralls'
   s.add_development_dependency 'yard' # for documentation
+  s.add_development_dependency 'pry'
+  s.add_development_dependency 'pry-doc'
+  s.add_development_dependency 'pry-rails'
   s.add_development_dependency 'rubocop'
   s.add_development_dependency 'rubocop-rspec'
   s.add_development_dependency 'rest-client' # for caching jsonld context docs
