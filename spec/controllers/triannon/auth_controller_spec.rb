@@ -327,6 +327,16 @@ describe Triannon::AuthController, :vcr, type: :controller do
   end # /auth/access_validate
 
   describe '#access_token_data' do
+    it 'returns nil for no Authorization header' do
+      access_data = subject.send(:access_token_data, {})
+      expect(access_data).to be_nil
+    end
+    it 'returns nil for Authorization header without "Bearer"' do
+      access_token = 'invalid data'
+      headers = {'Authorization' => "#{access_token}"}
+      access_data = subject.send(:access_token_data, headers)
+      expect(access_data).to be_nil
+    end
     it 'returns nil for invalid access token' do
       access_token = 'invalid data'
       headers = {'Authorization' => "Bearer #{access_token}"}
