@@ -15,12 +15,11 @@ module Triannon
     # save the token into session[:access_token]
     def access_token_generate(data)
       timestamp = Time.now.to_i.to_s # seconds since epoch
-      token = "#{data.to_json};;;#{timestamp}"
       salt  = SecureRandom.random_bytes(64)
       key   = ActiveSupport::KeyGenerator.new(timestamp).generate_key(salt)
       crypt = ActiveSupport::MessageEncryptor.new(key)
       session[:access_key] = key
-      session[:access_token] = crypt.encrypt_and_sign(token)
+      session[:access_token] = crypt.encrypt_and_sign([data, timestamp])
     end
 
     # decrypt, parse and validate access token
@@ -28,12 +27,9 @@ module Triannon
       if code == session[:access_token]
         key = session[:access_key]
         crypt = ActiveSupport::MessageEncryptor.new(key)
-        token = crypt.decrypt_and_verify(code)
-        token_data = token.split(';;;')
-        identity = JSON.parse(token_data.first)
-        timestamp = token_data.last.to_i
-        elapsed = Time.now.to_i - timestamp  # sec since token was issued
-        return identity if elapsed < Triannon.config[:access_token_expiry]
+        data, timestamp = crypt.decrypt_and_verify(code)
+        elapsed = Time.now.to_i - timestamp.to_i  # sec since token was issued
+        return data if elapsed < Triannon.config[:access_token_expiry]
       end
       nil
     end
