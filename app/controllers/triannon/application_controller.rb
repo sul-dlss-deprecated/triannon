@@ -1,6 +1,7 @@
 module Triannon
   class ApplicationController < ActionController::Base
 
+    before_action :authorize
 
     #--- Authentication methods
     #
@@ -44,6 +45,47 @@ module Triannon
       else
         token = auth.split[1]
         access_token_valid?(token)
+      end
+    end
+
+
+    private
+
+    def authorize
+      # Require authorization on POST and DELETE requests.
+      return true unless ['POST','DELETE'].include? request.method
+      # Allow any requests to the /auth paths; provided that an
+      # anno root container cannot start with 'auth' in the name
+      # (which is controlled by the routes constraints).
+      return true if request.path =~ /^\/auth/
+      # Try to map the request root container to config parameters;
+      # assume that a request can only map to one root container.
+      # If this mapping fails, assume that authorization is OK.
+      request_container = params['anno_root'] || request.path
+      containers = Triannon.config[:ldp]['anno_containers']
+      container = containers.keys.map {|c| c if request_container.include? c }.compact.first
+      container_config = containers[container]
+      return true if container_config.nil?
+      # If there is no authorization configured, allow access.
+      container_auth = container_config['auth']
+      return true if container_auth.nil?
+      auth_workgroups = container_auth['workgroups'] || []
+      return true if auth_workgroups.empty?
+      # Check the request contains an access token
+      access_data = access_token_data(request.headers)
+      if access_data.nil?
+        render403
+      else
+        # Identify an intersection of the user and the authorized workgroups.
+        user_workgroups = access_data['workgroups'] || []
+        match_workgroups = auth_workgroups & user_workgroups
+        render403 if match_workgroups.empty?
+      end
+    end
+
+    def render403
+      respond_to do |format|
+        format.all { head :forbidden }
       end
     end
 

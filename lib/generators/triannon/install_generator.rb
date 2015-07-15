@@ -20,8 +20,13 @@ development:
     #  "foo" here will mean you add a foo anno by POST to http://your.triannon-server.com/annotations/foo
     #  and you get the foo anno by GET to http://your.triannon-server.com/annotations/foo/(anno_uuid)
     anno_containers:
-      - foo
-      - blah
+      foo:
+      blah:
+        auth:
+          users: []
+          workgroups:
+          - org:wg-A
+          - org:wg-B
   solr_url: http://localhost:8983/solr/triannon
   triannon_base_url: http://your.triannon-server.com/annotations/
   max_solr_retries: 5
@@ -38,8 +43,13 @@ test: &test
     url: http://localhost:8983/fedora/rest
     uber_container:  anno
     anno_containers:
-      - foo
-      - blah
+      foo:
+      blah:
+        auth:
+          users: []
+          workgroups:
+          - org:wg-A
+          - org:wg-B
   solr_url: http://localhost:8983/solr/triannon
   triannon_base_url: http://your.triannon-server.com/annotations/
   authorized_clients:
@@ -53,8 +63,13 @@ production:
     url:
     uber_container:  anno
     anno_containers:
-      - foo
-      - blah
+      foo:
+      blah:
+        auth:
+          users: []
+          workgroups:
+          - org:wg-A
+          - org:wg-B
   solr_url:
   triannon_base_url:
 YML
