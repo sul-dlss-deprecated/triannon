@@ -20,6 +20,9 @@ require 'rspec/rails'
 require 'capybara/rails'
 require 'capybara/rspec'
 
+require 'pry'
+require 'pry-doc'
+
 =begin
 RSpec.configure do |config|
 # The settings below are suggested to provide a good initial experience
@@ -156,4 +159,21 @@ def delete_test_objects(ldp_containers, solr_ids, root_container, vcr_cassette_n
   }
   rsolr_client.commit
   VCR.eject_cassette(vcr_cassette_name)
+end
+
+
+
+# --- Content negotiation utils
+
+def accept_json
+    request.headers['Accept'] = 'application/json'
+end
+
+def content_json
+    request.headers['Content-Type'] =  'application/json'
+end
+
+def json_payloads
+    accept_json
+    content_json
 end
