@@ -69,15 +69,17 @@ module Triannon
       identity = parse_identity(data, required_fields)
       if identity['clientId'] && identity['clientSecret']
         if authorized_client? identity
-          code = { authorizationCode: auth_code_generate(identity) }
-          return json_response(code, 200)
+          id = identity['clientId']
+          pass = identity['clientSecret']
+          code = { authorizationCode: auth_code_generate(id, pass) }
+          json_response(code, 200)
         else
           err = {
             error: 'invalidClient',
             errorDescription: 'Invalid client credentials',
             errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
           }
-          json_response(err, 403)
+          json_response(err, 401)
         end
       else
         err = {
@@ -98,7 +100,7 @@ module Triannon
       # service. The service should delete the cookie from the login service
       # and create a new cookie that allows the user to access content.
       if session[:login_data]
-        if session[:client_auth_key]
+        if session[:client_data]
           # When an authorization code was obtained using /auth/client_identity,
           # that code must be passed to the Access Token Service as well.
           auth_code = params[:code]
@@ -128,7 +130,7 @@ module Triannon
     def access_validate
       auth = request.headers['Authorization']
       if auth.nil? || auth !~ /Bearer/
-        access_token_required
+        access_token_invalid
       else
         token = auth.split[1]
         if access_token_valid?(token)
@@ -158,21 +160,11 @@ module Triannon
       json_response(data, 200)
     end
 
-    # Issue a 403 for invalid access token
+    # Issue a 401 to challenge for a client access token
     def access_token_invalid
       err = {
         error: 'invalidAccess',
         errorDescription: 'invalid access token',
-        errorUri: ''
-      }
-      json_response(err, 403)
-    end
-
-    # Issue a 401 to challenge for a client access token
-    def access_token_required
-      err = {
-        error: 'invalidAccess',
-        errorDescription: 'access token is required',
         errorUri: ''
       }
       json_response(err, 401)
@@ -186,7 +178,9 @@ module Triannon
     # The request MUST include a URI parameter 'code=client_token' where
     # the 'client_token' has been obtained from /auth/client_identity and
     # the request MUST carry a body with the following JSON template:
-    # { "userId" : "ID", "userSecret" : "SECRET", "workgroups" : "wgA, wgB" }
+    # { "userId" : "ID", "workgroups" : "wgA, wgB" }
+    # Note that the current 'SearchWorks' requirements do not specify
+    # a 'userSecret' (it's not available).
     def login_handler_post
       return unless process_post?
       return unless process_json?
@@ -194,33 +188,54 @@ module Triannon
       if auth_code.nil?
         auth_code_required
       elsif auth_code_valid?(auth_code)
-        data = JSON.parse(request.body.read)
-        required_fields = ['userId', 'userSecret', 'workgroups']
-        identity = parse_identity(data, required_fields)
-        # When an authorized client POSTs user data, it is simply accepted.
-        if identity['userId'] && identity['workgroups']
-          cookies[:login_user] = identity['userId']
-          session[:login_data] = identity
-          redirect_to root_url, notice: 'Successfully logged in.'
-        else
-          login_required
+        begin
+          data = JSON.parse(request.body.read)
+          required_fields = ['userId', 'workgroups']
+          identity = parse_identity(data, required_fields)
+          # When an authorized client POSTs user data, it is simply accepted.
+          if identity['userId'] && identity['workgroups']
+            # Coerce workgroups into an Array.
+            wg = identity['workgroups'] || []
+            wg = wg.split(',') if wg.instance_of? String
+            wg.delete_if {|e| e.empty? }
+            identity['workgroups'] = wg
+            # Save the login_data until an access token is requested.
+            # Note that session data must be JSON compatible.
+            identity.to_json # check JSON compatibility
+            cookies[:login_user] = identity['userId']
+            session[:login_data] = identity
+            redirect_to root_url, notice: 'Successfully logged in.'
+          else
+            login_required
+          end
+        rescue
+          login_required(422)
         end
       else
         auth_code_invalid
       end
     end
 
-    def login_required
+    def login_required(status=401)
       if request.format == :html
         request_http_basic_authentication
       elsif request.format == :json
-        response.headers["WWW-Authenticate"] = %(Basic realm="Application")
-        err = {
-          error: '401 Unauthorized',
-          errorDescription: 'login credentials required',
-          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
-        }
-        json_response(err, 401)
+        # response.headers["WWW-Authenticate"] = %(Basic realm="Application")
+        if status == 401
+          err = {
+            error: '401 Unauthorized',
+            errorDescription: 'login credentials required',
+            errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
+          }
+        end
+        if status == 422
+          err = {
+            error: '422 Unprocessable Entity',
+            errorDescription: 'login credentials cannot be parsed',
+            errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
+          }
+        end
+        json_response(err, status)
       end
     end
 
@@ -231,50 +246,38 @@ module Triannon
     # Authenticates known clients
     # @param identity [Hash] with fields 'clientId' and 'clientSecret'
     def authorized_client?(identity)
-      authorized_clients[identity['clientId']] == identity['clientSecret']
+      @clients ||= Triannon.config[:authorized_clients]
+      @clients[identity['clientId']] == identity['clientSecret']
     end
-
-    # Sets a hash of authorized client data key:value pairs that correspond to
-    # the client_identity service parameters named 'clientId':'clientSecret';
-    # the data is provided by configuration.
-    def authorized_clients
-      @authorized_clients ||= Triannon.config[:authorized_clients]
-    end
-
 
     # --------------------------------------------------------------------
     # Authentication tokens
 
     # construct and encrypt an authorization code
-    def auth_code_generate(identity)
-      session[:client_identity] = identity
-      id = identity['clientId']
-      pass = identity['clientSecret']
-      timestamp = Time.now.to_i # seconds since epoch
-      auth_code = "#{id};;;#{timestamp}"
-      salt  = SecureRandom.random_bytes(64)
-      key   = ActiveSupport::KeyGenerator.new(pass).generate_key(salt)
+    def auth_code_generate(id, pass)
+      identity = "#{id};;;#{pass}"
+      timestamp = Time.now.to_i.to_s # seconds since epoch
+      salt  = SecureRandom.base64(64)
+      key   = ActiveSupport::KeyGenerator.new(identity).generate_key(salt)
       crypt = ActiveSupport::MessageEncryptor.new(key)
-      session[:client_auth_key] = key
-      crypt.encrypt_and_sign(auth_code)
+      session[:client_data] = [identity, salt]
+      session[:client_token] = crypt.encrypt_and_sign([id, timestamp])
     end
 
     # decrypt, parse and validate authorization code
     def auth_code_valid?(code)
       begin
-        key = session[:client_auth_key]
-        return false if key.nil?  # requires client authentication
-        crypt = ActiveSupport::MessageEncryptor.new(key)
-        auth_code = crypt.decrypt_and_verify(code)
-        if auth_code.include?(session[:client_identity]['clientId'])
-          timestamp = auth_code.split(';;;').last.to_i
-          elapsed = Time.now.to_i - timestamp  # sec since auth code was issued
-          return true if elapsed < Triannon.config[:client_token_expiry]
+        if code == session[:client_token]
+          identity, salt = session[:client_data]
+          key = ActiveSupport::KeyGenerator.new(identity).generate_key(salt)
+          crypt = ActiveSupport::MessageEncryptor.new(key)
+          data, timestamp = crypt.decrypt_and_verify(code)
+          elapsed = Time.now.to_i - timestamp.to_i  # sec since code was issued
+          return data if elapsed < Triannon.config[:client_token_expiry]
         end
       rescue ActiveSupport::MessageVerifier::InvalidSignature
-        # This is an invalid auth-code, so return false.
+        # This is an invalid code, so return nil (a falsy value).
       end
-      false
     end
 
     # Issue a 403 for invalid client authorization codes
@@ -363,15 +366,7 @@ module Triannon
     # @param data [Hash] Hash.to_json is rendered
     # @param status [Integer] HTTP status code
     def json_response(data, status)
-      response.status = status
-      respond_to do |format|
-        format.json {
-          render json: data.to_json, content_type: json_type_accepted
-        }
-        format.html {
-          render nothing: true
-        }
-      end
+      render json: data.to_json, content_type: json_type_accepted, status: status
     end
 
     # Response content type to match an HTTP accept type for JSON formats
@@ -411,7 +406,7 @@ module Triannon
           errorDescription: "#{request.path} accepts POST requests, not #{request.request_method}",
           errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
         }
-        response.headers.merge!(Allow: 'POST')
+        response.headers.merge!({'Allow' => 'POST'})
         json_response(err, 405)
         false
       end

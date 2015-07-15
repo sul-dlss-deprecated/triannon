@@ -40,8 +40,10 @@ namespace :triannon do
       puts "ERROR:  Triannon config file missing: #{Triannon.triannon_file} - are you in the rails app root directory?"
       raise "Triannon config file missing: #{Triannon.triannon_file}"
     end
-    Triannon.config[:ldp]['anno_containers'].each { |container_name|
-	    Triannon::LdpWriter.create_basic_container(Triannon.config[:ldp]['uber_container'], container_name)
+    uber_container = Triannon.config[:ldp]['uber_container']
+    containers = Triannon.config[:ldp]['anno_containers'].keys
+    containers.each { |c|
+	    Triannon::LdpWriter.create_basic_container(uber_container, c.dup)
     }
   end
 end # namespace triannon

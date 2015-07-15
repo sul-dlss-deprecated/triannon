@@ -1,44 +1,9 @@
 require 'spec_helper'
+# These specs use the spec/auth_helpers by using the tag 'help: :auth'
 
-describe Triannon::AuthController, :vcr, type: :controller do
+describe Triannon::AuthController, :vcr, type: :controller, help: :auth do
 
   routes { Triannon::Engine.routes }
-
-  before :all do
-    Triannon.config[:authorized_clients] = {'clientA'=>'secretA'}
-    Triannon.config[:client_token_expiry] = 60
-    Triannon.config[:access_token_expiry] = 3600
-  end
-
-  let(:access_token) {
-    login
-    get :access_token, code: auth_code
-    data = JSON.parse(response.body)
-    data['accessToken']
-  }
-
-  let(:auth_code) {
-    json_payloads
-    data = {clientId: 'clientA', clientSecret: 'secretA'}
-    post :client_identity, data.to_json
-    expect(response.status).to eql(200)
-    data = JSON.parse(response.body)
-    data['authorizationCode']
-  }
-
-  let(:login_data) {
-    # This is an old style hash so the keys are strings that are easier to
-    # work with when comparing this data in HTTP responses.
-    {'userId' => 'userA', 'userSecret' => 'secretA', 'workgroups' => 'A,B'}
-  }
-
-  let(:login) {
-    json_payloads
-    post :login, login_data.to_json, code: auth_code
-    expect(response.status).to eq(302)
-    expect(response).to redirect_to('/')
-    expect(response.cookies['login_user']).not_to be_nil
-  }
 
   describe 'OPTIONS /auth/login' do
     let(:check_service) {
@@ -50,7 +15,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
     }
     context 'accept JSON:' do
       before :each do
-        json_payloads
+        set_json_headers
       end
       it 'returns login information, with no user logged in' do
         process :options, 'OPTIONS'
@@ -76,36 +41,23 @@ describe Triannon::AuthController, :vcr, type: :controller do
 
   describe 'POST /auth/login' do
     before :each do
-      json_payloads
+      set_json_headers
     end
-    it 'rejects HTML content' do
-      data = {userId: 'userA', userSecret: 'secretA'}
-      params = {code: auth_code }
-      request.headers['Content-Type'] = 'text/html'
-      post :login, data.to_json, params
-      expect(response.status).to eql(415)
-    end
+    let(:auth_code_params) {
+      {code: auth_code }
+    }
     it 'rejects a request that has no "userId" field (response code 401)' do
-      data = {userSecret: 'secretA'}
-      params = {code: auth_code }
-      post :login, data.to_json, params
-      expect(response.status).to eql(401)
-      err = JSON.parse(response.body)
-      expect(err).not_to be_empty
-      expect(err['errorDescription']).to eql('login credentials required')
+      data = login_credentials.except 'userId'
+      post :login, data.to_json, auth_code_params
+      login_credentials_required
     end
-    it 'rejects a request that has no "userSecret" field (response code 401)' do
-      data = {userId: 'userA'}
-      params = {code: auth_code }
-      post :login, data.to_json, params
-      expect(response.status).to eql(401)
-      err = JSON.parse(response.body)
-      expect(err).not_to be_empty
-      expect(err['errorDescription']).to eql('login credentials required')
+    it 'rejects a request that has no "workgroups" field (response code 401)' do
+      data = login_credentials.except 'workgroups'
+      post :login, data.to_json, auth_code_params
+      login_credentials_required
     end
     it 'requires an authorization code (response code 401)' do
-      data = {userId: 'userA', userSecret: 'secretA'}
-      post :login, data.to_json
+      post :login, login_credentials.to_json
       expect(response.status).to eql(401)
       err = JSON.parse(response.body)
       expect(err).not_to be_empty
@@ -114,20 +66,69 @@ describe Triannon::AuthController, :vcr, type: :controller do
     end
     it 'rejects an invalid authorization code (response code 403)' do
       auth_code # first the client requests a code (setup session data)
-      data = {userId: 'userA', userSecret: 'secretA'}
       params = {code: 'invalid_auth_code' } # invalid code != session data
-      post :login, data.to_json, params
+      post :login, login_credentials.to_json, params
       expect(response.status).to eql(403)
       err = JSON.parse(response.body)
       expect(err).not_to be_empty
       expect(err['error']).to eql('invalidClient')
       expect(err['errorDescription']).to eql('Unable to validate authorization code')
     end
-    it 'accepts any user login data from authorized client (response code 302)' do
-      data = {userId: 'userAnon', userSecret: 'whatever', workgroups: 'doh :-)'}
-      params = {code: auth_code }
-      post :login, data.to_json, params
+    it 'accepts login data from authorized client (response code 302)' do
+      data = {userId: 'userAnon', workgroups: 'doh :-)'}
+      post :login, data.to_json, auth_code_params
       expect(response.status).to eql(302)
+    end
+    it 'excludes extraneous data from login data' do
+      data = {userId: 'userAnon', workgroups: 'doh :-)', extraneous: 'xyz'}
+      post :login, data.to_json, auth_code_params
+      expect(response.status).to eql(302)
+      data = session['login_data']
+      expect(data.keys).not_to include('extraneous')
+    end
+    it 'accepts "workgroups" values as Array' do
+      data = login_credentials
+      expect(data['workgroups']).to be_instance_of Array
+      post :login, data.to_json, auth_code_params
+      expect(response.status).to eql(302)
+      wg = session['login_data']['workgroups']
+      expect(wg).to be_instance_of Array
+      expect(wg).not_to be_empty
+    end
+    it 'accepts "workgroups" values as CSV String' do
+      data = login_credentials
+      data['workgroups'] = 'org:wg-A, org:wg-B' # will be split(',')
+      expect(data['workgroups']).to be_instance_of String
+      post :login, data.to_json, auth_code_params
+      expect(response.status).to eql(302)
+      wg = session['login_data']['workgroups']
+      expect(wg).to be_instance_of Array
+      expect(wg).not_to be_empty
+    end
+    it 'rejects "workgroups" values as nil' do
+      data = login_credentials
+      data['workgroups'] = nil # not acceptable
+      expect(data['workgroups']).to be_nil
+      post :login, data.to_json, auth_code_params
+      expect(response.status).to eql(401)
+      expect(session['login_data']).to be_nil
+    end
+    it 'rejects "userId" values as nil' do
+      data = login_credentials
+      data['userId'] = nil # not acceptable
+      expect(data['userId']).to be_nil
+      post :login, data.to_json, auth_code_params
+      expect(response.status).to eql(401)
+      expect(session['login_data']).to be_nil
+    end
+    it 'rejects data values that are not JSON compatible' do
+      # e.g. Some SecureRandom.random_bytes are not acceptable
+      data = login_credentials
+      data['userId'] = 'REPLACE'
+      json = data.to_json.gsub('REPLACE', "R\x13\n\xC3\xD8")
+      post :login, json, auth_code_params
+      expect(response.status).to eql(422)
+      expect(session['login_data']).to be_nil
     end
     it 'does not respond to GET' do
       process :login, 'GET'
@@ -136,6 +137,13 @@ describe Triannon::AuthController, :vcr, type: :controller do
       expect(err).not_to be_empty
       expect(err['error']).to eql('invalidRequest')
       expect(err['errorDescription']).to include('POST')
+    end
+    it 'rejects HTML content' do
+      data = {userId: 'userA', workgroups: 'wgA'}
+      params = {code: auth_code}
+      request.headers['Content-Type'] = 'text/html'
+      post :login, data.to_json, params
+      expect(response.status).to eql(415)
     end
   end
 
@@ -172,7 +180,7 @@ describe Triannon::AuthController, :vcr, type: :controller do
       expect(logout_notice).not_to eql(login_notice)
     end
     it 'does not respond to OPTIONS' do
-      json_payloads
+      set_json_headers
       process :logout, 'OPTIONS'
       expect(response.status).to eq(405)
       err = JSON.parse(response.body)
@@ -185,50 +193,44 @@ describe Triannon::AuthController, :vcr, type: :controller do
 
   describe 'POST /auth/client_identity' do
     before :each do
-      accept_json
-      content_json
+      set_json_headers
     end
+    let(:client_credentials_required) {
+      expect(response.status).to eql(401)
+      err = JSON.parse(response.body)
+      expect(err).not_to be_empty
+      expect(err['error']).to eql('invalidClient')
+      err
+    }
     it 'accepts JSON content' do
-      params = {clientId: 'clientA', clientSecret: 'secretA'}
-      post :client_identity, params.to_json
+      post :client_identity, client_credentials.to_json
       expect(response.status).to eql(200)
     end
     it 'rejects HTML content' do
       request.headers['Content-Type'] = 'text/html'
-      params = {clientId: 'clientA', clientSecret: 'secretA'}
-      post :client_identity, params.to_json
+      post :client_identity, client_credentials.to_json
       expect(response.status).to eql(415)
     end
     it 'rejects a request without "clientId" (response code 401)' do
-      data = {clientSecret: 'secretA'}
+      data = client_credentials.except 'clientId'
       post :client_identity, data.to_json
-      expect(response.status).to eql(401)
-      err = JSON.parse(response.body)
-      expect(err).not_to be_empty
-      expect(err['error']).to eql('invalidClient')
+      err = client_credentials_required
       expect(err['errorDescription']).to eql('Insufficient client data for authentication')
     end
     it 'rejects a request without "clientSecret" (response code 401)' do
-      data = {clientId: 'clientA'}
+      data = client_credentials.except 'clientSecret'
       post :client_identity, data.to_json
-      expect(response.status).to eql(401)
-      err = JSON.parse(response.body)
-      expect(err).not_to be_empty
-      expect(err['error']).to eql('invalidClient')
+      err = client_credentials_required
       expect(err['errorDescription']).to eql('Insufficient client data for authentication')
     end
-    it 'rejects unauthorized client requests (response code 403)' do
+    it 'rejects unauthorized client requests (response code 401)' do
       data = {clientId: 'clientA', clientSecret: 'secretB'}
       post :client_identity, data.to_json
-      expect(response.status).to eql(403)
-      err = JSON.parse(response.body)
-      expect(err).not_to be_empty
-      expect(err['error']).to eql('invalidClient')
+      err = client_credentials_required
       expect(err['errorDescription']).to eql('Invalid client credentials')
     end
     it 'returns an authorizationCode for authorized clients (response code 200)' do
-      data = {clientId: 'clientA', clientSecret: 'secretA'}
-      post :client_identity, data.to_json
+      post :client_identity, client_credentials.to_json
       expect(response.status).to eql(200)
       data = JSON.parse(response.body)
       expect(data).not_to be_empty
@@ -241,6 +243,15 @@ describe Triannon::AuthController, :vcr, type: :controller do
   # adapted from
   # http://image-auth.iiif.io/api/image/2.1/authentication.html#access-token-service
   describe 'GET /auth/access_token' do
+    let(:token_data) {
+      expect(response.cookies['login_user']).to be_nil
+      data = JSON.parse(response.body)
+      expect(data).not_to be_empty
+      data
+    }
+    before :each do
+      set_json_headers
+    end
     describe 'with valid login credentials' do
       before :each do
         login
@@ -248,50 +259,31 @@ describe Triannon::AuthController, :vcr, type: :controller do
       it 'with a valid authorization code - returns an access code' do
         get :access_token, code: auth_code
         expect(response.status).to eql(200)
-        expect(response.cookies['login_user']).to be_nil
-        data = JSON.parse(response.body)
-        expect(data).not_to be_empty
-        expect(data['accessToken']).not_to be_nil
-        expect(data['accessToken']).to be_instance_of String
+        expect(token_data['accessToken']).not_to be_nil
+        expect(token_data['accessToken']).to be_instance_of String
       end
       it 'with an invalid authorization code - response status is 403' do
         get :access_token, code: 'invalid_auth_code'
         expect(response.status).to eq(403)
-        expect(response.cookies['login_user']).to be_nil
-        err = JSON.parse(response.body)
-        expect(err).not_to be_empty
-        expect(err['error']).to eql('invalidClient')
-        expect(err['errorDescription']).to eql('Unable to validate authorization code')
+        expect(token_data['error']).to eql('invalidClient')
+        expect(token_data['errorDescription']).to eql('Unable to validate authorization code')
       end
       it 'without an authorization code - response status is 401' do
         get :access_token
         expect(response.status).to eq(401)
-        expect(response.cookies['login_user']).to be_nil
-        err = JSON.parse(response.body)
-        expect(err).not_to be_empty
-        expect(err['error']).to eql('invalidClient')
-        expect(err['errorDescription']).to eql('authorization code is required')
+        expect(token_data['error']).to eql('invalidClient')
+        expect(token_data['errorDescription']).to eql('authorization code is required')
       end
     end
 
     describe 'without valid login -' do
       it 'with a valid authorization code - response status is 401' do
-        accept_json
         get :access_token, code: auth_code
-        expect(response.status).to eq(401)
-        expect(response.cookies['login_user']).to be_nil
-        err = JSON.parse(response.body)
-        expect(err).not_to be_empty
-        expect(err['errorDescription']).to eql('login credentials required')
+        login_credentials_required
       end
       it 'without an authorization code - response status is 401' do
-        accept_json
         get :access_token
-        expect(response.status).to eq(401)
-        expect(response.cookies['login_user']).to be_nil
-        err = JSON.parse(response.body)
-        expect(err).not_to be_empty
-        expect(err['errorDescription']).to eql('login credentials required')
+        login_credentials_required
       end
     end
   end # /auth/access_token
@@ -307,12 +299,12 @@ describe Triannon::AuthController, :vcr, type: :controller do
       get :logout # resets session data, required to validate token
       request.headers['Authorization'] = "Bearer #{token}"
       get :access_validate
-      expect(response.status).to eq(403)
+      expect(response.status).to eq(401)
     end
-    it 'response code is 403 with invalid access token' do
+    it 'response code is 401 with invalid access token' do
       request.headers['Authorization'] = "Bearer invalid_token"
       get :access_validate
-      expect(response.status).to eq(403)
+      expect(response.status).to eq(401)
     end
     it 'response code is 401 with no access token' do
       request.headers['Authorization'] = nil
@@ -326,29 +318,62 @@ describe Triannon::AuthController, :vcr, type: :controller do
     end
   end # /auth/access_validate
 
+  # ApplicationController#access_token_data should be available to
+  # any controllers; it is tested here in the context of authentication.
   describe '#access_token_data' do
     it 'returns nil for no Authorization header' do
       access_data = subject.send(:access_token_data, {})
       expect(access_data).to be_nil
     end
     it 'returns nil for Authorization header without "Bearer"' do
-      access_token = 'invalid data'
-      headers = {'Authorization' => "#{access_token}"}
+      headers = {'Authorization' => 'Basic invalid_data'}
       access_data = subject.send(:access_token_data, headers)
       expect(access_data).to be_nil
     end
     it 'returns nil for invalid access token' do
-      access_token = 'invalid data'
-      headers = {'Authorization' => "Bearer #{access_token}"}
+      headers = {'Authorization' => "Bearer invalid_data"}
       access_data = subject.send(:access_token_data, headers)
       expect(access_data).to be_nil
     end
     it 'returns login data for valid access token' do
-      token = access_token
-      headers = {'Authorization' => "Bearer #{token}"}
+      headers = {'Authorization' => "Bearer #{access_token}"}
       access_data = subject.send(:access_token_data, headers)
-      expect(access_data).to eql(login_data)
+      expect(access_data).to eql(login_credentials)
     end
-  end #access_token_data
+  end #ApplicationController#access_token_data
+
+  # ApplicationController#authorize should be available to
+  # any controllers; it is tested here in the context of authentication.
+  describe '#authorize' do
+    it 'is called for any request' do
+      expect(controller).to receive(:authorize).twice
+      expect(controller).not_to receive(:authorized_workgroup?)
+      process :options, 'OPTIONS'
+      expect(response.status).to eql(200)
+      get :logout
+      expect(response.status).to eql(302)
+    end
+    it 'allows any GET request' do
+      expect(controller).to receive(:authorize).once
+      expect(controller).not_to receive(:authorized_workgroup?)
+      get :logout
+    end
+    it 'allows POST requests to an /auth path' do
+      expect(controller).to receive(:authorize).once
+      expect(controller).not_to receive(:authorized_workgroup?)
+      set_json_headers
+      post :client_identity, client_credentials.to_json
+      expect(response.status).to eql(200)
+    end
+    it 'allows DELETE requests to an /auth path' do
+      expect(controller).to receive(:authorize).once
+      expect(controller).not_to receive(:authorized_workgroup?)
+      set_json_headers
+      delete :client_identity, client_credentials.to_json
+      expect(response.status).to eql(405) # DELETE is not handled
+      expect(response.headers['Allow']).to eql('POST')
+    end
+  end #ApplicationController#authorize
+
 
 end

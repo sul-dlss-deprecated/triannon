@@ -9,9 +9,18 @@ development:
     #  the container names here will also map to paths in the triannon url, e.g.
     #  "foo" here will mean you add a foo anno by POST to http://your.triannon-server.com/annotations/foo
     #  and you get the foo anno by GET to http://your.triannon-server.com/annotations/foo/(anno_uuid)
+    # auth: this configures access for POST and DELETE requests; when it is
+    #   missing or the 'users' or 'workgroups' are empty, all access is OK.
+    #   otherwise, the client must submit an access token containing data
+    #   to be compared against these configuration parameters.
     anno_containers:
-      - foo
-      - blah
+      foo:
+      bar:
+        auth:
+          users: []
+          workgroups:
+          - org:wg-A
+          - org:wg-B
   solr_url: http://your.triannon_solr_url.here
   # triannon_base_url:  the prefix for the urls for your annos
   triannon_base_url: http://your.triannon-server.com/annotations/
@@ -30,8 +39,13 @@ test: &test
     url: http://your.ldp_store_url.here
     uber_container:  anno
     anno_containers:
-      - foo
-      - blah
+      foo:
+      bar:
+        auth:
+          users: []
+          workgroups:
+          - org:wg-A
+          - org:wg-B
   solr_url: http://your.triannon_solr_url.here
   triannon_base_url: http://your.triannon-server.com/annotations/
   authorized_clients:
@@ -46,8 +60,13 @@ production:
     url: http://your.ldp_store_url.here
     uber_container:  anno
     anno_containers:
-      - foo
-      - blah
+      foo:
+      bar:
+        auth:
+          users: []
+          workgroups:
+          - org:wg-A
+          - org:wg-B
   solr_url: http://your.triannon_solr_url.here
   triannon_base_url: http://your.triannon-server.com/annotations/
   authorized_clients:
