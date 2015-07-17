@@ -70,14 +70,14 @@ module Triannon
       if identity['clientId'] && identity['clientSecret']
         if authorized_client? identity
           code = { authorizationCode: auth_code_generate(identity) }
-          return json_response(code, 200)
+          json_response(code, 200)
         else
           err = {
             error: 'invalidClient',
             errorDescription: 'Invalid client credentials',
             errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
           }
-          json_response(err, 403)
+          json_response(err, 401)
         end
       else
         err = {
@@ -128,7 +128,7 @@ module Triannon
     def access_validate
       auth = request.headers['Authorization']
       if auth.nil? || auth !~ /Bearer/
-        access_token_required
+        access_token_invalid
       else
         token = auth.split[1]
         if access_token_valid?(token)
@@ -158,21 +158,11 @@ module Triannon
       json_response(data, 200)
     end
 
-    # Issue a 403 for invalid access token
+    # Issue a 401 to challenge for a client access token
     def access_token_invalid
       err = {
         error: 'invalidAccess',
         errorDescription: 'invalid access token',
-        errorUri: ''
-      }
-      json_response(err, 403)
-    end
-
-    # Issue a 401 to challenge for a client access token
-    def access_token_required
-      err = {
-        error: 'invalidAccess',
-        errorDescription: 'access token is required',
         errorUri: ''
       }
       json_response(err, 401)
@@ -363,15 +353,7 @@ module Triannon
     # @param data [Hash] Hash.to_json is rendered
     # @param status [Integer] HTTP status code
     def json_response(data, status)
-      response.status = status
-      respond_to do |format|
-        format.json {
-          render json: data.to_json, content_type: json_type_accepted
-        }
-        format.html {
-          render nothing: true
-        }
-      end
+      render json: data, content_type: json_type_accepted, status: status
     end
 
     # Response content type to match an HTTP accept type for JSON formats
@@ -411,7 +393,7 @@ module Triannon
           errorDescription: "#{request.path} accepts POST requests, not #{request.request_method}",
           errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
         }
-        response.headers.merge!(Allow: 'POST')
+        response.headers.merge!({'Allow' => 'POST'})
         json_response(err, 405)
         false
       end

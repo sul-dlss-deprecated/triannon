@@ -21,7 +21,7 @@ development:
     #  and you get the foo anno by GET to http://your.triannon-server.com/annotations/foo/(anno_uuid)
     anno_containers:
       foo:
-      blah:
+      bar:
         auth:
           users: []
           workgroups:
@@ -44,7 +44,7 @@ test: &test
     uber_container:  anno
     anno_containers:
       foo:
-      blah:
+      bar:
         auth:
           users: []
           workgroups:
@@ -64,7 +64,7 @@ production:
     uber_container:  anno
     anno_containers:
       foo:
-      blah:
+      bar:
         auth:
           users: []
           workgroups:

@@ -34,13 +34,18 @@ require 'triannon'
 require 'rspec/rails'
 require 'capybara/rails'
 require 'capybara/rspec'
+require_relative 'auth_helper'  # include AuthHelpers
 
 require 'pry'
 require 'pry-doc'
 
 RSpec.configure do |config|
-# The settings below are suggested to provide a good initial experience
-# with RSpec, but feel free to customize to your heart's content.
+  # include the authentication / authorization helpers in
+  # any 'describe' blocks tagged with 'help: :auth'
+  config.include AuthHelpers, :help => :auth
+
+  # The settings below are suggested to provide a good initial experience
+  # with RSpec, but feel free to customize to your heart's content.
 
   # Print the slowest examples and example groups at the
   # end of the spec run, to help surface which specs are running
@@ -180,17 +185,3 @@ end
 
 
 
-# --- Content negotiation utils
-
-def accept_json
-    request.headers['Accept'] = 'application/json'
-end
-
-def content_json
-    request.headers['Content-Type'] =  'application/json'
-end
-
-def json_payloads
-    accept_json
-    content_json
-end
