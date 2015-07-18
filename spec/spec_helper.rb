@@ -56,7 +56,7 @@ RSpec.configure do |config|
   # order dependency and want to debug it, you can fix the order by providing
   # the seed, which is printed after each run.
   #     --seed 1234
-  config.order = :random
+  # config.order = :random
 
   # Seed global randomization in this process using the `--seed` CLI option.
   # Setting this allows you to use `--seed` to deterministically reproduce
@@ -91,7 +91,7 @@ RestClient.enable Rack::Cache,
 
 require 'vcr'
 VCR.configure do |c|
-	# use rest client caching for jsonld context docs
+  # use rest client caching for jsonld context docs
   contexts = [
     OA::Graph::OA_DATED_CONTEXT_URL,
     OA::Graph::OA_CONTEXT_URL,
@@ -182,6 +182,4 @@ def delete_test_objects(ldp_containers, solr_ids, root_container, vcr_cassette_n
   rsolr_client.commit
   VCR.eject_cassette(vcr_cassette_name)
 end
-
-
 
