@@ -9,33 +9,18 @@
 ENV["RAILS_ENV"] ||= 'test'
 ENV["RSPEC_RUNNING"] = 'true'
 
-require 'simplecov'
 require 'coveralls'
-SimpleCov.profiles.define 'triannon' do
-  add_filter '/spec/'
-  add_group 'Config', 'config'
-  add_group 'Libraries', 'lib'
-  add_group 'Controllers', 'app/controllers'
-  add_group 'Models', 'app/models'
-  add_group 'Helpers', 'app/helpers'
-  add_group 'Services', 'app/services'
-  add_group 'Views', 'app/views'
-end
-SimpleCov.formatters = [
-  SimpleCov::Formatter::HTMLFormatter,
-  Coveralls::SimpleCov::Formatter
-]
-SimpleCov.start 'triannon'
+Coveralls.wear!
 
 require 'engine_cart'
 EngineCart.load_application!
 
 require 'triannon'
+require_relative 'auth_helper'
+
 require 'rspec/rails'
 require 'capybara/rails'
 require 'capybara/rspec'
-require_relative 'auth_helper'  # include AuthHelpers
-
 require 'pry'
 require 'pry-doc'
 
@@ -50,13 +35,13 @@ RSpec.configure do |config|
   # Print the slowest examples and example groups at the
   # end of the spec run, to help surface which specs are running
   # particularly slow.
-  config.profile_examples = 5
+#  config.profile_examples = 5
 
   # Run specs in random order to surface order dependencies. If you find an
   # order dependency and want to debug it, you can fix the order by providing
   # the seed, which is printed after each run.
   #     --seed 1234
-  # config.order = :random
+  config.order = :random
 
   # Seed global randomization in this process using the `--seed` CLI option.
   # Setting this allows you to use `--seed` to deterministically reproduce
@@ -64,11 +49,11 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 
-  # config.mock_with :rspec do |mocks|
-  #   # Prevents you from mocking or stubbing a method that does not exist on
-  #   # a real object. This is generally recommended.
-  #   mocks.verify_partial_doubles = true
-  # end
+  config.mock_with :rspec do |mocks|
+    # Prevents you from mocking or stubbing a method that does not exist on
+    # a real object. This is generally recommended.
+    mocks.verify_partial_doubles = true
+  end
 end
 
 module Triannon
@@ -182,4 +167,3 @@ def delete_test_objects(ldp_containers, solr_ids, root_container, vcr_cassette_n
   rsolr_client.commit
   VCR.eject_cassette(vcr_cassette_name)
 end
-
