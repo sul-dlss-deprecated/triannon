@@ -16,22 +16,26 @@ require 'engine_cart'
 EngineCart.load_application!
 
 require 'triannon'
+require_relative 'auth_helper'
+
 require 'rspec/rails'
 require 'capybara/rails'
 require 'capybara/rspec'
-
 require 'pry'
 require 'pry-doc'
 
-=begin
 RSpec.configure do |config|
-# The settings below are suggested to provide a good initial experience
-# with RSpec, but feel free to customize to your heart's content.
+  # include the authentication / authorization helpers in
+  # any 'describe' blocks tagged with 'help: :auth'
+  config.include AuthHelpers, :help => :auth
 
-  # Print the 10 slowest examples and example groups at the
+  # The settings below are suggested to provide a good initial experience
+  # with RSpec, but feel free to customize to your heart's content.
+
+  # Print the slowest examples and example groups at the
   # end of the spec run, to help surface which specs are running
   # particularly slow.
-  config.profile_examples = 10
+#  config.profile_examples = 5
 
   # Run specs in random order to surface order dependencies. If you find an
   # order dependency and want to debug it, you can fix the order by providing
@@ -45,12 +49,12 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 
+  config.mock_with :rspec do |mocks|
     # Prevents you from mocking or stubbing a method that does not exist on
     # a real object. This is generally recommended.
     mocks.verify_partial_doubles = true
   end
 end
-=end
 
 module Triannon
   def self.fixture_path path
@@ -72,10 +76,13 @@ RestClient.enable Rack::Cache,
 
 require 'vcr'
 VCR.configure do |c|
-	# use rest client caching for jsonld context docs
-  c.ignore_request do |req|
-    req.uri == OA::Graph::OA_DATED_CONTEXT_URL || req.uri == OA::Graph::OA_CONTEXT_URL ||req.uri == OA::Graph::IIIF_CONTEXT_URL
-  end
+  # use rest client caching for jsonld context docs
+  contexts = [
+    OA::Graph::OA_DATED_CONTEXT_URL,
+    OA::Graph::OA_CONTEXT_URL,
+    OA::Graph::IIIF_CONTEXT_URL
+  ]
+  c.ignore_request {|r| contexts.include? r.uri }
   c.cassette_library_dir = 'spec/fixtures/vcr_cassettes'
   c.hook_into :webmock
   c.allow_http_connections_when_no_cassette = true
@@ -146,7 +153,7 @@ def delete_test_objects(ldp_containers, solr_ids, root_container, vcr_cassette_n
         Triannon::LdpWriter.delete_container cont_url
         Faraday.new(url: "#{cont_url}/fcr:tombstone").delete
       end
-    rescue Triannon::LDPStorageError => e
+    rescue Triannon::LDPStorageError
       # probably here due to parent container being deleted first
     rescue Faraday::ConnectionFailed
       # probably here due to vcr cassette
@@ -159,21 +166,4 @@ def delete_test_objects(ldp_containers, solr_ids, root_container, vcr_cassette_n
   }
   rsolr_client.commit
   VCR.eject_cassette(vcr_cassette_name)
-end
-
-
-
-# --- Content negotiation utils
-
-def accept_json
-    request.headers['Accept'] = 'application/json'
-end
-
-def content_json
-    request.headers['Content-Type'] =  'application/json'
-end
-
-def json_payloads
-    accept_json
-    content_json
 end
