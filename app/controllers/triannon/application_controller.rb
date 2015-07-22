@@ -100,10 +100,9 @@ module Triannon
     def request_container_config
       # TODO: refine the matching algorithm, esp if there is more than one
       # match rather than assume it can only match one container.
-      request_container = params['anno_root'] || request.path
+      request_container = params['anno_root']
       configs = Triannon.config[:ldp]['anno_containers']
-      matches = configs.keys.select {|c| c if request_container.include? c }
-      configs[matches.first]
+      configs[request_container]
     end
 
     # Extract user workgroups from the access token
