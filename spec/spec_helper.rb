@@ -9,13 +9,30 @@
 ENV["RAILS_ENV"] ||= 'test'
 ENV["RSPEC_RUNNING"] = 'true'
 
+require 'simplecov'
 require 'coveralls'
-Coveralls.wear!
+SimpleCov.profiles.define 'triannon' do
+  add_filter '/spec/'
+  add_group 'Config', 'config'
+  add_group 'Libraries', 'lib'
+  add_group 'Controllers', 'app/controllers'
+  add_group 'Models', 'app/models'
+  add_group 'Helpers', 'app/helpers'
+  add_group 'Services', 'app/services'
+  add_group 'Views', 'app/views'
+end
+SimpleCov.formatters = [
+  SimpleCov::Formatter::HTMLFormatter,
+  Coveralls::SimpleCov::Formatter
+]
+SimpleCov.start 'triannon'
 
 require 'engine_cart'
 EngineCart.load_application!
 
 require 'triannon'
+require 'auth_helper'  # include AuthHelpers
+
 require 'rspec/rails'
 require 'capybara/rails'
 require 'capybara/rspec'
@@ -23,21 +40,24 @@ require 'capybara/rspec'
 require 'pry'
 require 'pry-doc'
 
-=begin
 RSpec.configure do |config|
-# The settings below are suggested to provide a good initial experience
-# with RSpec, but feel free to customize to your heart's content.
+  # include the authentication / authorization helpers in
+  # any 'describe' blocks tagged with 'help: :auth'
+  config.include AuthHelpers, :help => :auth
 
-  # Print the 10 slowest examples and example groups at the
+  # The settings below are suggested to provide a good initial experience
+  # with RSpec, but feel free to customize to your heart's content.
+
+  # Print the slowest examples and example groups at the
   # end of the spec run, to help surface which specs are running
   # particularly slow.
-  config.profile_examples = 10
+  config.profile_examples = 5
 
   # Run specs in random order to surface order dependencies. If you find an
   # order dependency and want to debug it, you can fix the order by providing
   # the seed, which is printed after each run.
   #     --seed 1234
-  config.order = :random
+  # config.order = :random
 
   # Seed global randomization in this process using the `--seed` CLI option.
   # Setting this allows you to use `--seed` to deterministically reproduce
@@ -45,12 +65,12 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 
-    # Prevents you from mocking or stubbing a method that does not exist on
-    # a real object. This is generally recommended.
-    mocks.verify_partial_doubles = true
-  end
+  # config.mock_with :rspec do |mocks|
+  #   # Prevents you from mocking or stubbing a method that does not exist on
+  #   # a real object. This is generally recommended.
+  #   mocks.verify_partial_doubles = true
+  # end
 end
-=end
 
 module Triannon
   def self.fixture_path path
@@ -72,10 +92,13 @@ RestClient.enable Rack::Cache,
 
 require 'vcr'
 VCR.configure do |c|
-	# use rest client caching for jsonld context docs
-  c.ignore_request do |req|
-    req.uri == OA::Graph::OA_DATED_CONTEXT_URL || req.uri == OA::Graph::OA_CONTEXT_URL ||req.uri == OA::Graph::IIIF_CONTEXT_URL
-  end
+  # use rest client caching for jsonld context docs
+  contexts = [
+    OA::Graph::OA_DATED_CONTEXT_URL,
+    OA::Graph::OA_CONTEXT_URL,
+    OA::Graph::IIIF_CONTEXT_URL
+  ]
+  c.ignore_request {|r| contexts.include? r.uri }
   c.cassette_library_dir = 'spec/fixtures/vcr_cassettes'
   c.hook_into :webmock
   c.allow_http_connections_when_no_cassette = true
@@ -146,7 +169,7 @@ def delete_test_objects(ldp_containers, solr_ids, root_container, vcr_cassette_n
         Triannon::LdpWriter.delete_container cont_url
         Faraday.new(url: "#{cont_url}/fcr:tombstone").delete
       end
-    rescue Triannon::LDPStorageError => e
+    rescue Triannon::LDPStorageError
       # probably here due to parent container being deleted first
     rescue Faraday::ConnectionFailed
       # probably here due to vcr cassette
@@ -161,19 +184,3 @@ def delete_test_objects(ldp_containers, solr_ids, root_container, vcr_cassette_n
   VCR.eject_cassette(vcr_cassette_name)
 end
 
-
-
-# --- Content negotiation utils
-
-def accept_json
-    request.headers['Accept'] = 'application/json'
-end
-
-def content_json
-    request.headers['Content-Type'] =  'application/json'
-end
-
-def json_payloads
-    accept_json
-    content_json
-end
