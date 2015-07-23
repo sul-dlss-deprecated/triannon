@@ -104,13 +104,7 @@ module Triannon
           # When an authorization code was obtained using /auth/client_identity,
           # that code must be passed to the Access Token Service as well.
           auth_code = params[:code]
-          if auth_code.nil?
-            auth_code_required
-          elsif auth_code_valid?(auth_code)
-            access_token_granted
-          else
-            auth_code_invalid
-          end
+          access_token_granted if auth_code_valid?(auth_code)
         else
           # Without an authentication code, a login session is sufficient for
           # granting an access token.  However, the only way to enable a login
@@ -185,9 +179,7 @@ module Triannon
       return unless process_post?
       return unless process_json?
       auth_code = params[:code]
-      if auth_code.nil?
-        auth_code_required
-      elsif auth_code_valid?(auth_code)
+      if auth_code_valid?(auth_code)
         begin
           data = JSON.parse(request.body.read)
           required_fields = ['userId', 'workgroups']
@@ -211,8 +203,6 @@ module Triannon
         rescue
           login_required(422)
         end
-      else
-        auth_code_invalid
       end
     end
 
@@ -266,18 +256,31 @@ module Triannon
 
     # decrypt, parse and validate authorization code
     def auth_code_valid?(code)
-      begin
-        if code == session[:client_token]
-          identity, salt = session[:client_data]
-          key = ActiveSupport::KeyGenerator.new(identity).generate_key(salt)
-          crypt = ActiveSupport::MessageEncryptor.new(key)
-          data, timestamp = crypt.decrypt_and_verify(code)
-          elapsed = Time.now.to_i - timestamp.to_i  # sec since code was issued
-          return data if elapsed < Triannon.config[:client_token_expiry]
+      if code.nil?
+        auth_code_required
+      elsif session[:client_token].nil?
+        auth_code_required
+      else
+        begin
+          if code == session[:client_token]
+            identity, salt = session[:client_data]
+            key = ActiveSupport::KeyGenerator.new(identity).generate_key(salt)
+            crypt = ActiveSupport::MessageEncryptor.new(key)
+            data, timestamp = crypt.decrypt_and_verify(code)
+            elapsed = Time.now.to_i - timestamp.to_i  # sec since code was issued
+            if elapsed < Triannon.config[:client_token_expiry]
+              return data
+            else
+              auth_code_required
+            end
+          else
+            auth_code_invalid
+          end
+        rescue ActiveSupport::MessageVerifier::InvalidSignature
+          # This is an invalid code, so return false.
         end
-      rescue ActiveSupport::MessageVerifier::InvalidSignature
-        # This is an invalid code, so return nil (a falsy value).
       end
+      false
     end
 
     # Issue a 403 for invalid client authorization codes
