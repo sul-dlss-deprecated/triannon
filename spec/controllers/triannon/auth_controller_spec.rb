@@ -301,11 +301,6 @@ describe Triannon::AuthController, :vcr, type: :controller, help: :auth do
       get :access_validate
       expect(response.status).to eq(401)
     end
-    it 'response code is 401 with invalid access token' do
-      request.headers['Authorization'] = "Bearer invalid_token"
-      get :access_validate
-      expect(response.status).to eq(401)
-    end
     it 'response code is 401 with no access token' do
       request.headers['Authorization'] = nil
       get :access_validate
@@ -316,31 +311,13 @@ describe Triannon::AuthController, :vcr, type: :controller, help: :auth do
       get :access_validate
       expect(response.status).to eq(401)
     end
+    it 'response code is 403 with invalid access token (after valid login)' do
+      token = access_token
+      request.headers['Authorization'] = "Bearer invalid_token"
+      get :access_validate
+      expect(response.status).to eq(403)
+    end
   end # /auth/access_validate
-
-  # ApplicationController#access_token_data should be available to
-  # any controllers; it is tested here in the context of authentication.
-  describe '#access_token_data' do
-    it 'returns nil for no Authorization header' do
-      access_data = subject.send(:access_token_data, {})
-      expect(access_data).to be_nil
-    end
-    it 'returns nil for Authorization header without "Bearer"' do
-      headers = {'Authorization' => 'Basic invalid_data'}
-      access_data = subject.send(:access_token_data, headers)
-      expect(access_data).to be_nil
-    end
-    it 'returns nil for invalid access token' do
-      headers = {'Authorization' => "Bearer invalid_data"}
-      access_data = subject.send(:access_token_data, headers)
-      expect(access_data).to be_nil
-    end
-    it 'returns login data for valid access token' do
-      headers = {'Authorization' => "Bearer #{access_token}"}
-      access_data = subject.send(:access_token_data, headers)
-      expect(access_data).to eql(login_credentials)
-    end
-  end #ApplicationController#access_token_data
 
   # ApplicationController#authorize should be available to
   # any controllers; it is tested here in the context of authentication.

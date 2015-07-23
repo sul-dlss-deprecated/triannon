@@ -6,7 +6,7 @@ module Triannon
     #--- Authentication methods
     #
     # The #access_token_data method is generally available to the
-    # application.  The #access_token_generate and #access_token_validate?
+    # application.  The #access_token_generate and #access_token_valid?
     # methods are consolidated here to provide a unified view of these methods,
     # although the application generally may not need to call them.  They are
     # used specifically in the auth_controller and these methods are tested
@@ -23,31 +23,39 @@ module Triannon
       session[:access_token] = crypt.encrypt_and_sign([data, timestamp])
     end
 
-    # decrypt, parse and validate access token
-    def access_token_valid?(code)
-      begin
-        if code == session[:access_token]
-          identity, salt = session[:access_data]
-          key = ActiveSupport::KeyGenerator.new(identity).generate_key(salt)
-          crypt = ActiveSupport::MessageEncryptor.new(key)
-          data, timestamp = crypt.decrypt_and_verify(code)
-          elapsed = Time.now.to_i - timestamp.to_i  # sec since token was issued
-          return data if elapsed < Triannon.config[:access_token_expiry]
+    # Extract access login data for a session.
+    # @return login_data [Array|nil] contains [data, timestamp]
+    def access_token_data
+      @access_data || begin
+        auth = request.headers['Authorization']
+        if auth.nil? || auth !~ /^Bearer/ || session[:access_token].nil?
+          render401
+        else
+          token = auth.split.last
+          if token == session[:access_token]
+            identity, salt = session[:access_data]
+            key = ActiveSupport::KeyGenerator.new(identity).generate_key(salt)
+            crypt = ActiveSupport::MessageEncryptor.new(key)
+            data, timestamp = crypt.decrypt_and_verify(token)
+            elapsed = Time.now.to_i - timestamp.to_i  # sec since code was issued
+            if elapsed < Triannon.config[:access_token_expiry]
+              @access_data = data
+              return data
+            else
+              render401
+            end
+          else
+            render403
+          end
         end
-      rescue ActiveSupport::MessageVerifier::InvalidSignature
-        # This is an invalid code, so return nil (a falsy value).
+        nil
+      rescue
       end
     end
 
-    # Extract access login data from Authorization header, if it is valid.
-    # @param headers [Hash] request.headers with 'Authorization'
-    # @return login_data [Hash|nil]
-    def access_token_data(headers)
-      auth = headers['Authorization']
-      unless auth.nil? || auth !~ /^Bearer/
-        token = auth.split.last
-        access_token_valid?(token)
-      end
+    # decrypt, parse and validate access token
+    def access_token_valid?
+      not access_token_data.nil?
     end
 
 
@@ -68,10 +76,7 @@ module Triannon
       # If the request does not map to a configured container, allow access.
       container_auth = container_authorization
       return true if container_auth.empty?
-      if request.headers['Authorization'].nil?
-        render401
-        return false
-      end
+      return false unless access_token_valid?
       # Identify an intersection of the user and the authorized workgroups.
       container_groups = container_auth['workgroups'] || []
       match = container_groups & user_workgroups
@@ -108,7 +113,7 @@ module Triannon
     # Extract user workgroups from the access token
     # @return workgroups [Array<String>]
     def user_workgroups
-      access_data = access_token_data(request.headers)
+      access_data = access_token_data
       if access_data.instance_of? Hash
         access_data['workgroups'] || []
       else

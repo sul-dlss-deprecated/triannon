@@ -122,17 +122,9 @@ module Triannon
     # GET /auth/access_validate
     # Authorize access based on validating an access token
     def access_validate
-      auth = request.headers['Authorization']
-      if auth.nil? || auth !~ /Bearer/
-        access_token_invalid
-      else
-        token = auth.split[1]
-        if access_token_valid?(token)
-          response.status = 200
-          render nothing: true
-        else
-          access_token_invalid
-        end
+      if access_token_valid?
+        response.status = 200
+        render nothing: true
       end
     end
 
