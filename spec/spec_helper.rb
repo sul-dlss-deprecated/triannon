@@ -12,7 +12,8 @@ ENV["RSPEC_RUNNING"] = 'true'
 require 'simplecov'
 require 'coveralls'
 SimpleCov.profiles.define 'triannon' do
-  add_filter '/spec/'
+  add_filter 'spec'
+  add_filter 'vendor'
   add_group 'Config', 'config'
   add_group 'Libraries', 'lib'
   add_group 'Controllers', 'app/controllers'
@@ -21,7 +22,7 @@ SimpleCov.profiles.define 'triannon' do
   add_group 'Services', 'app/services'
   add_group 'Views', 'app/views'
 end
-SimpleCov.formatters = [
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
   SimpleCov::Formatter::HTMLFormatter,
   Coveralls::SimpleCov::Formatter
 ]
