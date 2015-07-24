@@ -351,21 +351,6 @@ module Triannon
     end
 
 
-    # --------------------------------------------------------------------
-    # Utility methods
-
-
-    # @param data [Hash] Hash.to_json is rendered
-    # @param status [Integer] HTTP status code
-    def json_response(data, status)
-      render json: data.to_json, content_type: json_type_accepted, status: status
-    end
-
-    # Response content type to match an HTTP accept type for JSON formats
-    def json_type_accepted
-      mime_type_from_accept(['application/json', 'text/x-json', 'application/jsonrequest'])
-    end
-
     # Parse POST JSON data to ensure it contains required fields
     # @param fields [Array<String>] an array of required fields
     def parse_identity(data, fields)

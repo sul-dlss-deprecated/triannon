@@ -29,7 +29,7 @@ module Triannon
       @access_data || begin
         auth = request.headers['Authorization']
         if auth.nil? || auth !~ /^Bearer/ || session[:access_token].nil?
-          render401
+          access_token_error
         else
           token = auth.split.last
           if token == session[:access_token]
@@ -42,10 +42,11 @@ module Triannon
               @access_data = data
               return data
             else
-              render401
+              access_token_error
             end
           else
-            render403
+            msg = 'Unable to validate access code'
+            access_token_error(msg, 403)
           end
         end
         nil
@@ -58,6 +59,24 @@ module Triannon
       not access_token_data.nil?
     end
 
+
+    # --------------------------------------------------------------------
+    # Utility methods
+
+    # @param data [Hash] Hash.to_json is rendered
+    # @param status [Integer] HTTP status code
+    def json_response(data, status)
+      render json: data.to_json, content_type: json_type_accepted, status: status
+    end
+
+    # Response content type to match an HTTP accept type for JSON formats
+    def json_type_accepted
+      mime_type_from_accept(['application/json', 'text/x-json', 'application/jsonrequest'])
+    end
+
+
+    # --------------------------------------------------------------------
+    # Private methods
 
     private
 
@@ -81,7 +100,8 @@ module Triannon
       container_groups = container_auth['workgroups'] || []
       match = container_groups & user_workgroups
       if match.empty?
-        render403
+        msg = 'Write access is denied on this annotation container.'
+        access_token_error(msg, 403)
         false
       else
         true
@@ -91,23 +111,13 @@ module Triannon
     # Extract container authorization from the configuration parameters
     # @return authorization [Hash]
     def container_authorization
-      container_config = request_container_config
+      configs = Triannon.config[:ldp]['anno_containers']
+      container_config = configs[params['anno_root']]
       if container_config.instance_of? Hash
         container_config['auth'] || {}
       else
         {}
       end
-    end
-
-    # Map the request root container to config parameters;
-    # assume that a request can only map to one root container.
-    # If this mapping fails, assume that authorization is OK.
-    def request_container_config
-      # TODO: refine the matching algorithm, esp if there is more than one
-      # match rather than assume it can only match one container.
-      request_container = params['anno_root']
-      configs = Triannon.config[:ldp]['anno_containers']
-      configs[request_container]
     end
 
     # Extract user workgroups from the access token
@@ -121,16 +131,15 @@ module Triannon
       end
     end
 
-    def render401
-      respond_to do |format|
-        format.all { head :unauthorized }
-      end
-    end
-
-    def render403
-      respond_to do |format|
-        format.all { head :forbidden }
-      end
+    # Issue an access token error
+    def access_token_error(msg=nil, status=401)
+      msg ||= 'Access token required'
+      err = {
+        error: 'invalidRequest',
+        errorDescription: msg,
+        errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html#access-token-service'
+      }
+      json_response(err, status)
     end
 
   end
