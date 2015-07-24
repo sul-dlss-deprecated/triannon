@@ -256,10 +256,8 @@ module Triannon
 
     # decrypt, parse and validate authorization code
     def auth_code_valid?(code)
-      if code.nil?
-        auth_code_required
-      elsif session[:client_token].nil?
-        auth_code_required
+      if code.nil? || session[:client_token].nil?
+        auth_code_error
       else
         begin
           if code == session[:client_token]
@@ -271,10 +269,11 @@ module Triannon
             if elapsed < Triannon.config[:client_token_expiry]
               return data
             else
-              auth_code_required
+              auth_code_error
             end
           else
-            auth_code_invalid
+            msg = 'Unable to validate authorization code'
+            auth_code_error(msg, 403)
           end
         rescue ActiveSupport::MessageVerifier::InvalidSignature
           # This is an invalid code, so return false.
@@ -283,26 +282,16 @@ module Triannon
       false
     end
 
-    # Issue a 403 for invalid client authorization codes
-    def auth_code_invalid
+    # Issue a client authorization error
+    def auth_code_error(msg=nil, status=401)
+      msg ||= 'Client authorization required'
       err = {
         error: 'invalidClient',
-        errorDescription: 'Unable to validate authorization code',
-        errorUri: ''
+        errorDescription: msg,
+        errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html#client-identity-service'
       }
-      json_response(err, 403)
+      json_response(err, status)
     end
-
-    # Issue a 401 to challenge for a client authorization code
-    def auth_code_required
-      err = {
-        error: 'invalidClient',
-        errorDescription: 'authorization code is required',
-        errorUri: ''
-      }
-      json_response(err, 401)
-    end
-
 
     # --------------------------------------------------------------------
     # Service information data

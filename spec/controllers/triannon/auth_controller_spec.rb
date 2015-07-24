@@ -62,7 +62,7 @@ describe Triannon::AuthController, :vcr, type: :controller, help: :auth do
       err = JSON.parse(response.body)
       expect(err).not_to be_empty
       expect(err['error']).to eql('invalidClient')
-      expect(err['errorDescription']).to eql('authorization code is required')
+      expect(err['errorDescription']).to eql('Client authorization required')
     end
     it 'rejects an invalid authorization code (response code 403)' do
       auth_code # first the client requests a code (setup session data)
@@ -269,7 +269,7 @@ describe Triannon::AuthController, :vcr, type: :controller, help: :auth do
         get :access_token
         expect(response.status).to eq(401)
         expect(token_data['error']).to eql('invalidClient')
-        expect(token_data['errorDescription']).to eql('authorization code is required')
+        expect(token_data['errorDescription']).to eql('Client authorization required')
       end
     end
 
