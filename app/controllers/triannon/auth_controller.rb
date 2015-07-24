@@ -188,13 +188,21 @@ module Triannon
             identity.to_json # check JSON compatibility
             cookies[:login_user] = identity['userId']
             session[:login_data] = identity
-            redirect_to root_url, notice: 'Successfully logged in.'
+            login_successful
           else
             login_required
           end
         rescue
           login_required(422)
         end
+      end
+    end
+
+    def login_successful
+      if request.format == :html
+        redirect_to root_url, notice: 'Successfully logged in.'
+      elsif request.format == :json
+        render nothing: true, status: 200
       end
     end
 

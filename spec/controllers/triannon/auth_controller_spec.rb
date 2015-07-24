@@ -74,15 +74,15 @@ describe Triannon::AuthController, :vcr, type: :controller, help: :auth do
       expect(err['error']).to eql('invalidClient')
       expect(err['errorDescription']).to eql('Unable to validate authorization code')
     end
-    it 'accepts login data from authorized client (response code 302)' do
+    it 'accepts login data from authorized client (response code 200)' do
       data = {userId: 'userAnon', workgroups: 'doh :-)'}
       post :login, data.to_json, auth_code_params
-      expect(response.status).to eql(302)
+      expect(response.status).to eql(200)
     end
     it 'excludes extraneous data from login data' do
       data = {userId: 'userAnon', workgroups: 'doh :-)', extraneous: 'xyz'}
       post :login, data.to_json, auth_code_params
-      expect(response.status).to eql(302)
+      expect(response.status).to eql(200)
       data = session['login_data']
       expect(data.keys).not_to include('extraneous')
     end
@@ -90,7 +90,7 @@ describe Triannon::AuthController, :vcr, type: :controller, help: :auth do
       data = login_credentials
       expect(data['workgroups']).to be_instance_of Array
       post :login, data.to_json, auth_code_params
-      expect(response.status).to eql(302)
+      expect(response.status).to eql(200)
       wg = session['login_data']['workgroups']
       expect(wg).to be_instance_of Array
       expect(wg).not_to be_empty
@@ -100,7 +100,7 @@ describe Triannon::AuthController, :vcr, type: :controller, help: :auth do
       data['workgroups'] = 'org:wg-A, org:wg-B' # will be split(',')
       expect(data['workgroups']).to be_instance_of String
       post :login, data.to_json, auth_code_params
-      expect(response.status).to eql(302)
+      expect(response.status).to eql(200)
       wg = session['login_data']['workgroups']
       expect(wg).to be_instance_of Array
       expect(wg).not_to be_empty
@@ -168,16 +168,13 @@ describe Triannon::AuthController, :vcr, type: :controller, help: :auth do
       # the test apparatus uses the same session across get calls in this example.
       login
       login_session = session.dup
-      login_notice = flash.notice
       expect(login_session).not_to be_nil
-      expect(login_notice).not_to be_nil
       get :logout
       logout_session = session.dup
       logout_notice = flash.notice
       expect(logout_session).not_to be_nil
       expect(logout_session).not_to eql(login_session)
       expect(logout_notice).not_to be_nil
-      expect(logout_notice).not_to eql(login_notice)
     end
     it 'does not respond to OPTIONS' do
       set_json_headers
@@ -312,7 +309,7 @@ describe Triannon::AuthController, :vcr, type: :controller, help: :auth do
       expect(response.status).to eq(401)
     end
     it 'response code is 403 with invalid access token (after valid login)' do
-      token = access_token
+      access_token
       request.headers['Authorization'] = "Bearer invalid_token"
       get :access_validate
       expect(response.status).to eq(403)

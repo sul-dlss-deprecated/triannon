@@ -44,8 +44,7 @@ module AuthHelpers
     set_json_headers
     params = {'code' => auth_code}
     post :login, login_credentials.to_json, params
-    expect(response.status).to eq(302)
-    expect(response).to redirect_to('/')
+    expect(response.status).to eq(200)
     expect(response.cookies['login_user']).not_to be_nil
   end
 

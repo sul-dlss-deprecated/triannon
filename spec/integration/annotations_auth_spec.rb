@@ -39,7 +39,7 @@ describe 'AnnotationsAuthentication', :vcr, type: :request, help: :auth do
     expect(auth_code).not_to be_nil
     # 2. The client POSTs user credentials.
     post "/auth/login?code=#{auth_code}", login_credentials.to_json, headers
-    expect(response.status).to eql(302) # redirect to '/'
+    expect(response.status).to eql(200) # OK
     # 3. The client, on behalf of user, obtains a long-lived access token.
     get "/auth/access_token?code=#{auth_code}", accept_json
     expect(response.status).to eql(200) # OK
