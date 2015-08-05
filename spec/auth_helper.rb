@@ -3,18 +3,20 @@ module AuthHelpers
   def access_token
     @access_token ||= begin
       login
-      # get '/auth/access_token', {'code' => auth_code}
       get :access_token, {'code' => auth_code}
       data = JSON.parse(response.body)
       data['accessToken']
     end
   end
 
+  def access_token_headers
+    headers = json_payloads
+    headers.merge!( { 'Authorization' => "Bearer #{access_token}" } )
+  end
+
   def auth_code
     @auth_code ||= begin
-      # post '/auth/client_identity', client_credentials.to_json, json_payloads
-      # post '/auth/client_identity', client_credentials.to_json
-      set_json_headers
+      json_request_headers
       post :client_identity, client_credentials.to_json
       expect(response.status).to eql(200)
       data = JSON.parse(response.body)
@@ -41,11 +43,10 @@ module AuthHelpers
   def login
     # options = json_payloads
     # post '/auth/login', login_credentials.to_json, params
-    set_json_headers
+    json_request_headers
     params = {'code' => auth_code}
     post :login, login_credentials.to_json, params
-    expect(response.status).to eq(302)
-    expect(response).to redirect_to('/')
+    expect(response.status).to eq(200)
     expect(response.cookies['login_user']).not_to be_nil
   end
 
@@ -65,6 +66,15 @@ module AuthHelpers
     expect(err['errorDescription']).to eql('login credentials required')
   end
 
+  def login_credentials_unauthorized
+    @login_credentials_unauthorized ||= begin
+      # This is an old style hash so the keys are strings that are easier to
+      # work with when comparing this data in HTTP responses.
+      groups = ['org:wg-X'] # does not matche config/triannon.yml
+      {'userId' => 'userA', 'workgroups' => groups}
+    end
+  end
+
 
   # --- Content negotiation utils
 
@@ -77,15 +87,11 @@ module AuthHelpers
   end
 
   def json_payloads
-    headers = {}
-    headers.merge!(accept_json)
-    headers.merge!(content_json)
-    headers
+    {}.merge(accept_json).merge(content_json)
   end
 
-  def set_json_headers
-    request.headers['Accept'] = 'application/json'
-    request.headers['Content-Type'] = 'application/json'
+  def json_request_headers
+    request.headers.merge!(json_payloads)
   end
 
 end

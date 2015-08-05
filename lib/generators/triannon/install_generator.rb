@@ -36,7 +36,7 @@ development:
     clientA: secretA
     clientB: secretB
   # expiry values are in seconds
-  client_token_expiry: 60
+  client_token_expiry: 120
   access_token_expiry: 3600
 test: &test
   ldp:
@@ -56,22 +56,19 @@ test: &test
     clientA: secretA
     clientB: secretB
   # expiry values are in seconds
-  client_token_expiry: 60
+  client_token_expiry: 120
   access_token_expiry: 3600
 production:
   ldp:
     url:
     uber_container:  anno
     anno_containers:
-      foo:
-      bar:
-        auth:
-          users: []
-          workgroups:
-          - org:wg-A
-          - org:wg-B
   solr_url:
   triannon_base_url:
+  authorized_clients:
+  # expiry values are in seconds
+  client_token_expiry: 120
+  access_token_expiry: 3600
 YML
       create_file 'config/triannon.yml', default_yml
     end
