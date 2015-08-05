@@ -20,44 +20,60 @@ module Triannon
       key   = ActiveSupport::KeyGenerator.new(timestamp).generate_key(salt)
       crypt = ActiveSupport::MessageEncryptor.new(key)
       session[:access_data] = [timestamp, salt]
-      session[:access_token] = crypt.encrypt_and_sign([data, timestamp])
+      session[:access_token] = crypt.encrypt_and_sign(data)
     end
 
     # Extract access login data for a session.
-    # @return login_data [Array|nil] contains [data, timestamp]
+    # @return login_data [Hash] contains login data (empty on failure)
     def access_token_data
-      @access_data || begin
+      @access_data ||= begin
+        data = {}
         auth = request.headers['Authorization']
         if auth.nil? || auth !~ /^Bearer/ || session[:access_token].nil?
           access_token_error
         else
           token = auth.split.last
           if token == session[:access_token]
-            identity, salt = session[:access_data]
-            key = ActiveSupport::KeyGenerator.new(identity).generate_key(salt)
-            crypt = ActiveSupport::MessageEncryptor.new(key)
-            data, timestamp = crypt.decrypt_and_verify(token)
-            elapsed = Time.now.to_i - timestamp.to_i  # sec since code was issued
-            if elapsed < Triannon.config[:access_token_expiry]
-              @access_data = data
-              return data
+            timestamp, salt = session[:access_data]
+            if access_token_expired?(timestamp)
+              access_token_error('Access token expired')
             else
-              access_token_error
+              key = ActiveSupport::KeyGenerator.new(timestamp).generate_key(salt)
+              crypt = ActiveSupport::MessageEncryptor.new(key)
+              data = crypt.decrypt_and_verify(token)
             end
           else
-            msg = 'Unable to validate access code'
-            access_token_error(msg, 403)
+            access_token_error('Access code does not match login session')
           end
         end
-        nil
+        data
       rescue
+        access_token_error('Failed to validate access code')
+        data
       end
+    end
+
+    def access_token_expired?(timestamp)
+      elapsed = Time.now.to_i - timestamp.to_i  # sec since code was issued
+      elapsed >= Triannon.config[:access_token_expiry]
     end
 
     # decrypt, parse and validate access token
     def access_token_valid?
-      not access_token_data.nil?
+      not access_token_data.empty?
     end
+
+    # Issue an access token error
+    def access_token_error(msg=nil, status=401)
+      msg ||= 'Access token required'
+      err = {
+        error: 'invalidRequest',
+        errorDescription: msg,
+        errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html#access-token-service'
+      }
+      json_response(err, status)
+    end
+
 
 
     # --------------------------------------------------------------------
@@ -124,22 +140,7 @@ module Triannon
     # @return workgroups [Array<String>]
     def user_workgroups
       access_data = access_token_data
-      if access_data.instance_of? Hash
-        access_data['workgroups'] || []
-      else
-        []
-      end
-    end
-
-    # Issue an access token error
-    def access_token_error(msg=nil, status=401)
-      msg ||= 'Access token required'
-      err = {
-        error: 'invalidRequest',
-        errorDescription: msg,
-        errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html#access-token-service'
-      }
-      json_response(err, status)
+      access_data['workgroups'] || []
     end
 
   end

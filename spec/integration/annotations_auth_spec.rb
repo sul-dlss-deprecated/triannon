@@ -54,7 +54,7 @@ describe 'AnnotationsAuthentication', :vcr, type: :request, help: :auth do
 
   let(:create_annotation) {
     # CREATE a new annotation (using access token).
-    post container_uri, anno_data.to_json, valid_token_headers
+    post container_uri, anno_data.to_json, access_token_headers
     expect(response.status).to eql(201) # OK
     anno_id = assigns(:annotation).id
     @ldp_testing_container_urls << "#{@root_container}/#{anno_id}"
@@ -67,13 +67,8 @@ describe 'AnnotationsAuthentication', :vcr, type: :request, help: :auth do
   }
 
   let(:invalid_token_headers) {
-    headers = json_payloads
+    headers = access_token_headers
     headers.merge( { 'Authorization' => "Bearer invalid_token" } )
-  }
-
-  let(:valid_token_headers) {
-    headers = json_payloads
-    headers.merge!( { 'Authorization' => "Bearer #{access_token}" } )
   }
 
   describe 'authorized annotation create/delete' do
@@ -86,33 +81,17 @@ describe 'AnnotationsAuthentication', :vcr, type: :request, help: :auth do
       anno_id = create_annotation # see above
       anno_uri = "#{container_uri}/#{CGI.escape(anno_id)}"
       # DELETE an existing annotation.
-      delete anno_uri, nil, valid_token_headers
+      delete anno_uri, nil, access_token_headers
       expect(response.status).to eql(204) # OK, no content
       # Check that it's gone (GET does not require access token).
       get anno_uri
       expect(response.status).to eql(410) # gone
     end
 
-    it 'fails to create annotation without any access token' do
+    it 'fails to create annotation without an access token' do
       no_token_headers = json_payloads
       post container_uri, anno_data.to_json, no_token_headers
       expect(response.status).to eql(401) # requires authentication
-    end
-
-    it 'fails to create annotation using an invalid access token' do
-      access_token # create a valid access token
-      post container_uri, anno_data.to_json, invalid_token_headers
-      expect(response.status).to eql(403) # not authorized
-    end
-
-    it 'fails to delete annotation using an invalid access token' do
-      anno_id = create_annotation
-      anno_uri = "#{container_uri}/#{CGI.escape(anno_id)}"
-      delete anno_uri, nil, invalid_token_headers
-      expect(response.status).to eql(403) # not authorized
-      # Check that it's still present.
-      get anno_uri
-      expect(response.status).to eql(200) # OK, still exists
     end
 
     it 'fails to delete annotation without an access token' do
@@ -124,6 +103,71 @@ describe 'AnnotationsAuthentication', :vcr, type: :request, help: :auth do
       # Check that it's still present.
       get anno_uri
       expect(response.status).to eql(200) # OK, still exists
+    end
+
+    it 'fails to create annotation using an invalid access token' do
+      access_token # create a valid access token
+      post container_uri, anno_data.to_json, invalid_token_headers
+      expect(response.status).to eql(401) # requires authentication
+    end
+
+    it 'fails to delete annotation using an invalid access token' do
+      anno_id = create_annotation
+      anno_uri = "#{container_uri}/#{CGI.escape(anno_id)}"
+      delete anno_uri, nil, invalid_token_headers
+      expect(response.status).to eql(401) # requires authentication
+      # Check that it's still present.
+      get anno_uri
+      expect(response.status).to eql(200) # OK, still exists
+    end
+
+    it 'fails to create annotation using an expired access token' do
+      access_token # create a valid access token
+      config = Triannon.config.merge({access_token_expiry: 0})
+      allow(Triannon).to receive(:config).and_return(config)
+      post container_uri, anno_data.to_json, access_token_headers
+      expect(response.status).to eql(401) # requires authentication
+    end
+
+    it 'fails to delete annotation using an expired access token' do
+      anno_id = create_annotation
+      anno_uri = "#{container_uri}/#{CGI.escape(anno_id)}"
+      # expiry = Triannon.config[:access_token_expiry]
+      config = Triannon.config.merge({access_token_expiry: 0})
+      allow(Triannon).to receive(:config).and_return(config)
+      delete anno_uri, nil, access_token_headers
+      expect(response.status).to eql(401) # requires authentication
+      # Check that it's still present.
+      get anno_uri
+      expect(response.status).to eql(200) # OK, still exists
+    end
+
+    it 'fails to create annotation for unauthorized login credentials' do
+      headers = json_payloads
+      # 1. Obtain a client authorization code (short-lived token)
+      post "/auth/client_identity", client_credentials.to_json, headers
+      expect(response.status).to eql(200) # OK
+      auth = JSON.parse(response.body)
+      expect(auth.keys).to include('authorizationCode')
+      auth_code = auth['authorizationCode']
+      expect(auth_code).not_to be_nil
+      # 2. The client POSTs user credentials.
+      login_data = login_credentials_unauthorized
+      post "/auth/login?code=#{auth_code}", login_data.to_json, headers
+      expect(response.status).to eql(200) # OK
+      # 3. The client, on behalf of user, obtains a long-lived access token.
+      get "/auth/access_token?code=#{auth_code}", accept_json
+      expect(response.status).to eql(200) # OK
+      access = JSON.parse(response.body)
+      expect(access.keys).to include('accessToken')
+      expect(access.keys).to include('tokenType')
+      expect(access.keys).to include('expiresIn')
+      access_code = access['accessToken']
+      expect(access_code).not_to be_nil
+      # Try to create annotation on unauthorized container.
+      headers.merge!( { 'Authorization' => "Bearer #{access_code}" } )
+      post container_uri, anno_data.to_json, headers
+      expect(response.status).to eql(403) # not authorized
     end
 
   end

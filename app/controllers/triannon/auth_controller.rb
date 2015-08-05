@@ -141,21 +141,10 @@ module Triannon
       data = {
         accessToken: session[:access_token],
         tokenType: 'Bearer',
-        expiresIn: Triannon.config[:access_token_expiry]
+        expiresIn: Time.now.to_i + Triannon.config[:access_token_expiry]
       }
       json_response(data, 200)
     end
-
-    # Issue a 401 to challenge for a client access token
-    def access_token_invalid
-      err = {
-        error: 'invalidAccess',
-        errorDescription: 'invalid access token',
-        errorUri: ''
-      }
-      json_response(err, 401)
-    end
-
 
     # --------------------------------------------------------------------
     # User authentication
@@ -199,18 +188,11 @@ module Triannon
     end
 
     def login_successful
-      if request.format == :html
-        redirect_to root_url, notice: 'Successfully logged in.'
-      elsif request.format == :json
-        render nothing: true, status: 200
-      end
+      render nothing: true, status: 200
     end
 
     def login_required(status=401)
-      if request.format == :html
-        request_http_basic_authentication
-      elsif request.format == :json
-        # response.headers["WWW-Authenticate"] = %(Basic realm="Application")
+      if request.format == :json
         if status == 401
           err = {
             error: '401 Unauthorized',
@@ -265,15 +247,15 @@ module Triannon
             key = ActiveSupport::KeyGenerator.new(identity).generate_key(salt)
             crypt = ActiveSupport::MessageEncryptor.new(key)
             data, timestamp = crypt.decrypt_and_verify(code)
-            elapsed = Time.now.to_i - timestamp.to_i  # sec since code was issued
+            elapsed = Time.now.to_i - timestamp.to_i  # sec since code issued
             if elapsed < Triannon.config[:client_token_expiry]
               return data
             else
-              auth_code_error
+              auth_code_error('Authorization code expired')
             end
           else
             msg = 'Unable to validate authorization code'
-            auth_code_error(msg, 403)
+            auth_code_error(msg)
           end
         rescue ActiveSupport::MessageVerifier::InvalidSignature
           # This is an invalid code, so return false.
@@ -303,28 +285,28 @@ module Triannon
       uri.to_s.sub(uri.path,'')
     end
 
-    # http://image-auth.iiif.io/api/image/2.1/authentication.html#access-token-service
-    # return info [Hash] access token service information
-    def service_info_access_token
-      {
-        service: {
-          "@id" => service_base_uri + '/auth/access_token',
-          "profile" => "http://iiif.io/api/image/2/auth/token",
-          "label" => "Request Access Token for Triannon"
-        }
-      }
-    end
+    # # http://image-auth.iiif.io/api/image/2.1/authentication.html#access-token-service
+    # # return info [Hash] access token service information
+    # def service_info_access_token
+    #   {
+    #     service: {
+    #       "@id" => service_base_uri + '/auth/access_token',
+    #       "profile" => "http://iiif.io/api/image/2/auth/token",
+    #       "label" => "Request Access Token for Triannon"
+    #     }
+    #   }
+    # end
 
-    # http://image-auth.iiif.io/api/image/2.1/authentication.html#client-identity-service
-    # return info [Hash] client identity service information
-    def service_info_client_identity
-      {
-        service: {
-          "@id" => service_base_uri + '/auth/client_identity',
-          "profile" => "http://iiif.io/api/image/2/auth/clientId"
-        }
-      }
-    end
+    # # http://image-auth.iiif.io/api/image/2.1/authentication.html#client-identity-service
+    # # return info [Hash] client identity service information
+    # def service_info_client_identity
+    #   {
+    #     service: {
+    #       "@id" => service_base_uri + '/auth/client_identity',
+    #       "profile" => "http://iiif.io/api/image/2/auth/clientId"
+    #     }
+    #   }
+    # end
 
     # http://image-auth.iiif.io/api/image/2.1/authentication.html#login-service
     # return info [Hash] login service information
@@ -377,14 +359,7 @@ module Triannon
       if request.post?
         true
       else
-        logger.debug "Rejected Request Method: #{request.request_method}"
-        err = {
-          error: 'invalidRequest',
-          errorDescription: "#{request.path} accepts POST requests, not #{request.request_method}",
-          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
-        }
-        response.headers.merge!({'Allow' => 'POST'})
-        json_response(err, 405)
+        request_method_error('POST')
         false
       end
     end
@@ -393,19 +368,14 @@ module Triannon
     def request_method_error(accept)
       logger.debug "Rejected Request Method: #{request.request_method}"
       response.status = 405
-      response.headers.merge!(Allow: accept)
-      respond_to do |format|
-        format.json {
-          err = {
-            error: 'invalidRequest',
-            errorDescription: "#{request.path} accepts: #{accept}",
-            errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
-          }
-          render json: err.to_json, content_type: json_type_accepted
+      response.headers.merge!({'Allow' => accept})
+      if request.format == :json
+        err = {
+          error: 'invalidRequest',
+          errorDescription: "#{request.path} accepts: #{accept}",
+          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
         }
-        format.html {
-          render nothing: true
-        }
+        render json: err.to_json, content_type: json_type_accepted
       end
     end
 
