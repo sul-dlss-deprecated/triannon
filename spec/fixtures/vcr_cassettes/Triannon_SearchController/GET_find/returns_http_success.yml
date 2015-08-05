@@ -22,22 +22,38 @@ http_interactions:
         {
           'responseHeader'=>{
             'status'=>0,
-            'QTime'=>1,
+            'QTime'=>2,
             'params'=>{
               'wt'=>'ruby'}},
-          'response'=>{'numFound'=>0,'start'=>0,'maxScore'=>0.0,'docs'=>[]
+          'response'=>{'numFound'=>1,'start'=>0,'maxScore'=>1.0,'docs'=>[
+              {
+                'id'=>'new_anno_feature/14/b0/67/ad/14b067ad-82b5-4fd0-880e-75db373f079e',
+                'root'=>'new_anno_feature',
+                'motivation'=>['commenting'],
+                'target_url'=>['http://purl.stanford.edu/kq131cs7229'],
+                'target_type'=>['external_URI'],
+                'body_type'=>['content_as_text'],
+                'body_chars_exact'=>['I love this!'],
+                'anno_jsonld'=>'{"@context":"http://www.w3.org/ns/oa-context-20130208.json","@graph":[{"@id":"_:g70071890637160","@type":["dctypes:Text","cnt:ContentAsText"],"chars":"I love this!"},{"@id":"http://your.triannon-server.com/annotations/new_anno_feature/14/b0/67/ad/14b067ad-82b5-4fd0-880e-75db373f079e","@type":"oa:Annotation","hasBody":"_:g70071890637160","hasTarget":"http://purl.stanford.edu/kq131cs7229","motivatedBy":"oa:commenting"}]}',
+                '_version_'=>1508692900806918144,
+                'timestamp'=>'2015-08-05T19:07:50.843Z',
+                'score'=>1.0}]
           },
           'facet_counts'=>{
             'facet_queries'=>{},
             'facet_fields'=>{
-              'root'=>[],
-              'motivation'=>[],
-              'target_type'=>[],
-              'body_type'=>[],
+              'root'=>[
+                'new_anno_feature',1],
+              'motivation'=>[
+                'commenting',1],
+              'target_type'=>[
+                'external_URI',1],
+              'body_type'=>[
+                'content_as_text',1],
               'annotated_at_tdate'=>[]},
             'facet_dates'=>{},
             'facet_ranges'=>{},
             'facet_intervals'=>{}}}
     http_version: 
-  recorded_at: Tue, 04 Aug 2015 16:46:00 GMT
+  recorded_at: Wed, 05 Aug 2015 20:20:47 GMT
 recorded_with: VCR 2.9.3

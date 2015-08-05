@@ -17,9 +17,9 @@ http_interactions:
       message: OK
     headers:
       Etag:
-      - '"cff20386ab73d7d97c85334f8b2e92cd0d86e02c"'
+      - '"aedf639bbbabb63ace6c55df70e219e6d87b4669"'
       Last-Modified:
-      - Tue, 04 Aug 2015 16:46:07 GMT
+      - Wed, 05 Aug 2015 20:20:50 GMT
       Link:
       - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
       - <http://www.w3.org/ns/ldp#Container>;rel="type"
@@ -38,7 +38,7 @@ http_interactions:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Tue, 04 Aug 2015 16:46:08 GMT
+  recorded_at: Wed, 05 Aug 2015 20:20:50 GMT
 - request:
     method: head
     uri: http://localhost:8983/fedora/rest/anno/bar
@@ -52,30 +52,59 @@ http_interactions:
       - "*/*"
   response:
     status:
-      code: 200
-      message: OK
+      code: 404
+      message: Not Found
     headers:
-      Etag:
-      - '"7e3b7fd717d92fc8c40b9ccf3e74a701e28b441e"'
-      Last-Modified:
-      - Tue, 04 Aug 2015 16:41:59 GMT
-      Link:
-      - <http://www.w3.org/ns/ldp#BasicContainer>;rel="type"
-      - <http://www.w3.org/ns/ldp#Container>;rel="type"
-      - <http://www.w3.org/ns/ldp#Resource>;rel="type"
-      Accept-Patch:
-      - application/sparql-update
-      Accept-Post:
-      - text/turtle,text/rdf+n3,text/n3,application/rdf+xml,application/n-triples,multipart/form-data,application/sparql-update
-      Allow:
-      - MOVE,COPY,DELETE,POST,HEAD,GET,PUT,PATCH,OPTIONS
       Content-Type:
-      - text/tab-separated-values
+      - text/html;charset=ISO-8859-1
+      Cache-Control:
+      - must-revalidate,no-cache,no-store
       Content-Length:
-      - '0'
+      - '1385'
     body:
       encoding: UTF-8
       string: ''
     http_version: 
-  recorded_at: Tue, 04 Aug 2015 16:46:08 GMT
+  recorded_at: Wed, 05 Aug 2015 20:20:50 GMT
+- request:
+    method: post
+    uri: http://localhost:8983/fedora/rest/anno
+    body:
+      encoding: UTF-8
+      string: |
+        @prefix ldp: <http://www.w3.org/ns/ldp#> .
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+        <> a ldp:BasicContainer .
+    headers:
+      User-Agent:
+      - Faraday v0.9.1
+      Content-Type:
+      - text/turtle
+      Slug:
+      - bar
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Etag:
+      - '"1d92ff6ef1d1461363ea320fec0671a7cdc9544d"'
+      Last-Modified:
+      - Wed, 05 Aug 2015 20:20:50 GMT
+      Content-Length:
+      - '42'
+      Location:
+      - http://localhost:8983/fedora/rest/anno/bar
+      Content-Type:
+      - text/plain
+    body:
+      encoding: UTF-8
+      string: http://localhost:8983/fedora/rest/anno/bar
+    http_version: 
+  recorded_at: Wed, 05 Aug 2015 20:20:50 GMT
 recorded_with: VCR 2.9.3
