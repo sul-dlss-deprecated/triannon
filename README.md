@@ -24,16 +24,44 @@ Then run the triannon generator:
 $ rails g triannon:install
 ```
 
+
+## Configuration
+
 Edit the `config/triannon.yml` file:
 
 * `ldp:` Properties of LDP server
   * `url:` the baseurl of LDP server
-  * `uber_container:` name of an LDP Basic Container holding specific anno containers
-  * `anno_containers:`  (the names of LDP Basic Containers holding individual annos)
+  * `uber_container:` name of an LDP Basic Container holding all `anno_containers`
+  * `anno_containers:`  names of LDP Basic Containers holding annos
 * `solr_url:` Points to the baseurl of Solr instance configured for Triannon
 * `triannon_base_url:` Used as the base url for all annotations hosted by your Triannon server.  Identifiers from the LDP server will be appended to this base-url.  Generally something like "https://your-triannon-rails-box/annotations", as "/annotations" is added to the path by the Triannon gem
 
-Generate the root annotations containers on your LDP server:
+#### Authorization for Containers:
+```
+anno_containers:
+  foo:
+  bar:
+    auth:
+      users: []
+      workgroups:
+      - org:wg-A
+      - org:wg-B
+```
+
+Authorization applies only to POST and DELETE requests. In this example, the `foo` container requires no authorization (all operations are allowed).  On the other hand, the `bar` container requires authorization.  There are no authorized `users`, but two `workgroups` are authorized to modify annos in the container ('org:wg-A' and 'org:wg-B').
+
+#### Authorized Clients:
+```
+authorized_clients:
+  clientA: secretA
+# expiry values are in seconds
+client_token_expiry: 120
+access_token_expiry: 3600
+```
+
+When authorization is required on a container, there must be at least one authorized client.  The client credentials are used to validate an authorized client that will present requests on behalf of an authorized user or workgroup (see below for details on the authorization workflow).  The client credentials are not specific to any container.
+
+#### Generate the root annotations containers on your LDP server:
 
 ```console
 $ rake triannon:create_root_containers
@@ -43,7 +71,7 @@ $ rake triannon:create_root_containers
 
   NOTE:  you MUST create the root containers before creating any annotations.  All annotation MUST be created as a child of a root container.
 
-Set up caching for jsonld context documents:
+#### Caching jsonld context documents:
 
 * by using Rack::Cache for RestClient:
 
@@ -72,7 +100,11 @@ RestClient.enable Rack::Cache,
 
 ## Client Interactions with Triannon
 
-### Get a list of annos
+### READ operations
+
+GET requests do not require authorization, even for containers that are configured with authorization for POST and DELETE requests.
+
+#### Get a list of annos
 as a IIIF Annotation List (see http://iiif.io/api/presentation/2.0/#other-content-resources)
 
 * `GET`: `http://(host)/annotations/search?targetUri=some.url.org`
@@ -91,7 +123,7 @@ Search Parameters:
   * also supports turtle, rdfxml, json, html
     * `Accept`: `application/x-turtle`
 
-### Get a list of annos in a particular root container
+#### Get a list of annos in a particular root container
 as a IIIF Annotation List (see http://iiif.io/api/presentation/2.0/#other-content-resources)
 
 * `GET`: `http://(host)/annotations/(root container)/search?targetUri=some.url.org`
@@ -104,7 +136,7 @@ Search Parameters as above.
   * also supports turtle, rdfxml, json, html
     * `Accept`: `application/x-turtle`
 
-### Get a particular anno
+#### Get a particular anno
 `GET`: `http://(host)/annotations/(root container)/(anno_id)`
 
 NOTE:  you may need to URL encode the anno_id (e.g. "6f%2F0e%2F79%2F92%2F6f0e7992-83f5-4f31-8bb7-94a23465fdfb" instead of "6f/0e/79/92/6f0e7992-83f5-4f31-8bb7-94a23465fdfb"), particularly from a web browser.
@@ -136,7 +168,11 @@ You can also use this method (with the correct HTTP Accept header):
 
 Note that OA (Open Annotation) is the default context if none is specified.
 
-### Create an anno
+### WRITE operations
+
+When a container is configured with authorization, it applies to POST and DELETE requests.  For these requests, a valid access token is required in the request header, i.e. 'Authorization': 'Bearer {token_here}' (see details below on how to obtain an access token).
+
+#### Create an anno
 
 Note that annos must be created in an existing root container.
 
@@ -155,11 +191,73 @@ Note that annos must be created in an existing root container.
     * `Link`: `http://www.w3.org/ns/oa.json; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"`
       * note that the "type" part is optional and refers to the type of the rel, which is the reference for all json-ld contexts.
 
-### Delete an anno
+#### Delete an anno
 `DELETE`: `http://(host)/annotations/(root container)/(anno_id)`
 
-NOTE:  you may need to URL encode the anno_id (e.g. "6f%2F0e%2F79%2F92%2F6f0e7992-83f5-4f31-8bb7-94a23465fdfb" instead of "6f/0e/79/92/6f0e7992-83f5-4f31-8bb7-94a23465fdfb")
+NOTE: URL encode the anno_id (e.g. "6f%2F0e%2F79%2F92%2F6f0e7992-83f5-4f31-8bb7-94a23465fdfb" instead of "6f/0e/79/92/6f0e7992-83f5-4f31-8bb7-94a23465fdfb")
 
+### Authorization
+
+The triannon authorization is modeled on IIIF proposals, see
+  - https://github.com/IIIF/auth
+  - http://image-auth.iiif.io/api/image/2.1/authentication.html
+
+The authorization workflow accepts json and returns json (not json-ld).  It involves three phases and triannon manages authorization using cookies, which must be retained across requests.
+
+1. Obtain a client authorization code (short-lived token).  
+2. Use client authorization code to submit login credentials for authorized user or workgroup.
+3. Obtain an access token for submitting or deleting annotations on behalf of the authorized user or workgroup.
+
+### Authorization Examples
+
+Let's assume we have the authorization configuration noted above.
+
+#### Authorization using `curl`
+```sh
+# 1. POST client credentials to '/auth/client_identity'
+#    to get client authorization code (save cookies)
+curl -H "Content-Type: application/json" -X POST -c cookies.txt -d '{"clientId":"clientA","clientSecret":"secretA"}' http://localhost:3000/auth/client_identity
+{"authorizationCode":"TExteG5LRDBPUW1OK0JicHRhM2VQaGtTWDRTdzdhVThVS3crKy93OTJwU2g3cHBoZE9kTnB4RDl0OUdzSzZydS0tOGhBdWZhVGJScDVTM0hUMmg0c08xUT09--f9250f535bfb4cdf4b32568aae74b367a781407f"}
+
+# 2. POST login credentials to '/auth/login' (save modified cookies)
+curl -H "Content-Type: application/json" -X POST -c cookies.txt -b cookies.txt -d '{"userId":"userA","workgroups":"org:wg-A"}' http://localhost:3000/auth/login?code=TExteG5LRDBPUW1OK0JicHRhM2VQaGtTWDRTdzdhVThVS3crKy93OTJwU2g3cHBoZE9kTnB4RDl0OUdzSzZydS0tOGhBdWZhVGJScDVTM0hUMmg0c08xUT09--f9250f535bfb4cdf4b32568aae74b367a781407f
+
+# 3. GET '/auth/access_token' (save cookies)
+curl -H "Content-Type: application/json" -c cookies.txt -b cookies.txt http://localhost:3000/auth/access_token?code=TExteG5LRDBPUW1OK0JicHRhM2VQaGtTWDRTdzdhVThVS3crKy93OTJwU2g3cHBoZE9kTnB4RDl0OUdzSzZydS0tOGhBdWZhVGJScDVTM0hUMmg0c08xUT09--f9250f535bfb4cdf4b32568aae74b367a781407f
+{"accessToken":"d09pSG5jVkhFMlVLendBNTdLd1lFZzBjZk5TZE1ONktNcDFiQzhibUV4eklsNURiRFNTbGg5YVFReElLR21HMVhmRzdYSU4vZUxjKzA5OGRjYjFMejJHTmo1UHF1cU00T0ZaNTNWMWVuR2M9LS1FT2RNUkJRbHlaTXU2ZTNvVnAwbGZRPT0=--c0a26b65e91137c82a5a42bcb9fd32f29bdfd0f3","tokenType":"Bearer","expiresIn":1438821498}
+```
+
+#### Authorization using ruby `rest-client`
+```ruby
+require 'rest-client'
+triannon_auth = RestClient::Resource.new(
+  'http://localhost:3000/auth',
+  cookies: {},
+  headers: { accept: :json, content_type: :json }
+)
+# 1. Obtain a client authorization code (short-lived token)
+client = { clientId: 'clientA', clientSecret: 'secretA' }
+response = triannon_auth["/client_identity"].post client.to_json
+triannon_auth.options[:cookies] = response.cookies  # save the cookie data
+auth = JSON.parse(response.body)
+client_code = auth['authorizationCode']
+client_param = "?code=#{client_code}"
+
+# 2. The client POSTs user credentials
+user = { userId: 'userA', workgroups: 'org:wg-A' }
+response = triannon_auth["/login#{client_param}"].post user.to_json
+triannon_auth.options[:cookies] = response.cookies  # save the cookie data
+
+# 3. The client, on behalf of user, obtains a long-lived access token.
+response = triannon_auth["/access_token#{client_param}"].get # no content type
+triannon_auth.options[:cookies] = response.cookies  # save the cookie data
+access = JSON.parse(response.body)
+access_token = "Bearer #{access['accessToken']}"
+triannon_auth.headers[:Authorization] = access_token
+```
+
+See also the `authenticate` method in:
+  - https://github.com/sul-dlss/triannon-client/blob/master/lib/triannon-client/triannon_client.rb
 
 # Running This Code in Development
 
