@@ -214,17 +214,28 @@ Let's assume we have the authorization configuration noted above.
 
 #### Authorization using `curl`
 ```sh
+# client and user credentials (consistent with configs)
+client='{"clientId":"clientA","clientSecret":"secretA"}'
+user='{"userId":"userA","workgroups":"org:wg-A"}'
+
 # 1. POST client credentials to '/auth/client_identity'
 #    to get client authorization code (save cookies)
-curl -H "Content-Type: application/json" -X POST -c cookies.txt -d '{"clientId":"clientA","clientSecret":"secretA"}' http://localhost:3000/auth/client_identity
-{"authorizationCode":"TExteG5LRDBPUW1OK0JicHRhM2VQaGtTWDRTdzdhVThVS3crKy93OTJwU2g3cHBoZE9kTnB4RDl0OUdzSzZydS0tOGhBdWZhVGJScDVTM0hUMmg0c08xUT09--f9250f535bfb4cdf4b32568aae74b367a781407f"}
+code=$(curl -s -X POST -H "Content-Type: application/json" \
+     -c cookies.txt -d $client http://localhost:3000/auth/client_identity)
+echo $code
+#>> {"authorizationCode":"VjZQODJmbGtXU1VUMzdpcDhPemt4bjA2N3A4ZU1xQy9laTl3Uk9sUUd5YlZDMmtuZ05COFFtUVpHSGZzMGxLeC0ta2hDemRXdUdNQy9sMVJVeFJwdzN2dz09--8405018ec9fc7d751726417101963f18ee175c71"}
+client_code=$(echo $code | sed -e 's/{"authorizationCode":"\(.*\)"}/\1/')
 
 # 2. POST login credentials to '/auth/login' (save modified cookies)
-curl -H "Content-Type: application/json" -X POST -c cookies.txt -b cookies.txt -d '{"userId":"userA","workgroups":"org:wg-A"}' http://localhost:3000/auth/login?code=TExteG5LRDBPUW1OK0JicHRhM2VQaGtTWDRTdzdhVThVS3crKy93OTJwU2g3cHBoZE9kTnB4RDl0OUdzSzZydS0tOGhBdWZhVGJScDVTM0hUMmg0c08xUT09--f9250f535bfb4cdf4b32568aae74b367a781407f
+curl -H "Content-Type: application/json" -X POST \
+     -c cookies.txt -b cookies.txt -d $user \
+     http://localhost:3000/auth/login?code=$client_code
 
 # 3. GET '/auth/access_token' (save cookies)
-curl -H "Content-Type: application/json" -c cookies.txt -b cookies.txt http://localhost:3000/auth/access_token?code=TExteG5LRDBPUW1OK0JicHRhM2VQaGtTWDRTdzdhVThVS3crKy93OTJwU2g3cHBoZE9kTnB4RDl0OUdzSzZydS0tOGhBdWZhVGJScDVTM0hUMmg0c08xUT09--f9250f535bfb4cdf4b32568aae74b367a781407f
-{"accessToken":"d09pSG5jVkhFMlVLendBNTdLd1lFZzBjZk5TZE1ONktNcDFiQzhibUV4eklsNURiRFNTbGg5YVFReElLR21HMVhmRzdYSU4vZUxjKzA5OGRjYjFMejJHTmo1UHF1cU00T0ZaNTNWMWVuR2M9LS1FT2RNUkJRbHlaTXU2ZTNvVnAwbGZRPT0=--c0a26b65e91137c82a5a42bcb9fd32f29bdfd0f3","tokenType":"Bearer","expiresIn":1438821498}
+curl -H "Content-Type: application/json" \
+     -c cookies.txt -b cookies.txt \
+     http://localhost:3000/auth/access_token?code=$client_code
+#>> {"accessToken":"d09pSG5jVkhFMlVLendBNTdLd1lFZzBjZk5TZE1ONktNcDFiQzhibUV4eklsNURiRFNTbGg5YVFReElLR21HMVhmRzdYSU4vZUxjKzA5OGRjYjFMejJHTmo1UHF1cU00T0ZaNTNWMWVuR2M9LS1FT2RNUkJRbHlaTXU2ZTNvVnAwbGZRPT0=--c0a26b65e91137c82a5a42bcb9fd32f29bdfd0f3","tokenType":"Bearer","expiresIn":1438821498}
 ```
 
 #### Authorization using ruby `rest-client`
