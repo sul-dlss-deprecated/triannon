@@ -1,9 +1,11 @@
 require_dependency "triannon/application_controller"
 
 module Triannon
-  # Adapted from http://image-auth.iiif.io/api/image/2.1/authentication.html
+  # Adapted from http://iiif.io/api/auth
   class AuthController < ApplicationController
     include RdfResponseFormats
+
+    IIIF_AUTH = 'http://iiif.io/api/auth/'
 
     # HTTP request methods accepted by /auth/login
     # TODO: enable GET when triannon supports true user authentication
@@ -14,13 +16,7 @@ module Triannon
       # The request MUST use HTTP OPTIONS
       case request.request_method
       when 'OPTIONS'
-        if cookies[:login_user]
-          info = service_info_logout
-        else
-          info = service_info_login
-        end
-        # TODO: include optional info, such as service_info_client_identity
-        json_response(info, 200)
+        json_response(service_info, 200)
       else
         # The routes should prevent any execution here.
         request_method_error(LOGIN_ACCEPT)
@@ -28,7 +24,7 @@ module Triannon
     end
 
     # POST to /auth/login
-    # http://image-auth.iiif.io/api/image/2.1/authentication.html#login-service
+    # http://iiif.io/api/auth#login-service
     def login
       # The service must set a Cookie for the Access Token Service to retrieve
       # to determine the user information provided by the authentication system.
@@ -42,7 +38,7 @@ module Triannon
     end
 
     # GET /auth/logout
-    # http://image-auth.iiif.io/api/image/2.1/authentication.html#logout-service
+    # http://iiif.io/api/auth#logout-service
     def logout
       case request.request_method
       when 'GET'
@@ -58,8 +54,8 @@ module Triannon
     # POST /auth/client_identity
     # A request MUST carry a body with:
     # { "clientId" : "ID", "clientSecret" : "SECRET" }
-    # http://image-auth.iiif.io/api/image/2.1/authentication.html#client-identity-service
-    # http://image-auth.iiif.io/api/image/2.1/authentication.html#error-conditions
+    # http://iiif.io/api/auth#client-identity-service
+    # http://iiif.io/api/auth#error-conditions
     # return json body [String] containing: { "authorizationCode": code }
     def client_identity
       return unless process_post?
@@ -76,16 +72,16 @@ module Triannon
         else
           err = {
             error: 'invalidClient',
-            errorDescription: 'Invalid client credentials',
-            errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
+            errorDescription: 'Unknown client credentials',
+            errorUri: IIIF_AUTH
           }
-          json_response(err, 401)
+          json_response(err, 403)
         end
       else
         err = {
-          error: 'invalidClient',
-          errorDescription: 'Insufficient client data for authentication',
-          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
+          error: 'missingCredentials',
+          errorDescription: 'Requires {"clientId": x, "clientSecret": x}',
+          errorUri: IIIF_AUTH
         }
         json_response(err, 401)
       end
@@ -93,8 +89,8 @@ module Triannon
 
 
     # GET /auth/access_token
-    # http://image-auth.iiif.io/api/image/2.1/authentication.html#access-token-service
-    # http://image-auth.iiif.io/api/image/2.1/authentication.html#error-conditions
+    # http://iiif.io/api/auth#access-token-service
+    # http://iiif.io/api/auth#error-conditions
     def access_token
       # The cookie established via the login service must be passed to this
       # service. The service should delete the cookie from the login service
@@ -195,16 +191,16 @@ module Triannon
       if request.format == :json
         if status == 401
           err = {
-            error: '401 Unauthorized',
+            error: 'missingCredentials',
             errorDescription: 'login credentials required',
-            errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
+            errorUri: IIIF_AUTH
           }
         end
         if status == 422
           err = {
-            error: '422 Unprocessable Entity',
+            error: 'invalidRequest',
             errorDescription: 'login credentials cannot be parsed',
-            errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
+            errorUri: IIIF_AUTH
           }
         end
         json_response(err, status)
@@ -270,7 +266,7 @@ module Triannon
       err = {
         error: 'invalidClient',
         errorDescription: msg,
-        errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html#client-identity-service'
+        errorUri: 'http://iiif.io/api/auth#client-identity-service'
       }
       json_response(err, status)
     end
@@ -285,53 +281,59 @@ module Triannon
       uri.to_s.sub(uri.path,'')
     end
 
-    # # http://image-auth.iiif.io/api/image/2.1/authentication.html#access-token-service
-    # # return info [Hash] access token service information
-    # def service_info_access_token
-    #   {
-    #     service: {
-    #       "@id" => service_base_uri + '/auth/access_token',
-    #       "profile" => "http://iiif.io/api/image/2/auth/token",
-    #       "label" => "Request Access Token for Triannon"
-    #     }
-    #   }
-    # end
+    # http://iiif.io/api/auth#login-service
+    # return info [Hash] authorization service information
+    def service_info
+      info = service_info_login
+      services = info['service']['service']
+      services.push service_info_logout
+      services.push service_info_client_identity
+      services.push service_info_access_token
+      info
+    end
 
-    # # http://image-auth.iiif.io/api/image/2.1/authentication.html#client-identity-service
-    # # return info [Hash] client identity service information
-    # def service_info_client_identity
-    #   {
-    #     service: {
-    #       "@id" => service_base_uri + '/auth/client_identity',
-    #       "profile" => "http://iiif.io/api/image/2/auth/clientId"
-    #     }
-    #   }
-    # end
-
-    # http://image-auth.iiif.io/api/image/2.1/authentication.html#login-service
+    # http://iiif.io/api/auth#login-service
     # return info [Hash] login service information
     def service_info_login
       {
-        service: {
-          "@id" => service_base_uri + '/auth/login',
-          "profile" => "http://iiif.io/api/image/2/auth/login",
-          "label" => "Login to Triannon"
+        'service' => {
+          '@id' => service_base_uri + '/auth/login',
+          'profile' => 'http://iiif.io/api/auth/0/login',
+          'label' => 'Login to Triannon',
+          'service' => [
+            # Related services ...
+          ]
         }
       }
     end
 
-    # http://image-auth.iiif.io/api/image/2.1/authentication.html#logout-service
+    # http://iiif.io/api/auth#logout-service
     # return info [Hash] logout service information
     def service_info_logout
       {
-        service: {
-          "@id" => service_base_uri + '/auth/logout',
-          "profile" => "http://iiif.io/api/image/2/auth/logout",
-          "label" => "Logout of Triannon"
-        }
+        "@id" => service_base_uri + '/auth/logout',
+        "profile" => "http://iiif.io/api/auth/0/logout",
+        "label" => "Logout of Triannon"
       }
     end
 
+    # http://iiif.io/api/auth#access-token-service
+    # return info [Hash] access token service information
+    def service_info_access_token
+      {
+        "@id" => service_base_uri + '/auth/access_token',
+        "profile" => "http://iiif.io/api/auth/0/token",
+      }
+    end
+
+    # http://iiif.io/api/auth#client-identity-service
+    # return info [Hash] client identity service information
+    def service_info_client_identity
+      {
+        "@id" => service_base_uri + '/auth/client_identity',
+        "profile" => "http://iiif.io/api/auth/0/clientId",
+      }
+    end
 
     # Parse POST JSON data to ensure it contains required fields
     # @param fields [Array<String>] an array of required fields
@@ -373,7 +375,7 @@ module Triannon
         err = {
           error: 'invalidRequest',
           errorDescription: "#{request.path} accepts: #{accept}",
-          errorUri: 'http://image-auth.iiif.io/api/image/2.1/authentication.html'
+          errorUri: IIIF_AUTH
         }
         render json: err.to_json, content_type: json_type_accepted
       end
