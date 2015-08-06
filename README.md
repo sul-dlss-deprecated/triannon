@@ -199,8 +199,8 @@ NOTE: URL encode the anno_id (e.g. "6f%2F0e%2F79%2F92%2F6f0e7992-83f5-4f31-8bb7-
 ### Authorization
 
 The triannon authorization is modeled on IIIF proposals, see
+  - http://iiif.io/api/auth/
   - https://github.com/IIIF/auth
-  - http://image-auth.iiif.io/api/image/2.1/authentication.html
 
 The authorization workflow accepts json and returns json (not json-ld).  It involves three phases and triannon manages authorization using cookies, which must be retained across requests.
 
