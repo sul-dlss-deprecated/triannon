@@ -97,6 +97,17 @@
         <filter class="solr.ICUFoldingFilterFactory"/>
         <filter class="solr.TrimFilterFactory" />
       </analyzer>
+      <!--
+        cf. http://wiki.apache.org/solr/MultitermQueryAnalysis
+        Without this the charFilters are not executed at query time when doing a wildcard search? Add debugQuery=on too see this.
+      -->
+      <analyzer type="multiterm">
+        <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="^\s*https?\:\/\/" replacement=""/>
+        <charFilter class="solr.PatternReplaceCharFilterFactory" pattern="\/\s*$" replacement=""/>
+        <tokenizer class="solr.KeywordTokenizerFactory" />
+        <filter class="solr.ICUFoldingFilterFactory"/>
+        <filter class="solr.TrimFilterFactory" />
+      </analyzer>
     </fieldType>
         
   </types>

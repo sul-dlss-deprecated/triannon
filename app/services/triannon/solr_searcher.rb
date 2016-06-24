@@ -107,10 +107,10 @@ module Triannon
     # @return [Array<String>] an array of query terms to be added to the Solr q argument
     def self.q_terms_for_url(fieldname, url)
       q_terms = []
-      q_terms << "#{fieldname}:#{RSolr.solr_escape(url)}"
       if !url.include? '#'
-        # Note: do NOT Solr escape the # (unnec) or the * (want Solr to view it as wildcard)
-        q_terms << "#{fieldname}:#{RSolr.solr_escape(url)}#*"
+        q_terms << "#{fieldname}:#{RSolr.solr_escape(url)}*"
+      else
+        q_terms << "#{fieldname}:#{RSolr.solr_escape(url)}"
       end
       q_terms
     end
