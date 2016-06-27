@@ -1,6 +1,14 @@
 module Triannon
   class SolrSearcher
 
+    def self.to_natural(n)
+      i = nil
+      begin
+        i = Integer(n)
+      end
+      !(i.nil?) && i >= 0 ? i : 0
+    end
+
     # convert RSolr::Response object into an array of OA::Graph objects,
     #   where each graph object contains a single annotation returned in the response docs
     # @param [Hash] rsolr_response an RSolr response to a query.  It's actually an
@@ -68,6 +76,10 @@ module Triannon
             end
           when 'anno_root'
             fq_terms_array << "root:#{RSolr.solr_escape(v)}"
+          when 'start'
+            solr_params_hash[:start] = to_natural( v )
+          when 'limit'
+            solr_params_hash[:rows] = to_natural( v )
 
           # TODO: add'l params to implement:
           # targetType - fq
@@ -107,10 +119,10 @@ module Triannon
     # @return [Array<String>] an array of query terms to be added to the Solr q argument
     def self.q_terms_for_url(fieldname, url)
       q_terms = []
-      q_terms << "#{fieldname}:#{RSolr.solr_escape(url)}"
       if !url.include? '#'
-        # Note: do NOT Solr escape the # (unnec) or the * (want Solr to view it as wildcard)
-        q_terms << "#{fieldname}:#{RSolr.solr_escape(url)}#*"
+        q_terms << "#{fieldname}:#{RSolr.solr_escape(url)}*"
+      else
+        q_terms << "#{fieldname}:#{RSolr.solr_escape(url)}"
       end
       q_terms
     end

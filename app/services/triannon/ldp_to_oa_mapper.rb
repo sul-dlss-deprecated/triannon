@@ -27,7 +27,8 @@ module Triannon
     # load statements from base anno container into @oa_graph
     def extract_base
       root_subject_solns = @ldp_anno_graph.query OA::Graph.anno_query
-      if root_subject_solns.count == 1
+      #for some reason the query returns nil instead of an empty array?
+      if root_subject_solns && root_subject_solns.count == 1
         stored_url = Triannon.config[:ldp]['url'].strip
         stored_url.chop! if stored_url.end_with?('/')
         uber_container = Triannon.config[:ldp]['uber_container'].strip
@@ -83,7 +84,8 @@ module Triannon
     # @return [Boolean] true if it adds statements to @oa_graph, false otherwise
     def map_external_ref uri_obj, predicate, subject_obj = @root_uri
       solns = @ldp_anno_graph.query [uri_obj, RDF::Triannon.externalReference, nil]
-      if solns.count > 0
+      #for some reason the query returns nil instead of an empty array?
+      if solns && solns.count > 0
         external_uri = solns.first.object
         @oa_graph << [subject_obj, predicate, external_uri]
 
@@ -109,7 +111,8 @@ module Triannon
     # @return [Boolean] true if it adds statements to @oa_graph, false otherwise
     def map_content_as_text uri_obj, predicate, subject_obj = @root_uri
       solns = @ldp_anno_graph.query [uri_obj, RDF.type, RDF::Vocab::CNT.ContentAsText]
-      if solns.count > 0
+      #for some reason the query returns nil instead of an empty array?
+      if solns && solns.count > 0
         blank_node = RDF::Node.new
         @oa_graph << [subject_obj, predicate, blank_node]
 
@@ -135,7 +138,8 @@ module Triannon
     # @return [Boolean] true if it adds statements to @oa_graph, false otherwise
     def map_specific_resource uri_obj, predicate
       solns = @ldp_anno_graph.query [uri_obj, RDF.type, RDF::Vocab::OA.SpecificResource]
-      if solns.count > 0
+      #for some reason the query returns nil instead of an empty array?
+      if solns && solns.count > 0
         blank_node = RDF::Node.new
         @oa_graph << [@root_uri, predicate, blank_node]
 
@@ -188,7 +192,8 @@ module Triannon
     # @return [Boolean] true if it adds statements to @oa_graph, false otherwise
     def map_choice uri_obj, predicate
       solns = @ldp_anno_graph.query [uri_obj, RDF.type, RDF::Vocab::OA.Choice]
-      if solns.count > 0
+      #for some reason the query returns nil instead of an empty array?
+      if solns && solns.count > 0
         blank_node = RDF::Node.new
         @oa_graph << [@root_uri, predicate, blank_node]
 
